@@ -69,7 +69,7 @@ class _ProfileContentState extends State<ProfileContent> {
         Container(
           height: MediaQuery.of(context).size.height * .32,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: Color(0xFF0061b0),
           ),
           child: Align(
             alignment: Alignment.center,
@@ -176,7 +176,7 @@ class _ProfileContentState extends State<ProfileContent> {
                 Text(
                   "Phone Number",
                   style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
+                      color: Color(0xFF0061b0), fontWeight: FontWeight.bold),
                 ),
                 TextField(
                   controller: mobileField,
@@ -188,7 +188,7 @@ class _ProfileContentState extends State<ProfileContent> {
                 Text(
                   "User Type",
                   style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
+                      color: Color(0xFF0061b0), fontWeight: FontWeight.bold),
                 ),
                 TextField(
                   controller: userType,
@@ -198,17 +198,17 @@ class _ProfileContentState extends State<ProfileContent> {
                   height: 20,
                 ),
                 Text(
-                  "Password",
+                  "Change Password",
                   style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
+                      color: Color(0xFF0061b0), fontWeight: FontWeight.bold),
                 ),
-                TextField(
-                  controller: password,
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.vpn_key),
-                      suffixText: "Change Password",
-                      suffixStyle: TextStyle(color: Colors.blue)),
-                )
+                // TextField(
+                //   controller: password,
+                //   decoration: InputDecoration(
+                //       prefixIcon: Icon(Icons.vpn_key),
+                //       suffixText: "Change Password",
+                //       suffixStyle: TextStyle(color: Color(0xFF0061b0))),
+                // )
               ],
             )),
       ],

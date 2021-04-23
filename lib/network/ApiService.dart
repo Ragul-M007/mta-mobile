@@ -2,6 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
 import 'package:mta/models/DashboardRes.dart';
+import 'package:mta/models/FectchProjectDocReq.dart';
+import 'package:mta/models/FectchProjectDocRes.dart';
+import 'package:mta/models/FetchCategoryDocRes.dart';
+import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/NewsRes.dart';
@@ -38,6 +42,17 @@ abstract class ApiService {
 
   @GET("/users/profile")
   Future<ProfileRes> profile();
+
+  @GET(
+      "/projects/getDocuments?category_id={category_id}&project_id={project_id}")
+  Future<FetchCategoryDocRes> getCategoryDoc(
+      @Path("category_id") int id, @Path("project_id") int pid);
+
+  @GET("/projects/getDocuments?project_id={project_id}")
+  Future<FectchProjectDocRes> getProjectDoc(@Path("project_id") int id);
+
+  @GET("/categories?project_id={project_id}")
+  Future<FectchCatsRes> getCats(@Path("project_id") int id);
 
   @POST("/projects/addDocument")
   Future<AddDocRes> addDoc(@Body() AddDocReq body);

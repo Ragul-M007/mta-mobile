@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/constant.dart';
+import 'package:mta/utilities/customcolor.dart';
+import 'package:mta/utilities/drawables.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Attendance extends StatefulWidget {
@@ -27,6 +30,10 @@ class _AttendanceState extends State<Attendance>
     _calendarController = CalendarController();
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) => getLocation());
+  }
+
+  menuopen() {
+    print("menuopen");
   }
 
   @override
@@ -309,22 +316,11 @@ class _AttendanceState extends State<Attendance>
             ],
             child: Scaffold(
               backgroundColor: isgridView ? Colors.blue : Colors.grey[300],
-              appBar: AppBar(
-                title: Text("Employee attendance"),
-                leading: IconButton(
-                  icon: Icon(
-                    Icons.menu,
-                    color: Colors.black,
-                  ),
-                  onPressed: () {
-                    _controller.toggle();
-                  },
-                ),
-              ),
+              appBar: mainappbar(ontab: menuopen, title: "Employee Attendance"),
               body: isgridView
                   ? gridView()
                   : Padding(
-                      padding: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(0.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -336,7 +332,8 @@ class _AttendanceState extends State<Attendance>
                                 InkWell(
                                   child: Row(
                                     children: [
-                                      Text("Grid View"),
+                                      Text("Grid View",style: Drawables.adddoccontentstyle(Colors.black87, 14.0, FontWeight.w500)),
+                                      SizedBox(width: 5.0),
                                       Icon(
                                         Icons.grid_view,
                                         color: Colors.blue,
@@ -366,12 +363,19 @@ class _AttendanceState extends State<Attendance>
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15.0),
                                       child: Container(
-                                        height: 150,
-                                        color: Colors.white,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border(
+                                            left: BorderSide(
+                                              color: Colors.red,
+                                              width: 4.0,
+                                            ),
+                                          ),
+                                        ),
                                         child: Row(
                                           children: [
                                             Container(
-                                                width: 10,
+                                                width: 4,
                                                 decoration: BoxDecoration(
                                                   color: Colors.red,
                                                 )),
@@ -382,14 +386,22 @@ class _AttendanceState extends State<Attendance>
                                                       horizontal: 15,
                                                       vertical: 35),
                                                   child: Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 10.0),
                                                     child: Center(
                                                         child: Text(
                                                       "23 Feb \n Sun",
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black87,
+                                                              14.0,
+                                                              FontWeight.w400),
                                                     )),
                                                     decoration: BoxDecoration(
                                                         border: Border.all(
-                                                            color:
-                                                                Colors.black),
+                                                            color: Colors
+                                                                .grey[200]),
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(10)),
@@ -406,70 +418,93 @@ class _AttendanceState extends State<Attendance>
                                                   RichText(
                                                     text: TextSpan(
                                                       text: 'Start Time -',
-                                                      style:
-                                                          DefaultTextStyle.of(
-                                                                  context)
-                                                              .style,
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black54,
+                                                              13.0,
+                                                              FontWeight.w400),
                                                       children: <TextSpan>[
                                                         TextSpan(
-                                                            text: ' 9:30 AM',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold)),
+                                                          text: ' 9:30 AM',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black54,
+                                                                  13.0,
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
                                                       ],
                                                     ),
                                                   ),
+                                                  SizedBox(height: 3.0),
                                                   Row(
                                                     children: [
                                                       Icon(
                                                         Icons.pin_drop,
                                                         color: Colors.blue,
+                                                        size: 16.0,
                                                       ),
+                                                      SizedBox(width: 5.0),
                                                       Text(
                                                           "Gandhipuram, coimbatore",
-                                                          style: TextStyle(
-                                                              color:
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
                                                                   Colors.grey,
-                                                              fontSize: 13)),
+                                                                  12.0,
+                                                                  FontWeight
+                                                                      .w400)),
                                                     ],
                                                   ),
-                                                  Icon(Icons.more_vert),
+                                                  Icon(Icons.more_vert,
+                                                      color: Colors.grey,
+                                                      size: 14.0),
                                                   RichText(
                                                     text: TextSpan(
                                                       text: 'End Time -',
-                                                      style:
-                                                          DefaultTextStyle.of(
-                                                                  context)
-                                                              .style,
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black54,
+                                                              13.0,
+                                                              FontWeight.w400),
                                                       children: <TextSpan>[
                                                         TextSpan(
-                                                            text: ' 9:30 AM',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold)),
+                                                          text: ' 9:30 AM',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black54,
+                                                                  13.0,
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
                                                       ],
                                                     ),
                                                   ),
+                                                  SizedBox(height: 3.0),
                                                   Row(
                                                     children: [
                                                       Icon(
                                                         Icons.pin_drop,
                                                         color: Colors.blue,
+                                                        size: 16.0,
                                                       ),
                                                       Text(
                                                         "Gandhipuram, coimbatore",
-                                                        style: TextStyle(
-                                                            color: Colors.grey,
-                                                            fontSize: 13),
+                                                        style: Drawables
+                                                            .adddoccontentstyle(
+                                                                Colors.grey,
+                                                                12.0,
+                                                                FontWeight
+                                                                    .w400),
                                                       ),
                                                     ],
                                                   ),
+                                                  SizedBox(height: 3.0),
                                                   Text(
                                                     "9 Hrs",
                                                     style: TextStyle(
-                                                        color: Colors.blue),
+                                                        color: Colors.blue, fontWeight: FontWeight.w600),
                                                   ),
                                                 ],
                                               ),
@@ -480,7 +515,8 @@ class _AttendanceState extends State<Attendance>
                                     ));
                               },
                             ),
-                          )
+                          ),
+                          bottombutton()
                         ],
                       ),
                     ),
@@ -488,6 +524,41 @@ class _AttendanceState extends State<Attendance>
       ),
     );
   }
+
+  Widget bottombutton(){
+    return  Container(
+                width: double.infinity,
+                height: 50,
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                      child: Center(
+                        child: Text("Check In",style: Drawables.adddoccontentstyle(Colors.white, 14.0, FontWeight.w600),),
+                      ),
+                      decoration: BoxDecoration(
+                        color: CustomColors.primarycolor,
+                        borderRadius:
+                            BorderRadius.only(topLeft: Radius.circular(10.0)),
+                      ),
+                    )),
+                    Expanded(
+                        child: Container(
+                      child: Center(
+                        child: Text("Check Out",style: Drawables.adddoccontentstyle(Colors.white, 14.0, FontWeight.w600),),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius:
+                            BorderRadius.only(topRight: Radius.circular(10.0)),
+                      ),
+                    )),
+                  ],
+                ),
+              );
+  }
+
+ 
 
   Widget gridView() {
     return Stack(
@@ -507,6 +578,7 @@ class _AttendanceState extends State<Attendance>
                       child: Row(
                         children: [
                           Text("LisView View"),
+                          SizedBox(width:5.0),
                           Icon(
                             Icons.list_sharp,
                             color: Colors.white,
@@ -525,7 +597,7 @@ class _AttendanceState extends State<Attendance>
               Container(
                 // color: Color.fromRGBO(36, 58, 142,1),
                 child: TableCalendar(
-                  rowHeight: 35,
+                  rowHeight: 30,
                   calendarController: _calendarController,
                   startDay: DateTime.now(),
                   headerStyle: HeaderStyle(
@@ -536,13 +608,13 @@ class _AttendanceState extends State<Attendance>
                   daysOfWeekStyle: DaysOfWeekStyle(
                       weekdayStyle: TextStyle(color: Colors.white)),
                   calendarStyle: CalendarStyle(
-                    weekendStyle: TextStyle(color: Colors.red),
-                    outsideWeekendStyle: TextStyle(color: Colors.red),
+                    weekendStyle: TextStyle(color: Colors.white),
+                    outsideWeekendStyle: TextStyle(color: Colors.white),
                     todayStyle: TextStyle(
                       color: Colors.white,
                     ),
-                    todayColor: Colors.black,
-                    selectedColor: Colors.red,
+                    todayColor: Colors.white,
+                    selectedColor: Colors.white,
                     selectedStyle: TextStyle(color: Colors.black),
                     weekdayStyle: TextStyle(color: Colors.white),
                     outsideDaysVisible: true,
@@ -559,9 +631,8 @@ class _AttendanceState extends State<Attendance>
         ),
         Container(
           margin: EdgeInsets.fromLTRB(
-              0, MediaQuery.of(context).size.height * .50, 0, 0),
+              0, MediaQuery.of(context).size.height * .45, 0, 0),
           width: double.infinity,
-          // height:MediaQuery.of(context).size.height * .5 ,
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
@@ -573,152 +644,169 @@ class _AttendanceState extends State<Attendance>
                 height: 10,
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: 10,
-                  padding: EdgeInsets.all(5),
-                  itemBuilder: (BuildContext context, int index) {
-                    return new Padding(
-                        padding: EdgeInsets.all(5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Container(
-                            height: 130,
-                            color: Colors.white,
-                            child: Row(
-                              children: [
-                                Container(
-                                    width: 10,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                    )),
-                                Container(
-                                  width: 110,
-                                  child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 15, vertical: 35),
+                            child: ListView.builder(
+                              itemCount: 10,
+                              padding: EdgeInsets.all(5),
+                              itemBuilder: (BuildContext context, int index) {
+                                return new Padding(
+                                    padding: EdgeInsets.all(5),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15.0),
                                       child: Container(
-                                        child: Center(
-                                            child: Text(
-                                          "23 Feb \n Sun",
-                                        )),
                                         decoration: BoxDecoration(
-                                            border:
-                                                Border.all(color: Colors.black),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                      )),
-                                ),
-                                Expanded(
-                                    child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'Start Time -',
-                                          style: DefaultTextStyle.of(context)
-                                              .style,
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text: ' 9:30 AM',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13)),
+                                          color: Colors.white,
+                                          border: Border(
+                                            left: BorderSide(
+                                              color: Colors.red,
+                                              width: 4.0,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                                width: 4,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                )),
+                                            Container(
+                                              width: 110,
+                                              child: Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 15,
+                                                      vertical: 35),
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 10.0),
+                                                    child: Center(
+                                                        child: Text(
+                                                      "23 Feb \n Sun",
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black87,
+                                                              14.0,
+                                                              FontWeight.w400),
+                                                    )),
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            color: Colors
+                                                                .grey[200]),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10)),
+                                                  )),
+                                            ),
+                                            Expanded(
+                                                child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  RichText(
+                                                    text: TextSpan(
+                                                      text: 'Start Time -',
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black54,
+                                                              13.0,
+                                                              FontWeight.w400),
+                                                      children: <TextSpan>[
+                                                        TextSpan(
+                                                          text: ' 9:30 AM',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black54,
+                                                                  13.0,
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 3.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.pin_drop,
+                                                        color: Colors.blue,
+                                                        size: 16.0,
+                                                      ),
+                                                      SizedBox(width: 5.0),
+                                                      Text(
+                                                          "Gandhipuram, coimbatore",
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.grey,
+                                                                  12.0,
+                                                                  FontWeight
+                                                                      .w400)),
+                                                    ],
+                                                  ),
+                                                  Icon(Icons.more_vert,
+                                                      color: Colors.grey,
+                                                      size: 14.0),
+                                                  RichText(
+                                                    text: TextSpan(
+                                                      text: 'End Time -',
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black54,
+                                                              13.0,
+                                                              FontWeight.w400),
+                                                      children: <TextSpan>[
+                                                        TextSpan(
+                                                          text: ' 9:30 AM',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black54,
+                                                                  13.0,
+                                                                  FontWeight
+                                                                      .w700),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 3.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.pin_drop,
+                                                        color: Colors.blue,
+                                                        size: 16.0,
+                                                      ),
+                                                      Text(
+                                                        "Gandhipuram, coimbatore",
+                                                        style: Drawables
+                                                            .adddoccontentstyle(
+                                                                Colors.grey,
+                                                                12.0,
+                                                                FontWeight
+                                                                    .w400),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 3.0),
+                                                  Text(
+                                                    "9 Hrs",
+                                                    style: TextStyle(
+                                                        color: Colors.blue, fontWeight: FontWeight.w600),
+                                                  ),
+                                                ],
+                                              ),
+                                            ))
                                           ],
                                         ),
                                       ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.pin_drop,
-                                            color: Colors.blue,
-                                            size: 20,
-                                          ),
-                                          Text("Gandhipuram, coimbatore",
-                                              style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 13)),
-                                        ],
-                                      ),
-                                      Icon(
-                                        Icons.more_vert,
-                                        size: 20,
-                                      ),
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'End Time -',
-                                          style: DefaultTextStyle.of(context)
-                                              .style,
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text: ' 9:30 AM',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.pin_drop,
-                                            color: Colors.blue,
-                                            size: 20,
-                                          ),
-                                          Text(
-                                            "Gandhipuram, coimbatore",
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 13),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        "9 Hrs",
-                                        style: TextStyle(color: Colors.blue),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                              ],
+                                    ));
+                              },
                             ),
                           ),
-                        ));
-                  },
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                height: 50,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Container(
-                      child: Center(
-                        child: Text("Check out"),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius:
-                            BorderRadius.only(topLeft: Radius.circular(10.0)),
-                      ),
-                    )),
-                    Expanded(
-                        child: Container(
-                      child: Center(
-                        child: Text("Check in"),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius:
-                            BorderRadius.only(topRight: Radius.circular(10.0)),
-                      ),
-                    )),
-                  ],
-                ),
-              )
+             bottombutton(),
             ],
           ),
         ),

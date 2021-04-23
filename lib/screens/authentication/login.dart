@@ -349,25 +349,27 @@ class _LoginContentState extends State<LoginContent>
                               SizedBox(
                                 width: 10,
                               ),
-                              Column(
-                                children: [
-                                  Text(
-                                    _newsLists[index].titleText,
-                                    textAlign: TextAlign.left,
-                                    textDirection: TextDirection.ltr,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    _newsLists[index].description,
-                                    overflow: TextOverflow.clip,
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(),
-                                  )
-                                ],
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      _newsLists[index].titleText,
+                                      textAlign: TextAlign.left,
+                                      textDirection: TextDirection.ltr,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      _newsLists[index].description,
+                                      overflow: TextOverflow.clip,
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(),
+                                    )
+                                  ],
+                                ),
                               )
                             ],
                           )))
@@ -399,22 +401,24 @@ class _LoginContentState extends State<LoginContent>
                               SizedBox(
                                 width: 10,
                               ),
-                              Column(
-                                children: [
-                                  Text(
-                                    _newsLists[index].titleText,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    _newsLists[index].description,
-                                    overflow: TextOverflow.clip,
-                                    style: TextStyle(),
-                                  )
-                                ],
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      _newsLists[index].titleText,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      _newsLists[index].description,
+                                      overflow: TextOverflow.clip,
+                                      style: TextStyle(),
+                                    )
+                                  ],
+                                ),
                               )
                             ],
                           )))

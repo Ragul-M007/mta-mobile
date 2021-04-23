@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 
 Widget menuoption({
@@ -31,6 +32,38 @@ Widget menuoption({
   );
 }
 
+Widget appbar(String title){
+  return AppBar(
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+        elevation: 8,
+        title: Text(title, style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),),
+        actions: [
+         title == "Documents" ? Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Icon(
+              Icons.search,
+              color: Colors.black,
+            ),
+          ): Padding(padding: EdgeInsets.all(0))
+        ],
+      );
+}
+
+
+Widget mainappbar({@required Function ontab, @required String title}){
+  return AppBar(
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+        elevation: 8,
+        title: Text(title, style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),),
+        leading: Icon(Icons.menu, color: Colors.black,),
+      );
+}
 Widget button({@required Function ontab, @required String buttoncontent}) {
   return GestureDetector(
     onTap: ontab,

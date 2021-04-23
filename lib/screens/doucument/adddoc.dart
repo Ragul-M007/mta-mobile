@@ -157,14 +157,25 @@ class _AddDocContentState extends State<AddDocContent> {
   Widget uploadButton() {
     return GestureDetector(
       onTap: () async {
-        FilePickerResult result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['jpg', 'pdf', 'doc', 'jepg', 'png', 'xlsx'],
-        );
+        // FilePickerResult result = await FilePicker.platform.pickFiles(
+        //   type: FileType.custom,
+        //   allowedExtensions: [
+        //     'jpg',
+        //     'pdf',
+        //     'doc',
+        //     'jepg',
+        //     'png',
+        //     'xlsx',
+        //     'docx',
+        //     'xls'
+        //   ],
+        // );
+        FilePickerResult result = await FilePicker.platform.pickFiles();
         if (result != null) {
           PlatformFile file = result.files.first;
           final bytes = await Io.File(file.path).readAsBytes();
-          String base64Encode = base64.encode(bytes);
+          String base64Encodes(List<int> bytes) => base64.encode(bytes);
+          String base64Encode = base64Encodes(bytes); //base64.encode(bytes);
           file64 = base64Encode;
           fileExt = file.extension;
           // print(bytes);
@@ -209,20 +220,25 @@ class _AddDocContentState extends State<AddDocContent> {
     }
 
     AddDocReq addDocreq = AddDocReq();
-    addDocreq.categoryId = null;
+    addDocreq.categoryId = Strings.category == true
+        ? Strings.selectedCategory[0].categoryId
+        : null;
     addDocreq.description = docDesc.text;
     addDocreq.fileName = docTitle.text;
-    addDocreq.projectId = 5;
+    addDocreq.projectId = Strings.selectedProject[0].projectId;
     addDocreq.userId = Strings.userID;
+    String base64Data = extension + file64;
     List<String> _data = List<String>();
-    _data.add(extension + file64);
-    addDocreq.file = _data;
-    //print(addDocreq.toString());
+    _data.add(base64Data);
+    //addDocreq.file = _data;
+    addDocreq.file = base64Data;
+
+    print(addDocreq.file);
     api.addDoc(addDocreq).then((response) {
       AppUtils.dismissprogress();
-      //print('docResponse status ${response.toJson()}');
 
       if (response.status) {
+        Navigator.popAndPushNamed(context, '/viewdoclist');
         setState(() {});
       } else {
         print('error');

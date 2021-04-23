@@ -107,6 +107,64 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<FetchCategoryDocRes> getCategoryDoc(id, pid) async {
+    ArgumentError.checkNotNull(id, 'id');
+    ArgumentError.checkNotNull(pid, 'pid');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/projects/getDocuments?category_id=$id&project_id=$pid',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FetchCategoryDocRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<FectchProjectDocRes> getProjectDoc(id) async {
+    ArgumentError.checkNotNull(id, 'id');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/projects/getDocuments?project_id=$id',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FectchProjectDocRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<FectchCatsRes> getCats(id) async {
+    ArgumentError.checkNotNull(id, 'id');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/categories?project_id=$id',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FectchCatsRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
   Future<AddDocRes> addDoc(body) async {
     ArgumentError.checkNotNull(body, 'body');
     const _extra = <String, dynamic>{};

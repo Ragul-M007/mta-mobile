@@ -133,16 +133,22 @@ class _VerifypinState extends State<Verifypin> {
                 ),
               ),
             ),
-            Container(
-                width: double.infinity,
-                margin: EdgeInsets.fromLTRB(
-                    10, MediaQuery.of(context).size.height * .68, 10, 20),
-                child: Text("Forgot Pin",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF9e9e9e)))),
+            GestureDetector(
+              onTap: () {
+                AppUtils.clearAllPreferences();
+                Navigator.popAndPushNamed(context, '/login');
+              },
+              child: Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.fromLTRB(
+                      10, MediaQuery.of(context).size.height * .68, 10, 20),
+                  child: Text("Forgot Pin",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF9e9e9e)))),
+            ),
             Container(
               margin: EdgeInsets.fromLTRB(
                   10, MediaQuery.of(context).size.height * .75, 10, 20),

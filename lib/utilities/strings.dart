@@ -1,3 +1,6 @@
+import 'package:mta/models/DashboardRes.dart';
+import 'package:mta/models/FetchCatsRes.dart';
+
 mixin Strings {
   static String authToken = '';
   static String baseImageUrl = "https://demo.emeetify.com:81/";
@@ -15,6 +18,10 @@ mixin Strings {
   static int selectcontactno;
   static String selectedImg;
   static bool network;
+
+  static bool category = false;
+  static List<Data> selectedProject = [];
+  static List<FectchCatsData> selectedCategory = [];
 
   // user data
   static String username;

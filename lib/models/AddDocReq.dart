@@ -1,7 +1,8 @@
 class AddDocReq {
   int categoryId;
   String description;
-  List<String> file;
+  //List<String> file;
+  String file;
   String fileName;
   int projectId;
   int userId;

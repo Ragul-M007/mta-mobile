@@ -50,7 +50,7 @@ class _DashboardState extends State<Dashboard>
 
     api.projects().then((response) {
       AppUtils.dismissprogress();
-      print('projectResponse status ${response.toJson()}');
+      //print('projectResponse status ${response.toJson()}');
 
       if (response.status) {
         // Navigator.pushNamed(ctx, "/dashboard");
@@ -116,7 +116,7 @@ class _DashboardState extends State<Dashboard>
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/attendance", currentmenu: 3);
+                  menuRedirect(routename: "/profile", currentmenu: 3);
                 },
                 selectedmenuvalue: 3,
                 menutitle: "Profile",
@@ -130,7 +130,7 @@ class _DashboardState extends State<Dashboard>
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/adddoc", currentmenu: 5);
+                  menuRedirect(routename: "/contactus", currentmenu: 5);
                 },
                 selectedmenuvalue: 5,
                 menutitle: "Contact Us",
@@ -255,78 +255,92 @@ class _DashboardState extends State<Dashboard>
                                           crossAxisCount: 2),
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    return new Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: new GridTile(
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          child: Padding(
+                                    return GestureDetector(
+                                      onTap: () {
+                                        onTapProject(_searchLists[index]);
+                                      },
+                                      child: new Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: new GridTile(
+                                          child: Container(
+                                            height: 50,
+                                            width: 50,
+                                            child: Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    10, 10, 10, 0),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: 10),
+                                                      child: image(
+                                                          Strings.baseImageUrl +
+                                                              _searchLists[
+                                                                      index]
+                                                                  .projectImg,
+                                                          65.0,
+                                                          65.0),
+                                                    ),
+                                                    Container()
+                                                  ],
+                                                )),
+                                          ),
+                                          footer: Padding(
                                               padding: EdgeInsets.fromLTRB(
-                                                  10, 10, 10, 0),
-                                              child: Row(
+                                                  10, 10, 0, 20),
+                                              child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Padding(
                                                     padding: EdgeInsets.only(
-                                                        top: 10),
-                                                    child: image(
-                                                        Strings.baseImageUrl +
-                                                            _searchLists[index]
-                                                                .projectImg,
-                                                        65.0,
-                                                        65.0),
+                                                        left: 5),
+                                                    child: Text(
+                                                      _searchLists[index]
+                                                          .projectName,
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
                                                   ),
-                                                  Container()
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    children: [
+                                                      Icon(Icons.pin_drop,
+                                                          color: Color(
+                                                              0xFF0061b0)),
+                                                      SizedBox(width: 5),
+                                                      Expanded(
+                                                        child: Text(
+                                                          _searchLists[index]
+                                                                  .address +
+                                                              ' , ' +
+                                                              _searchLists[
+                                                                      index]
+                                                                  .city,
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
                                               )),
                                         ),
-                                        footer: Padding(
-                                            padding: EdgeInsets.fromLTRB(
-                                                10, 10, 0, 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    _searchLists[index]
-                                                        .projectName,
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Icon(Icons.pin_drop,
-                                                        color:
-                                                            Color(0xFF0061b0)),
-                                                    SizedBox(width: 5),
-                                                    Text(
-                                                      _searchLists[index]
-                                                          .address,
-                                                      overflow:
-                                                          TextOverflow.clip,
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.grey),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            )),
                                       ),
                                     );
                                   },
@@ -338,78 +352,107 @@ class _DashboardState extends State<Dashboard>
                                           crossAxisCount: 2),
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    return new Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: new GridTile(
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          child: Padding(
+                                    return GestureDetector(
+                                      onTap: () {
+                                        onTapProject(_projectLists[index]);
+                                      },
+                                      child: new Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: new GridTile(
+                                          child: Container(
+                                            height: 50,
+                                            width: 50,
+                                            child: Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    10, 10, 10, 10),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: 10),
+                                                      child: image(
+                                                          Strings.baseImageUrl +
+                                                              _projectLists[
+                                                                      index]
+                                                                  .projectImg,
+                                                          65.0,
+                                                          65.0),
+                                                    ),
+                                                    Container()
+                                                  ],
+                                                )),
+                                          ),
+                                          footer: Padding(
                                               padding: EdgeInsets.fromLTRB(
-                                                  10, 10, 10, 10),
-                                              child: Row(
+                                                  10, 0, 0, 20),
+                                              child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Padding(
                                                     padding: EdgeInsets.only(
-                                                        top: 10),
-                                                    child: image(
-                                                        Strings.baseImageUrl +
-                                                            _projectLists[index]
-                                                                .projectImg,
-                                                        65.0,
-                                                        65.0),
+                                                        left: 5),
+                                                    child: Text(
+                                                      _projectLists[index]
+                                                          .projectName,
+                                                      style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
                                                   ),
-                                                  Container()
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    children: [
+                                                      Container(
+                                                        width: 20.0,
+                                                        height: 20.0,
+                                                        decoration:
+                                                            new BoxDecoration(
+                                                          image:
+                                                              new DecorationImage(
+                                                            image: new AssetImage(
+                                                                "assets/icons/pin.png"),
+                                                            fit: BoxFit.fill,
+                                                          ),
+                                                          borderRadius:
+                                                              new BorderRadius
+                                                                  .all(new Radius
+                                                                      .circular(
+                                                                  50.0)),
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 5),
+                                                      Expanded(
+                                                        child: Text(
+                                                          _projectLists[index]
+                                                                  .address +
+                                                              ' , ' +
+                                                              _projectLists[
+                                                                      index]
+                                                                  .city,
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
                                               )),
                                         ),
-                                        footer: Padding(
-                                            padding: EdgeInsets.fromLTRB(
-                                                10, 0, 0, 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    _projectLists[index]
-                                                        .projectName,
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Icon(Icons.pin_drop,
-                                                        color:
-                                                            Color(0xFF0061b0)),
-                                                    SizedBox(width: 5),
-                                                    Text(
-                                                      _projectLists[index]
-                                                          .address,
-                                                      overflow:
-                                                          TextOverflow.clip,
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.grey),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            )),
                                       ),
                                     );
                                   },
@@ -419,6 +462,12 @@ class _DashboardState extends State<Dashboard>
                 }))),
       ),
     );
+  }
+
+  onTapProject(Data projectList) {
+    Strings.selectedProject = [];
+    Strings.selectedProject.add(projectList);
+    Navigator.pushNamed(context, '/categories');
   }
 
   menuRedirect({@required String routename, int currentmenu}) {
