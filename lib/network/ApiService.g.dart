@@ -183,4 +183,43 @@ class _ApiService implements ApiService {
     final value = AddDocRes.fromJson(_result.data);
     return value;
   }
+
+  @override
+  Future<AddAttendanceRes> addAttendance(body) async {
+    ArgumentError.checkNotNull(body, 'body');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body?.toJson() ?? <String, dynamic>{});
+    final _result = await _dio.request<Map<String, dynamic>>('/attendance',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'POST',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = AddAttendanceRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<FetchAttendanceRes> getAttendance(id, date) async {
+    ArgumentError.checkNotNull(id, 'id');
+    ArgumentError.checkNotNull(date, 'date');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/attendance?user_id=$id&date=$date',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FetchAttendanceRes.fromJson(_result.data);
+    return value;
+  }
 }

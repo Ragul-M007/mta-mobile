@@ -6,10 +6,12 @@ import 'package:mta/screens/categories/categeories.dart';
 import 'package:mta/screens/categories/categoriesinfo.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
+import 'package:mta/screens/others/contactus.dart';
 import 'package:mta/screens/dashboard/dashboard.dart';
 import 'package:mta/screens/doucument/adddoc.dart';
 import 'package:mta/screens/doucument/viewdoclist.dart';
 import 'package:mta/screens/drawer/drawer.dart';
+import 'package:mta/screens/others/newshighlights.dart';
 import 'package:mta/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/screens/splashscreen.dart';
@@ -63,6 +65,12 @@ class RoutesGenerator {
         break;
       case '/viewdoclist':
         return MaterialPageRoute(builder: (_) => ViewDocScreen());
+        break;
+      case '/contactus':
+        return MaterialPageRoute(builder: (_) => Contactus());
+        break;
+      case '/newshighlights':
+        return MaterialPageRoute(builder: (_) => Newshighlights());
         break;
       default:
         return _errorRoute();

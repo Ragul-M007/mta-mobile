@@ -5,6 +5,9 @@ class ProfileRes {
   String mobileNo;
   String userImg;
   String role;
+  String city;
+  String area;
+  String state;
   int iat;
   int exp;
   String iss;
@@ -16,6 +19,9 @@ class ProfileRes {
       this.mobileNo,
       this.userImg,
       this.role,
+      this.city,
+      this.area,
+      this.state,
       this.iat,
       this.exp,
       this.iss});
@@ -30,6 +36,9 @@ class ProfileRes {
     iat = json['iat'];
     exp = json['exp'];
     iss = json['iss'];
+    city = json['city'];
+    area = json['area'];
+    state = json['state'];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +52,9 @@ class ProfileRes {
     data['iat'] = this.iat;
     data['exp'] = this.exp;
     data['iss'] = this.iss;
+    data['city'] = this.city;
+    data['area'] = this.area;
+    data['state'] = this.state;
     return data;
   }
 }

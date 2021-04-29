@@ -32,38 +32,60 @@ Widget menuoption({
   );
 }
 
-Widget appbar(String title){
+Widget appbar(String title) {
   return AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-        elevation: 8,
-        title: Text(title, style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),),
-        actions: [
-         title == "Documents" ? Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Icon(
-              Icons.search,
-              color: Colors.black,
-            ),
-          ): Padding(padding: EdgeInsets.all(0))
-        ],
-      );
+    iconTheme: IconThemeData(color: Colors.black),
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+    elevation: 8,
+    title: Text(
+      title,
+      style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
+    ),
+    actions: [
+      title == "Documents"
+          ? Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Icon(
+                Icons.search,
+                color: Colors.black,
+              ),
+            )
+          : Padding(padding: EdgeInsets.all(0))
+    ],
+  );
 }
 
-
-Widget mainappbar({@required Function ontab, @required String title}){
+Widget mainappbar(
+    {@required Function ontab, @required String title, @required controller}) {
   return AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-        elevation: 8,
-        title: Text(title, style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),),
-        leading: Icon(Icons.menu, color: Colors.black,),
-      );
+    iconTheme: IconThemeData(color: Colors.black),
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+    elevation: 8,
+    title: Text(
+      title,
+      style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
+    ),
+    leading: SizedBox(
+      height: 25.0,
+      width: 25.0,
+      child: IconButton(
+        icon: Icon(
+          Icons.menu,
+          size: 25.0,
+          color: const Color(0xFF979797),
+        ),
+        onPressed: () {
+          controller.toggle();
+        },
+      ),
+    ),
+  );
 }
+
 Widget button({@required Function ontab, @required String buttoncontent}) {
   return GestureDetector(
     onTap: ontab,

@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:mta/models/AddAttendanceReq.dart';
+import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
+import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/LoginReq.dart';
@@ -57,6 +60,12 @@ abstract class ApiService {
   @POST("/projects/addDocument")
   Future<AddDocRes> addDoc(@Body() AddDocReq body);
 
+  @POST("/attendance")
+  Future<AddAttendanceRes> addAttendance(@Body() AddAttendanceReq body);
+
+  @GET("/attendance?user_id={user_id}&date={date}")
+  Future<FetchAttendanceRes> getAttendance(
+      @Path("user_id") int id, @Path("date") String date);
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
 //////////////////////////////////////////////////////////////////////////////////////////

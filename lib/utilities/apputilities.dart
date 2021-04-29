@@ -61,9 +61,33 @@ class AppUtils {
   static void showToast(String message) {
     Fluttertoast.showToast(
         msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        timeInSecForIosWeb: 1,
-        gravity: ToastGravity.BOTTOM,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Color(0xFF0061b0),
+        gravity: ToastGravity.CENTER,
+        fontSize: 16.0);
+  }
+
+  static void showToastError(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.red,
+        gravity: ToastGravity.CENTER,
+        fontSize: 16.0);
+  }
+
+  static void showToastSuccess(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.green,
+        gravity: ToastGravity.CENTER,
         fontSize: 16.0);
   }
 

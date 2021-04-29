@@ -1,9 +1,13 @@
+import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
+import 'package:mta/models/FectchProjectDocRes.dart';
+import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 
 mixin Strings {
   static String authToken = '';
   static String baseImageUrl = "https://demo.emeetify.com:81/";
+  static String socketUrl = 'https://demo.emeetify.com:5012/';
   static String profilePic;
   static int currentmenuvalue = 1;
   static int userID;
@@ -22,7 +26,11 @@ mixin Strings {
   static bool category = false;
   static List<Data> selectedProject = [];
   static List<FectchCatsData> selectedCategory = [];
-
+  static List<FetchCategoryDoc> selectedCatDocument = [];
+  static List<ProjectDocData> selectedProDocument = [];
+  static int selectedDocsIndex = 0;
+  static int selectedCommentsIndex = 0;
+  static List<CommentsRes> comments = [];
   // user data
   static String username;
   static String usermail;

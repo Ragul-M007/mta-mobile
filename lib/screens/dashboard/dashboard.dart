@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:ext_storage/ext_storage.dart';
 import 'package:fancy_drawer/fancy_drawer.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -8,7 +12,11 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:open_file/open_file.dart';
+import 'package:dio/dio.dart';
 
 class Dashboard extends StatefulWidget {
   static const String routeName = "/dashboard";
@@ -24,6 +32,8 @@ class _DashboardState extends State<Dashboard>
 
   List<Data> _projectLists = [];
   List<Data> _searchLists = [];
+  String filepath;
+  var dio = Dio();
   void initState() {
     super.initState();
     _controller = FancyDrawerController(
@@ -35,6 +45,7 @@ class _DashboardState extends State<Dashboard>
         });
       });
     super.initState();
+    getPermission();
     WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
   }
 
@@ -135,16 +146,16 @@ class _DashboardState extends State<Dashboard>
                 selectedmenuvalue: 5,
                 menutitle: "Contact Us",
               ),
+              // menuoption(
+              //   ontab: () {
+              //     menuRedirect(routename: "/privacypolicy", currentmenu: 6);
+              //   },
+              //   selectedmenuvalue: 6,
+              //   menutitle: "Privacy Policy",
+              // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/privacypolicy", currentmenu: 6);
-                },
-                selectedmenuvalue: 6,
-                menutitle: "Privacy Policy",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/dashboard", currentmenu: 7);
+                  menuRedirect(routename: "/newshighlights", currentmenu: 7);
                 },
                 selectedmenuvalue: 7,
                 menutitle: "News & Highlights",
@@ -171,8 +182,16 @@ class _DashboardState extends State<Dashboard>
                   actions: [
                     Padding(
                         padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
-                        child: image(Strings.baseImageUrl + Strings.profilePic,
-                            40.0, 40.0))
+                        child: GestureDetector(
+                          onTap: () {
+                            _showMyDialog(context,
+                                Strings.baseImageUrl + Strings.profilePic);
+                          },
+                          child: image(
+                              Strings.baseImageUrl + Strings.profilePic,
+                              40.0,
+                              40.0),
+                        ))
                   ],
                   bottom: PreferredSize(
                       preferredSize: Size.fromHeight(kToolbarHeight),
@@ -255,27 +274,29 @@ class _DashboardState extends State<Dashboard>
                                           crossAxisCount: 2),
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        onTapProject(_searchLists[index]);
-                                      },
-                                      child: new Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: new GridTile(
-                                          child: Container(
-                                            height: 50,
-                                            width: 50,
-                                            child: Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    10, 10, 10, 0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
+                                    return new Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: new GridTile(
+                                        child: Container(
+                                          height: 50,
+                                          width: 50,
+                                          child: Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  10, 10, 10, 0),
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      _downloadfile(
+                                                          _projectLists[index]
+                                                              .projectImg);
+                                                    },
+                                                    child: Padding(
                                                       padding: EdgeInsets.only(
                                                           top: 10),
                                                       child: image(
@@ -286,11 +307,16 @@ class _DashboardState extends State<Dashboard>
                                                           65.0,
                                                           65.0),
                                                     ),
-                                                    Container()
-                                                  ],
-                                                )),
-                                          ),
-                                          footer: Padding(
+                                                  ),
+                                                  Container()
+                                                ],
+                                              )),
+                                        ),
+                                        footer: GestureDetector(
+                                          onTap: () {
+                                            onTapProject(_searchLists[index]);
+                                          },
+                                          child: Padding(
                                               padding: EdgeInsets.fromLTRB(
                                                   10, 10, 0, 20),
                                               child: Column(
@@ -352,27 +378,29 @@ class _DashboardState extends State<Dashboard>
                                           crossAxisCount: 2),
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        onTapProject(_projectLists[index]);
-                                      },
-                                      child: new Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: new GridTile(
-                                          child: Container(
-                                            height: 50,
-                                            width: 50,
-                                            child: Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    10, 10, 10, 10),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
+                                    return new Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: new GridTile(
+                                        child: Container(
+                                          height: 50,
+                                          width: 50,
+                                          child: Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  10, 10, 10, 10),
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      _downloadfile(
+                                                          _projectLists[index]
+                                                              .projectImg);
+                                                    },
+                                                    child: Padding(
                                                       padding: EdgeInsets.only(
                                                           top: 10),
                                                       child: image(
@@ -383,11 +411,16 @@ class _DashboardState extends State<Dashboard>
                                                           65.0,
                                                           65.0),
                                                     ),
-                                                    Container()
-                                                  ],
-                                                )),
-                                          ),
-                                          footer: Padding(
+                                                  ),
+                                                  Container()
+                                                ],
+                                              )),
+                                        ),
+                                        footer: GestureDetector(
+                                          onTap: () {
+                                            onTapProject(_projectLists[index]);
+                                          },
+                                          child: Padding(
                                               padding: EdgeInsets.fromLTRB(
                                                   10, 0, 0, 20),
                                               child: Column(
@@ -497,5 +530,85 @@ class _DashboardState extends State<Dashboard>
         borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
       ),
     );
+  }
+
+  void getPermission() async {
+    // print("getPermission");
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+    //await Permission.storage.request();
+    // await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  }
+
+  void _downloadfile(serverURL) async {
+    _showMyDialog(context, Strings.baseImageUrl + serverURL);
+  }
+
+  Future<void> _showMyDialog(context, imgurl) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      new Icon(Icons.close, size: 22.0, color: Colors.black),
+                    ],
+                  ),
+                  decoration: new BoxDecoration(
+                    color: Colors.transparent,
+                    image: new DecorationImage(
+                      image: new NetworkImage(imgurl),
+                      fit: BoxFit.contain,
+                    ),
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(10.0)),
+                  ),
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> openFile(filePath) async {
+    print(filePath);
+    final _result = await OpenFile.open(filePath);
+  }
+
+  Future<String> downloadFile(String url, String fileName, String dir) async {
+    HttpClient httpClient = new HttpClient();
+    File file;
+    String filePath = '';
+    String myUrl = '';
+
+    try {
+      myUrl = Strings.baseImageUrl + url;
+      var request = await httpClient.getUrl(Uri.parse(myUrl));
+      var response = await request.close();
+      print(myUrl);
+      if (response.statusCode == 200) {
+        var bytes = await consolidateHttpClientResponseBytes(response);
+        filePath = '$dir/$fileName';
+        file = File(filePath);
+        await file.writeAsBytes(bytes);
+      } else
+        filePath = 'Error code: ' + response.statusCode.toString();
+    } catch (ex) {
+      filePath = 'Can not fetch url';
+    }
+
+    return filePath;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
@@ -7,7 +8,13 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
+import 'package:ext_storage/ext_storage.dart';
+import 'package:open_file/open_file.dart';
+
+import 'package:dio/dio.dart';
 
 class ViewDocScreen extends StatelessWidget {
   const ViewDocScreen({Key key}) : super(key: key);
@@ -34,9 +41,71 @@ class ViewDocContent extends StatefulWidget {
 class _ViewDocContentState extends State<ViewDocContent> {
   List<ProjectDocData> _docsList = [];
   List<FetchCategoryDoc> _categorydocsList = [];
+  String filepath;
+  var dio = Dio();
+
   void initState() {
     super.initState();
+    getPermission();
     WidgetsBinding.instance.addPostFrameCallback((_) => getDocs());
+  }
+
+  //get storage permission
+  void getPermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+  }
+
+  void _downloadfile(serverURL) async {
+    AppUtils.showprogress();
+    AppUtils.showToast('Downloading');
+    String path = await ExtStorage.getExternalStoragePublicDirectory(
+        ExtStorage.DIRECTORY_DOWNLOADS);
+    var filenames = serverURL.split("/");
+    var fileName = filenames[1];
+    String fullPath = "$path/$fileName";
+    setState(() {
+      filepath = fullPath;
+    });
+    var downloadedFile = await downloadFile(serverURL, fileName, path);
+    openFile(downloadedFile);
+  }
+
+  Future<void> openFile(filePath) async {
+    await OpenFile.open(filePath);
+  }
+
+  Future<String> downloadFile(String url, String fileName, String dir) async {
+    HttpClient httpClient = new HttpClient();
+    File file;
+    String filePath = '';
+    String myUrl = '';
+
+    try {
+      myUrl = Strings.baseImageUrl + url;
+      var request = await httpClient.getUrl(Uri.parse(myUrl));
+      var response = await request.close();
+      print(myUrl);
+      if (response.statusCode == 200) {
+        var bytes = await consolidateHttpClientResponseBytes(response);
+        filePath = '$dir/$fileName';
+        file = File(filePath);
+        await file.writeAsBytes(bytes);
+      } else if (response.statusCode == 404) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+        filePath = 'Error code: ' + response.statusCode.toString();
+      }
+    } catch (ex) {
+      AppUtils.dismissprogress();
+      filePath = 'Can not fetch url';
+    }
+    AppUtils.dismissprogress();
+    return filePath;
   }
 
   @override
@@ -92,12 +161,21 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 0),
-                                            child: Image.asset(
-                                                "assets/icons/doc.png",
-                                                width: 70.0,
-                                                height: 70.0),
+                                          GestureDetector(
+                                            onTap: () {
+                                              _downloadfile(
+                                                  _categorydocsList[index]
+                                                      .file);
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.only(top: 0),
+                                              child: Image.asset(
+                                                  getFileExt(
+                                                      _categorydocsList[index]
+                                                          .fileName),
+                                                  width: 70.0,
+                                                  height: 70.0),
+                                            ),
                                           ),
                                           SizedBox(
                                             width: 45.0,
@@ -129,6 +207,10 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                         SizedBox(height: 7.0),
                                         GestureDetector(
                                           onTap: () {
+                                            Strings.selectedDocsIndex = index;
+                                            Strings.selectedCatDocument = [];
+                                            Strings.selectedCatDocument
+                                                .add(_categorydocsList[index]);
                                             Navigator.pushNamed(
                                                 context, '/comments');
                                           },
@@ -193,12 +275,19 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 0),
-                                            child: Image.asset(
-                                                "assets/icons/doc.png",
-                                                width: 70.0,
-                                                height: 70.0),
+                                          GestureDetector(
+                                            onTap: () {
+                                              _downloadfile(
+                                                  _docsList[index].file);
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.only(top: 0),
+                                              child: Image.asset(
+                                                  getFileExt(_docsList[index]
+                                                      .fileName),
+                                                  width: 70.0,
+                                                  height: 70.0),
+                                            ),
                                           ),
                                           SizedBox(
                                             width: 45.0,
@@ -230,6 +319,10 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                         SizedBox(height: 7.0),
                                         GestureDetector(
                                           onTap: () {
+                                            Strings.selectedDocsIndex = index;
+                                            Strings.selectedProDocument = [];
+                                            Strings.selectedProDocument
+                                                .add(_docsList[index]);
                                             Navigator.pushNamed(
                                                 context, '/comments');
                                           },
@@ -311,6 +404,35 @@ class _ViewDocContentState extends State<ViewDocContent> {
         AppUtils.dismissprogress();
         print(onError.toString());
       });
+    }
+  }
+
+  String getFileExt(String fileName) {
+    var file = fileName.split(".");
+    var fileExt = file[1];
+    if (fileExt == "png" || fileExt == "PNG") {
+      return "assets/icons/png.png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return "assets/icons/jpg.png";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return "assets/icons/pdf.png";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return "assets/icons/txt.png";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return "assets/icons/ppt.png";
+    } else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return "assets/icons/xls.png";
+    } else {
+      return "assets/icons/doc.png";
     }
   }
 }

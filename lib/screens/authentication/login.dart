@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -60,6 +59,8 @@ class _LoginContentState extends State<LoginContent>
     _tabController = new TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
     setState(() {
+      // _emailIdController.text = "u.elanthendral718@gmail.com";
+      // _passwordController.text = "test";
       _emailIdController.text = "superadmin@mta.com";
       _passwordController.text = "test12";
     });
@@ -334,23 +335,30 @@ class _LoginContentState extends State<LoginContent>
               return _newsLists[index].feedType == "N"
                   ? Container(
                       child: Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.all(25),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             textDirection: TextDirection.ltr,
                             children: [
                               Container(
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.network(Strings.baseImageUrl +
-                                        _newsLists[index].imgUrl)),
-                              ),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  height: 80,
+                                  child: FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100.0),
+                                        child: Image.network(
+                                            Strings.baseImageUrl +
+                                                _newsLists[index].imgUrl)),
+                                  )),
                               SizedBox(
-                                width: 10,
+                                width: 20,
                               ),
                               Expanded(
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       _newsLists[index].titleText,
@@ -362,11 +370,33 @@ class _LoginContentState extends State<LoginContent>
                                     SizedBox(
                                       height: 10,
                                     ),
-                                    Text(
-                                      _newsLists[index].description,
-                                      overflow: TextOverflow.clip,
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          width: 18.0,
+                                          height: 18.0,
+                                          child: IconButton(
+                                              padding: new EdgeInsets.all(0.0),
+                                              color: Colors.grey,
+                                              icon: new Icon(Icons.update,
+                                                  size: 18.0)),
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          calculateTimeDifferenceBetween(
+                                              serverDate:
+                                                  _newsLists[index].updatedAt),
+                                          textAlign: TextAlign.left,
+                                          textDirection: TextDirection.ltr,
+                                          style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 12),
+                                        )
+                                      ],
                                     )
                                   ],
                                 ),
@@ -387,35 +417,68 @@ class _LoginContentState extends State<LoginContent>
               return _newsLists[index].feedType == "H"
                   ? Container(
                       child: Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: EdgeInsets.all(25),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            textDirection: TextDirection.ltr,
                             children: [
                               Container(
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.network(Strings.baseImageUrl +
-                                        _newsLists[index].imgUrl)),
-                              ),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  height: 80,
+                                  child: FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100.0),
+                                        child: Image.network(
+                                            Strings.baseImageUrl +
+                                                _newsLists[index].imgUrl)),
+                                  )),
                               SizedBox(
-                                width: 10,
+                                width: 20,
                               ),
                               Expanded(
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       _newsLists[index].titleText,
+                                      textAlign: TextAlign.left,
+                                      textDirection: TextDirection.ltr,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                     SizedBox(
                                       height: 10,
                                     ),
-                                    Text(
-                                      _newsLists[index].description,
-                                      overflow: TextOverflow.clip,
-                                      style: TextStyle(),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          width: 18.0,
+                                          height: 18.0,
+                                          child: IconButton(
+                                              padding: new EdgeInsets.all(0.0),
+                                              color: Colors.grey,
+                                              icon: new Icon(Icons.update,
+                                                  size: 18.0)),
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          calculateTimeDifferenceBetween(
+                                              serverDate:
+                                                  _newsLists[index].updatedAt),
+                                          textAlign: TextAlign.left,
+                                          textDirection: TextDirection.ltr,
+                                          style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 12),
+                                        )
+                                      ],
                                     )
                                   ],
                                 ),
@@ -449,5 +512,19 @@ class _LoginContentState extends State<LoginContent>
       AppUtils.dismissprogress();
       print(onError.toString());
     });
+  }
+
+  static String calculateTimeDifferenceBetween({@required String serverDate}) {
+    DateTime startDate = DateTime.parse(serverDate);
+    DateTime endDate = DateTime.now();
+    int seconds = endDate.difference(startDate).inSeconds;
+    if (seconds < 60)
+      return '${seconds.abs()} second';
+    else if (seconds >= 60 && seconds < 3600)
+      return '${startDate.difference(endDate).inMinutes.abs()} minute';
+    else if (seconds >= 3600 && seconds < 86400)
+      return '${startDate.difference(endDate).inHours.abs()} hour';
+    else
+      return '${startDate.difference(endDate).inDays.abs()} day';
   }
 }
