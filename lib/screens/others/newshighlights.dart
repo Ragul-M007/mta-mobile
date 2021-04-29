@@ -277,10 +277,12 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                           width: 18.0,
                                           height: 18.0,
                                           child: IconButton(
-                                              padding: new EdgeInsets.all(0.0),
-                                              color: Colors.grey,
-                                              icon: new Icon(Icons.update,
-                                                  size: 18.0)),
+                                            padding: new EdgeInsets.all(0.0),
+                                            color: Colors.grey,
+                                            icon: new Icon(Icons.update,
+                                                size: 18.0),
+                                            onPressed: () {},
+                                          ),
                                         ),
                                         SizedBox(
                                           width: 5,
@@ -359,10 +361,12 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                           width: 18.0,
                                           height: 18.0,
                                           child: IconButton(
-                                              padding: new EdgeInsets.all(0.0),
-                                              color: Colors.grey,
-                                              icon: new Icon(Icons.update,
-                                                  size: 18.0)),
+                                            padding: new EdgeInsets.all(0.0),
+                                            color: Colors.grey,
+                                            icon: new Icon(Icons.update,
+                                                size: 18.0),
+                                            onPressed: () {},
+                                          ),
                                         ),
                                         SizedBox(
                                           width: 5,

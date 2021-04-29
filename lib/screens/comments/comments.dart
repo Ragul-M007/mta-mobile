@@ -168,11 +168,13 @@ class _CommentsState extends State<Comments> {
                                               width: 18.0,
                                               height: 18.0,
                                               child: IconButton(
-                                                  padding:
-                                                      new EdgeInsets.all(0.0),
-                                                  color: Colors.grey,
-                                                  icon: new Icon(Icons.update,
-                                                      size: 18.0)),
+                                                padding:
+                                                    new EdgeInsets.all(0.0),
+                                                color: Colors.grey,
+                                                icon: new Icon(Icons.update,
+                                                    size: 18.0),
+                                                onPressed: () {},
+                                              ),
                                             ),
                                             SizedBox(
                                               width: 1,

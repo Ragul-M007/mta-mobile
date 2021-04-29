@@ -19,6 +19,7 @@ FancyDrawerController _controller;
 var now = DateTime.now();
 var month = now.month.toString().padLeft(2, '0');
 var day = now.day.toString().padLeft(2, '0');
+var year = now.year.toString();
 var monthMatch = [
   "Jan",
   "Feb",
@@ -69,8 +70,8 @@ class _AttendanceContentState extends State<AttendanceContent>
       });
     _calendarController = CalendarController();
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => getAttendance());
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => getAttendance(day + "-" + month + "-" + year));
   }
 
   menuopen() {
@@ -201,11 +202,14 @@ class _AttendanceContentState extends State<AttendanceContent>
                                 InkWell(
                                   child: Row(
                                     children: [
+                                      SizedBox(
+                                        height: 80,
+                                      ),
                                       Text("Grid View",
                                           style: Drawables.adddoccontentstyle(
                                               Colors.black87,
                                               14.0,
-                                              FontWeight.w500)),
+                                              FontWeight.w600)),
                                       SizedBox(width: 5.0),
                                       Icon(
                                         Icons.grid_view,
@@ -223,15 +227,31 @@ class _AttendanceContentState extends State<AttendanceContent>
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.fromLTRB(30, 0, 0, 20),
                             child: DropdownButton<String>(
                               value: dropdownValue,
-                              style: const TextStyle(color: Color(0xFF0061b0)),
+                              style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16),
                               underline: Container(
                                 height: 3,
-                                color: Color(0xFF0061b0),
+                                color: Colors.transparent,
                               ),
                               onChanged: (String newValue) {
+                                var index = 0;
+                                monthMatch.map((element) {
+                                  // get index
+                                  index = monthMatch.indexOf(newValue);
+                                }).toList();
+                                var selecetedMonth = index + 1;
+                                var editedMonth = "";
+                                if (selecetedMonth.toString().length == 1) {
+                                  editedMonth = "0" + selecetedMonth.toString();
+                                } else {
+                                  selecetedMonth.toString();
+                                }
+                                getAttendance(editedMonth);
                                 setState(() {
                                   dropdownValue = newValue;
                                 });
@@ -453,10 +473,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                     },
                                   ),
                                 )
-                              : SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.5,
-                                ),
+                              : SizedBox(),
                           bottombutton()
                         ],
                       ),
@@ -533,6 +550,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                     InkWell(
                       child: Row(
                         children: [
+                          SizedBox(
+                            height: 80,
+                          ),
                           Text(
                             "List View",
                             style: TextStyle(color: Colors.white),
@@ -781,11 +801,11 @@ class _AttendanceContentState extends State<AttendanceContent>
     }
   }
 
-  getAttendance() {
+  getAttendance(String date) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
-    api.getAttendance(Strings.userID, "27-04-2021").then((response) {
+    api.getAttendance(Strings.userID, date).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
       setState(() {
@@ -803,14 +823,14 @@ class _AttendanceContentState extends State<AttendanceContent>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     AddAttendanceReq req = AddAttendanceReq();
-    req.checkTime = "2PM";
+    req.checkTime = DateFormat().add_jm().format(DateTime.now()).toString();
     req.checkType = action;
     req.latLng = "27.2046,77.4977";
-    req.locationName = "Mulanur";
+    req.locationName = "Coimbatore";
     api.addAttendance(req).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      AppUtils.showToast(response.message);
+      AppUtils.showToastSuccess(response.message);
       setState(() {});
     }).catchError((onError) {
       AppUtils.dismissprogress();
