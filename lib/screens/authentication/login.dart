@@ -59,10 +59,8 @@ class _LoginContentState extends State<LoginContent>
     _tabController = new TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
     setState(() {
-      // _emailIdController.text = "u.elanthendral718@gmail.com";
-      // _passwordController.text = "test";
-      _emailIdController.text = "superadmin@mta.com";
-      _passwordController.text = "test12";
+      _emailIdController.text = "";
+      _passwordController.text = "";
     });
   }
 
@@ -75,9 +73,11 @@ class _LoginContentState extends State<LoginContent>
   _login() async {
     FocusScope.of(context).unfocus();
     if (_emailIdController.text.isEmpty) {
-      AppUtils.showToast("Please Enter Your Email Id");
+      AppUtils.showToastError("Please Enter Your Email Id");
     } else if (_passwordController.text.isEmpty) {
-      AppUtils.showToast("Please Enter Your Password");
+      AppUtils.showToastError("Please enter Your Password");
+    } else if (_passwordController.text.trim() == "") {
+      AppUtils.showToastError("Please enter Your Password");
     } else {
       bool network = await Validators.networkconnectvitiy();
       if (network) {
@@ -92,6 +92,7 @@ class _LoginContentState extends State<LoginContent>
     LoginReq loginreq = LoginReq();
     loginreq.email = _emailIdController.text;
     loginreq.password = _passwordController.text;
+    loginreq.token = Strings.fcmToken;
     api.login(loginreq).then((response) {
       AppUtils.dismissprogress();
       print('loginResponse status ${response.toJson()}');
@@ -105,7 +106,7 @@ class _LoginContentState extends State<LoginContent>
         Strings.authToken = response.token;
         Navigator.pushNamed(context, "/setpin");
       } else {
-        print('error');
+        AppUtils.showToastError(response.message);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -336,74 +337,84 @@ class _LoginContentState extends State<LoginContent>
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            textDirection: TextDirection.ltr,
-                            children: [
-                              Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  height: 80,
-                                  child: FittedBox(
-                                    fit: BoxFit.fill,
-                                    child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100.0),
-                                        child: Image.network(
-                                            Strings.baseImageUrl +
-                                                _newsLists[index].imgUrl)),
-                                  )),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _newsLists[index].titleText,
-                                      textAlign: TextAlign.left,
-                                      textDirection: TextDirection.ltr,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          width: 18.0,
-                                          height: 18.0,
-                                          child: IconButton(
-                                            padding: new EdgeInsets.all(0.0),
-                                            color: Colors.grey,
-                                            icon: new Icon(Icons.update,
-                                                size: 18.0),
-                                            onPressed: () {},
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          calculateTimeDifferenceBetween(
-                                              serverDate:
-                                                  _newsLists[index].updatedAt),
-                                          textAlign: TextAlign.left,
-                                          textDirection: TextDirection.ltr,
-                                          style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12),
-                                        )
-                                      ],
-                                    )
-                                  ],
+                          child: GestureDetector(
+                            onTap: () {
+                              _showMyDialog(
+                                  Strings.baseImageUrl +
+                                      _newsLists[index].imgUrl,
+                                  _newsLists[index].titleText,
+                                  _newsLists[index].description);
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              textDirection: TextDirection.ltr,
+                              children: [
+                                Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    height: 80,
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100.0),
+                                          child: Image.network(
+                                              Strings.baseImageUrl +
+                                                  _newsLists[index].imgUrl)),
+                                    )),
+                                SizedBox(
+                                  width: 20,
                                 ),
-                              )
-                            ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _newsLists[index].titleText,
+                                        textAlign: TextAlign.left,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            width: 18.0,
+                                            height: 18.0,
+                                            child: IconButton(
+                                              padding: new EdgeInsets.all(0.0),
+                                              color: Colors.grey,
+                                              icon: new Icon(Icons.update,
+                                                  size: 18.0),
+                                              onPressed: () {},
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            calculateTimeDifferenceBetween(
+                                                serverDate: _newsLists[index]
+                                                    .updatedAt),
+                                            textAlign: TextAlign.left,
+                                            textDirection: TextDirection.ltr,
+                                            style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 12),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           )))
                   : SizedBox();
             },
@@ -420,74 +431,84 @@ class _LoginContentState extends State<LoginContent>
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            textDirection: TextDirection.ltr,
-                            children: [
-                              Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  height: 80,
-                                  child: FittedBox(
-                                    fit: BoxFit.fill,
-                                    child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100.0),
-                                        child: Image.network(
-                                            Strings.baseImageUrl +
-                                                _newsLists[index].imgUrl)),
-                                  )),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _newsLists[index].titleText,
-                                      textAlign: TextAlign.left,
-                                      textDirection: TextDirection.ltr,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          width: 18.0,
-                                          height: 18.0,
-                                          child: IconButton(
-                                            padding: new EdgeInsets.all(0.0),
-                                            color: Colors.grey,
-                                            icon: new Icon(Icons.update,
-                                                size: 18.0),
-                                            onPressed: () {},
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          calculateTimeDifferenceBetween(
-                                              serverDate:
-                                                  _newsLists[index].updatedAt),
-                                          textAlign: TextAlign.left,
-                                          textDirection: TextDirection.ltr,
-                                          style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12),
-                                        )
-                                      ],
-                                    )
-                                  ],
+                          child: GestureDetector(
+                            onTap: () {
+                              _showMyDialog(
+                                  Strings.baseImageUrl +
+                                      _newsLists[index].imgUrl,
+                                  _newsLists[index].titleText,
+                                  _newsLists[index].description);
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              textDirection: TextDirection.ltr,
+                              children: [
+                                Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    height: 80,
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100.0),
+                                          child: Image.network(
+                                              Strings.baseImageUrl +
+                                                  _newsLists[index].imgUrl)),
+                                    )),
+                                SizedBox(
+                                  width: 20,
                                 ),
-                              )
-                            ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _newsLists[index].titleText,
+                                        textAlign: TextAlign.left,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            width: 18.0,
+                                            height: 18.0,
+                                            child: IconButton(
+                                              padding: new EdgeInsets.all(0.0),
+                                              color: Colors.grey,
+                                              icon: new Icon(Icons.update,
+                                                  size: 18.0),
+                                              onPressed: () {},
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            calculateTimeDifferenceBetween(
+                                                serverDate: _newsLists[index]
+                                                    .updatedAt),
+                                            textAlign: TextAlign.left,
+                                            textDirection: TextDirection.ltr,
+                                            style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 12),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           )))
                   : SizedBox();
             },
@@ -530,5 +551,84 @@ class _LoginContentState extends State<LoginContent>
       return '${startDate.difference(endDate).inHours.abs()} hour';
     else
       return '${startDate.difference(endDate).inDays.abs()} day';
+  }
+
+  Future<void> _showMyDialog(imgurl, title, desc) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.height * 0.75,
+                    child: GridView.count(
+                      primary: false,
+                      crossAxisCount: 1,
+                      children: <Widget>[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  new Icon(Icons.close,
+                                      size: 22.0, color: Colors.black),
+                                ]),
+                            Container(
+                              child: image(imgurl, 100.0, 100.0),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Color(0xFF0061b0),
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                desc,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
+                              // ,
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))),
+        );
+      },
+    );
+  }
+
+  Widget image(String img, double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: new BoxDecoration(
+        color: const Color(0xff7c94b6),
+        image: new DecorationImage(
+          image: new NetworkImage(img),
+          fit: BoxFit.fill,
+        ),
+        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+      ),
+    );
   }
 }

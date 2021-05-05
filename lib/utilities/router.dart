@@ -12,6 +12,7 @@ import 'package:mta/screens/doucument/adddoc.dart';
 import 'package:mta/screens/doucument/viewdoclist.dart';
 import 'package:mta/screens/drawer/drawer.dart';
 import 'package:mta/screens/others/newshighlights.dart';
+import 'package:mta/screens/others/notification.dart';
 import 'package:mta/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/screens/splashscreen.dart';
@@ -71,6 +72,9 @@ class RoutesGenerator {
         break;
       case '/newshighlights':
         return MaterialPageRoute(builder: (_) => Newshighlights());
+        break;
+      case '/notification':
+        return MaterialPageRoute(builder: (_) => PushNotification());
         break;
       default:
         return _errorRoute();

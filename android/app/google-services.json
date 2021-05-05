@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "432746271272",
+    "project_id": "mtaskein",
+    "storage_bucket": "mtaskein.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432746271272:android:e8f7739d9167a0e2ed5b1d",
+        "android_client_info": {
+          "package_name": "com.skein.mta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432746271272-acc09gs3h3eif8ed7tdp953sksri9h1l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.skein.mta",
+            "certificate_hash": "1c93bbb82d360e95abf4323a557ffc5903fe5854"
+          }
+        },
+        {
+          "client_id": "432746271272-o3t4rdt9arvnhvlj9lifeg7e8g3fkk2r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcAXqmIFzo99_lL9uy9Ldf1Q7V46rx-AM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432746271272-o3t4rdt9arvnhvlj9lifeg7e8g3fkk2r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

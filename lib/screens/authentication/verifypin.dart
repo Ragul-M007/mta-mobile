@@ -42,6 +42,7 @@ class _VerifypinState extends State<Verifypin> {
       if (value != null) {
         loginreq.email = value;
         loginreq.loginpin = codeVerifyField;
+        loginreq.token = Strings.fcmToken;
         // print(loginreq.email);
         // print(loginreq.loginpin);
         //Navigator.pushNamed(ctx, "/dashboard");
@@ -59,7 +60,7 @@ class _VerifypinState extends State<Verifypin> {
             AppUtils.savePreferences("easyAccess", "Y");
             Navigator.pushNamed(ctx, "/dashboard");
           } else {
-            print('error');
+            AppUtils.showToastError(response.message);
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
@@ -168,7 +169,7 @@ class _VerifypinState extends State<Verifypin> {
                       print(codeVerifyField);
                       print("${codeVerifyField.length}");
                       if (codeVerifyField.length < 4) {
-                        AppUtils.showToast("Please Enter Pin");
+                        AppUtils.showToastError("Please Enter Pin");
                       } else {
                         signin();
                       }

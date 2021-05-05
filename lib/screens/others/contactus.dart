@@ -124,13 +124,13 @@ class _ContactusState extends State<Contactus>
                 selectedmenuvalue: 7,
                 menutitle: "News & Highlights",
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/settings", currentmenu: 8);
-                },
-                selectedmenuvalue: 8,
-                menutitle: "Settings",
-              ),
+              // menuoption(
+              //   ontab: () {
+              //     menuRedirect(routename: "/settings", currentmenu: 8);
+              //   },
+              //   selectedmenuvalue: 8,
+              //   menutitle: "Settings",
+              // ),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/login", currentmenu: 9);
@@ -243,7 +243,7 @@ class _ContactusContentState extends State<ContactusContent> {
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(
-                        0, MediaQuery.of(context).size.height * .35, 0, 0),
+                        0, MediaQuery.of(context).size.height * .31, 0, 0),
                     padding: EdgeInsets.all(5),
                     width: double.infinity,
                     decoration: BoxDecoration(color: Colors.grey[200]),
@@ -302,7 +302,7 @@ class _ContactusContentState extends State<ContactusContent> {
                   Container(
                       width: double.infinity,
                       margin: EdgeInsets.fromLTRB(
-                          10, MediaQuery.of(context).size.height * .5, 10, 20),
+                          10, MediaQuery.of(context).size.height * .40, 10, 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

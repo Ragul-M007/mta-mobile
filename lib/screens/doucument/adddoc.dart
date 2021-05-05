@@ -206,46 +206,51 @@ class _AddDocContentState extends State<AddDocContent> {
   }
 
   void submit() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    String extension;
-    if (fileExt == 'png' ||
-        fileExt == 'jpg' ||
-        fileExt == 'jepg' ||
-        fileExt == 'PNG' ||
-        fileExt == 'JPG') {
-      extension = "data:image/" + fileExt + ";base64,";
+    if (docTitle.text.trim() == "" ||
+        docTitle.text == null ||
+        docTitle.text == "null") {
+      AppUtils.showToastError("Please select Document");
     } else {
-      extension = "data:application/" + fileExt + ";base64,";
-    }
-
-    AddDocReq addDocreq = AddDocReq();
-    addDocreq.categoryId = Strings.category == true
-        ? Strings.selectedCategory[0].categoryId
-        : null;
-    addDocreq.description = docDesc.text;
-    addDocreq.fileName = docTitle.text;
-    addDocreq.projectId = Strings.selectedProject[0].projectId;
-    addDocreq.userId = Strings.userID;
-    String base64Data = extension + file64;
-    List<String> _data = List<String>();
-    _data.add(base64Data);
-    //addDocreq.file = _data;
-    addDocreq.file = base64Data;
-
-    print(addDocreq.file);
-    api.addDoc(addDocreq).then((response) {
-      AppUtils.dismissprogress();
-
-      if (response.status) {
-        Navigator.popAndPushNamed(context, '/viewdoclist');
-        setState(() {});
+      AppUtils.showprogress();
+      final api = Provider.of<ApiService>(context, listen: false);
+      String extension;
+      if (fileExt == 'png' ||
+          fileExt == 'jpg' ||
+          fileExt == 'jepg' ||
+          fileExt == 'PNG' ||
+          fileExt == 'JPG') {
+        extension = "data:image/" + fileExt + ";base64,";
       } else {
-        print('error');
+        extension = "data:application/" + fileExt + ";base64,";
       }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+
+      AddDocReq addDocreq = AddDocReq();
+      addDocreq.categoryId = Strings.category == true
+          ? Strings.selectedCategory[0].categoryId
+          : null;
+      addDocreq.description = docDesc.text;
+      addDocreq.fileName = docTitle.text;
+      addDocreq.projectId = Strings.selectedProject[0].projectId;
+      addDocreq.userId = Strings.userID;
+      String base64Data = extension + file64;
+      List<String> _data = List<String>();
+      _data.add(base64Data);
+      //addDocreq.file = _data;
+      addDocreq.file = base64Data;
+
+      print(addDocreq.file);
+      api.addDoc(addDocreq).then((response) {
+        AppUtils.dismissprogress();
+        if (response.status) {
+          Navigator.popAndPushNamed(context, '/viewdoclist');
+          setState(() {});
+        } else {
+          AppUtils.showToastError(response.message);
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        print(onError.toString());
+      });
+    }
   }
 }

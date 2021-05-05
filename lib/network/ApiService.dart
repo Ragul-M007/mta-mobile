@@ -3,15 +3,21 @@ import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
+import 'package:mta/models/ChangePassReq.dart';
+import 'package:mta/models/ChangePassRes.dart';
 import 'package:mta/models/DashboardRes.dart';
+import 'package:mta/models/EditProfileReq.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
+import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/NewsRes.dart';
+import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/utilities/strings.dart';
@@ -37,8 +43,8 @@ abstract class ApiService {
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);
 
-  @GET("/projects")
-  Future<DashboardRes> projects();
+  @GET("/projects?user_id={user_id}")
+  Future<DashboardRes> projects(@Path("user_id") int id);
 
   @GET("/newsfeed")
   Future<NewsRes> news();
@@ -66,6 +72,23 @@ abstract class ApiService {
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
       @Path("user_id") int id, @Path("date") String date);
+
+  @GET("/categories?project_id={project_id}")
+  Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
+
+  @GET("/projects/getmappedUser?project_id={project_id}")
+  Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);
+
+  @GET("/utils/getNotification")
+  Future<NotificationRes> notification();
+
+  @POST("/users/changePassword")
+  Future<ChangePassRes> changePass(@Body() ChangePassReq body);
+
+  @PUT("/users/{user_id}")
+  Future<ChangePassRes> editProfile(
+      @Path("user_id") int id, @Body() EditProfileReq body);
+
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
 //////////////////////////////////////////////////////////////////////////////////////////

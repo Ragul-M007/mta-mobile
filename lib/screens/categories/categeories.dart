@@ -178,7 +178,7 @@ class _CategoriesContentState extends State<CategoriesContent> {
           _catsList = response.data;
         });
       } else {
-        print('error');
+        AppUtils.showToastError(response.message);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();

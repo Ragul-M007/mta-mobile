@@ -3,6 +3,8 @@ import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
+import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/FetchMapedUsersRes.dart';
 
 mixin Strings {
   static String authToken = '';
@@ -31,6 +33,10 @@ mixin Strings {
   static int selectedDocsIndex = 0;
   static int selectedCommentsIndex = 0;
   static List<CommentsRes> comments = [];
+  static String fcmToken = "";
+  static List<CatsData> categories = [];
+  static List<FetchMapedUsersData> users = [];
+  static bool showNotification = false;
   // user data
   static String username;
   static String usermail;

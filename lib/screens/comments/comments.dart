@@ -2,33 +2,77 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mta/models/CommentsRes.dart';
+import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/network/ApiService.dart';
+import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:intl/intl.dart';
+
+List<FetchMapedUsersData> users = Strings.users;
+List<CatsData> cats = Strings.categories;
+final _userIitems = users
+    .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
+    .toList();
+final _catsItems = cats
+    .map((cats) => MultiSelectItem<CatsData>(cats, cats.categoryName))
+    .toList();
+var tagedUsers = "";
+var tagedUsersId = "";
+var tagedCats = "";
+var tagedCatsId = "";
 
 class Comments extends StatefulWidget {
-  static const String routeName = "/comments";
+  const Comments({Key key}) : super(key: key);
 
   @override
   _CommentsState createState() => _CommentsState();
 }
 
 class _CommentsState extends State<Comments> {
+  @override
+  Widget build(BuildContext context) {
+    return Provider<ApiService>(
+        create: (context) => ApiService.create(),
+        child: Scaffold(
+          appBar: appbar("Comments"),
+          backgroundColor: Colors.grey[300],
+          body: CommentsContent(),
+        ));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+}
+
+class CommentsContent extends StatefulWidget {
+  static const String routeName = "/comments";
+
+  @override
+  _CommentsContentState createState() => _CommentsContentState();
+}
+
+class _CommentsContentState extends State<CommentsContent> {
   IO.Socket _socket;
   var _currDoc;
-
   TextEditingController _msgcontroller = TextEditingController();
   @override
   void initState() {
     super.initState();
-    print("in");
-
     if (Strings.category == true) {
       _currDoc = Strings.selectedCatDocument[0];
     } else {
       _currDoc = Strings.selectedProDocument[0];
     }
+    // getUserCats();
     _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
@@ -53,7 +97,6 @@ class _CommentsState extends State<Comments> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: appbar("Comments"),
       body: Column(
         children: [
           SizedBox(
@@ -257,6 +300,103 @@ class _CommentsState extends State<Comments> {
                       }))
               : SizedBox(),
           Container(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFFffffff),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 10,
+                  child: MultiSelectDialogField(
+                    items: _userIitems,
+                    title: Text("Tag Users"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.person,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Users",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    onConfirm: (results) {
+                      if (results.length > 0) {
+                        tagedUsers = "";
+                        tagedUsersId = "";
+                        results.forEach((element) {
+                          tagedUsers = tagedUsers + "," + element.name;
+                          tagedUsersId = tagedUsersId.toString() +
+                              "," +
+                              element.userId.toString();
+                        });
+                      } else {
+                        tagedUsers = "";
+                        tagedUsersId = "";
+                      }
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 10,
+                  child: MultiSelectDialogField(
+                    items: _catsItems,
+                    title: Text("Tag Categories"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.category,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Categories",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    onConfirm: (results) {
+                      if (results.length > 0) {
+                        tagedCats = "";
+                        tagedCatsId = "";
+                        results.forEach((element) {
+                          tagedCats = tagedCats + "," + element.categoryName;
+                          tagedCatsId = tagedCatsId.toString() +
+                              "," +
+                              element.categoryId.toString();
+                        });
+                      } else {
+                        tagedCats = "";
+                        tagedCatsId = "";
+                      }
+                      //_selectedAnimals = results;
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 40),
+          Container(
             width: double.infinity,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -300,26 +440,40 @@ class _CommentsState extends State<Comments> {
 
   postComments() {
     //print(_msgcontroller.text);
-    _socket.emit(
-        'create-document-comment',
-        json.encode({
-          "comment": _msgcontroller.text,
-          "document_id": Strings.category == true
-              ? Strings.selectedCatDocument[0].documentId
-              : Strings.selectedProDocument[0].documentId,
-          'recipient_id': null,
-          'recipient': ""
-        }));
-    setState(() {
-      if (Strings.category == true) {
-        Strings.selectedCatDocument[0].commentsCount =
-            Strings.selectedCatDocument[0].commentsCount + 1;
-      } else {
-        Strings.selectedProDocument[0].commentsCount =
-            Strings.selectedProDocument[0].commentsCount + 1;
-      }
-      _msgcontroller.text = '';
-    });
+    if (_msgcontroller.text.trim() == "") {
+      AppUtils.showToastError("Please Enter Comments");
+    } else {
+      _socket.emit(
+          'create-document-comment',
+          json.encode({
+            "comment": _msgcontroller.text,
+            "document_id": Strings.category == true
+                ? Strings.selectedCatDocument[0].documentId
+                : Strings.selectedProDocument[0].documentId,
+            'recipient_id': tagedUsersId,
+            'recipient': tagedUsers,
+            "category_id_list": tagedCatsId,
+            "category_list": tagedCats
+          }));
+      // print(tagedUsersId);
+      // print(tagedUsers);
+      // print(tagedCatsId);
+      // print(tagedCats);
+      setState(() {
+        if (Strings.category == true) {
+          Strings.selectedCatDocument[0].commentsCount =
+              Strings.selectedCatDocument[0].commentsCount + 1;
+        } else {
+          Strings.selectedProDocument[0].commentsCount =
+              Strings.selectedProDocument[0].commentsCount + 1;
+        }
+        tagedUsers = "";
+        tagedUsersId = "";
+        tagedCats = "";
+        tagedCatsId = "";
+        _msgcontroller.text = '';
+      });
+    }
   }
 
   String getFileExt(String fileName) {
@@ -353,7 +507,18 @@ class _CommentsState extends State<Comments> {
 
   static String calculateTimeDifferenceBetween({@required String serverDate}) {
     DateTime startDate = DateTime.parse(serverDate);
+    //print(DateFormat.MMMEd().format(startDate));
     DateTime endDate = DateTime.now();
+
+    // var dateUtc = DateTime.now().toUtc();
+    // var strToDateTime = DateTime.parse(dateUtc.toString());
+    // final convertLocal = strToDateTime.toLocal();
+    // var newFormat = DateFormat("yy-MM-dd hh:mm:ss aaa");
+    // String updatedDt = newFormat.format(convertLocal);
+    // print(dateUtc);
+    // print(convertLocal);
+    // print(updatedDt);
+
     int seconds = endDate.difference(startDate).inSeconds;
     if (seconds < 60)
       return '${seconds.abs()} second ago';
@@ -364,6 +529,40 @@ class _CommentsState extends State<Comments> {
     else
       return '${startDate.difference(endDate).inDays.abs()} day ago';
   }
+
+  // getUserCats() {
+  //   AppUtils.showprogress();
+  //   final api = Provider.of<ApiService>(context, listen: false);
+  //   api.fetchUsers(Strings.selectedProject[0].projectId).then((response) {
+  //     if (response.status) {
+  //       setState(() {
+  //         // Strings.users = response.data;
+  //         users = response.data;
+  //         print(response.data[0].userId);
+  //       });
+  //       final api = Provider.of<ApiService>(context, listen: false);
+  //       api.fetchCats(Strings.selectedProject[0].projectId).then((response) {
+  //         AppUtils.dismissprogress();
+  //         if (response.status) {
+  //           setState(() {
+  //             // Strings.categories = response.data;
+  //             cats = response.data;
+  //           });
+  //         } else {
+  //           print('error');
+  //         }
+  //       }).catchError((onError) {
+  //         AppUtils.dismissprogress();
+  //         print(onError.toString());
+  //       });
+  //     } else {
+  //       print('error');
+  //     }
+  //   }).catchError((onError) {
+  //     AppUtils.dismissprogress();
+  //     print(onError.toString());
+  //   });
+  // }
 }
 
 class MySeparator extends StatelessWidget {

@@ -59,7 +59,7 @@ class _DashboardState extends State<Dashboard>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx, listen: false);
 
-    api.projects().then((response) {
+    api.projects(Strings.userID).then((response) {
       AppUtils.dismissprogress();
       //print('projectResponse status ${response.toJson()}');
 
@@ -69,7 +69,7 @@ class _DashboardState extends State<Dashboard>
           _projectLists = response.data;
         });
       } else {
-        print('error');
+        AppUtils.showToastError(response.message);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -160,13 +160,13 @@ class _DashboardState extends State<Dashboard>
                 selectedmenuvalue: 7,
                 menutitle: "News & Highlights",
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/settings", currentmenu: 8);
-                },
-                selectedmenuvalue: 8,
-                menutitle: "Settings",
-              ),
+              // menuoption(
+              //   ontab: () {
+              //     menuRedirect(routename: "/settings", currentmenu: 8);
+              //   },
+              //   selectedmenuvalue: 8,
+              //   menutitle: "Settings",
+              // ),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/login", currentmenu: 9);

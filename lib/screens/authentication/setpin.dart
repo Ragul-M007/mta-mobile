@@ -46,7 +46,7 @@ class _SetpinState extends State<Setpin> {
             AppUtils.savePreferences("easyAccess", "Y");
             Navigator.pushNamed(ctx, "/dashboard");
           } else {
-            print('error');
+            AppUtils.showToastError(response.message);
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
@@ -146,7 +146,7 @@ class _SetpinState extends State<Setpin> {
                       print(codeVerifyField);
                       print("${codeVerifyField.length}");
                       if (codeVerifyField.length < 4) {
-                        AppUtils.showToast("Please Enter Pin");
+                        AppUtils.showToastError("Please Enter Pin");
                       } else {
                         signin();
                       }

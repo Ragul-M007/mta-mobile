@@ -56,11 +56,13 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<DashboardRes> projects() async {
+  Future<DashboardRes> projects(id) async {
+    ArgumentError.checkNotNull(id, 'id');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio.request<Map<String, dynamic>>('/projects',
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/projects?user_id=$id',
         queryParameters: queryParameters,
         options: RequestOptions(
             method: 'GET',
@@ -220,6 +222,102 @@ class _ApiService implements ApiService {
             baseUrl: baseUrl),
         data: _data);
     final value = FetchAttendanceRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<FetchMapedCatRes> fetchCats(id) async {
+    ArgumentError.checkNotNull(id, 'id');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/categories?project_id=$id',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FetchMapedCatRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<FetchMapedUsersRes> fetchUsers(id) async {
+    ArgumentError.checkNotNull(id, 'id');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/projects/getmappedUser?project_id=$id',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = FetchMapedUsersRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<NotificationRes> notification() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/utils/getNotification',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'GET',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = NotificationRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> changePass(body) async {
+    ArgumentError.checkNotNull(body, 'body');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body?.toJson() ?? <String, dynamic>{});
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/users/changePassword',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'POST',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = ChangePassRes.fromJson(_result.data);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> editProfile(id, body) async {
+    ArgumentError.checkNotNull(id, 'id');
+    ArgumentError.checkNotNull(body, 'body');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body?.toJson() ?? <String, dynamic>{});
+    final _result = await _dio.request<Map<String, dynamic>>('/users/$id',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'PUT',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = ChangePassRes.fromJson(_result.data);
     return value;
   }
 }

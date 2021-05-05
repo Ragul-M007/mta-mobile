@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -13,9 +14,15 @@ import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:geocoder/services/base.dart';
 
 FancyDrawerController _controller;
 
+double lat = 0.00;
+double long = 0.00;
+String location = '';
 var now = DateTime.now();
 var month = now.month.toString().padLeft(2, '0');
 var day = now.day.toString().padLeft(2, '0');
@@ -58,7 +65,7 @@ class _AttendanceContentState extends State<AttendanceContent>
     with SingleTickerProviderStateMixin {
   CalendarController _calendarController;
   bool isgridView = true;
-  List<AttendanceData> _attendance;
+  List<AttendanceData> _attendance = [];
 
   void initState() {
     _controller = FancyDrawerController(
@@ -165,13 +172,13 @@ class _AttendanceContentState extends State<AttendanceContent>
                 selectedmenuvalue: 7,
                 menutitle: "News & Highlights",
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/settings", currentmenu: 8);
-                },
-                selectedmenuvalue: 8,
-                menutitle: "Settings",
-              ),
+              // menuoption(
+              //   ontab: () {
+              //     menuRedirect(routename: "/settings", currentmenu: 8);
+              //   },
+              //   selectedmenuvalue: 8,
+              //   menutitle: "Settings",
+              // ),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/login", currentmenu: 9);
@@ -195,10 +202,36 @@ class _AttendanceContentState extends State<AttendanceContent>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                             child: Row(
                               children: [
-                                Expanded(child: Container()),
+                                Icon(
+                                  Icons.pin_drop,
+                                  color: Color(0xFF0061b0),
+                                  size: 26.0,
+                                ),
+                                SizedBox(width: 5.0),
+                                Expanded(
+                                    child: Container(
+                                  child: Text(location,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87)),
+                                )),
+                                GestureDetector(
+                                  onTap: () {
+                                    getUserLocation();
+                                  },
+                                  child: Icon(
+                                    Icons.refresh,
+                                    color: Color(0xFF0061b0),
+                                    size: 26.0,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
                                 InkWell(
                                   child: Row(
                                     children: [
@@ -220,6 +253,8 @@ class _AttendanceContentState extends State<AttendanceContent>
                                   onTap: () {
                                     setState(() {
                                       isgridView = true;
+                                      getAttendance(
+                                          day + "-" + month + "-" + year);
                                     });
                                   },
                                 )
@@ -251,7 +286,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                 } else {
                                   selecetedMonth.toString();
                                 }
-                                getAttendance(editedMonth);
+                                getAttendance(editedMonth + "-" + year);
                                 setState(() {
                                   dropdownValue = newValue;
                                 });
@@ -277,10 +312,10 @@ class _AttendanceContentState extends State<AttendanceContent>
                               }).toList(),
                             ),
                           ),
-                          _attendance != null
+                          _attendance.length > 0
                               ? Expanded(
                                   child: ListView.builder(
-                                    itemCount: 1,
+                                    itemCount: _attendance.length,
                                     padding: EdgeInsets.all(5),
                                     itemBuilder:
                                         (BuildContext context, int index) {
@@ -320,7 +355,17 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                                       10.0),
                                                           child: Center(
                                                               child: Text(
-                                                            "23 Feb \n Sun",
+                                                            getDateFormat(
+                                                                    _attendance[
+                                                                            index]
+                                                                        .date,
+                                                                    1) +
+                                                                "\n" +
+                                                                getDateFormat(
+                                                                    _attendance[
+                                                                            index]
+                                                                        .date,
+                                                                    2),
                                                             style: Drawables
                                                                 .adddoccontentstyle(
                                                                     Colors
@@ -364,9 +409,10 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                             children: <
                                                                 TextSpan>[
                                                               TextSpan(
-                                                                text: _attendance[
-                                                                        0]
-                                                                    .checkTime,
+                                                                text: getTimeFormat(
+                                                                    _attendance[
+                                                                            index]
+                                                                        .checkInTime),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -390,8 +436,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                             SizedBox(
                                                                 width: 5.0),
                                                             Text(
-                                                                _attendance[0]
-                                                                    .locationName,
+                                                                _attendance[
+                                                                        index]
+                                                                    .checkInLocation,
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -417,9 +464,10 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                             children: <
                                                                 TextSpan>[
                                                               TextSpan(
-                                                                text: _attendance[
-                                                                        1]
-                                                                    .checkTime,
+                                                                text: getTimeFormat(
+                                                                    _attendance[
+                                                                            index]
+                                                                        .checkOutTime),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -441,8 +489,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                               size: 16.0,
                                                             ),
                                                             Text(
-                                                              _attendance[1]
-                                                                  .locationName,
+                                                              _attendance[index]
+                                                                  .checkOutLocation
+                                                                  .toString(),
                                                               style: Drawables
                                                                   .adddoccontentstyle(
                                                                       Colors
@@ -455,7 +504,11 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                         ),
                                                         SizedBox(height: 3.0),
                                                         Text(
-                                                          "9 Hrs",
+                                                          getHours(
+                                                              _attendance[index]
+                                                                  .checkInTime,
+                                                              _attendance[index]
+                                                                  .checkOutTime),
                                                           style: TextStyle(
                                                               color: Color(
                                                                   0xFF0061b0),
@@ -546,7 +599,33 @@ class _AttendanceContentState extends State<AttendanceContent>
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
                 child: Row(
                   children: [
-                    Expanded(child: Container()),
+                    Icon(
+                      Icons.pin_drop,
+                      color: Colors.grey,
+                      size: 26.0,
+                    ),
+                    SizedBox(width: 5.0),
+                    Expanded(
+                        child: Container(
+                      child: Text(location,
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                    )),
+                    GestureDetector(
+                      onTap: () {
+                        getUserLocation();
+                      },
+                      child: Icon(
+                        Icons.refresh,
+                        color: Colors.grey,
+                        size: 26.0,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
                     InkWell(
                       child: Row(
                         children: [
@@ -567,6 +646,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                       onTap: () {
                         setState(() {
                           isgridView = false;
+                          dropdownValue = monthMatch[int.parse(month) - 1];
+                          //getAttendance(month);
+                          getAttendance(month + "-" + year);
                         });
                       },
                     )
@@ -578,7 +660,6 @@ class _AttendanceContentState extends State<AttendanceContent>
                 child: TableCalendar(
                   rowHeight: 30,
                   calendarController: _calendarController,
-                  startDay: DateTime.now(),
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                     centerHeaderTitle: true,
@@ -592,16 +673,20 @@ class _AttendanceContentState extends State<AttendanceContent>
                     todayStyle: TextStyle(
                       color: Colors.white,
                     ),
-                    todayColor: Colors.white,
+                    todayColor: Colors.red,
                     selectedColor: Colors.white,
                     selectedStyle: TextStyle(color: Colors.black),
                     weekdayStyle: TextStyle(color: Colors.white),
-                    outsideDaysVisible: true,
+                    outsideDaysVisible: false,
                     outsideStyle: TextStyle(color: Colors.grey),
                   ),
-                  onDaySelected: (day, events, holidays) {
-                    print(day);
+                  onDaySelected: (days, events, holidays) {
+                    print(days);
                     print(events);
+                    var month1 = days.month.toString().padLeft(2, '0');
+                    var day1 = days.day.toString().padLeft(2, '0');
+                    var year1 = days.year.toString();
+                    getAttendance(day1 + "-" + month1 + "-" + year1);
                   },
                 ),
               ),
@@ -623,9 +708,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                 height: 10,
               ),
               Expanded(
-                child: _attendance != null
+                child: _attendance.length > 0
                     ? ListView.builder(
-                        itemCount: 1,
+                        itemCount: _attendance.length,
                         padding: EdgeInsets.all(5),
                         itemBuilder: (BuildContext context, int index) {
                           return new Padding(
@@ -659,7 +744,13 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   vertical: 10.0),
                                               child: Center(
                                                   child: Text(
-                                                "23 Feb \n Sun",
+                                                getDateFormat(
+                                                        _attendance[index].date,
+                                                        1) +
+                                                    "\n" +
+                                                    getDateFormat(
+                                                        _attendance[index].date,
+                                                        2),
                                                 style: Drawables
                                                     .adddoccontentstyle(
                                                         Colors.black87,
@@ -691,8 +782,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                         FontWeight.w400),
                                                 children: <TextSpan>[
                                                   TextSpan(
-                                                    text: _attendance[0]
-                                                        .checkTime,
+                                                    text: getTimeFormat(
+                                                        _attendance[index]
+                                                            .checkInTime),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -712,7 +804,8 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                 ),
                                                 SizedBox(width: 5.0),
                                                 Text(
-                                                    _attendance[1].locationName,
+                                                    _attendance[index]
+                                                        .checkInLocation,
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.grey,
@@ -732,8 +825,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                         FontWeight.w400),
                                                 children: <TextSpan>[
                                                   TextSpan(
-                                                    text: _attendance[1]
-                                                        .checkTime,
+                                                    text: getTimeFormat(
+                                                        _attendance[index]
+                                                            .checkOutTime),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -752,7 +846,14 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   size: 16.0,
                                                 ),
                                                 Text(
-                                                  _attendance[1].locationName,
+                                                  _attendance[index]
+                                                              .checkOutLocation
+                                                              .toString() !=
+                                                          "null"
+                                                      ? _attendance[index]
+                                                          .checkOutLocation
+                                                          .toString()
+                                                      : "",
                                                   style: Drawables
                                                       .adddoccontentstyle(
                                                           Colors.grey,
@@ -763,7 +864,11 @@ class _AttendanceContentState extends State<AttendanceContent>
                                             ),
                                             SizedBox(height: 3.0),
                                             Text(
-                                              "9 Hrs",
+                                              getHours(
+                                                  _attendance[index]
+                                                      .checkInTime,
+                                                  _attendance[index]
+                                                      .checkOutTime),
                                               style: TextStyle(
                                                   color: Color(0xFF0061b0),
                                                   fontWeight: FontWeight.w600),
@@ -802,17 +907,24 @@ class _AttendanceContentState extends State<AttendanceContent>
   }
 
   getAttendance(String date) {
+    getUserLocation();
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
     api.getAttendance(Strings.userID, date).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      setState(() {
-        if (response.data.length > 0) {
-          _attendance = response.data;
-        }
-      });
+      if (response.status) {
+        setState(() {
+          if (response.data.length > 0) {
+            _attendance = response.data;
+          } else {
+            _attendance = [];
+          }
+        });
+      } else {
+        AppUtils.showToastError(response.message);
+      }
     }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
@@ -823,18 +935,131 @@ class _AttendanceContentState extends State<AttendanceContent>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     AddAttendanceReq req = AddAttendanceReq();
-    req.checkTime = DateFormat().add_jm().format(DateTime.now()).toString();
+    //req.checkTime = DateFormat().add_jm().format(DateTime.now()).toString();
+    req.checkTime = DateTime.now().toString();
     req.checkType = action;
-    req.latLng = "27.2046,77.4977";
-    req.locationName = "Coimbatore";
+    req.latLng = lat.toString() + "," + long.toString();
+    req.locationName = location;
     api.addAttendance(req).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      AppUtils.showToastSuccess(response.message);
-      setState(() {});
+      if (response.status) {
+        AppUtils.showToastSuccess(response.message);
+        if (isgridView == true) {
+          getAttendance(day + "-" + month + "-" + year);
+        } else {
+          dropdownValue = monthMatch[int.parse(month) - 1];
+          getAttendance(month + "-" + year);
+        }
+        setState(() {});
+      } else {
+        AppUtils.showToastError(response.message);
+      }
     }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
     });
+  }
+
+  String getDateFormat(String date, int condition) {
+    if (date != "" && date != "null" && date != null) {
+      DateTime dateNow = DateTime.parse(date);
+      var formatedDate = DateFormat.MMMEd().format(dateNow);
+      var splitDate = formatedDate.split(",");
+      var modifiedDay = splitDate[0];
+      var splitSecond = splitDate[1].split(" ");
+      var modifiedDate = splitSecond[2];
+      var modifiedMonth = splitSecond[1];
+      if (condition == 1) {
+        return modifiedDate + " " + modifiedMonth;
+      } else {
+        return modifiedDay;
+      }
+    } else {
+      return "";
+    }
+  }
+
+  String getTimeFormat(String date) {
+    if (date != "" && date != "null" && date != null) {
+      return DateFormat().add_jm().format(DateTime.parse(date)).toString();
+    } else {
+      return "";
+    }
+  }
+
+  String getHours(String checkInTime, String checkOutTime) {
+    // var startDate = DateTime.parse(DateTime.now().toString());
+    // var endDate = DateTime.parse(DateTime.now().toString());
+    if (checkInTime != "" &&
+        checkOutTime != "" &&
+        checkInTime != "null" &&
+        checkInTime != null &&
+        checkOutTime != "null" &&
+        checkOutTime != null) {
+      DateTime startDate = DateTime.parse(checkInTime);
+      DateTime endDate = DateTime.parse(checkOutTime);
+
+      int seconds = endDate.difference(startDate).inSeconds;
+      if (seconds < 60)
+        return '${seconds.abs()} Secs';
+      else if (seconds >= 60 && seconds < 3600) {
+        String secs =
+            (seconds.abs() - startDate.difference(endDate).inMinutes.abs() * 60)
+                .toString();
+        return '${startDate.difference(endDate).inMinutes.abs()} Mins' +
+            " " +
+            '$secs Secs';
+      } else {
+        String mins = (startDate.difference(endDate).inMinutes.abs() -
+                startDate.difference(endDate).inHours.abs() * 60)
+            .toString();
+        return '${startDate.difference(endDate).inHours.abs()} Hrs' +
+            " " +
+            '$mins Mins';
+      }
+    } else {
+      return "";
+    }
+  }
+
+  getUserLocation() async {
+    await Geolocator.checkPermission().then((value) async => {
+          if (value == LocationPermission.denied)
+            {
+              {await Geolocator.requestPermission().then((value) => {})}
+            }
+          else if (value == LocationPermission.deniedForever)
+            {
+              AppUtils.showToastError(
+                  "Please enable loaction from App permission Settings")
+            }
+          else
+            {
+              await Geolocator.getCurrentPosition().then((value) => {
+                    setState(
+                      () {
+                        AppUtils.showprogress();
+                        lat = value.latitude;
+                        long = value.longitude;
+                        getGeocode(lat, long);
+                      },
+                    )
+                  })
+            }
+        });
+  }
+
+  Future<void> getGeocode(double latt, double longg) async {
+    var results = await Geocoder.local
+        .findAddressesFromCoordinates(new Coordinates(latt, longg));
+    setState(() {
+      var address = results.first;
+      location = address.addressLine;
+      // print(address.addressLine);
+      // print("${address.featureName} : ${address.addressLine}");
+      // AppUtils.showToastError(address.addressLine);
+    });
+    AppUtils.dismissprogress();
   }
 }

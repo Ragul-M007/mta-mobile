@@ -211,8 +211,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             Strings.selectedCatDocument = [];
                                             Strings.selectedCatDocument
                                                 .add(_categorydocsList[index]);
-                                            Navigator.pushNamed(
-                                                context, '/comments');
+
+                                            getUserCats();
                                           },
                                           child: Row(
                                             crossAxisAlignment:
@@ -323,8 +323,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             Strings.selectedProDocument = [];
                                             Strings.selectedProDocument
                                                 .add(_docsList[index]);
-                                            Navigator.pushNamed(
-                                                context, '/comments');
+                                            getUserCats();
                                           },
                                           child: Row(
                                             crossAxisAlignment:
@@ -398,7 +397,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
             _docsList = response.data;
           });
         } else {
-          print('error');
+          AppUtils.showToastError(response.message);
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -434,5 +433,38 @@ class _ViewDocContentState extends State<ViewDocContent> {
     } else {
       return "assets/icons/doc.png";
     }
+  }
+
+  getUserCats() {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchUsers(Strings.selectedProject[0].projectId).then((response) {
+      if (response.status) {
+        setState(() {
+          Strings.users = response.data;
+          print(Strings.users[0].userId);
+        });
+        final api = Provider.of<ApiService>(context, listen: false);
+        api.fetchCats(Strings.selectedProject[0].projectId).then((response) {
+          AppUtils.dismissprogress();
+          if (response.status) {
+            setState(() {
+              Strings.categories = response.data;
+              Navigator.pushNamed(context, '/comments');
+            });
+          } else {
+            print('error');
+          }
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
   }
 }

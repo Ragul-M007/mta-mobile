@@ -28,46 +28,38 @@ class FetchAttendanceRes {
 }
 
 class AttendanceData {
-  int id;
   int userId;
-  String checkType;
-  String checkTime;
-  String locationName;
-  String latLng;
-  String createdAt;
-  String updatedAt;
+  String date;
+  String checkInTime;
+  String checkOutTime;
+  String checkInLocation;
+  String checkOutLocation;
 
   AttendanceData(
-      {this.id,
-      this.userId,
-      this.checkType,
-      this.checkTime,
-      this.locationName,
-      this.latLng,
-      this.createdAt,
-      this.updatedAt});
+      {this.userId,
+      this.date,
+      this.checkInTime,
+      this.checkOutTime,
+      this.checkInLocation,
+      this.checkOutLocation});
 
   AttendanceData.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
     userId = json['user_id'];
-    checkType = json['checkType'];
-    checkTime = json['checkTime'];
-    locationName = json['location_name'];
-    latLng = json['latLng'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    date = json['date'];
+    checkInTime = json['check_in_time'];
+    checkOutTime = json['check_out_time'];
+    checkInLocation = json['check_in_location'];
+    checkOutLocation = json['check_out_location'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
     data['user_id'] = this.userId;
-    data['checkType'] = this.checkType;
-    data['checkTime'] = this.checkTime;
-    data['location_name'] = this.locationName;
-    data['latLng'] = this.latLng;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    data['date'] = this.date;
+    data['check_in_time'] = this.checkInTime;
+    data['check_out_time'] = this.checkOutTime;
+    data['check_in_location'] = this.checkInLocation;
+    data['check_out_location'] = this.checkOutLocation;
     return data;
   }
 }

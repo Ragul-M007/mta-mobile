@@ -2,10 +2,28 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mta/models/CommentsRes.dart';
+import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+
+List<FetchMapedUsersData> users = Strings.users;
+List<CatsData> cats = Strings.categories;
+final _userIitems = users
+    .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
+    .toList();
+final _catsItems = cats
+    .map((cats) => MultiSelectItem<CatsData>(cats, cats.categoryName))
+    .toList();
+var tagedUsers = "";
+var tagedUsersId = "";
+var tagedCats = "";
+var tagedCatsId = "";
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -350,6 +368,103 @@ class _RepliesState extends State<Replies> {
                       }))
               : SizedBox(),
           Container(
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: const Color(0xFFffffff),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 10,
+                  child: MultiSelectDialogField(
+                    items: _userIitems,
+                    title: Text("Tag Users"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.person,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Users",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    onConfirm: (results) {
+                      if (results.length > 0) {
+                        tagedUsers = "";
+                        tagedUsersId = "";
+                        results.forEach((element) {
+                          tagedUsers = tagedUsers + "," + element.name;
+                          tagedUsersId = tagedUsersId.toString() +
+                              "," +
+                              element.userId.toString();
+                        });
+                      } else {
+                        tagedUsers = "";
+                        tagedUsersId = "";
+                      }
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 10,
+                  child: MultiSelectDialogField(
+                    items: _catsItems,
+                    title: Text("Tag Categories"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.category,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Categories",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    onConfirm: (results) {
+                      if (results.length > 0) {
+                        tagedCats = "";
+                        tagedCatsId = "";
+                        results.forEach((element) {
+                          tagedCats = tagedCats + "," + element.categoryName;
+                          tagedCatsId = tagedCatsId.toString() +
+                              "," +
+                              element.categoryId.toString();
+                        });
+                      } else {
+                        tagedCats = "";
+                        tagedCatsId = "";
+                      }
+                      //_selectedAnimals = results;
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 40),
+          Container(
             width: double.infinity,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -392,28 +507,32 @@ class _RepliesState extends State<Replies> {
   }
 
   postReplies() {
-    _socket.emit(
-        'create-document-comment',
-        json.encode({
-          "comment": _msgcontroller.text,
-          "document_id": Strings.category == true
-              ? Strings.selectedCatDocument[0].documentId
-              : Strings.selectedProDocument[0].documentId,
-          'recipient_id': null,
-          'recipient': "",
-          'parent_comment_id':
-              Strings.comments[Strings.selectedCommentsIndex].commentId
-        }));
-    setState(() {
-      // if (Strings.category == true) {
-      //   Strings.selectedCatDocument[0].commentsCount =
-      //       Strings.selectedCatDocument[0].commentsCount + 1;
-      // } else {
-      //   Strings.selectedProDocument[0].commentsCount =
-      //       Strings.selectedProDocument[0].commentsCount + 1;
-      // }
-      _msgcontroller.text = '';
-    });
+    if (_msgcontroller.text.trim() == "") {
+      AppUtils.showToastError("Please Enter Reply");
+    } else {
+      _socket.emit(
+          'create-document-comment',
+          json.encode({
+            "comment": _msgcontroller.text,
+            "document_id": Strings.category == true
+                ? Strings.selectedCatDocument[0].documentId
+                : Strings.selectedProDocument[0].documentId,
+            'recipient_id': tagedUsersId,
+            'recipient': tagedUsers,
+            "category_id_list": tagedCatsId,
+            "category_list": tagedCats,
+            'parent_comment_id':
+                Strings.comments[Strings.selectedCommentsIndex].commentId
+          }));
+      setState(() {
+        tagedUsers = "";
+        tagedUsersId = "";
+        tagedCats = "";
+        tagedCatsId = "";
+        _msgcontroller.text = '';
+        _msgcontroller.text = '';
+      });
+    }
   }
 
   static String calculateTimeDifferenceBetween({@required String serverDate}) {
