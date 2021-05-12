@@ -80,6 +80,17 @@ class AppUtils {
         fontSize: 16.0);
   }
 
+  static void showToastErrorTop(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.red,
+        gravity: ToastGravity.TOP,
+        fontSize: 16.0);
+  }
+
   static void showToastSuccess(String message) {
     Fluttertoast.showToast(
         msg: message,

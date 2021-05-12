@@ -33,6 +33,7 @@ class CategoriesContent extends StatefulWidget {
 
 class _CategoriesContentState extends State<CategoriesContent> {
   List<FectchCatsData> _catsList = [];
+  String _errText = "";
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => getCategories());
@@ -47,8 +48,8 @@ class _CategoriesContentState extends State<CategoriesContent> {
           child: Row(
             children: [
               Container(
-                width: 40.0,
-                height: 40.0,
+                width: 45.0,
+                height: 45.0,
                 decoration: new BoxDecoration(
                   color: const Color(0xff7c94b6),
                   image: new DecorationImage(
@@ -75,16 +76,19 @@ class _CategoriesContentState extends State<CategoriesContent> {
                         Text(
                           Strings.selectedProject[0].projectName,
                           style: Drawables.adddoccontentstyle(
-                              Colors.black, 15.0, FontWeight.w500),
+                              Colors.black, 18.0, FontWeight.w500),
                         ),
                         SizedBox(
-                          width: 10,
+                          width: 20,
                         ),
                         Icon(
                           Icons.info_outlined,
-                          size: 15,
+                          size: 25,
                         ),
                       ],
+                    ),
+                    SizedBox(
+                      height: 7,
                     ),
                     Row(
                       children: [
@@ -119,11 +123,11 @@ class _CategoriesContentState extends State<CategoriesContent> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(20),
-            itemBuilder: (BuildContext ctx, int index) {
-              return _catsList != null
-                  ? Padding(
+          child: _catsList.length > 0
+              ? ListView.builder(
+                  padding: EdgeInsets.all(20),
+                  itemBuilder: (BuildContext ctx, int index) {
+                    return Padding(
                       padding: EdgeInsets.all(10),
                       child: GestureDetector(
                         onTap: () {
@@ -156,12 +160,29 @@ class _CategoriesContentState extends State<CategoriesContent> {
                           ),
                         ),
                       ),
-                    )
-                  : SizedBox();
-              // return Text("hi");
-            },
-            itemCount: _catsList.length,
-          ),
+                    );
+
+                    // return Text("hi");
+                  },
+                  itemCount: _catsList.length,
+                )
+              : Container(
+                  child: Padding(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _errText,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.all(20),
+                )),
         )
       ],
     );
@@ -178,7 +199,14 @@ class _CategoriesContentState extends State<CategoriesContent> {
           _catsList = response.data;
         });
       } else {
-        AppUtils.showToastError(response.message);
+        setState(() {
+          _errText = "No Categories found !";
+        });
+        if (response.message != null) {
+          AppUtils.showToastError(response.message);
+        } else {
+          AppUtils.showToastError("No Categories found !");
+        }
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();

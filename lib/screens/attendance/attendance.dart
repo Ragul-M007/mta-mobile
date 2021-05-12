@@ -65,6 +65,7 @@ class _AttendanceContentState extends State<AttendanceContent>
     with SingleTickerProviderStateMixin {
   CalendarController _calendarController;
   bool isgridView = true;
+  bool isShowCheckInOut = true;
   List<AttendanceData> _attendance = [];
 
   void initState() {
@@ -253,6 +254,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                   onTap: () {
                                     setState(() {
                                       isgridView = true;
+                                      isShowCheckInOut = true;
                                       getAttendance(
                                           day + "-" + month + "-" + year);
                                     });
@@ -435,17 +437,18 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                             ),
                                                             SizedBox(
                                                                 width: 5.0),
-                                                            Text(
-                                                                _attendance[
-                                                                        index]
-                                                                    .checkInLocation,
-                                                                style: Drawables
-                                                                    .adddoccontentstyle(
-                                                                        Colors
-                                                                            .grey,
-                                                                        12.0,
-                                                                        FontWeight
-                                                                            .w400)),
+                                                            Expanded(
+                                                              child: Text(
+                                                                  _attendance[
+                                                                          index]
+                                                                      .checkInLocation,
+                                                                  style: Drawables.adddoccontentstyle(
+                                                                      Colors
+                                                                          .grey,
+                                                                      12.0,
+                                                                      FontWeight
+                                                                          .w400)),
+                                                            ),
                                                           ],
                                                         ),
                                                         Icon(Icons.more_vert,
@@ -488,17 +491,20 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                                   0xFF0061b0),
                                                               size: 16.0,
                                                             ),
-                                                            Text(
-                                                              _attendance[index]
-                                                                  .checkOutLocation
-                                                                  .toString(),
-                                                              style: Drawables
-                                                                  .adddoccontentstyle(
-                                                                      Colors
-                                                                          .grey,
-                                                                      12.0,
-                                                                      FontWeight
-                                                                          .w400),
+                                                            Expanded(
+                                                              child: Text(
+                                                                _attendance[
+                                                                        index]
+                                                                    .checkOutLocation
+                                                                    .toString(),
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        Colors
+                                                                            .grey,
+                                                                        12.0,
+                                                                        FontWeight
+                                                                            .w400),
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
@@ -527,7 +533,6 @@ class _AttendanceContentState extends State<AttendanceContent>
                                   ),
                                 )
                               : SizedBox(),
-                          bottombutton()
                         ],
                       ),
                     ),
@@ -545,7 +550,13 @@ class _AttendanceContentState extends State<AttendanceContent>
           Expanded(
               child: GestureDetector(
             onTap: () {
-              checkInOut("IN");
+              // checkInOut("IN");
+              if (location == '' || location == null) {
+                AppUtils.showToastErrorTop(
+                    "Unable to find your location, Please tap refersh icon to get your location");
+              } else {
+                _onWillPop("IN");
+              }
             },
             child: Container(
               child: Center(
@@ -564,7 +575,13 @@ class _AttendanceContentState extends State<AttendanceContent>
           Expanded(
               child: GestureDetector(
             onTap: () {
-              checkInOut("OUT");
+              //checkInOut("OUT");
+              if (location == '' || location == null) {
+                AppUtils.showToastErrorTop(
+                    "Unable to find your location, Please tap refersh icon to get your location");
+              } else {
+                _onWillPop("OUT");
+              }
             },
             child: Container(
               child: Center(
@@ -646,6 +663,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                       onTap: () {
                         setState(() {
                           isgridView = false;
+                          isShowCheckInOut = false;
                           dropdownValue = monthMatch[int.parse(month) - 1];
                           //getAttendance(month);
                           getAttendance(month + "-" + year);
@@ -681,12 +699,17 @@ class _AttendanceContentState extends State<AttendanceContent>
                     outsideStyle: TextStyle(color: Colors.grey),
                   ),
                   onDaySelected: (days, events, holidays) {
-                    print(days);
-                    print(events);
                     var month1 = days.month.toString().padLeft(2, '0');
                     var day1 = days.day.toString().padLeft(2, '0');
                     var year1 = days.year.toString();
                     getAttendance(day1 + "-" + month1 + "-" + year1);
+
+                    if ((day1 + "-" + month1 + "-" + year1) ==
+                        (day + "-" + month + "-" + year)) {
+                      isShowCheckInOut = true;
+                    } else {
+                      isShowCheckInOut = false;
+                    }
                   },
                 ),
               ),
@@ -803,14 +826,16 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   size: 16.0,
                                                 ),
                                                 SizedBox(width: 5.0),
-                                                Text(
-                                                    _attendance[index]
-                                                        .checkInLocation,
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w400)),
+                                                Expanded(
+                                                  child: Text(
+                                                      _attendance[index]
+                                                          .checkInLocation,
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.grey,
+                                                              12.0,
+                                                              FontWeight.w400)),
+                                                ),
                                               ],
                                             ),
                                             Icon(Icons.more_vert,
@@ -845,20 +870,22 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   color: Color(0xFF0061b0),
                                                   size: 16.0,
                                                 ),
-                                                Text(
-                                                  _attendance[index]
-                                                              .checkOutLocation
-                                                              .toString() !=
-                                                          "null"
-                                                      ? _attendance[index]
-                                                          .checkOutLocation
-                                                          .toString()
-                                                      : "",
-                                                  style: Drawables
-                                                      .adddoccontentstyle(
-                                                          Colors.grey,
-                                                          12.0,
-                                                          FontWeight.w400),
+                                                Expanded(
+                                                  child: Text(
+                                                    _attendance[index]
+                                                                .checkOutLocation
+                                                                .toString() !=
+                                                            "null"
+                                                        ? _attendance[index]
+                                                            .checkOutLocation
+                                                            .toString()
+                                                        : "",
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w400),
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -886,7 +913,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                         height: MediaQuery.of(context).size.height * 0.95,
                       ),
               ),
-              bottombutton(),
+              isShowCheckInOut == true ? bottombutton() : SizedBox()
             ],
           ),
         ),
@@ -899,8 +926,9 @@ class _AttendanceContentState extends State<AttendanceContent>
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
-      Navigator.popAndPushNamed(context, routename);
+      //AppUtils.clearAllPreferences();
+      Navigator.popAndPushNamed(context, "/verifypin");
+      // Navigator.popAndPushNamed(context, routename);
     } else {
       Navigator.pushNamed(context, routename);
     }
@@ -929,6 +957,54 @@ class _AttendanceContentState extends State<AttendanceContent>
       AppUtils.dismissprogress();
       print(onError.toString());
     });
+  }
+
+  Future<bool> _onWillPop(action) async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              action == "IN"
+                  ? 'Your Check IN location is  \n' + '" ' + location + ' "'
+                  : 'Your Check OUT location is  \n' + '" ' + location + ' "',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ({checkInOut(action), Navigator.of(context).pop(false)}),
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
   }
 
   checkInOut(action) {

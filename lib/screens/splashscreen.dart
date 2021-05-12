@@ -8,6 +8,8 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';
 import 'package:mta/utilities/strings.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+
 class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,7 @@ class SplashScreen extends StatelessWidget {
         ),
         initialRoute: '/',
         onGenerateRoute: RoutesGenerator.generateRoute,
+        navigatorKey: navigatorKey,
         builder: EasyLoading.init(),
         home: SplashScreenContent());
   }

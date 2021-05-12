@@ -32,8 +32,11 @@ class _DashboardState extends State<Dashboard>
 
   List<Data> _projectLists = [];
   List<Data> _searchLists = [];
+  FocusNode searchField = new FocusNode();
   String filepath;
   var dio = Dio();
+
+  String _errText = "";
   void initState() {
     super.initState();
     _controller = FancyDrawerController(
@@ -61,15 +64,19 @@ class _DashboardState extends State<Dashboard>
 
     api.projects(Strings.userID).then((response) {
       AppUtils.dismissprogress();
-      //print('projectResponse status ${response.toJson()}');
-
       if (response.status) {
-        // Navigator.pushNamed(ctx, "/dashboard");
         setState(() {
           _projectLists = response.data;
         });
       } else {
-        AppUtils.showToastError(response.message);
+        setState(() {
+          _errText = "No Projects found !";
+        });
+        if (response.message != null) {
+          AppUtils.showToastError(response.message);
+        } else {
+          AppUtils.showToastError("No Projects found !");
+        }
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -78,421 +85,548 @@ class _DashboardState extends State<Dashboard>
     });
   }
 
-  Widget build(BuildContext context) {
-    return Provider<ApiService>(
-      create: (context) => ApiService.create(),
-      child: Container(
-        decoration:
-            Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
-        child: FancyDrawerWrapper(
-            backgroundColor: Colors.transparent,
-            controller: _controller,
-            drawerItems: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: 30),
-                margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                child: Row(
-                  children: [
-                    new Container(
-                        width: 60.0,
-                        height: 60.0,
-                        decoration: Drawables.menudecorationImage(
-                            "assets/images/logo.jpeg", 50.0)),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "MTA Architects",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
-                    )
-                  ],
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/dashboard", currentmenu: 1);
-                },
-                selectedmenuvalue: 1,
-                menutitle: "Projects",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/attendance", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Attendance",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/profile", currentmenu: 3);
-                },
-                selectedmenuvalue: 3,
-                menutitle: "Profile",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/notification", currentmenu: 4);
-                },
-                selectedmenuvalue: 4,
-                menutitle: "Notification",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/contactus", currentmenu: 5);
-                },
-                selectedmenuvalue: 5,
-                menutitle: "Contact Us",
-              ),
-              // menuoption(
-              //   ontab: () {
-              //     menuRedirect(routename: "/privacypolicy", currentmenu: 6);
-              //   },
-              //   selectedmenuvalue: 6,
-              //   menutitle: "Privacy Policy",
-              // ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/newshighlights", currentmenu: 7);
-                },
-                selectedmenuvalue: 7,
-                menutitle: "News & Highlights",
-              ),
-              // menuoption(
-              //   ontab: () {
-              //     menuRedirect(routename: "/settings", currentmenu: 8);
-              //   },
-              //   selectedmenuvalue: 8,
-              //   menutitle: "Settings",
-              // ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                },
-                selectedmenuvalue: 9,
-                menutitle: "Logout",
+              TextButton(
+                onPressed: () => exit(0),
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
               ),
             ],
-            child: Scaffold(
-                backgroundColor: const Color(0xFFececed),
-                appBar: AppBar(
-                  backgroundColor: Colors.white,
-                  actions: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
-                        child: GestureDetector(
-                          onTap: () {
-                            _showMyDialog(context,
-                                Strings.baseImageUrl + Strings.profilePic);
-                          },
-                          child: image(
-                              Strings.baseImageUrl + Strings.profilePic,
-                              40.0,
-                              40.0),
-                        ))
-                  ],
-                  bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(kToolbarHeight),
-                      child: Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Container(
-                          //  padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: const Color(0xFFeceeef),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Material(
-                              color: const Color(0xFFeceeef),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: TextField(
-                                      decoration: InputDecoration.collapsed(
-                                        hintText: ' Search',
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isEmpty) {
-                                          setState(() {
-                                            _searchLists = [];
-                                          });
-                                          return;
-                                        }
-                                        _searchLists = [];
-                                        _projectLists.forEach((projectDetail) {
-                                          if (projectDetail.projectName
-                                              .contains(value))
-                                            _searchLists.add(projectDetail);
-                                        });
+          ),
+        )) ??
+        false;
+  }
 
-                                        setState(() {});
-                                      },
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        _onWillPop();
+      },
+      child: Provider<ApiService>(
+        create: (context) => ApiService.create(),
+        child: Container(
+          decoration:
+              Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
+          child: FancyDrawerWrapper(
+              backgroundColor: Colors.transparent,
+              controller: _controller,
+              drawerItems: <Widget>[
+                Container(
+                  padding: EdgeInsets.only(bottom: 30),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  child: Row(
+                    children: [
+                      new Container(
+                          width: 60.0,
+                          height: 60.0,
+                          decoration: Drawables.menudecorationImage(
+                              "assets/images/logo.jpeg", 50.0)),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "MTA Architects",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                      )
+                    ],
+                  ),
+                ),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/dashboard", currentmenu: 1);
+                  },
+                  selectedmenuvalue: 1,
+                  menutitle: "Projects",
+                ),
+                Strings.roleId != 1
+                    ? menuoption(
+                        ontab: () {
+                          menuRedirect(
+                              routename: "/attendance", currentmenu: 2);
+                        },
+                        selectedmenuvalue: 2,
+                        menutitle: "Attendance",
+                      )
+                    : SizedBox(),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/profile", currentmenu: 3);
+                  },
+                  selectedmenuvalue: 3,
+                  menutitle: "Profile",
+                ),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/notification", currentmenu: 4);
+                  },
+                  selectedmenuvalue: 4,
+                  menutitle: "Notification",
+                ),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/contactus", currentmenu: 5);
+                  },
+                  selectedmenuvalue: 5,
+                  menutitle: "Contact Us",
+                ),
+                // menuoption(
+                //   ontab: () {
+                //     menuRedirect(routename: "/privacypolicy", currentmenu: 6);
+                //   },
+                //   selectedmenuvalue: 6,
+                //   menutitle: "Privacy Policy",
+                // ),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/newshighlights", currentmenu: 7);
+                  },
+                  selectedmenuvalue: 7,
+                  menutitle: "News & Highlights",
+                ),
+                // menuoption(
+                //   ontab: () {
+                //     menuRedirect(routename: "/settings", currentmenu: 8);
+                //   },
+                //   selectedmenuvalue: 8,
+                //   menutitle: "Settings",
+                // ),
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/login", currentmenu: 9);
+                  },
+                  selectedmenuvalue: 9,
+                  menutitle: "Logout",
+                ),
+              ],
+              child: Scaffold(
+                  backgroundColor: const Color(0xFFececed),
+                  appBar: AppBar(
+                    backgroundColor: Colors.white,
+                    actions: [
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
+                          child: GestureDetector(
+                            onTap: () {
+                              _showMyDialog(
+                                  context,
+                                  Strings.baseImageUrl + Strings.profilePic,
+                                  Strings.username);
+                            },
+                            child: image(
+                                Strings.baseImageUrl + Strings.profilePic,
+                                40.0,
+                                40.0),
+                          ))
+                    ],
+                    bottom: PreferredSize(
+                        preferredSize: Size.fromHeight(kToolbarHeight),
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Container(
+                            //  padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
+                              color: const Color(0xFFeceeef),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Material(
+                                color: const Color(0xFFeceeef),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: TextField(
+                                        focusNode: searchField,
+                                        decoration: InputDecoration.collapsed(
+                                          hintText: ' Search',
+                                        ),
+                                        onChanged: (value) {
+                                          if (value.isEmpty) {
+                                            setState(() {
+                                              _searchLists = [];
+                                            });
+                                            return;
+                                          }
+                                          _searchLists = [];
+                                          _projectLists
+                                              .forEach((projectDetail) {
+                                            if (projectDetail.projectName
+                                                .toLowerCase()
+                                                .contains(value.toLowerCase()))
+                                              _searchLists.add(projectDetail);
+                                          });
+
+                                          setState(() {});
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  InkWell(
-                                    child: Icon(
-                                      Icons.search,
-                                      color: Colors.black,
-                                    ),
-                                    onTap: () {},
-                                  )
-                                ],
+                                    InkWell(
+                                      child: Icon(
+                                        Icons.search,
+                                        color: Colors.black,
+                                      ),
+                                      onTap: () {},
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
+                        )),
+                    leading: SizedBox(
+                      height: 25.0,
+                      width: 25.0,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.menu,
+                          size: 25.0,
+                          color: const Color(0xFF979797),
                         ),
-                      )),
-                  leading: SizedBox(
-                    height: 25.0,
-                    width: 25.0,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        size: 25.0,
-                        color: const Color(0xFF979797),
+                        onPressed: () {
+                          searchField.unfocus();
+                          _controller.toggle();
+                        },
                       ),
-                      onPressed: () {
-                        _controller.toggle();
-                      },
                     ),
                   ),
-                ),
-                body: Builder(builder: (BuildContext newContext) {
-                  ctx = newContext;
-                  return _projectLists != null
-                      ? Padding(
-                          padding: EdgeInsets.all(20),
-                          child: _searchLists.length != 0
-                              ? GridView.builder(
-                                  itemCount: _searchLists.length,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2),
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return new Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: new GridTile(
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          child: Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 10, 10, 0),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      _downloadfile(
-                                                          _projectLists[index]
-                                                              .projectImg);
-                                                    },
-                                                    child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 10),
-                                                      child: image(
-                                                          Strings.baseImageUrl +
-                                                              _searchLists[
+                  body: Builder(builder: (BuildContext newContext) {
+                    ctx = newContext;
+                    return _projectLists.length > 0
+                        ? Padding(
+                            padding: EdgeInsets.all(20),
+                            child: _searchLists.length != 0
+                                ? GridView.builder(
+                                    itemCount: _searchLists.length,
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2),
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          onTapProject(_searchLists[index]);
+                                        },
+                                        child: new Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: new GridTile(
+                                            child: Container(
+                                              height: 50,
+                                              width: 50,
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 10, 10, 0),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          _downloadfile(
+                                                              _projectLists[
                                                                       index]
                                                                   .projectImg,
-                                                          65.0,
-                                                          65.0),
-                                                    ),
-                                                  ),
-                                                  Container()
-                                                ],
-                                              )),
-                                        ),
-                                        footer: GestureDetector(
-                                          onTap: () {
-                                            onTapProject(_searchLists[index]);
-                                          },
-                                          child: Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 10, 0, 20),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 5),
-                                                    child: Text(
-                                                      _searchLists[index]
-                                                          .projectName,
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  Row(
+                                                              _projectLists[
+                                                                      index]
+                                                                  .projectName,
+                                                              _projectLists[
+                                                                      index]
+                                                                  .description,
+                                                              _projectLists[
+                                                                      index]
+                                                                  .status);
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 10),
+                                                          child: image(
+                                                              Strings.baseImageUrl +
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .projectImg,
+                                                              65.0,
+                                                              65.0),
+                                                        ),
+                                                      ),
+                                                      Container()
+                                                    ],
+                                                  )),
+                                            ),
+                                            footer: GestureDetector(
+                                              onTap: () {
+                                                onTapProject(
+                                                    _searchLists[index]);
+                                              },
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 10, 0, 20),
+                                                  child: Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
-                                                      Icon(Icons.pin_drop,
-                                                          color: Color(
-                                                              0xFF0061b0)),
-                                                      SizedBox(width: 5),
-                                                      Expanded(
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5),
                                                         child: Text(
                                                           _searchLists[index]
-                                                                  .address +
-                                                              ' , ' +
-                                                              _searchLists[
-                                                                      index]
-                                                                  .city,
-                                                          overflow:
-                                                              TextOverflow.clip,
+                                                              .projectName,
                                                           style: TextStyle(
-                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.black,
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.grey),
+                                                                      .bold),
                                                         ),
                                                       ),
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Icon(Icons.pin_drop,
+                                                              color: Color(
+                                                                  0xFF0061b0)),
+                                                          SizedBox(width: 5),
+                                                          Expanded(
+                                                            child: Text(
+                                                              _searchLists[
+                                                                          index]
+                                                                      .address +
+                                                                  ' , ' +
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .city,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .clip,
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
                                                     ],
-                                                  )
-                                                ],
-                                              )),
+                                                  )),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : GridView.builder(
-                                  itemCount: _projectLists.length,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2),
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return new Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: new GridTile(
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          child: Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 10, 10, 10),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      _downloadfile(
-                                                          _projectLists[index]
-                                                              .projectImg);
-                                                    },
-                                                    child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 10),
-                                                      child: image(
-                                                          Strings.baseImageUrl +
+                                      );
+                                    },
+                                  )
+                                : GridView.builder(
+                                    itemCount: _projectLists.length,
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2),
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          onTapProject(_projectLists[index]);
+                                        },
+                                        child: new Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: new GridTile(
+                                            child: Container(
+                                              height: 50,
+                                              width: 50,
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 10, 10, 10),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          _downloadfile(
                                                               _projectLists[
                                                                       index]
                                                                   .projectImg,
-                                                          65.0,
-                                                          65.0),
-                                                    ),
-                                                  ),
-                                                  Container()
-                                                ],
-                                              )),
-                                        ),
-                                        footer: GestureDetector(
-                                          onTap: () {
-                                            onTapProject(_projectLists[index]);
-                                          },
-                                          child: Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  10, 0, 0, 20),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 5),
-                                                    child: Text(
-                                                      _projectLists[index]
-                                                          .projectName,
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: [
-                                                      Container(
-                                                        width: 20.0,
-                                                        height: 20.0,
-                                                        decoration:
-                                                            new BoxDecoration(
-                                                          image:
-                                                              new DecorationImage(
-                                                            image: new AssetImage(
-                                                                "assets/icons/pin.png"),
-                                                            fit: BoxFit.fill,
-                                                          ),
-                                                          borderRadius:
-                                                              new BorderRadius
-                                                                  .all(new Radius
-                                                                      .circular(
-                                                                  50.0)),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 5),
-                                                      Expanded(
-                                                        child: Text(
-                                                          _projectLists[index]
-                                                                  .address +
-                                                              ' , ' +
                                                               _projectLists[
                                                                       index]
-                                                                  .city,
-                                                          overflow:
-                                                              TextOverflow.clip,
-                                                          style: TextStyle(
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.grey),
+                                                                  .projectName,
+                                                              _projectLists[
+                                                                      index]
+                                                                  .description,
+                                                              _projectLists[
+                                                                      index]
+                                                                  .status);
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 10),
+                                                          child: image(
+                                                              Strings.baseImageUrl +
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .projectImg,
+                                                              65.0,
+                                                              65.0),
                                                         ),
                                                       ),
+                                                      Container()
                                                     ],
-                                                  )
-                                                ],
-                                              )),
+                                                  )),
+                                            ),
+                                            footer: GestureDetector(
+                                              onTap: () {
+                                                onTapProject(
+                                                    _projectLists[index]);
+                                              },
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 0, 0, 20),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5),
+                                                        child: Text(
+                                                          _projectLists[index]
+                                                              .projectName,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          Container(
+                                                            width: 20.0,
+                                                            height: 20.0,
+                                                            decoration:
+                                                                new BoxDecoration(
+                                                              image:
+                                                                  new DecorationImage(
+                                                                image: new AssetImage(
+                                                                    "assets/icons/pin.png"),
+                                                                fit:
+                                                                    BoxFit.fill,
+                                                              ),
+                                                              borderRadius:
+                                                                  new BorderRadius
+                                                                      .all(new Radius
+                                                                          .circular(
+                                                                      50.0)),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Expanded(
+                                                            child: Text(
+                                                              _projectLists[
+                                                                          index]
+                                                                      .address +
+                                                                  ' , ' +
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .city,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .clip,
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  )),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                        )
-                      : SizedBox();
-                }))),
+                                      );
+                                    },
+                                  ),
+                          )
+                        : Container(
+                            height: MediaQuery.of(context).size.height * .75,
+                            child: Padding(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _errText,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            ));
+                  }))),
+        ),
       ),
     );
   }
@@ -508,9 +642,9 @@ class _DashboardState extends State<Dashboard>
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
+      //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
-      Navigator.popAndPushNamed(context, routename);
+      Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);
       Navigator.pushNamed(context, routename);
@@ -542,11 +676,89 @@ class _DashboardState extends State<Dashboard>
     // await PermissionHandler().requestPermissions([PermissionGroup.storage]);
   }
 
-  void _downloadfile(serverURL) async {
-    _showMyDialog(context, Strings.baseImageUrl + serverURL);
+  void _downloadfile(serverURL, title, desc, status) async {
+    _showMyDialogProject(
+        context, Strings.baseImageUrl + serverURL, title, desc, status);
   }
 
-  Future<void> _showMyDialog(context, imgurl) async {
+  Future<void> _showMyDialogProject(
+      context, imgurl, title, desc, status) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        new Icon(Icons.close, size: 22.0, color: Colors.black)
+                      ]),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        title,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        "Status : " + status,
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: new BoxDecoration(
+                            color: const Color(0xff7c94b6),
+                            image: new DecorationImage(
+                              image: new NetworkImage(imgurl),
+                              fit: BoxFit.fill,
+                            ),
+                            borderRadius:
+                                new BorderRadius.all(new Radius.circular(5.0)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        "Description : " + desc,
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showMyDialog(context, imgurl, title) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -564,6 +776,23 @@ class _DashboardState extends State<Dashboard>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       new Icon(Icons.close, size: 22.0, color: Colors.black),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Color(0xFF0061b0),
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                     ],
                   ),
                   decoration: new BoxDecoration(

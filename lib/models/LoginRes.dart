@@ -33,6 +33,7 @@ class LoginResData {
   String mobileNo;
   String userImg;
   String role;
+  int roleId;
 
   LoginResData(
       {this.name,
@@ -40,7 +41,8 @@ class LoginResData {
       this.emailId,
       this.mobileNo,
       this.userImg,
-      this.role});
+      this.role,
+      this.roleId});
 
   LoginResData.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -49,6 +51,7 @@ class LoginResData {
     mobileNo = json['mobile_no'];
     userImg = json['user_img'];
     role = json['role'];
+    roleId = json['role_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -59,6 +62,7 @@ class LoginResData {
     data['mobile_no'] = this.mobileNo;
     data['user_img'] = this.userImg;
     data['role'] = this.role;
+    data['role_id'] = this.roleId;
     return data;
   }
 }

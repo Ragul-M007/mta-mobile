@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:mta/models/ChangePassReq.dart';
+import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
+import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
@@ -11,6 +15,25 @@ import 'package:mta/models/NewsRes.dart';
 import '../splashscreen.dart';
 
 bool isVerifyScreen = false;
+String codeVerifyField;
+String verificationCode;
+String emailIdforVerification = '';
+
+FocusNode one = new FocusNode();
+FocusNode two = new FocusNode();
+FocusNode three = new FocusNode();
+FocusNode four = new FocusNode();
+FocusNode five = new FocusNode();
+
+final oneT = TextEditingController();
+final twoT = TextEditingController();
+final threeT = TextEditingController();
+final fourT = TextEditingController();
+final fiveT = TextEditingController();
+final changePassConfirm = TextEditingController();
+final changePassNew = TextEditingController();
+
+final forgotPassEmailID = TextEditingController();
 
 class Login extends StatefulWidget {
   static const String routeName = "/login";
@@ -25,15 +48,65 @@ class _LoginState extends State<Login> {
     // return Container(child: LoginContent());
 
     return Scaffold(
-      appBar: EmptyAppBar(),
-      body: GestureDetector(
+        appBar: EmptyAppBar(),
+        body: GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
           },
-          child: Provider<ApiService>(
-              create: (context) => ApiService.create(), child: LoginContent())),
-    );
+          child: WillPopScope(
+              onWillPop: () async {
+                _onWillPop();
+              },
+              child: Provider<ApiService>(
+                  create: (context) => ApiService.create(),
+                  child: LoginContent())),
+        ));
     // child: Scaffold(appBar: EmptyAppBar(), body: LoginContent())));
+  }
+
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
   }
 }
 
@@ -61,6 +134,8 @@ class _LoginContentState extends State<LoginContent>
     setState(() {
       _emailIdController.text = "";
       _passwordController.text = "";
+      // _emailIdController.text = "superadmin@mta.com";
+      // _passwordController.text = "test12";
     });
   }
 
@@ -73,11 +148,11 @@ class _LoginContentState extends State<LoginContent>
   _login() async {
     FocusScope.of(context).unfocus();
     if (_emailIdController.text.isEmpty) {
-      AppUtils.showToastError("Please Enter Your Email Id");
+      AppUtils.showToastErrorTop("Please Enter Your Email Id");
     } else if (_passwordController.text.isEmpty) {
-      AppUtils.showToastError("Please enter Your Password");
+      AppUtils.showToastErrorTop("Please enter Your Password");
     } else if (_passwordController.text.trim() == "") {
-      AppUtils.showToastError("Please enter Your Password");
+      AppUtils.showToastErrorTop("Please enter Your Password");
     } else {
       bool network = await Validators.networkconnectvitiy();
       if (network) {
@@ -93,6 +168,7 @@ class _LoginContentState extends State<LoginContent>
     loginreq.email = _emailIdController.text;
     loginreq.password = _passwordController.text;
     loginreq.token = Strings.fcmToken;
+    Strings.authToken = '';
     api.login(loginreq).then((response) {
       AppUtils.dismissprogress();
       print('loginResponse status ${response.toJson()}');
@@ -103,10 +179,12 @@ class _LoginContentState extends State<LoginContent>
         AppUtils.savePreferences("profilePic", response.data.userImg);
         Strings.profilePic = response.data.userImg;
         Strings.userID = response.data.userId;
+        Strings.username = response.data.name;
+        Strings.roleId = response.data.roleId;
         Strings.authToken = response.token;
         Navigator.pushNamed(context, "/setpin");
       } else {
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastErrorTop(response.message);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -116,165 +194,186 @@ class _LoginContentState extends State<LoginContent>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        key: scaffoldKey,
-        child: Stack(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height * .25,
-              decoration: new BoxDecoration(
-                color: Colors.white,
-                image: new DecorationImage(
-                  image: new AssetImage("assets/images/background1.png"),
-                  fit: BoxFit.fill,
+    return SingleChildScrollView(
+      child: SafeArea(
+          key: scaffoldKey,
+          child: Stack(
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * .25,
+                decoration: new BoxDecoration(
+                  color: Colors.white,
+                  image: new DecorationImage(
+                    image: new AssetImage("assets/images/background1.png"),
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ),
-            ),
-            Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                margin: EdgeInsets.fromLTRB(
-                    20, MediaQuery.of(context).size.height * 15 / 100, 20, 0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFcccccc),
-                        offset: const Offset(
-                          -2.0,
-                          6.0,
-                        ),
-                        blurRadius: 20.0,
-                        spreadRadius: 10.0,
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(20)),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Login",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                            child: Text(
-                              "Email Id",
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600),
+              Container(
+                  height: MediaQuery.of(context).size.height * 0.44,
+                  margin: EdgeInsets.fromLTRB(
+                      20, MediaQuery.of(context).size.height * 12 / 100, 20, 0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFcccccc),
+                          offset: const Offset(
+                            -2.0,
+                            6.0,
+                          ),
+                          blurRadius: 20.0,
+                          spreadRadius: 10.0,
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(20)),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "Login",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                              child: Text(
+                                "Email Id",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          child: TextField(
-                            controller: _emailIdController,
-                            decoration: InputDecoration(
-                                hintText: "Email ID",
-                                contentPadding: EdgeInsets.all(10),
-                                hintStyle: TextStyle(
-                                    fontSize: 14.0, color: Colors.black),
-                                // border: OutlineInputBorder(),
-                                border: InputBorder.none),
-                            keyboardType: TextInputType.emailAddress,
+                          SizedBox(
+                            height: 5,
                           ),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFf2f3f4),
-                              border:
-                                  Border.all(color: const Color(0xFFf2f3f4)),
-                              borderRadius: BorderRadius.circular(25)),
-                        ),
-                        SizedBox(height: 5.0),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                            child: Text(
-                              "Password",
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          child: TextField(
-                              controller: _passwordController,
+                          Container(
+                            child: TextField(
+                              controller: _emailIdController,
                               decoration: InputDecoration(
-                                  hintText: "Password",
+                                  hintText: "Email ID",
                                   contentPadding: EdgeInsets.all(10),
                                   hintStyle: TextStyle(
                                       fontSize: 14.0, color: Colors.black),
                                   // border: OutlineInputBorder(),
                                   border: InputBorder.none),
-                              keyboardType: TextInputType.visiblePassword,
-                              obscureText: true),
-                          decoration: BoxDecoration(
-                              color: const Color(0xFFf2f3f4),
-                              border:
-                                  Border.all(color: const Color(0xFFf2f3f4)),
-                              borderRadius: BorderRadius.circular(25)),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            _login();
-                          },
-                          child: Container(
-                            child: Center(
-                                child: Text(
-                              "LOGIN",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  color: Colors.white),
-                              textAlign: TextAlign.center,
-                            )),
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            height: 40,
-                            margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                              keyboardType: TextInputType.emailAddress,
+                            ),
                             decoration: BoxDecoration(
-                                color: Color(0xFF0061b0),
+                                color: const Color(0xFFf2f3f4),
+                                border:
+                                    Border.all(color: const Color(0xFFf2f3f4)),
                                 borderRadius: BorderRadius.circular(25)),
                           ),
-                        )
-                      ],
+                          SizedBox(height: 5.0),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                              child: Text(
+                                "Password",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Container(
+                            child: TextField(
+                                controller: _passwordController,
+                                decoration: InputDecoration(
+                                    hintText: "Password",
+                                    contentPadding: EdgeInsets.all(10),
+                                    hintStyle: TextStyle(
+                                        fontSize: 14.0, color: Colors.black),
+                                    // border: OutlineInputBorder(),
+                                    border: InputBorder.none),
+                                keyboardType: TextInputType.visiblePassword,
+                                obscureText: true),
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFf2f3f4),
+                                border:
+                                    Border.all(color: const Color(0xFFf2f3f4)),
+                                borderRadius: BorderRadius.circular(25)),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _login();
+                            },
+                            child: Container(
+                              child: Center(
+                                  child: Text(
+                                "LOGIN",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: Colors.white),
+                                textAlign: TextAlign.center,
+                              )),
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              height: 40,
+                              margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                              decoration: BoxDecoration(
+                                  color: Color(0xFF0061b0),
+                                  borderRadius: BorderRadius.circular(25)),
+                            ),
+                          ),
+                          SizedBox(height: 10.0),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _forgotPass();
+                                },
+                                child: Text(
+                                  "Forgot Password ?",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.4,
-              margin: EdgeInsets.fromLTRB(
-                  0, MediaQuery.of(context).size.height * 0.6, 0, 0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
-              child: tabbarwidget(),
-            )
-          ],
-        ));
+                  )),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                margin: EdgeInsets.fromLTRB(
+                    0, MediaQuery.of(context).size.height * 0.6, 0, 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: tabbarwidget(),
+              )
+            ],
+          )),
+    );
   }
 
   Widget tabbarwidget() {
@@ -380,6 +479,18 @@ class _LoginContentState extends State<LoginContent>
                                       SizedBox(
                                         height: 10,
                                       ),
+                                      Text(
+                                        _newsLists[index].description,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
                                       Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
@@ -470,6 +581,18 @@ class _LoginContentState extends State<LoginContent>
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        _newsLists[index].description,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
                                       ),
                                       SizedBox(
                                         height: 10,
@@ -565,50 +688,39 @@ class _LoginContentState extends State<LoginContent>
                     Navigator.of(context).pop();
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    child: GridView.count(
-                      primary: false,
-                      crossAxisCount: 1,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  new Icon(Icons.close,
-                                      size: 22.0, color: Colors.black),
-                                ]),
-                            Container(
-                              child: image(imgurl, 100.0, 100.0),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Color(0xFF0061b0),
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                desc,
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
-                              // ,
-                            ],
-                          ),
+                              new Icon(Icons.close,
+                                  size: 22.0, color: Colors.black),
+                            ]),
+                        Container(
+                          child: image(imgurl, 100.0, 100.0),
                         ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          title,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0061b0),
+                              fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          desc,
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                        // ,
                       ],
                     ),
                   ))),
@@ -630,5 +742,428 @@ class _LoginContentState extends State<LoginContent>
         borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
       ),
     );
+  }
+
+  Future<void> _otpVerify() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext contextResetPin) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(contextResetPin).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(contextResetPin).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "OTP verification",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Enter 5 digit verification code that has been sent to your registered Email",
+                      style: TextStyle(color: const Color(0xFF9e9e9e)),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    _boxBuilder(contextResetPin),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        codeVerifyField = oneT.text +
+                            twoT.text +
+                            threeT.text +
+                            fourT.text +
+                            fiveT.text;
+
+                        if (codeVerifyField.length < 5) {
+                          AppUtils.showToastError("Please Enter code");
+                        } else {
+                          otpVerifyCall(contextResetPin);
+                        }
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "VERIFY",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(contextResetPin).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _boxBuilder(contextResetPin) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _box(1, contextResetPin),
+        _box(2, contextResetPin),
+        _box(3, contextResetPin),
+        _box(4, contextResetPin),
+        _box(5, contextResetPin),
+      ],
+    );
+  }
+
+  Widget _box(val, contextResetPin) {
+    return Padding(
+      padding: EdgeInsets.all(1),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 3),
+        alignment: Alignment.center,
+        height: 50,
+        width: 40,
+        child: TextField(
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          autofocus: true,
+          controller: val == 1
+              ? oneT
+              : val == 2
+                  ? twoT
+                  : val == 3
+                      ? threeT
+                      : val == 4
+                          ? fourT
+                          : fiveT,
+          focusNode: val == 1
+              ? one
+              : val == 2
+                  ? two
+                  : val == 3
+                      ? three
+                      : val == 4
+                          ? four
+                          : five,
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.all(10), counterText: ''),
+          textAlign: TextAlign.center,
+          onChanged: (value) {
+            print(value);
+            if (value == '') {
+              print("null");
+            } else {
+              FocusScope.of(contextResetPin).requestFocus(
+                val == 1
+                    ? two
+                    : val == 2
+                        ? three
+                        : val == 3
+                            ? four
+                            : val == 4
+                                ? five
+                                : null,
+              );
+              print("not null");
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _changePass() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext ctxd) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(ctxd).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(ctxd).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "Set Password",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      "New Password",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: changePassNew,
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.vpn_key,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Confirm Password",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: changePassConfirm,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.vpn_key,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setNewPass(ctxd);
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "SAVE",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(ctxd).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _forgotPass() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext ctxd) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(ctxd).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(ctxd).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "Forgot Password",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      "Regitered Email Id",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: forgotPassEmailID,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        _generateOtp(context);
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "SUBMIT",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(ctxd).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  _generateOtp(ctx) {
+    if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
+      AppUtils.showToastErrorTop("Please enter your registered Email Id");
+    } else {
+      AppUtils.showprogress();
+      final api = Provider.of<ApiService>(context, listen: false);
+      ForgotPassReq request = ForgotPassReq();
+      request.emailId = forgotPassEmailID.text;
+
+      api.forgotPass(request).then((response) {
+        AppUtils.dismissprogress();
+        print('Response status ${response.toJson()}');
+        if (response.status) {
+          Navigator.of(ctx).pop();
+          emailIdforVerification = forgotPassEmailID.text;
+          forgotPassEmailID.text = '';
+          _otpVerify();
+        } else {
+          AppUtils.showToastError(response.message);
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        print(onError.toString());
+      });
+    }
+  }
+
+  otpVerifyCall(ctx) {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    ValidateOTPReq request = ValidateOTPReq();
+    request.emailId = emailIdforVerification;
+    request.otp = codeVerifyField;
+
+    api.otpVerify(request).then((response) {
+      AppUtils.dismissprogress();
+      print('Response status ${response.toJson()}');
+      if (response.status) {
+        Navigator.of(ctx).pop();
+        oneT.text = '';
+        twoT.text = '';
+        threeT.text = '';
+        fourT.text = '';
+        fiveT.text = '';
+        _changePass();
+      } else {
+        AppUtils.showToastError(response.message);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  setNewPass(ctx) {
+    if (changePassNew.text == '') {
+      AppUtils.showToastErrorTop("Please Enter Password");
+    } else if (changePassConfirm.text == '') {
+      AppUtils.showToastErrorTop("Please Enter Confirm Password");
+    } else if (changePassNew.text != changePassConfirm.text) {
+      AppUtils.showToastErrorTop("Password & Confirm Password are not same");
+    } else {
+      AppUtils.showprogress();
+      final api = Provider.of<ApiService>(context, listen: false);
+      ChangePassReq request = ChangePassReq();
+      request.emailId = emailIdforVerification;
+      request.newPassword = changePassNew.text;
+
+      api.changePass(request).then((response) {
+        AppUtils.dismissprogress();
+        print('Response status ${response.toJson()}');
+        if (response.status) {
+          changePassNew.text = "";
+          changePassConfirm.text = "";
+          Navigator.of(ctx).pop();
+
+          AppUtils.showToastSuccess(response.message);
+        } else {
+          AppUtils.showToastErrorTop(response.message);
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        print(onError.toString());
+      });
+    }
   }
 }

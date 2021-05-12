@@ -96,13 +96,15 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
             selectedmenuvalue: 1,
             menutitle: "Projects",
           ),
-          menuoption(
-            ontab: () {
-              menuRedirect(routename: "/attendance", currentmenu: 2);
-            },
-            selectedmenuvalue: 2,
-            menutitle: "Attendance",
-          ),
+          Strings.roleId != 1
+              ? menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/attendance", currentmenu: 2);
+                  },
+                  selectedmenuvalue: 2,
+                  menutitle: "Attendance",
+                )
+              : SizedBox(),
           menuoption(
             ontab: () {
               menuRedirect(routename: "/profile", currentmenu: 3);
@@ -168,8 +170,9 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
-      Navigator.popAndPushNamed(context, routename);
+      //AppUtils.clearAllPreferences();
+      // Navigator.popAndPushNamed(context, routename);
+      Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       Navigator.pushNamed(context, routename);
     }
@@ -278,6 +281,18 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                       SizedBox(
                                         height: 10,
                                       ),
+                                      Text(
+                                        _newsLists[index].description,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
                                       Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
@@ -368,6 +383,18 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        _newsLists[index].description,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        textDirection: TextDirection.ltr,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
                                       ),
                                       SizedBox(
                                         height: 10,
@@ -463,50 +490,39 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                     Navigator.of(context).pop();
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    child: GridView.count(
-                      primary: false,
-                      crossAxisCount: 1,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  new Icon(Icons.close,
-                                      size: 22.0, color: Colors.black),
-                                ]),
-                            Container(
-                              child: image(imgurl, 100.0, 100.0),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Color(0xFF0061b0),
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                desc,
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
-                              // ,
-                            ],
-                          ),
+                              new Icon(Icons.close,
+                                  size: 22.0, color: Colors.black),
+                            ]),
+                        Container(
+                          child: image(imgurl, 100.0, 100.0),
                         ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          title,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0061b0),
+                              fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          desc,
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                        // ,
                       ],
                     ),
                   ))),

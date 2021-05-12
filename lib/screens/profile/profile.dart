@@ -92,13 +92,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 selectedmenuvalue: 1,
                 menutitle: "Projects",
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/attendance", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Attendance",
-              ),
+              Strings.roleId != 1
+                  ? menuoption(
+                      ontab: () {
+                        menuRedirect(routename: "/attendance", currentmenu: 2);
+                      },
+                      selectedmenuvalue: 2,
+                      menutitle: "Attendance",
+                    )
+                  : SizedBox(),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/profile", currentmenu: 3);
@@ -163,9 +165,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
+      //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
-      Navigator.popAndPushNamed(context, routename);
+      //Navigator.popAndPushNamed(context, routename);
+      Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);
       Navigator.pushNamed(context, routename);
@@ -229,244 +232,248 @@ class _ProfileContentState extends State<ProfileContent> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: loader
-            ? Padding(padding: EdgeInsets.all(0.0))
-            : Stack(
-                children: <Widget>[
-                  Container(
-                    height: MediaQuery.of(context).size.height * .32,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0061b0),
-                    ),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            image(Strings.baseImageUrl + Strings.profilePic,
-                                40.0, 40.0),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _profileData[0].name,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  _profileData[0].email,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 15),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                _editProfile();
-                              },
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: new BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: new BorderRadius.all(
-                                      new Radius.circular(50.0)),
-                                ),
-                                child: Icon(
-                                  Icons.edit,
-                                  color: Color(0xFF0061b0),
+    return SingleChildScrollView(
+      child: SafeArea(
+          child: loader
+              ? Padding(padding: EdgeInsets.all(0.0))
+              : Stack(
+                  children: <Widget>[
+                    Container(
+                      height: MediaQuery.of(context).size.height * .32,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0061b0),
+                      ),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              image(Strings.baseImageUrl + Strings.profilePic,
+                                  40.0, 40.0),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _profileData[0].name,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    _profileData[0].email,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  _editProfile();
+                                },
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: new BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: new BorderRadius.all(
+                                        new Radius.circular(50.0)),
+                                  ),
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Color(0xFF0061b0),
+                                  ),
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      padding: EdgeInsets.all(10),
+                      width: double.infinity,
+                    ),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(
+                          0, MediaQuery.of(context).size.height * .32, 0, 0),
+                      padding: EdgeInsets.all(5),
+                      width: double.infinity,
+                      decoration: BoxDecoration(color: Colors.grey[200]),
+                    ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _controller.toggle();
+                              },
+                              child: Icon(
+                                Icons.menu,
+                                color: Colors.white,
+                              ),
                             ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              "Profile",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18),
+                            )
                           ],
                         ),
                       ),
                     ),
-                    padding: EdgeInsets.all(10),
-                    width: double.infinity,
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(
-                        0, MediaQuery.of(context).size.height * .32, 0, 0),
-                    padding: EdgeInsets.all(5),
-                    width: double.infinity,
-                    decoration: BoxDecoration(color: Colors.grey[200]),
-                  ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              _controller.toggle();
-                            },
-                            child: Icon(
-                              Icons.menu,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "Profile",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
-                          )
-                        ],
-                      ),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(
+                          20, MediaQuery.of(context).size.height * .25, 20, 10),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Padding(
+                          padding: EdgeInsets.all(30),
+                          child: Row(
+                            children: [
+                              Icon(Icons.pin_drop),
+                              SizedBox(
+                                width: 2,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  address,
+                                  overflow: TextOverflow.clip,
+                                ),
+                              )
+                            ],
+                          )),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(
-                        20, MediaQuery.of(context).size.height * .25, 20, 10),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15)),
-                    child: Padding(
-                        padding: EdgeInsets.all(30),
-                        child: Row(
+                    Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.fromLTRB(10,
+                            MediaQuery.of(context).size.height * .40, 10, 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.pin_drop),
+                            Text(
+                              "Phone Number",
+                              style: TextStyle(
+                                  color: Color(0xFF0061b0),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            TextField(
+                              controller: mobileField,
+                              enabled: false,
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.call,
+                                      color: Color(0xFF0061b0))),
+                            ),
                             SizedBox(
-                              width: 2,
+                              height: 20,
                             ),
                             Text(
-                              address,
-                              overflow: TextOverflow.clip,
-                            )
+                              "Role",
+                              style: TextStyle(
+                                  color: Color(0xFF0061b0),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            TextField(
+                              controller: userType,
+                              enabled: false,
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.person,
+                                      color: Color(0xFF0061b0))),
+                            ),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _changePass();
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Change Password",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: new BoxDecoration(
+                                      color: Color(0xFF0061b0),
+                                      borderRadius: new BorderRadius.all(
+                                          new Radius.circular(50.0)),
+                                    ),
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                _changePin();
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Reset Pin",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: new BoxDecoration(
+                                      color: Color(0xFF0061b0),
+                                      borderRadius: new BorderRadius.all(
+                                          new Radius.circular(50.0)),
+                                    ),
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         )),
-                  ),
-                  Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.fromLTRB(
-                          10, MediaQuery.of(context).size.height * .40, 10, 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Phone Number",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          TextField(
-                            controller: mobileField,
-                            enabled: false,
-                            decoration: InputDecoration(
-                                prefixIcon:
-                                    Icon(Icons.call, color: Color(0xFF0061b0))),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            "Role",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          TextField(
-                            controller: userType,
-                            enabled: false,
-                            decoration: InputDecoration(
-                                prefixIcon: Icon(Icons.person,
-                                    color: Color(0xFF0061b0))),
-                          ),
-                          SizedBox(
-                            height: 40,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              _changePass();
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Change Password",
-                                  style: TextStyle(
-                                      color: Color(0xFF0061b0),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  width: 15,
-                                ),
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: new BoxDecoration(
-                                    color: Color(0xFF0061b0),
-                                    borderRadius: new BorderRadius.all(
-                                        new Radius.circular(50.0)),
-                                  ),
-                                  child: Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                    size: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 40,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              _changePin();
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Reset Pin",
-                                  style: TextStyle(
-                                      color: Color(0xFF0061b0),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  width: 15,
-                                ),
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: new BoxDecoration(
-                                    color: Color(0xFF0061b0),
-                                    borderRadius: new BorderRadius.all(
-                                        new Radius.circular(50.0)),
-                                  ),
-                                  child: Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                    size: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )),
-                ],
-              ));
+                  ],
+                )),
+    );
   }
 
   getProfile() {
@@ -593,6 +600,7 @@ class _ProfileContentState extends State<ProfileContent> {
                     ),
                     TextField(
                       controller: changePassConfirm,
+                      obscureText: true,
                       keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                           prefixIcon: Icon(Icons.vpn_key,

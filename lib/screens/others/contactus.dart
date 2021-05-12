@@ -82,13 +82,15 @@ class _ContactusState extends State<Contactus>
                 selectedmenuvalue: 1,
                 menutitle: "Projects",
               ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/attendance", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Attendance",
-              ),
+              Strings.roleId != 1
+                  ? menuoption(
+                      ontab: () {
+                        menuRedirect(routename: "/attendance", currentmenu: 2);
+                      },
+                      selectedmenuvalue: 2,
+                      menutitle: "Attendance",
+                    )
+                  : SizedBox(),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/profile", currentmenu: 3);
@@ -153,9 +155,10 @@ class _ContactusState extends State<Contactus>
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
+      //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
-      Navigator.popAndPushNamed(context, routename);
+      Navigator.popAndPushNamed(context, "/verifypin");
+      //Navigator.popAndPushNamed(context, routename);
     } else {
       //Navigator.pop(context);
       Navigator.pushNamed(context, routename);
@@ -313,6 +316,7 @@ class _ContactusContentState extends State<ContactusContent> {
                                 fontWeight: FontWeight.bold),
                           ),
                           TextField(
+                            enabled: false,
                             controller: mobileField,
                             decoration:
                                 InputDecoration(prefixIcon: Icon(Icons.call)),
@@ -327,6 +331,7 @@ class _ContactusContentState extends State<ContactusContent> {
                                 fontWeight: FontWeight.bold),
                           ),
                           TextField(
+                            enabled: false,
                             controller: userType,
                             decoration:
                                 InputDecoration(prefixIcon: Icon(Icons.email)),

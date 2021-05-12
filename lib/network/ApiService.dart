@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
@@ -14,12 +15,16 @@ import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/SetPinReq.dart';
+import 'package:mta/models/validateOTPReq.dart';
+import 'package:mta/screens/splashscreen.dart';
+import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:retrofit/retrofit.dart';
@@ -85,6 +90,12 @@ abstract class ApiService {
   @POST("/users/changePassword")
   Future<ChangePassRes> changePass(@Body() ChangePassReq body);
 
+  @POST("/users/forgotPassword")
+  Future<ChangePassRes> forgotPass(@Body() ForgotPassReq body);
+
+  @POST("/users/validate_otp")
+  Future<ChangePassRes> otpVerify(@Body() ValidateOTPReq body);
+
   @PUT("/users/{user_id}")
   Future<ChangePassRes> editProfile(
       @Path("user_id") int id, @Body() EditProfileReq body);
@@ -104,6 +115,14 @@ abstract class ApiService {
         //options.headers["Host"] = "<calculated when request is sent>";
         options.followRedirects = false;
         options.validateStatus = (status) {
+          Strings.statusCode = status;
+          if (status == 401) {
+            AppUtils.showToastError(
+                "Session has been expired ! Please login again");
+
+            navigatorKey.currentState.popAndPushNamed('/verifypin');
+            // return false;
+          }
           return status < 500;
         };
         return options;

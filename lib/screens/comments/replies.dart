@@ -37,6 +37,8 @@ class _RepliesState extends State<Replies> {
   var _currDoc;
 
   TextEditingController _msgcontroller = TextEditingController();
+  ScrollController _scrollController = new ScrollController();
+  FocusNode msgField = new FocusNode();
   @override
   void initState() {
     super.initState();
@@ -228,6 +230,9 @@ class _RepliesState extends State<Replies> {
           Strings.comments[Strings.selectedCommentsIndex].replies.length > 0
               ? Expanded(
                   child: ListView.builder(
+                      shrinkWrap: true,
+                      reverse: true,
+                      controller: _scrollController,
                       padding: EdgeInsets.all(20),
                       itemCount: Strings.comments[Strings.selectedCommentsIndex]
                           .replies.length,
@@ -475,6 +480,7 @@ class _RepliesState extends State<Replies> {
                     color: Colors.white),
                 child: TextField(
                   controller: _msgcontroller,
+                  focusNode: msgField,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                       hintText: "Type your reply..",
@@ -497,11 +503,18 @@ class _RepliesState extends State<Replies> {
   getReplies() {
     _socket.on("document-comments", (_data) {
       print('fromServer $_data');
+      msgField.unfocus();
       setState(() {
         Strings.comments = [];
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          curve: Curves.fastOutSlowIn,
+          duration: const Duration(seconds: 1),
+        );
+        msgField.unfocus();
       });
     });
   }

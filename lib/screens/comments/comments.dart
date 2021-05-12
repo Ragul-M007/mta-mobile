@@ -16,6 +16,8 @@ import 'package:intl/intl.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
+ScrollController _scrollController = new ScrollController();
+FocusNode msgField = new FocusNode();
 final _userIitems = users
     .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
     .toList();
@@ -26,6 +28,7 @@ var tagedUsers = "";
 var tagedUsersId = "";
 var tagedCats = "";
 var tagedCatsId = "";
+var showscroll = true;
 
 class Comments extends StatefulWidget {
   const Comments({Key key}) : super(key: key);
@@ -67,6 +70,8 @@ class _CommentsContentState extends State<CommentsContent> {
   @override
   void initState() {
     super.initState();
+
+    Strings.comments = [];
     if (Strings.category == true) {
       _currDoc = Strings.selectedCatDocument[0];
     } else {
@@ -112,8 +117,8 @@ class _CommentsContentState extends State<CommentsContent> {
                     children: [
                       Image.asset(
                           getFileExt(Strings.category == true
-                              ? Strings.selectedCatDocument[0].fileName
-                              : Strings.selectedProDocument[0].fileName),
+                              ? Strings.selectedCatDocument[0].file
+                              : Strings.selectedProDocument[0].file),
                           width: 30.0,
                           height: 30.0),
                       SizedBox(
@@ -154,12 +159,16 @@ class _CommentsContentState extends State<CommentsContent> {
           Strings.comments.length > 0
               ? Expanded(
                   child: ListView.builder(
+                      shrinkWrap: true,
+                      reverse: true,
+                      controller: _scrollController,
                       itemCount: Strings.comments.length,
                       padding: EdgeInsets.all(20),
                       itemBuilder: (BuildContext ctx, int index) {
                         return Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,6 +417,7 @@ class _CommentsContentState extends State<CommentsContent> {
                 child: TextField(
                   controller: _msgcontroller,
                   style: TextStyle(color: Colors.black),
+                  focusNode: msgField,
                   decoration: InputDecoration(
                       hintText: "Type your comment..",
                       hintStyle: TextStyle(color: Colors.grey[400]),
@@ -429,6 +439,7 @@ class _CommentsContentState extends State<CommentsContent> {
   getComments() {
     _socket.on("document-comments", (_data) {
       print('fromServer $_data');
+      msgField.unfocus();
       setState(() {
         Strings.comments = [];
         for (var item in _data) {
@@ -472,6 +483,16 @@ class _CommentsContentState extends State<CommentsContent> {
         tagedCats = "";
         tagedCatsId = "";
         _msgcontroller.text = '';
+        // if (showscroll != true) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          curve: Curves.fastOutSlowIn,
+          duration: const Duration(seconds: 1),
+        );
+        msgField.unfocus();
+        // } else {
+        //   showscroll = false;
+        // }
       });
     }
   }

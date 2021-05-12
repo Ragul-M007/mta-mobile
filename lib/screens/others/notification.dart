@@ -95,13 +95,15 @@ class _NotificationContentState extends State<NotificationContent>
             selectedmenuvalue: 1,
             menutitle: "Projects",
           ),
-          menuoption(
-            ontab: () {
-              menuRedirect(routename: "/attendance", currentmenu: 2);
-            },
-            selectedmenuvalue: 2,
-            menutitle: "Attendance",
-          ),
+          Strings.roleId != 1
+              ? menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/attendance", currentmenu: 2);
+                  },
+                  selectedmenuvalue: 2,
+                  menutitle: "Attendance",
+                )
+              : SizedBox(),
           menuoption(
             ontab: () {
               menuRedirect(routename: "/profile", currentmenu: 3);
@@ -233,8 +235,9 @@ class _NotificationContentState extends State<NotificationContent>
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
-      AppUtils.clearAllPreferences();
-      Navigator.popAndPushNamed(context, routename);
+      //AppUtils.clearAllPreferences();
+      //Navigator.popAndPushNamed(context, routename);
+      Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       Navigator.pushNamed(context, routename);
     }

@@ -24,6 +24,8 @@ mixin Strings {
   static int selectcontactno;
   static String selectedImg;
   static bool network;
+  static int roleId;
+  static int statusCode = 0;
 
   static bool category = false;
   static List<Data> selectedProject = [];

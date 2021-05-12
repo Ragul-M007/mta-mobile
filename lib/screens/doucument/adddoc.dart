@@ -184,7 +184,8 @@ class _AddDocContentState extends State<AddDocContent> {
           // print(file.extension);
           // print(file.path);
           setState(() {
-            docTitle.text = file.name;
+            var title = file.name.split(".");
+            docTitle.text = title[0];
           });
         } else {
           // User canceled the picker
