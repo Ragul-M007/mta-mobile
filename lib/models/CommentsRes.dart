@@ -2,6 +2,7 @@ class CommentsRes {
   int commentId;
   int parentCommentId;
   String comment;
+  String audio;
   String date;
   String recipientId;
   String recipient;
@@ -15,6 +16,7 @@ class CommentsRes {
       {this.commentId,
       this.parentCommentId,
       this.comment,
+      this.audio,
       this.date,
       this.recipientId,
       this.recipient,
@@ -28,6 +30,7 @@ class CommentsRes {
     commentId = json['comment_id'];
     parentCommentId = json['parent_comment_id'];
     comment = json['comment'];
+    audio = json['audio'];
     date = json['date'];
     recipientId = json['recipient_id'];
     recipient = json['recipient'];
@@ -48,6 +51,7 @@ class CommentsRes {
     data['comment_id'] = this.commentId;
     data['parent_comment_id'] = this.parentCommentId;
     data['comment'] = this.comment;
+    data['audio'] = this.audio;
     data['date'] = this.date;
     data['recipient_id'] = this.recipientId;
     data['recipient'] = this.recipient;
@@ -65,6 +69,7 @@ class CommentsRes {
 class Replies {
   String date;
   String comment;
+  String audio;
   String userImg;
   String recipient;
   String commentBy;
@@ -77,6 +82,7 @@ class Replies {
   Replies(
       {this.date,
       this.comment,
+      this.audio,
       this.userImg,
       this.recipient,
       this.commentBy,
@@ -89,6 +95,7 @@ class Replies {
   Replies.fromJson(Map<String, dynamic> json) {
     date = json['date'];
     comment = json['comment'];
+    audio = json['audio'];
     userImg = json['user_img'];
     recipient = json['recipient'];
     commentBy = json['comment_by'];
@@ -103,6 +110,7 @@ class Replies {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['date'] = this.date;
     data['comment'] = this.comment;
+    data['audio'] = this.audio;
     data['user_img'] = this.userImg;
     data['recipient'] = this.recipient;
     data['comment_by'] = this.commentBy;

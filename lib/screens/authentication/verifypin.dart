@@ -106,6 +106,7 @@ class _VerifypinState extends State<Verifypin> {
             Strings.username = response.data.name;
             Strings.roleId = response.data.roleId;
             AppUtils.savePreferences("easyAccess", "Y");
+            Strings.isLogin = true;
             Navigator.pushNamed(ctx, "/dashboard");
           } else {
             AppUtils.showToastError(response.message);
@@ -286,7 +287,15 @@ class _VerifypinState extends State<Verifypin> {
           onChanged: (value) {
             print(value);
             if (value == '') {
-              print("null");
+              FocusScope.of(context).requestFocus(
+                val == 4
+                    ? three
+                    : val == 3
+                        ? two
+                        : val == 2
+                            ? one
+                            : null,
+              );
             } else {
               FocusScope.of(context).requestFocus(
                 val == 1

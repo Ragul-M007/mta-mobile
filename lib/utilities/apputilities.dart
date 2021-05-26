@@ -102,9 +102,9 @@ class AppUtils {
         fontSize: 16.0);
   }
 
-  static void snackBar(BuildContext context, String message) {
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+  // static void snackBar(BuildContext context, String message) {
+  //   Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
+  // }
 
   static void showprogress() {
     // showProgressDialog(

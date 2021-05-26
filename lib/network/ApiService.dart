@@ -4,6 +4,8 @@ import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
+import 'package:mta/models/AudioReq.dart';
+import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -100,6 +102,9 @@ abstract class ApiService {
   Future<ChangePassRes> editProfile(
       @Path("user_id") int id, @Body() EditProfileReq body);
 
+  @POST("/utils/getAudioUrl")
+  Future<AudioRes> uploadAudio(@Body() AudioReq body);
+
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -117,6 +122,7 @@ abstract class ApiService {
         options.validateStatus = (status) {
           Strings.statusCode = status;
           if (status == 401) {
+            Strings.isLogin = false;
             AppUtils.showToastError(
                 "Session has been expired ! Please login again");
 

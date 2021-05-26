@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,6 +45,7 @@ class _SetpinState extends State<Setpin> {
 
           if (response.status) {
             AppUtils.savePreferences("easyAccess", "Y");
+            Strings.isLogin = true;
             Navigator.pushNamed(ctx, "/dashboard");
           } else {
             AppUtils.showToastError(response.message);
@@ -209,7 +211,15 @@ class _SetpinState extends State<Setpin> {
           onChanged: (value) {
             print(value);
             if (value == '') {
-              print("null");
+              FocusScope.of(context).requestFocus(
+                val == 4
+                    ? three
+                    : val == 3
+                        ? two
+                        : val == 2
+                            ? one
+                            : null,
+              );
             } else {
               FocusScope.of(context).requestFocus(
                 val == 1

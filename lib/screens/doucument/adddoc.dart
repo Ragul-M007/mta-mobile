@@ -217,10 +217,11 @@ class _AddDocContentState extends State<AddDocContent> {
       String extension;
       if (fileExt == 'png' ||
           fileExt == 'jpg' ||
+          fileExt == 'jpeg' ||
           fileExt == 'jepg' ||
           fileExt == 'PNG' ||
           fileExt == 'JPG') {
-        extension = "data:image/" + fileExt + ";base64,";
+        extension = "data:image/jpeg;base64,";
       } else {
         extension = "data:application/" + fileExt + ";base64,";
       }

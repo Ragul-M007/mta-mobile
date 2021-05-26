@@ -44,15 +44,16 @@ Widget appbar(String title) {
       style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
     ),
     actions: [
-      title == "Documents"
-          ? Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-            )
-          : Padding(padding: EdgeInsets.all(0))
+      // title == "Documents"
+      //     ? Padding(
+      //         padding: const EdgeInsets.only(right: 20),
+      //         child: Icon(
+      //           Icons.search,
+      //           color: Colors.black,
+      //         ),
+      //       )
+      //     :
+      Padding(padding: EdgeInsets.all(0))
     ],
   );
 }

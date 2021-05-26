@@ -876,8 +876,19 @@ class _LoginContentState extends State<LoginContent>
           textAlign: TextAlign.center,
           onChanged: (value) {
             print(value);
+
             if (value == '') {
-              print("null");
+              FocusScope.of(contextResetPin).requestFocus(
+                val == 5
+                    ? four
+                    : val == 4
+                        ? three
+                        : val == 3
+                            ? two
+                            : val == 2
+                                ? one
+                                : null,
+              );
             } else {
               FocusScope.of(contextResetPin).requestFocus(
                 val == 1

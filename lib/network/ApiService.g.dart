@@ -360,4 +360,24 @@ class _ApiService implements ApiService {
     final value = ChangePassRes.fromJson(_result.data);
     return value;
   }
+
+  @override
+  Future<AudioRes> uploadAudio(body) async {
+    ArgumentError.checkNotNull(body, 'body');
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body?.toJson() ?? <String, dynamic>{});
+    final _result = await _dio.request<Map<String, dynamic>>(
+        '/utils/getAudioUrl',
+        queryParameters: queryParameters,
+        options: RequestOptions(
+            method: 'POST',
+            headers: <String, dynamic>{},
+            extra: _extra,
+            baseUrl: baseUrl),
+        data: _data);
+    final value = AudioRes.fromJson(_result.data);
+    return value;
+  }
 }

@@ -44,12 +44,12 @@ class _CategoriesContentState extends State<CategoriesContent> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
           child: Row(
             children: [
               Container(
-                width: 45.0,
-                height: 45.0,
+                width: MediaQuery.of(context).size.width * 0.12,
+                height: MediaQuery.of(context).size.width * 0.12,
                 decoration: new BoxDecoration(
                   color: const Color(0xff7c94b6),
                   image: new DecorationImage(
@@ -60,9 +60,7 @@ class _CategoriesContentState extends State<CategoriesContent> {
                   borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                 ),
               ),
-              SizedBox(
-                width: 20,
-              ),
+              SizedBox(width: MediaQuery.of(context).size.width * 0.05),
               GestureDetector(
                 onTap: () {
                   Strings.category = false;
@@ -73,17 +71,35 @@ class _CategoriesContentState extends State<CategoriesContent> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          Strings.selectedProject[0].projectName,
-                          style: Drawables.adddoccontentstyle(
-                              Colors.black, 18.0, FontWeight.w500),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: Text(
+                            Strings.selectedProject[0].projectName,
+                            style: Drawables.adddoccontentstyle(
+                                Colors.black, 18.0, FontWeight.w500),
+                          ),
                         ),
                         SizedBox(
                           width: 20,
                         ),
                         Icon(
                           Icons.info_outlined,
-                          size: 25,
+                          color: Color(0xFF0061b0),
+                          size: 20,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(
+                              "View Project Docs",
+                              style: Drawables.adddoccontentstyle(
+                                  Colors.grey[600], 12.0, FontWeight.w600),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -204,9 +220,10 @@ class _CategoriesContentState extends State<CategoriesContent> {
         });
         if (response.message != null) {
           AppUtils.showToastError(response.message);
-        } else {
-          AppUtils.showToastError("No Categories found !");
         }
+        //  else {
+        //   AppUtils.showToastError("No Categories found !");
+        // }
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();

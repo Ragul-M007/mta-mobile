@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/EditProfileReq.dart';
 import 'package:mta/models/LoginRes.dart';
@@ -21,6 +22,7 @@ import 'dart:io' as Io;
 
 FancyDrawerController _controller;
 FocusNode name = new FocusNode();
+ImagePicker _picker = ImagePicker();
 
 class Profile extends StatefulWidget {
   static const String routeName = "/profile";
@@ -168,6 +170,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
       //Navigator.popAndPushNamed(context, routename);
+      Strings.isLogin = false;
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);
@@ -756,7 +759,15 @@ class _ProfileContentState extends State<ProfileContent> {
           onChanged: (value) {
             print(value);
             if (value == '') {
-              print("null");
+              FocusScope.of(contextResetPin).requestFocus(
+                val == 4
+                    ? three
+                    : val == 3
+                        ? two
+                        : val == 2
+                            ? one
+                            : null,
+              );
             } else {
               FocusScope.of(contextResetPin).requestFocus(
                 val == 1
@@ -784,7 +795,7 @@ class _ProfileContentState extends State<ProfileContent> {
       AppUtils.showToastError("Please enter Confirm Password");
     } else if (changePassNew.text.trim() != changePassConfirm.text.trim()) {
       AppUtils.showToastError(
-          "New Password & Confirm Password are nor matching");
+          "New Password & Confirm Password are not matching");
     } else {
       AppUtils.showprogress();
       final api = Provider.of<ApiService>(context, listen: false);
@@ -798,6 +809,7 @@ class _ProfileContentState extends State<ProfileContent> {
         if (response.status) {
           AppUtils.showToastSuccess(response.message);
           AppUtils.clearAllPreferences();
+          Strings.isLogin = false;
           Navigator.popAndPushNamed(context, "/login");
         } else {
           AppUtils.showToastError(response.message);
@@ -858,14 +870,63 @@ class _ProfileContentState extends State<ProfileContent> {
                                   ),
                                 ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            changeProPic();
-                          },
-                          child: Container(
-                            child: Icon(Icons.add_a_photo,
-                                size: 20, color: Color(0xFF0061b0)),
-                          ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                //changeProPic();
+                                takePhoto(ImageSource.camera);
+                              },
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.add_a_photo,
+                                        size: 20, color: Color(0xFF0061b0)),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      "Camera",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                //changeProPic();
+                                takePhoto(ImageSource.gallery);
+                              },
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.collections,
+                                        size: 20, color: Color(0xFF0061b0)),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      "Gallery",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         )
                       ],
                     ),
@@ -1052,6 +1113,19 @@ class _ProfileContentState extends State<ProfileContent> {
     } else {
       // User canceled the picker
     }
+  }
+
+  void takePhoto(ImageSource source) async {
+    final pickedFile = await _picker.getImage(source: source);
+    final bytes = await Io.File(pickedFile.path).readAsBytes();
+    setState(() {
+      editProfilePictureBase64 =
+          "data:image/jpeg;base64," + base64Encode(bytes);
+      editProfilePicture = base64.decode(base64Encode(bytes));
+      editPicTap = true;
+      _imageAsyncWidget = new MemoryImage(editProfilePicture);
+      name.requestFocus();
+    });
   }
 
   resetPin(contextpin) {

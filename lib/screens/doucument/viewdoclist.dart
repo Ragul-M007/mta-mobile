@@ -41,6 +41,12 @@ class ViewDocContent extends StatefulWidget {
 class _ViewDocContentState extends State<ViewDocContent> {
   List<ProjectDocData> _docsList = [];
   List<FetchCategoryDoc> _categorydocsList = [];
+
+  // List<ProjectDocData> _searchProLists = [];
+  // List<FetchCategoryDoc> _searchCatsLists = [];
+  var _searchList = [];
+  FocusNode searchField = new FocusNode();
+  TextEditingController _searchFieldController = TextEditingController();
   String filepath;
   var dio = Dio();
 
@@ -135,276 +141,546 @@ class _ViewDocContentState extends State<ViewDocContent> {
             style: Drawables.adddoccontentstyle(
                 Colors.black45, 15.0, FontWeight.w400),
           ),
-          Strings.category == true
-              ? _categorydocsList.length > 0
-                  ? GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: _categorydocsList.length,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2),
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10.0, top: 10.0, bottom: 10.0, right: 5.0),
-                          child: new Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            child: new GridTile(
-                              child: Container(
-                                child: Padding(
-                                    padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            _downloadfile(
-                                                _categorydocsList[index].file);
-                                          },
-                                          child: Padding(
-                                            padding: EdgeInsets.only(top: 0),
-                                            child: Image.asset(
-                                                getFileExt(
-                                                    _categorydocsList[index]
-                                                        .file),
-                                                width: 70.0,
-                                                height: 70.0),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 45.0,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showMyDialogProject(
-                                                context,
-                                                _categorydocsList[index]
-                                                    .fileName,
-                                                _categorydocsList[index]
-                                                    .description,
-                                                _categorydocsList[index]
-                                                    .createdAt);
-                                          },
-                                          child: Container(
-                                              child: Icon(
-                                            Icons.info_outlined,
-                                            size: 20.0,
-                                          )),
-                                        )
-                                      ],
-                                    )),
-                              ),
-                              footer: Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 10),
-                                        child: Text(
-                                          _categorydocsList[index].fileName,
-                                          style: Drawables.adddoccontentstyle(
-                                              Colors.black87,
-                                              14.0,
-                                              FontWeight.w500),
-                                        ),
-                                      ),
-                                      SizedBox(height: 7.0),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Strings.selectedDocsIndex = index;
-                                          Strings.selectedCatDocument = [];
-                                          Strings.selectedCatDocument
-                                              .add(_categorydocsList[index]);
+          Padding(
+            padding: EdgeInsets.all(15),
+            child: Container(
+              //  padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFFeceeef),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Material(
+                  color: const Color(0xFFeceeef),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          focusNode: searchField,
+                          controller: _searchFieldController,
+                          decoration: InputDecoration.collapsed(
+                            hintText: ' Search',
+                          ),
+                          onChanged: (value) {
+                            if (value.isEmpty) {
+                              setState(() {
+                                // _searchCatsLists = [];
+                                // _searchProLists = [];
+                                _searchList = [];
+                              });
+                              return;
+                            }
+                            // _searchCatsLists = [];
+                            // _searchProLists = [];
+                            _searchList = [];
+                            if (Strings.category == true) {
+                              _categorydocsList.forEach((detail) {
+                                if (detail.fileName
+                                    .toLowerCase()
+                                    .startsWith(value.toLowerCase()))
+                                  //_searchCatsLists.add(detail);
+                                  _searchList.add(detail);
+                              });
+                            } else {
+                              _docsList.forEach((detail) {
+                                if (detail.fileName
+                                    .toLowerCase()
+                                    .startsWith(value.toLowerCase()))
+                                  // _searchProLists.add(detail);
+                                  _searchList.add(detail);
+                              });
+                            }
 
-                                          getUserCats();
-                                        },
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            SizedBox(width: 10.0),
-                                            Image.asset(
-                                                "assets/icons/Comments.png",
-                                                width: 15.0,
-                                                height: 15.0),
-                                            SizedBox(width: 5),
-                                            Text(
-                                              _categorydocsList[index]
-                                                      .commentsCount
-                                                      .toString() +
-                                                  " Comments",
-                                              overflow: TextOverflow.clip,
-                                              style: TextStyle(
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.grey),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  )),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      child: Padding(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            _errText,
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                            setState(() {});
+                          },
+                        ),
                       ),
-                      padding: EdgeInsets.all(20),
-                    ))
-              : _docsList.length > 0
-                  ? GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: _docsList.length,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2),
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10.0, top: 10.0, bottom: 10.0, right: 5.0),
-                          child: new Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            child: new GridTile(
-                              child: Container(
-                                child: Padding(
-                                    padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            _downloadfile(
-                                                _docsList[index].file);
-                                          },
-                                          child: Padding(
+                      InkWell(
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.black,
+                        ),
+                        onTap: () {},
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          _searchList.length != 0
+              ? GridView.builder(
+                  shrinkWrap: true,
+                  itemCount: _searchList.length,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2),
+                  itemBuilder: (BuildContext context, int index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                          left: 10.0, top: 10.0, bottom: 10.0, right: 5.0),
+                      child: new Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: new GridTile(
+                          child: Container(
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        _downloadfile(_searchList[index].file);
+                                      },
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Padding(
                                             padding: EdgeInsets.only(top: 0),
                                             child: Image.asset(
                                                 getFileExt(
-                                                    _docsList[index].file),
+                                                    _searchList[index].file),
                                                 width: 70.0,
                                                 height: 70.0),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          width: 45.0,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showMyDialogProject(
-                                                context,
-                                                _docsList[index].fileName,
-                                                _docsList[index].description,
-                                                _docsList[index].createdAt);
-                                          },
-                                          child: Container(
-                                              child: Icon(
-                                            Icons.info_outlined,
-                                            size: 20.0,
-                                          )),
-                                        )
-                                      ],
-                                    )),
-                              ),
-                              footer: Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 10),
-                                        child: Text(
-                                          _docsList[index].fileName,
-                                          style: Drawables.adddoccontentstyle(
-                                              Colors.black87,
-                                              14.0,
-                                              FontWeight.w500),
-                                        ),
+                                          Positioned(
+                                            top: 2,
+                                            left: 10,
+                                            child: Container(
+                                                child: Icon(
+                                              Icons.download_rounded,
+                                              size: 20.0,
+                                            )),
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(height: 7.0),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Strings.selectedDocsIndex = index;
-                                          Strings.selectedProDocument = [];
-                                          Strings.selectedProDocument
-                                              .add(_docsList[index]);
-                                          getUserCats();
-                                        },
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            SizedBox(width: 10.0),
-                                            Image.asset(
-                                                "assets/icons/Comments.png",
-                                                width: 15.0,
-                                                height: 15.0),
-                                            SizedBox(width: 5),
-                                            Text(
-                                              _docsList[index]
-                                                      .commentsCount
-                                                      .toString() +
-                                                  " Comments",
-                                              overflow: TextOverflow.clip,
-                                              style: TextStyle(
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.grey),
-                                            ),
-                                          ],
+                                    ),
+                                    SizedBox(
+                                      width: 45.0,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showMyDialogProject(
+                                            context,
+                                            _searchList[index].fileName,
+                                            _searchList[index].description,
+                                            _searchList[index].createdAt);
+                                      },
+                                      child: Container(
+                                          child: Icon(
+                                        Icons.info_outlined,
+                                        size: 20.0,
+                                      )),
+                                    )
+                                  ],
+                                )),
+                          ),
+                          footer: Padding(
+                              padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      _searchList[index].fileName,
+                                      style: Drawables.adddoccontentstyle(
+                                          Colors.black87,
+                                          14.0,
+                                          FontWeight.w500),
+                                    ),
+                                  ),
+                                  SizedBox(height: 7.0),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Strings.selectedDocsIndex = index;
+                                      Strings.selectedCatDocument = [];
+                                      Strings.selectedCatDocument
+                                          .add(_searchList[index]);
+
+                                      getUserCats();
+                                    },
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        SizedBox(width: 10.0),
+                                        Image.asset("assets/icons/Comments.png",
+                                            width: 15.0, height: 15.0),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          _searchList[index]
+                                                  .commentsCount
+                                                  .toString() +
+                                              " Comments",
+                                          overflow: TextOverflow.clip,
+                                          style: TextStyle(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.grey),
                                         ),
-                                      )
-                                    ],
-                                  )),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      child: Padding(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            _errText,
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              )),
+                        ),
                       ),
-                      padding: EdgeInsets.all(20),
-                    ))
+                    );
+                  },
+                )
+              : _searchFieldController.text != ""
+                  ? Align(
+                      alignment: Alignment.topCenter,
+                      child: Text(
+                        "No results found",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    )
+                  : Strings.category == true
+                      ? _categorydocsList.length > 0
+                          ? GridView.builder(
+                              shrinkWrap: true,
+                              itemCount: _categorydocsList.length,
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2),
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0,
+                                      top: 10.0,
+                                      bottom: 10.0,
+                                      right: 5.0),
+                                  child: new Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: new GridTile(
+                                      child: Container(
+                                        child: Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                10, 15, 10, 0),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _downloadfile(
+                                                        _categorydocsList[index]
+                                                            .file);
+                                                  },
+                                                  child: Stack(
+                                                    children: <Widget>[
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 0),
+                                                        child: Image.asset(
+                                                            getFileExt(
+                                                                _categorydocsList[
+                                                                        index]
+                                                                    .file),
+                                                            width: 70.0,
+                                                            height: 70.0),
+                                                      ),
+                                                      Positioned(
+                                                        top: 2,
+                                                        left: 10,
+                                                        child: Container(
+                                                            child: Icon(
+                                                          Icons
+                                                              .download_rounded,
+                                                          size: 20.0,
+                                                        )),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 45.0,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _showMyDialogProject(
+                                                        context,
+                                                        _categorydocsList[index]
+                                                            .fileName,
+                                                        _categorydocsList[index]
+                                                            .description,
+                                                        _categorydocsList[index]
+                                                            .createdAt);
+                                                  },
+                                                  child: Container(
+                                                      child: Icon(
+                                                    Icons.info_outlined,
+                                                    size: 20.0,
+                                                  )),
+                                                )
+                                              ],
+                                            )),
+                                      ),
+                                      footer: Padding(
+                                          padding:
+                                              EdgeInsets.fromLTRB(10, 0, 0, 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    EdgeInsets.only(left: 10),
+                                                child: Text(
+                                                  _categorydocsList[index]
+                                                      .fileName,
+                                                  style: Drawables
+                                                      .adddoccontentstyle(
+                                                          Colors.black87,
+                                                          14.0,
+                                                          FontWeight.w500),
+                                                ),
+                                              ),
+                                              SizedBox(height: 7.0),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Strings.selectedDocsIndex =
+                                                      index;
+                                                  Strings.selectedCatDocument =
+                                                      [];
+                                                  Strings.selectedCatDocument
+                                                      .add(_categorydocsList[
+                                                          index]);
+
+                                                  getUserCats();
+                                                },
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    SizedBox(width: 10.0),
+                                                    Image.asset(
+                                                        "assets/icons/Comments.png",
+                                                        width: 15.0,
+                                                        height: 15.0),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                      _categorydocsList[index]
+                                                              .commentsCount
+                                                              .toString() +
+                                                          " Comments",
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      style: TextStyle(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.grey),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          )),
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              child: Padding(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _errText,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            ))
+                      : _docsList.length > 0
+                          ? GridView.builder(
+                              shrinkWrap: true,
+                              itemCount: _docsList.length,
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2),
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0,
+                                      top: 10.0,
+                                      bottom: 10.0,
+                                      right: 5.0),
+                                  child: new Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: new GridTile(
+                                      child: Container(
+                                        child: Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                10, 15, 10, 0),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _downloadfile(
+                                                        _docsList[index].file);
+                                                  },
+                                                  child: Stack(
+                                                    children: <Widget>[
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 0),
+                                                        child: Image.asset(
+                                                            getFileExt(
+                                                                _docsList[index]
+                                                                    .file),
+                                                            width: 70.0,
+                                                            height: 70.0),
+                                                      ),
+                                                      Positioned(
+                                                        top: 2,
+                                                        left: 10,
+                                                        child: Container(
+                                                            child: Icon(
+                                                          Icons
+                                                              .download_rounded,
+                                                          size: 20.0,
+                                                        )),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 45.0,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _showMyDialogProject(
+                                                        context,
+                                                        _docsList[index]
+                                                            .fileName,
+                                                        _docsList[index]
+                                                            .description,
+                                                        _docsList[index]
+                                                            .createdAt);
+                                                  },
+                                                  child: Container(
+                                                      child: Icon(
+                                                    Icons.info_outlined,
+                                                    size: 20.0,
+                                                  )),
+                                                )
+                                              ],
+                                            )),
+                                      ),
+                                      footer: Padding(
+                                          padding:
+                                              EdgeInsets.fromLTRB(10, 0, 0, 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    EdgeInsets.only(left: 10),
+                                                child: Text(
+                                                  _docsList[index].fileName,
+                                                  style: Drawables
+                                                      .adddoccontentstyle(
+                                                          Colors.black87,
+                                                          14.0,
+                                                          FontWeight.w500),
+                                                ),
+                                              ),
+                                              SizedBox(height: 7.0),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Strings.selectedDocsIndex =
+                                                      index;
+                                                  Strings.selectedProDocument =
+                                                      [];
+                                                  Strings.selectedProDocument
+                                                      .add(_docsList[index]);
+                                                  getUserCats();
+                                                },
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    SizedBox(width: 10.0),
+                                                    Image.asset(
+                                                        "assets/icons/Comments.png",
+                                                        width: 15.0,
+                                                        height: 15.0),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                      _docsList[index]
+                                                              .commentsCount
+                                                              .toString() +
+                                                          " Comments",
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      style: TextStyle(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.grey),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          )),
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              child: Padding(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _errText,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            ))
         ],
       ),
     );
@@ -431,9 +707,10 @@ class _ViewDocContentState extends State<ViewDocContent> {
           });
           if (response.message != null) {
             AppUtils.showToastError(response.message);
-          } else {
-            AppUtils.showToastError("No Documents found !");
           }
+          // else {
+          //   AppUtils.showToastError("No Documents found !");
+          // }
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -455,9 +732,10 @@ class _ViewDocContentState extends State<ViewDocContent> {
           });
           if (response.message != null) {
             AppUtils.showToastError(response.message);
-          } else {
-            AppUtils.showToastError("No Documents found !");
           }
+          // else {
+          //   AppUtils.showToastError("No Documents found !");
+          // }
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -564,7 +842,6 @@ class _ViewDocContentState extends State<ViewDocContent> {
       if (response.status) {
         setState(() {
           Strings.users = response.data;
-          print(Strings.users[0].userId);
         });
         final api = Provider.of<ApiService>(context, listen: false);
         api.fetchCats(Strings.selectedProject[0].projectId).then((response) {

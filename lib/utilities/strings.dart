@@ -26,6 +26,9 @@ mixin Strings {
   static bool network;
   static int roleId;
   static int statusCode = 0;
+  static bool pushNotify = true;
+  static bool isLogin = false;
+  static bool isPushAvailable = false;
 
   static bool category = false;
   static List<Data> selectedProject = [];
@@ -48,4 +51,7 @@ mixin Strings {
   static String district;
   static String dateofbirth;
   static String preferedcourse;
+
+  static List<ProjectDocData> selectedNotifyDocument = [];
+  static bool selectedNotifyDocumentFlag = false;
 }

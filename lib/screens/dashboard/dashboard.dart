@@ -33,6 +33,7 @@ class _DashboardState extends State<Dashboard>
   List<Data> _projectLists = [];
   List<Data> _searchLists = [];
   FocusNode searchField = new FocusNode();
+  TextEditingController _searchFieldController = TextEditingController();
   String filepath;
   var dio = Dio();
 
@@ -58,6 +59,38 @@ class _DashboardState extends State<Dashboard>
     super.dispose();
   }
 
+  getUserCats(proId) {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchUsers(proId).then((response) {
+      if (response.status) {
+        setState(() {
+          Strings.users = response.data;
+        });
+        final api = Provider.of<ApiService>(context, listen: false);
+        api.fetchCats(proId).then((response) {
+          AppUtils.dismissprogress();
+          if (response.status) {
+            setState(() {
+              Strings.categories = response.data;
+              Navigator.pushNamed(context, '/comments');
+            });
+          } else {
+            print('error');
+          }
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
   getProjects() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx, listen: false);
@@ -68,15 +101,24 @@ class _DashboardState extends State<Dashboard>
         setState(() {
           _projectLists = response.data;
         });
+        if (Strings.isPushAvailable == true) {
+          Strings.isPushAvailable = false;
+          getUserCats(Strings.selectedProject[0].projectId);
+        }
       } else {
         setState(() {
           _errText = "No Projects found !";
         });
         if (response.message != null) {
           AppUtils.showToastError(response.message);
-        } else {
-          AppUtils.showToastError("No Projects found !");
         }
+        if (Strings.isPushAvailable == true) {
+          Strings.isPushAvailable = false;
+          getUserCats(Strings.selectedProject[0].projectId);
+        }
+        // else {
+        //   AppUtils.showToastError("No Projects found !");
+        // }
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -274,6 +316,7 @@ class _DashboardState extends State<Dashboard>
                                     Expanded(
                                       child: TextField(
                                         focusNode: searchField,
+                                        controller: _searchFieldController,
                                         decoration: InputDecoration.collapsed(
                                           hintText: ' Search',
                                         ),
@@ -289,10 +332,11 @@ class _DashboardState extends State<Dashboard>
                                               .forEach((projectDetail) {
                                             if (projectDetail.projectName
                                                 .toLowerCase()
-                                                .contains(value.toLowerCase()))
+                                                .startsWith(
+                                                    value.toLowerCase()))
                                               _searchLists.add(projectDetail);
                                           });
-
+                                          print(_searchLists.length);
                                           setState(() {});
                                         },
                                       ),
@@ -461,151 +505,168 @@ class _DashboardState extends State<Dashboard>
                                       );
                                     },
                                   )
-                                : GridView.builder(
-                                    itemCount: _projectLists.length,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2),
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          onTapProject(_projectLists[index]);
-                                        },
-                                        child: new Card(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: new GridTile(
-                                            child: Container(
-                                              height: 50,
-                                              width: 50,
-                                              child: Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      10, 10, 10, 10),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          _downloadfile(
-                                                              _projectLists[
-                                                                      index]
-                                                                  .projectImg,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .projectName,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .description,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .status);
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  top: 10),
-                                                          child: image(
-                                                              Strings.baseImageUrl +
+                                : _searchFieldController.text != ""
+                                    ? Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Text(
+                                          "No results found",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      )
+                                    : GridView.builder(
+                                        itemCount: _projectLists.length,
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2),
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              onTapProject(
+                                                  _projectLists[index]);
+                                            },
+                                            child: new Card(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: new GridTile(
+                                                child: Container(
+                                                  height: 50,
+                                                  width: 50,
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 10, 10, 10),
+                                                      child: Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              _downloadfile(
                                                                   _projectLists[
                                                                           index]
                                                                       .projectImg,
-                                                              65.0,
-                                                              65.0),
-                                                        ),
-                                                      ),
-                                                      Container()
-                                                    ],
-                                                  )),
-                                            ),
-                                            footer: GestureDetector(
-                                              onTap: () {
-                                                onTapProject(
-                                                    _projectLists[index]);
-                                              },
-                                              child: Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      10, 0, 0, 20),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 5),
-                                                        child: Text(
-                                                          _projectLists[index]
-                                                              .projectName,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ),
-                                                      Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          Container(
-                                                            width: 20.0,
-                                                            height: 20.0,
-                                                            decoration:
-                                                                new BoxDecoration(
-                                                              image:
-                                                                  new DecorationImage(
-                                                                image: new AssetImage(
-                                                                    "assets/icons/pin.png"),
-                                                                fit:
-                                                                    BoxFit.fill,
-                                                              ),
-                                                              borderRadius:
-                                                                  new BorderRadius
-                                                                      .all(new Radius
-                                                                          .circular(
-                                                                      50.0)),
-                                                            ),
-                                                          ),
-                                                          SizedBox(width: 5),
-                                                          Expanded(
-                                                            child: Text(
-                                                              _projectLists[
-                                                                          index]
-                                                                      .address +
-                                                                  ' , ' +
                                                                   _projectLists[
                                                                           index]
-                                                                      .city,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              style: TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .grey),
+                                                                      .projectName,
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .description,
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .status);
+                                                            },
+                                                            child: Padding(
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10),
+                                                              child: image(
+                                                                  Strings.baseImageUrl +
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .projectImg,
+                                                                  65.0,
+                                                                  65.0),
                                                             ),
                                                           ),
+                                                          Container()
                                                         ],
-                                                      )
-                                                    ],
-                                                  )),
+                                                      )),
+                                                ),
+                                                footer: GestureDetector(
+                                                  onTap: () {
+                                                    onTapProject(
+                                                        _projectLists[index]);
+                                                  },
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 0, 0, 20),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 5),
+                                                            child: Text(
+                                                              _projectLists[
+                                                                      index]
+                                                                  .projectName,
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ),
+                                                          Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .end,
+                                                            children: [
+                                                              Container(
+                                                                width: 20.0,
+                                                                height: 20.0,
+                                                                decoration:
+                                                                    new BoxDecoration(
+                                                                  image:
+                                                                      new DecorationImage(
+                                                                    image: new AssetImage(
+                                                                        "assets/icons/pin.png"),
+                                                                    fit: BoxFit
+                                                                        .fill,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      new BorderRadius
+                                                                          .all(new Radius
+                                                                              .circular(
+                                                                          50.0)),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 5),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  _projectLists[
+                                                                              index]
+                                                                          .address +
+                                                                      ' , ' +
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .city,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .clip,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          12,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      color: Colors
+                                                                          .grey),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      )),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                          );
+                                        },
+                                      ),
                           )
                         : Container(
                             height: MediaQuery.of(context).size.height * .75,
@@ -644,6 +705,7 @@ class _DashboardState extends State<Dashboard>
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
+      Strings.isLogin = false;
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);

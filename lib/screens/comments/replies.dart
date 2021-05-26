@@ -1,29 +1,54 @@
+import 'dart:async';
 import 'dart:convert';
-
+import 'dart:typed_data';
+import 'dart:io' as Io;
+import 'package:audioplayers/audio_cache.dart';
+import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:record/record.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
+AnimationController _animationController;
+AudioPlayer audioPlayer = AudioPlayer();
+AudioCache audioCache = AudioCache();
 final _userIitems = users
     .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
     .toList();
 final _catsItems = cats
     .map((cats) => MultiSelectItem<CatsData>(cats, cats.categoryName))
     .toList();
-var tagedUsers = "";
-var tagedUsersId = "";
-var tagedCats = "";
-var tagedCatsId = "";
+var tagedUsers = [];
+var tagedUsersId = [];
+var tagedCats = [];
+var tagedCatsId = [];
+var showscroll = true;
+var typing = false;
+var showtoastinfo = false;
+var startRecording = false;
+
+var isPlaying = false;
+var playingIndex = null;
+int audioLength = 0;
+int audioCurrentlenth = 0;
+Timer _timer;
+List<int> recordedData = [];
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -33,6 +58,33 @@ class Replies extends StatefulWidget {
 }
 
 class _RepliesState extends State<Replies> {
+  @override
+  Widget build(BuildContext context) {
+    return Provider<ApiService>(
+        create: (context) => ApiService.create(),
+        child: Scaffold(
+          appBar: appbar("Replies"),
+          backgroundColor: Colors.grey[300],
+          body: RepliesContent(),
+        ));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+}
+
+class RepliesContent extends StatefulWidget {
+  static const String routeName = "/replies";
+
+  @override
+  _RepliesContentState createState() => _RepliesContentState();
+}
+
+class _RepliesContentState extends State<RepliesContent>
+    with SingleTickerProviderStateMixin {
   IO.Socket _socket;
   var _currDoc;
 
@@ -42,7 +94,18 @@ class _RepliesState extends State<Replies> {
   @override
   void initState() {
     super.initState();
-    print("in");
+    Strings.pushNotify = false;
+    _animationController = new AnimationController(
+        vsync: this, duration: Duration(milliseconds: 500));
+    _animationController.repeat(reverse: true);
+
+    setState(() {
+      tagedUsers = [];
+      tagedUsersId = [];
+      tagedCats = [];
+      tagedCatsId = [];
+      // Strings.comments = [];
+    });
 
     if (Strings.category == true) {
       _currDoc = Strings.selectedCatDocument[0];
@@ -62,10 +125,34 @@ class _RepliesState extends State<Replies> {
   }
 
   @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+    Strings.pushNotify = true;
+    tagedUsers = [];
+    tagedUsersId = [];
+    tagedCats = [];
+    tagedCatsId = [];
+    // Strings.comments = [];
+  }
+
+  Stopwatch watch = Stopwatch();
+  bool startStop = true;
+  String elapsedTime = '';
+
+  updateTime(Timer _timer) {
+    if (watch.isRunning) {
+      setState(() {
+        print("startstop Inside=$startStop");
+        elapsedTime = transformMilliSeconds(watch.elapsedMilliseconds);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: appbar("Replies"),
       body: Column(
         children: [
           SizedBox(
@@ -227,7 +314,9 @@ class _RepliesState extends State<Replies> {
                   )
                 ],
               )),
-          Strings.comments[Strings.selectedCommentsIndex].replies.length > 0
+          Strings.comments[Strings.selectedCommentsIndex].replies.length > 0 &&
+                  Strings.comments[Strings.selectedCommentsIndex].replies !=
+                      null
               ? Expanded(
                   child: ListView.builder(
                       shrinkWrap: true,
@@ -332,17 +421,159 @@ class _RepliesState extends State<Replies> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                      Strings
-                                                          .comments[Strings
-                                                              .selectedCommentsIndex]
-                                                          .replies[index]
-                                                          .comment,
-                                                      style: Drawables
-                                                          .adddoccontentstyle(
-                                                              Colors.black45,
-                                                              14.0,
-                                                              FontWeight.w400)),
+                                                  Strings
+                                                                  .comments[Strings
+                                                                      .selectedCommentsIndex]
+                                                                  .replies[
+                                                                      index]
+                                                                  .audio ==
+                                                              "" ||
+                                                          Strings
+                                                                  .comments[Strings
+                                                                      .selectedCommentsIndex]
+                                                                  .replies[
+                                                                      index]
+                                                                  .audio ==
+                                                              null
+                                                      ? Text(
+                                                          Strings
+                                                              .comments[Strings
+                                                                  .selectedCommentsIndex]
+                                                              .replies[index]
+                                                              .comment
+                                                              .toString(),
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black45,
+                                                                  14.0,
+                                                                  FontWeight
+                                                                      .w400))
+                                                      : Row(
+                                                          children: [
+                                                            isPlaying == false
+                                                                ? GestureDetector(
+                                                                    onTap: () {
+                                                                      setState(
+                                                                          () {
+                                                                        if (isPlaying ==
+                                                                            true) {
+                                                                          stopAudio();
+                                                                          _timer = new Timer(
+                                                                              const Duration(milliseconds: 500),
+                                                                              () {
+                                                                            setState(() {
+                                                                              isPlaying = true;
+                                                                              playingIndex = index;
+                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                            });
+                                                                          });
+                                                                        } else {
+                                                                          isPlaying =
+                                                                              true;
+                                                                          playingIndex =
+                                                                              index;
+                                                                          playAudio(Strings
+                                                                              .comments[Strings.selectedCommentsIndex]
+                                                                              .replies[index]
+                                                                              .audio);
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                    child: new Icon(
+                                                                        Icons
+                                                                            .play_arrow,
+                                                                        size:
+                                                                            28.0),
+                                                                  )
+                                                                : playingIndex ==
+                                                                        index
+                                                                    ? GestureDetector(
+                                                                        onTap:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            isPlaying =
+                                                                                false;
+                                                                          });
+
+                                                                          stopAudio();
+                                                                        },
+                                                                        child: new Icon(
+                                                                            Icons
+                                                                                .stop,
+                                                                            size:
+                                                                                28.0),
+                                                                      )
+                                                                    : GestureDetector(
+                                                                        onTap:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            if (isPlaying ==
+                                                                                true) {
+                                                                              stopAudio();
+                                                                              _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                setState(() {
+                                                                                  isPlaying = true;
+                                                                                  playingIndex = index;
+                                                                                  playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                                });
+                                                                              });
+                                                                            } else {
+                                                                              isPlaying = true;
+                                                                              playingIndex = index;
+                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                            }
+                                                                          });
+                                                                        },
+                                                                        child: new Icon(
+                                                                            Icons
+                                                                                .play_arrow,
+                                                                            size:
+                                                                                28.0),
+                                                                      ),
+                                                            SizedBox(
+                                                              width: 10,
+                                                            ),
+                                                            Slider(
+                                                              value: playingIndex ==
+                                                                      index
+                                                                  ? audioCurrentlenth
+                                                                      .toDouble()
+                                                                  : 0,
+                                                              min: 0,
+                                                              max: playingIndex ==
+                                                                      index
+                                                                  ? audioLength
+                                                                      .toDouble()
+                                                                  : 0,
+                                                              onChanged: (double
+                                                                  value) {
+                                                                setState(() {
+                                                                  playingIndex ==
+                                                                          index
+                                                                      ? audioCurrentlenth =
+                                                                          value
+                                                                              .toInt()
+                                                                      : 0;
+                                                                  // _currentSliderValue = value;
+                                                                });
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                  // Text(
+                                                  //     Strings
+                                                  //         .comments[Strings
+                                                  //             .selectedCommentsIndex]
+                                                  //         .replies[index]
+                                                  //         .comment,
+                                                  //     style: Drawables
+                                                  //         .adddoccontentstyle(
+                                                  //             Colors.black45,
+                                                  //             14.0,
+                                                  //             FontWeight.w400)),
                                                   SizedBox(
                                                     height: 10,
                                                   ),
@@ -407,17 +638,15 @@ class _RepliesState extends State<Replies> {
                     ),
                     onConfirm: (results) {
                       if (results.length > 0) {
-                        tagedUsers = "";
-                        tagedUsersId = "";
+                        tagedUsers = [];
+                        tagedUsersId = [];
                         results.forEach((element) {
-                          tagedUsers = tagedUsers + "," + element.name;
-                          tagedUsersId = tagedUsersId.toString() +
-                              "," +
-                              element.userId.toString();
+                          tagedUsers.add(element.name);
+                          tagedUsersId.add(element.userId);
                         });
                       } else {
-                        tagedUsers = "";
-                        tagedUsersId = "";
+                        tagedUsers = [];
+                        tagedUsersId = [];
                       }
                     },
                   ),
@@ -449,17 +678,19 @@ class _RepliesState extends State<Replies> {
                     ),
                     onConfirm: (results) {
                       if (results.length > 0) {
-                        tagedCats = "";
-                        tagedCatsId = "";
+                        tagedCats = [];
+                        tagedCatsId = [];
                         results.forEach((element) {
-                          tagedCats = tagedCats + "," + element.categoryName;
-                          tagedCatsId = tagedCatsId.toString() +
-                              "," +
-                              element.categoryId.toString();
+                          tagedCats.add(element.categoryName);
+                          tagedCatsId.add(element.categoryId);
+                          // tagedCats = tagedCats + "," + element.categoryName;
+                          // tagedCatsId = tagedCatsId.toString() +
+                          //     "," +
+                          //     element.categoryId.toString();
                         });
                       } else {
-                        tagedCats = "";
-                        tagedCatsId = "";
+                        tagedCats = [];
+                        tagedCatsId = [];
                       }
                       //_selectedAnimals = results;
                     },
@@ -468,33 +699,139 @@ class _RepliesState extends State<Replies> {
               ],
             ),
           ),
-          SizedBox(height: 40),
+          SizedBox(height: 10),
           Container(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: showtoastinfo == true
+                          ? Colors.grey[400]
+                          : Colors.grey[300],
+                      borderRadius: new BorderRadius.all(Radius.circular(20))),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      showtoastinfo == true
+                          ? "Hold to record, release to send"
+                          : "",
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                )
+              ],
+            ),
+          ),
+          Stack(children: [
+            Align(
+              alignment: Alignment.topLeft,
               child: Container(
-                padding: EdgeInsets.only(left: 20),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    color: Colors.white),
-                child: TextField(
-                  controller: _msgcontroller,
-                  focusNode: msgField,
-                  style: TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                      hintText: "Type your reply..",
-                      hintStyle: TextStyle(color: Colors.grey),
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                          icon: Icon(Icons.send, color: Color(0xFF0061b0)),
-                          onPressed: () {
-                            postReplies();
-                          })),
+                width: MediaQuery.of(context).size.width * 0.85,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    padding: EdgeInsets.only(left: 20),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(50)),
+                        color: Colors.white),
+                    child: TextField(
+                      controller: _msgcontroller,
+                      onChanged: (value) {
+                        if (value.length > 0) {
+                          setState(() {
+                            typing = true;
+                          });
+                        } else {
+                          setState(() {
+                            typing = false;
+                          });
+                        }
+                      },
+                      style: TextStyle(color: Colors.black),
+                      focusNode: msgField,
+                      decoration: InputDecoration(
+                          hintText: startRecording == true
+                              ? elapsedTime
+                              : "Type your comment..",
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: InputBorder.none,
+                          prefixIcon: FadeTransition(
+                            opacity: _animationController,
+                            child: startRecording == true
+                                ? Icon(Icons.mic, color: Colors.red)
+                                : SizedBox(
+                                    width: 0,
+                                  ),
+                          )),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            Positioned(
+              right: startRecording == true ? 10 : 15,
+              bottom: startRecording == true ? 0 : 12,
+              child: Container(
+                width: startRecording == true ? 60 : 40,
+                height: startRecording == true ? 60 : 40,
+                decoration: BoxDecoration(
+                    color: Color(0xFF0061b0),
+                    borderRadius:
+                        new BorderRadius.all(new Radius.circular(50.0))),
+                child: GestureDetector(
+                  onLongPress: () {
+                    setState(() {
+                      startRecording = true;
+                      startOrStop();
+                      recordComments();
+                    });
+                  },
+                  onLongPressEnd: (details) async {
+                    // AppUtils.showToast(details.toString());
+                    setState(() async {
+                      startRecording = false;
+                      startOrStop();
+                      stopRecord();
+                      sendAudio();
+                    });
+                  },
+                  onTap: () {
+                    if (typing == true) {
+                      postReplies();
+                    } else {
+                      setState(() {
+                        showtoastinfo = true;
+                      });
+                      _timer =
+                          new Timer(const Duration(milliseconds: 2000), () {
+                        setState(() {
+                          showtoastinfo = false;
+                        });
+                      });
+                    }
+                  },
+                  child: typing == false
+                      ? Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 22,
+                        )
+                      : Icon(
+                          Icons.send,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                ),
+              ),
+            ),
+          ]),
         ],
       ),
     );
@@ -509,44 +846,225 @@ class _RepliesState extends State<Replies> {
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
+        // _scrollController.animateTo(
+        //   _scrollController.position.maxScrollExtent,
+        //   curve: Curves.fastOutSlowIn,
+        //   duration: const Duration(seconds: 1),
+        // );
+        // msgField.unfocus();
+      });
+    });
+  }
+
+  recordComments() async {
+    var dir = await ExtStorage.getExternalStoragePublicDirectory(
+        ExtStorage.DIRECTORY_DOWNLOADS);
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      getPermission();
+    } else {
+      await Record.start(
+        path: dir + "/MTARecordedAudio.wav",
+        encoder: AudioEncoder.AAC,
+      );
+    }
+  }
+
+  stopRecord() async {
+    await Record.stop();
+  }
+
+  playAudio(url) async {
+    // var dir = await ExtStorage.getExternalStoragePublicDirectory(
+    //     ExtStorage.DIRECTORY_DOWNLOADS);
+    // String url = dir + "/MTARecordedAudio.wav";
+    await audioPlayer.play(Strings.baseImageUrl + url,
+        volume: 5, stayAwake: false);
+    audioPlayer.onDurationChanged.listen((Duration d) {
+      int seconds = d.inSeconds;
+      print('Max duration: $d');
+      setState(() {
+        audioLength = seconds;
+      });
+    });
+    audioPlayer.onAudioPositionChanged.listen((Duration p) {
+      int seconds = p.inSeconds;
+      print('curr duration: $p');
+      setState(() {
+        audioCurrentlenth = seconds;
+      });
+    });
+    audioPlayer.onPlayerCompletion.listen((event) {
+      setState(() {
+        audioLength = 0;
+        audioCurrentlenth = 0;
+        playingIndex = null;
+        isPlaying = false;
+      });
+    });
+    audioPlayer.onPlayerError.listen((msg) {
+      print('audioPlayer error : $msg');
+    });
+  }
+
+  stopAudio() async {
+    await audioPlayer.stop();
+    setState(() {
+      audioLength = 0;
+      audioCurrentlenth = 0;
+      playingIndex = null;
+      isPlaying = false;
+    });
+  }
+
+  sendAudio() async {
+    AppUtils.showprogress();
+    var dir = await ExtStorage.getExternalStoragePublicDirectory(
+        ExtStorage.DIRECTORY_DOWNLOADS);
+    final bytesData =
+        await Io.File(dir + "/MTARecordedAudio.wav").readAsBytes();
+    String base64Encodes(List<int> bytes) => base64.encode(bytes);
+    String base64Encode = base64Encodes(bytesData);
+    final api = Provider.of<ApiService>(context, listen: false);
+    AudioReq req = AudioReq();
+    req.audio = "data:audio/wav;base64," + base64Encode;
+    api.uploadAudio(req).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status) {
+        _socket.emit(
+            'create-document-comment',
+            json.encode({
+              "project_id": Strings.selectedProject[0].projectId,
+              "project_name": Strings.selectedProject[0].projectName,
+              "audio": response.data,
+              "comment": _msgcontroller.text,
+              "document_id": Strings.category == true
+                  ? Strings.selectedCatDocument[0].documentId
+                  : Strings.selectedProDocument[0].documentId,
+              'recipient_id': json.encode(tagedUsersId),
+              'recipient': json.encode(tagedUsers),
+              "category_id_list": json.encode(tagedCatsId),
+              "category_list": json.encode(tagedCats),
+              'parent_comment_id':
+                  Strings.comments[Strings.selectedCommentsIndex].commentId
+            }));
+
+        setState(() {
+          if (Strings.category == true) {
+            Strings.selectedCatDocument[0].commentsCount =
+                Strings.selectedCatDocument[0].commentsCount + 1;
+          } else {
+            Strings.selectedProDocument[0].commentsCount =
+                Strings.selectedProDocument[0].commentsCount + 1;
+          }
+          tagedUsers = [];
+          tagedUsersId = [];
+          tagedCats = [];
+          tagedCatsId = [];
+          _msgcontroller.text = '';
+          typing = false;
+          // if (showscroll != true) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            curve: Curves.fastOutSlowIn,
+            duration: const Duration(seconds: 1),
+          );
+          msgField.unfocus();
+          // } else {
+          //   showscroll = false;
+          // }
+        });
+      } else {
+        AppUtils.showToastErrorTop(response.message);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  postReplies() {
+    // print(json.encode(tagedUsersId.toString()));
+    if (_msgcontroller.text.trim() == "") {
+      AppUtils.showToastError("Please Enter Comments");
+    } else {
+      _socket.emit(
+          'create-document-comment',
+          json.encode({
+            "project_id": Strings.selectedProject[0].projectId,
+            "project_name": Strings.selectedProject[0].projectName,
+            "audio": "",
+            "comment": _msgcontroller.text,
+            "document_id": Strings.category == true
+                ? Strings.selectedCatDocument[0].documentId
+                : Strings.selectedProDocument[0].documentId,
+            'recipient_id': json.encode(tagedUsersId),
+            'recipient': json.encode(tagedUsers),
+            "category_id_list": json.encode(tagedCatsId),
+            "category_list": json.encode(tagedCats),
+            'parent_comment_id':
+                Strings.comments[Strings.selectedCommentsIndex].commentId
+          }));
+
+      // print(tagedUsers);
+      // print(tagedCatsId);
+      // print(tagedCats);
+      setState(() {
+        if (Strings.category == true) {
+          Strings.selectedCatDocument[0].commentsCount =
+              Strings.selectedCatDocument[0].commentsCount + 1;
+        } else {
+          Strings.selectedProDocument[0].commentsCount =
+              Strings.selectedProDocument[0].commentsCount + 1;
+        }
+        tagedUsers = [];
+        tagedUsersId = [];
+        tagedCats = [];
+        tagedCatsId = [];
+        _msgcontroller.text = '';
+        typing = false;
+        // if (showscroll != true) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           curve: Curves.fastOutSlowIn,
           duration: const Duration(seconds: 1),
         );
         msgField.unfocus();
-      });
-    });
-  }
-
-  postReplies() {
-    if (_msgcontroller.text.trim() == "") {
-      AppUtils.showToastError("Please Enter Reply");
-    } else {
-      _socket.emit(
-          'create-document-comment',
-          json.encode({
-            "comment": _msgcontroller.text,
-            "document_id": Strings.category == true
-                ? Strings.selectedCatDocument[0].documentId
-                : Strings.selectedProDocument[0].documentId,
-            'recipient_id': tagedUsersId,
-            'recipient': tagedUsers,
-            "category_id_list": tagedCatsId,
-            "category_list": tagedCats,
-            'parent_comment_id':
-                Strings.comments[Strings.selectedCommentsIndex].commentId
-          }));
-      setState(() {
-        tagedUsers = "";
-        tagedUsersId = "";
-        tagedCats = "";
-        tagedCatsId = "";
-        _msgcontroller.text = '';
-        _msgcontroller.text = '';
+        // } else {
+        //   showscroll = false;
+        // }
       });
     }
   }
+
+  // postReplies() {
+  //   if (_msgcontroller.text.trim() == "") {
+  //     AppUtils.showToastError("Please Enter Reply");
+  //   } else {
+  //     _socket.emit(
+  //         'create-document-comment',
+  //         json.encode({
+  //           "comment": _msgcontroller.text,
+  //           "document_id": Strings.category == true
+  //               ? Strings.selectedCatDocument[0].documentId
+  //               : Strings.selectedProDocument[0].documentId,
+  //           'recipient_id': tagedUsersId,
+  //           'recipient': tagedUsers,
+  //           "category_id_list": tagedCatsId,
+  //           "category_list": tagedCats,
+  //           'parent_comment_id':
+  //               Strings.comments[Strings.selectedCommentsIndex].commentId
+  //         }));
+  //     setState(() {
+  //       tagedUsers = "";
+  //       tagedUsersId = "";
+  //       tagedCats = "";
+  //       tagedCatsId = "";
+  //       _msgcontroller.text = '';
+  //       _msgcontroller.text = '';
+  //     });
+  //   }
+  // }
 
   static String calculateTimeDifferenceBetween({@required String serverDate}) {
     DateTime startDate = DateTime.parse(serverDate);
@@ -560,6 +1078,55 @@ class _RepliesState extends State<Replies> {
       return '${startDate.difference(endDate).inHours.abs()} hour ago';
     else
       return '${startDate.difference(endDate).inDays.abs()} day ago';
+  }
+
+  startOrStop() {
+    if (startStop) {
+      startWatch();
+    } else {
+      stopWatch();
+    }
+  }
+
+  reset() {
+    watch.reset();
+  }
+
+  startWatch() {
+    setState(() {
+      startStop = false;
+      watch.start();
+      _timer = Timer.periodic(Duration(milliseconds: 100), updateTime);
+    });
+  }
+
+  stopWatch() {
+    setState(() {
+      startStop = true;
+      watch.stop();
+      setTime();
+      reset();
+    });
+  }
+
+  setTime() {
+    var timeSoFar = watch.elapsedMilliseconds;
+    setState(() {
+      elapsedTime = transformMilliSeconds(timeSoFar);
+    });
+  }
+
+  transformMilliSeconds(int milliseconds) {
+    int hundreds = (milliseconds / 10).truncate();
+    int seconds = (hundreds / 100).truncate();
+    int minutes = (seconds / 60).truncate();
+    int hours = (minutes / 60).truncate();
+
+    String hoursStr = (hours % 60).toString().padLeft(2, '0');
+    String minutesStr = (minutes % 60).toString().padLeft(2, '0');
+    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
+
+    return "$hoursStr:$minutesStr:$secondsStr";
   }
 }
 
@@ -628,4 +1195,16 @@ Future<void> _showMyDialog(context, imgurl) async {
       );
     },
   );
+}
+
+void getPermission() async {
+  var status = await Permission.microphone.status;
+  if (status.isDenied) {
+    await Permission.microphone.request();
+  } else if (status.isPermanentlyDenied) {
+    AppUtils.showToastError(
+        "Please enable Microphone from App permission Settings");
+  } else {
+    await Permission.microphone.request();
+  }
 }

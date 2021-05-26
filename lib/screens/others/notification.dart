@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/models/DashboardRes.dart';
+import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -165,54 +167,94 @@ class _NotificationContentState extends State<NotificationContent>
                       child: ListView.builder(
                         padding: EdgeInsets.all(20),
                         itemBuilder: (BuildContext ctx, int index) {
-                          return Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Container(
-                              child: Padding(
-                                padding: EdgeInsets.all(15),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(_msgList[index].title,
-                                              style:
-                                                  Drawables.adddoccontentstyle(
-                                                      Color(0xFF0061b0),
-                                                      16.0,
-                                                      FontWeight.w600)),
-                                          Text(_msgList[index].description,
-                                              style:
-                                                  Drawables.adddoccontentstyle(
-                                                      Colors.black87,
-                                                      14.0,
-                                                      FontWeight.w500)),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      decoration: new BoxDecoration(
-                                        color: const Color(0xff7c94b6),
-                                        image: new DecorationImage(
-                                          image: new NetworkImage(
-                                              Strings.baseImageUrl +
-                                                  _msgList[index].imgUrl),
-                                          fit: BoxFit.fill,
+                          return GestureDetector(
+                            onTap: () {
+                              var data = {
+                                "document_id":
+                                    _msgList[index].docDetail[0].documentId,
+                                "file": _msgList[index].docDetail[0].file,
+                                "file_name":
+                                    _msgList[index].docDetail[0].fileName,
+                                // "user_id": 4,
+                                // "name": "Super Admin",
+                                // "created_at": "2021-05-03 08:09:51",
+                                // "description": "Sample Images",
+                                "commentsCount": 0
+                              };
+                              // Strings.selectedNotifyDocumentFlag = true;
+                              // Strings.selectedNotifyDocument = [];
+                              // Strings.selectedNotifyDocument
+                              //     .add(ProjectDocData.fromJson(data));
+                              Strings.category = false;
+                              Strings.selectedProDocument = [];
+
+                              Strings.selectedProDocument
+                                  .add(ProjectDocData.fromJson(data));
+                              Strings.selectedProject.add(Data.fromJson({
+                                "project_id":
+                                    _msgList[index].docDetail[0].projectId,
+                                "project_name":
+                                    _msgList[index].docDetail[0].projectName
+                              }));
+                              getUserCats(
+                                  _msgList[index].docDetail[0].projectId);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Container(
+                                child: Padding(
+                                  padding: EdgeInsets.all(15),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(_msgList[index].title,
+                                                style: Drawables
+                                                    .adddoccontentstyle(
+                                                        Color(0xFF0061b0),
+                                                        16.0,
+                                                        FontWeight.w600)),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(_msgList[index].description,
+                                                style: Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.black87,
+                                                        14.0,
+                                                        FontWeight.w500)),
+                                          ],
                                         ),
-                                        borderRadius: new BorderRadius.all(
-                                            new Radius.circular(50.0)),
                                       ),
-                                    ),
-                                  ],
+                                      _msgList[index].imgUrl != ""
+                                          ? Container(
+                                              width: 40.0,
+                                              height: 40.0,
+                                              decoration: new BoxDecoration(
+                                                color: const Color(0xff7c94b6),
+                                                image: new DecorationImage(
+                                                  image: new NetworkImage(
+                                                      Strings.baseImageUrl +
+                                                          _msgList[index]
+                                                              .imgUrl),
+                                                  fit: BoxFit.fill,
+                                                ),
+                                                borderRadius: new BorderRadius
+                                                        .all(
+                                                    new Radius.circular(50.0)),
+                                              ),
+                                            )
+                                          : SizedBox(),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Color(0xFFffffff),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Color(0xFFffffff),
+                                ),
                               ),
                             ),
                           );
@@ -255,6 +297,38 @@ class _NotificationContentState extends State<NotificationContent>
         });
       } else {
         AppUtils.showToastError(response.message);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  getUserCats(proId) {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchUsers(proId).then((response) {
+      if (response.status) {
+        setState(() {
+          Strings.users = response.data;
+        });
+        final api = Provider.of<ApiService>(context, listen: false);
+        api.fetchCats(proId).then((response) {
+          AppUtils.dismissprogress();
+          if (response.status) {
+            setState(() {
+              Strings.categories = response.data;
+              Navigator.pushNamed(context, '/comments');
+            });
+          } else {
+            print('error');
+          }
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      } else {
+        print('error');
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
