@@ -245,16 +245,33 @@ class _RepliesContentState extends State<RepliesContent>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                          Strings
-                                              .comments[
-                                                  Strings.selectedCommentsIndex]
-                                              .comment
-                                              .toString(),
-                                          style: Drawables.adddoccontentstyle(
-                                              Colors.black45,
-                                              14.0,
-                                              FontWeight.w400)),
+                                      Strings
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      .audio ==
+                                                  "" ||
+                                              Strings
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      .audio ==
+                                                  null
+                                          ? Text(
+                                              Strings
+                                                  .comments[Strings
+                                                      .selectedCommentsIndex]
+                                                  .comment
+                                                  .toString(),
+                                              style:
+                                                  Drawables.adddoccontentstyle(
+                                                      Colors.black45,
+                                                      14.0,
+                                                      FontWeight.w400))
+                                          : Text("Audio Message",
+                                              style:
+                                                  Drawables.adddoccontentstyle(
+                                                      Colors.black45,
+                                                      14.0,
+                                                      FontWeight.w400)),
                                       SizedBox(
                                         height: 10,
                                       ),
@@ -846,12 +863,14 @@ class _RepliesContentState extends State<RepliesContent>
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
-        // _scrollController.animateTo(
-        //   _scrollController.position.maxScrollExtent,
-        //   curve: Curves.fastOutSlowIn,
-        //   duration: const Duration(seconds: 1),
-        // );
-        // msgField.unfocus();
+        _timer = new Timer(const Duration(milliseconds: 1000), () {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            curve: Curves.fastOutSlowIn,
+            duration: const Duration(seconds: 1),
+          );
+          msgField.unfocus();
+        });
       });
     });
   }

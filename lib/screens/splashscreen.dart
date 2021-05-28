@@ -75,7 +75,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   Widget build(BuildContext context) {
     return Container(
       child: Image.asset(
-        'assets/images/background1.png',
+        'assets/images/splash_p.png',
         fit: BoxFit.fill,
       ),
     );

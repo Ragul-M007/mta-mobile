@@ -500,7 +500,11 @@ class _ProfileContentState extends State<ProfileContent> {
         editAddress.text = _profileData[0].area;
         editState.text = _profileData[0].state;
         editCity.text = _profileData[0].city;
-        Strings.profilePic = _profileData[0].userImg;
+        if (_profileData[0].userImg != null) {
+          Strings.profilePic = _profileData[0].userImg;
+        } else {
+          Strings.profilePic = "";
+        }
       });
     }).catchError((onError) {
       AppUtils.dismissprogress();

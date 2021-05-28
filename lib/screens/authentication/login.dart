@@ -176,8 +176,13 @@ class _LoginContentState extends State<LoginContent>
       if (response.status) {
         AppUtils.savePreferences("emailId", response.data.emailId);
         AppUtils.savePreferences("userId", response.data.userId);
-        AppUtils.savePreferences("profilePic", response.data.userImg);
-        Strings.profilePic = response.data.userImg;
+        if (response.data.userImg != null) {
+          AppUtils.savePreferences("profilePic", response.data.userImg);
+          Strings.profilePic = response.data.userImg;
+        } else {
+          AppUtils.savePreferences("profilePic", "");
+          Strings.profilePic = "";
+        }
         Strings.userID = response.data.userId;
         Strings.username = response.data.name;
         Strings.roleId = response.data.roleId;

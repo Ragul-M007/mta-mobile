@@ -10,6 +10,7 @@ mixin Strings {
   static String authToken = '';
   static String baseImageUrl = "https://demo.emeetify.com:81/";
   static String socketUrl = 'https://demo.emeetify.com:5012/';
+  static String imageUrl = 'https://demo.emeetify.com:5016/';
   static String profilePic;
   static int currentmenuvalue = 1;
   static int userID;

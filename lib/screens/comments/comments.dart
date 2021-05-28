@@ -730,20 +730,24 @@ class _CommentsContentState extends State<CommentsContent>
     _socket.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
+
       setState(() {
         Strings.comments = [];
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
+        }
+
+        _timer = new Timer(const Duration(milliseconds: 1000), () {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            curve: Curves.fastOutSlowIn,
+            duration: const Duration(seconds: 1),
+          );
+          msgField.unfocus();
           Strings.selectedProDocument[0].commentsCount =
               Strings.comments.length;
-        }
+        });
       });
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        curve: Curves.fastOutSlowIn,
-        duration: const Duration(seconds: 1),
-      );
-      msgField.unfocus();
     });
   }
 

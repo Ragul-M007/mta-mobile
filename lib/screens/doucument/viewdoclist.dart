@@ -705,9 +705,9 @@ class _ViewDocContentState extends State<ViewDocContent> {
           setState(() {
             _errText = "No Documents found !";
           });
-          if (response.message != null) {
-            AppUtils.showToastError(response.message);
-          }
+          // if (response.message != null) {
+          //   AppUtils.showToastError(response.message);
+          // }
           // else {
           //   AppUtils.showToastError("No Documents found !");
           // }
@@ -729,10 +729,11 @@ class _ViewDocContentState extends State<ViewDocContent> {
         } else {
           setState(() {
             _errText = "No Documents found !";
+            //  _errText = response.message;
           });
-          if (response.message != null) {
-            AppUtils.showToastError(response.message);
-          }
+          // if (response.message != null) {
+          //   AppUtils.showToastError(response.message);
+          // }
           // else {
           //   AppUtils.showToastError("No Documents found !");
           // }

@@ -217,10 +217,11 @@ class _CategoriesContentState extends State<CategoriesContent> {
       } else {
         setState(() {
           _errText = "No Categories found !";
+          // _errText = response.message;
         });
-        if (response.message != null) {
-          AppUtils.showToastError(response.message);
-        }
+        // if (response.message != null) {
+        //   AppUtils.showToastError(response.message);
+        // }
         //  else {
         //   AppUtils.showToastError("No Categories found !");
         // }

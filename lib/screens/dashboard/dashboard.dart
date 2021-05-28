@@ -107,11 +107,12 @@ class _DashboardState extends State<Dashboard>
         }
       } else {
         setState(() {
-          _errText = "No Projects found !";
+          // _errText = "No Projects found !";
+          _errText = response.message;
         });
-        if (response.message != null) {
-          AppUtils.showToastError(response.message);
-        }
+        // if (response.message != null) {
+        //   AppUtils.showToastError(response.message);
+        // }
         if (Strings.isPushAvailable == true) {
           Strings.isPushAvailable = false;
           getUserCats(Strings.selectedProject[0].projectId);
