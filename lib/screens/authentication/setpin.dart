@@ -5,6 +5,8 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mta/screens/attendance/attendance.dart';
+
 
 class Setpin extends StatefulWidget {
   static const String routeName = "/setpin";
@@ -15,8 +17,8 @@ class Setpin extends StatefulWidget {
 
 class _SetpinState extends State<Setpin> {
   final mobileField = TextEditingController();
-  String codeVerifyField;
-  String verificationCode;
+  String? codeVerifyField;
+  String? verificationCode;
 
   bool _isLoading = false;
 
@@ -30,11 +32,11 @@ class _SetpinState extends State<Setpin> {
   final threeT = TextEditingController();
   final fourT = TextEditingController();
 
-  BuildContext ctx;
+  BuildContext? ctx;
 
   signin() {
     AppUtils.showprogress();
-    final api = Provider.of<ApiService>(ctx, listen: false);
+    final api = Provider.of<ApiService>(ctx!, listen: false);
     SetPinReq setpinreq = SetPinReq();
     setpinreq.loginpin = codeVerifyField;
     AppUtils.getIntPreferences('userId').then((value) {
@@ -43,12 +45,22 @@ class _SetpinState extends State<Setpin> {
           AppUtils.dismissprogress();
           print('setPinResponse status ${response.toJson()}');
 
-          if (response.status) {
+          if (response.status!) {
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
-            Navigator.pushNamed(ctx, "/dashboard");
+
+
+            if(Strings.FromNotification)
+            {
+                Strings.FromNotification = false;
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
+            }
+            else
+            {
+                Navigator.pushNamed(ctx!, "/dashboard");
+            }
           } else {
-            AppUtils.showToastError(response.message);
+            AppUtils.showToastError(response.message!);
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
@@ -146,8 +158,8 @@ class _SetpinState extends State<Setpin> {
                       codeVerifyField =
                           oneT.text + twoT.text + threeT.text + fourT.text;
                       print(codeVerifyField);
-                      print("${codeVerifyField.length}");
-                      if (codeVerifyField.length < 4) {
+                      print("${codeVerifyField!.length}");
+                      if (codeVerifyField!.length < 4) {
                         AppUtils.showToastError("Please Enter Pin");
                       } else {
                         signin();
@@ -188,7 +200,8 @@ class _SetpinState extends State<Setpin> {
         height: 50,
         width: 40,
         child: TextField(
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
+          textInputAction: TextInputAction.done,
           maxLength: 1,
           autofocus: true,
           controller: val == 1

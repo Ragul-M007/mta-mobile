@@ -13,11 +13,11 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
-FancyDrawerController _controller;
+FancyDrawerController? _controller;
 List<NotificationData> _msgList = [];
 
 class PushNotification extends StatelessWidget {
-  const PushNotification({Key key}) : super(key: key);
+  const PushNotification({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +47,13 @@ class _NotificationContentState extends State<NotificationContent>
 
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => getNotification());
+    WidgetsBinding.instance?.addPostFrameCallback((_) => getNotification());
   }
-
   menuopen() {}
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -65,7 +64,7 @@ class _NotificationContentState extends State<NotificationContent>
           Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
       child: FancyDrawerWrapper(
         backgroundColor: Colors.transparent,
-        controller: _controller,
+        controller: _controller!,
         drawerItems: <Widget>[
           Container(
             padding: EdgeInsets.only(bottom: 30),
@@ -76,12 +75,12 @@ class _NotificationContentState extends State<NotificationContent>
                     width: 60.0,
                     height: 60.0,
                     decoration: Drawables.menudecorationImage(
-                        "assets/images/logo.jpeg", 50.0)),
+                        "assets/images/logo.jpg", 50.0)),
                 SizedBox(
                   width: 10,
                 ),
                 Text(
-                  "MTA Architects",
+                  "MTA Connect",
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -97,7 +96,7 @@ class _NotificationContentState extends State<NotificationContent>
             selectedmenuvalue: 1,
             menutitle: "Projects",
           ),
-          Strings.roleId != 1
+          (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
               ? menuoption(
                   ontab: () {
                     menuRedirect(routename: "/attendance", currentmenu: 2);
@@ -168,13 +167,15 @@ class _NotificationContentState extends State<NotificationContent>
                         padding: EdgeInsets.all(20),
                         itemBuilder: (BuildContext ctx, int index) {
                           return GestureDetector(
-                            onTap: () {
-                              var data = {
+                            onTap: () 
+                            {
+                              var data = 
+                              {
                                 "document_id":
-                                    _msgList[index].docDetail[0].documentId,
-                                "file": _msgList[index].docDetail[0].file,
+                                    _msgList[index].docDetail?[0].documentId,
+                                "file": _msgList[index].docDetail?[0].file,
                                 "file_name":
-                                    _msgList[index].docDetail[0].fileName,
+                                    _msgList[index].docDetail?[0].fileName,
                                 // "user_id": 4,
                                 // "name": "Super Admin",
                                 // "created_at": "2021-05-03 08:09:51",
@@ -192,12 +193,12 @@ class _NotificationContentState extends State<NotificationContent>
                                   .add(ProjectDocData.fromJson(data));
                               Strings.selectedProject.add(Data.fromJson({
                                 "project_id":
-                                    _msgList[index].docDetail[0].projectId,
+                                    _msgList[index].docDetail?[0].projectId,
                                 "project_name":
-                                    _msgList[index].docDetail[0].projectName
+                                    _msgList[index].docDetail?[0].projectName
                               }));
-                              getUserCats(
-                                  _msgList[index].docDetail[0].projectId);
+                              // getUserCats(
+                              //     _msgList[index].docDetail?[0].projectId);
                             },
                             child: Padding(
                               padding: EdgeInsets.all(10),
@@ -211,7 +212,7 @@ class _NotificationContentState extends State<NotificationContent>
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(_msgList[index].title,
+                                            Text(_msgList[index].title!,
                                                 style: Drawables
                                                     .adddoccontentstyle(
                                                         Color(0xFF0061b0),
@@ -220,7 +221,7 @@ class _NotificationContentState extends State<NotificationContent>
                                             SizedBox(
                                               height: 10,
                                             ),
-                                            Text(_msgList[index].description,
+                                            Text(_msgList[index].description!,
                                                 style: Drawables
                                                     .adddoccontentstyle(
                                                         Colors.black87,
@@ -238,8 +239,8 @@ class _NotificationContentState extends State<NotificationContent>
                                                 image: new DecorationImage(
                                                   image: new NetworkImage(
                                                       Strings.baseImageUrl +
-                                                          _msgList[index]
-                                                              .imgUrl),
+                                                          (_msgList[index]
+                                                              .imgUrl ?? "")),
                                                   fit: BoxFit.fill,
                                                 ),
                                                 borderRadius: new BorderRadius
@@ -272,16 +273,16 @@ class _NotificationContentState extends State<NotificationContent>
     ));
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      Strings.currentmenuvalue = currentmenu;
+      Strings.currentmenuvalue = currentmenu!;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       //Navigator.popAndPushNamed(context, routename);
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 
@@ -291,14 +292,15 @@ class _NotificationContentState extends State<NotificationContent>
     api.notification().then((response) {
       AppUtils.dismissprogress();
       print('categoiresResponse status ${response.toJson()}');
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          _msgList = response.data;
+          _msgList = response.data!;
         });
       } else {
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastError(response.message!);
       }
-    }).catchError((onError) {
+    }).catchError((onError) 
+    {
       AppUtils.dismissprogress();
       print(onError.toString());
     });
@@ -308,16 +310,16 @@ class _NotificationContentState extends State<NotificationContent>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(proId).then((response) {
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          Strings.users = response.data;
+          Strings.users = response.data!;
         });
         final api = Provider.of<ApiService>(context, listen: false);
         api.fetchCats(proId).then((response) {
           AppUtils.dismissprogress();
-          if (response.status) {
+          if (response.status!) {
             setState(() {
-              Strings.categories = response.data;
+              Strings.categories = response.data!;
               Navigator.pushNamed(context, '/comments');
             });
           } else {

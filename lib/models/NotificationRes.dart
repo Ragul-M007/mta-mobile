@@ -1,7 +1,7 @@
 class NotificationRes {
-  bool status;
-  String message;
-  List<NotificationData> data;
+  bool? status;
+  String? message;
+  List<NotificationData>? data;
 
   NotificationRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class NotificationRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<NotificationData>();
+      data = <NotificationData>[];
       json['data'].forEach((v) {
-        data.add(new NotificationData.fromJson(v));
+        data?.add(new NotificationData.fromJson(v));
       });
     }
   }
@@ -21,18 +21,18 @@ class NotificationRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class NotificationData {
-  String title;
-  String description;
-  String imgUrl;
-  List<DocDetail> docDetail;
-  String createdAt;
+  String? title;
+  String? description;
+  String? imgUrl;
+  List<DocDetail>? docDetail;
+  String? createdAt;
 
   NotificationData(
       {this.title,
@@ -46,9 +46,9 @@ class NotificationData {
     description = json['description'];
     imgUrl = json['img_url'];
     if (json['doc_detail'] != null) {
-      docDetail = new List<DocDetail>();
+      docDetail = <DocDetail>[];
       json['doc_detail'].forEach((v) {
-        docDetail.add(new DocDetail.fromJson(v));
+        docDetail?.add(new DocDetail.fromJson(v));
       });
     }
     createdAt = json['created_at'];
@@ -60,7 +60,7 @@ class NotificationData {
     data['description'] = this.description;
     data['img_url'] = this.imgUrl;
     if (this.docDetail != null) {
-      data['doc_detail'] = this.docDetail.map((v) => v.toJson()).toList();
+      data['doc_detail'] = this.docDetail?.map((v) => v.toJson()).toList();
     }
     data['created_at'] = this.createdAt;
     return data;
@@ -68,11 +68,11 @@ class NotificationData {
 }
 
 class DocDetail {
-  int documentId;
-  String fileName;
-  String file;
-  int projectId;
-  String projectName;
+  int? documentId;
+  String? fileName;
+  String? file;
+  int? projectId;
+  String? projectName;
 
   DocDetail(
       {this.documentId,

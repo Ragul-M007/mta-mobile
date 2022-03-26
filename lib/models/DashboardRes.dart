@@ -1,7 +1,7 @@
 class DashboardRes {
-  bool status;
-  String message;
-  List<Data> data;
+  bool? status;
+  String? message;
+  List<Data>? data;
 
   DashboardRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class DashboardRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<Data>();
+      data = <Data>[];
       json['data'].forEach((v) {
-        data.add(new Data.fromJson(v));
+        data?.add(new Data.fromJson(v));
       });
     }
   }
@@ -21,26 +21,26 @@ class DashboardRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class Data {
-  int projectId;
-  int categoryId;
-  String projectName;
-  String categoryName;
-  String projectImg;
-  String city;
-  String state;
-  String address;
-  String status;
-  String startDate;
-  String endDate;
-  String description;
-  List<Documents> documents;
+  int? projectId;
+  int? categoryId;
+  String? projectName;
+  String? categoryName;
+  String? projectImg;
+  String? city;
+  String? state;
+  String? address;
+  String? status;
+  String? startDate;
+  String? endDate;
+  String? description;
+  List<Documents>? documents;
 
   Data(
       {this.projectId,
@@ -71,9 +71,9 @@ class Data {
     endDate = json['end_date'];
     description = json['description'];
     if (json['documents'] != null) {
-      documents = new List<Documents>();
+      documents = <Documents>[];
       json['documents'].forEach((v) {
-        documents.add(new Documents.fromJson(v));
+        documents?.add(new Documents.fromJson(v));
       });
     }
   }
@@ -93,19 +93,19 @@ class Data {
     data['end_date'] = this.endDate;
     data['description'] = this.description;
     if (this.documents != null) {
-      data['documents'] = this.documents.map((v) => v.toJson()).toList();
+      data['documents'] = this.documents?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class Documents {
-  String name;
-  int userId;
-  String fileUrl;
-  String userName;
-  String createdAt;
-  int documentId;
+  String? name;
+  int? userId;
+  String? fileUrl;
+  String? userName;
+  String? createdAt;
+  int? documentId;
 
   Documents(
       {this.name,

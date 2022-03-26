@@ -8,6 +8,7 @@ import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/PushRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/attendance/attendance.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';
@@ -54,13 +55,28 @@ class SplashScreenContent extends StatefulWidget {
 }
 
 class _SplashScreenContentState extends State<SplashScreenContent> {
-  Timer timer;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  Timer? timer;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   @override
   void initState() {
     super.initState();
-    getToken();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getFCMToken());
+    
+       _firebaseMessaging.subscribeToTopic("messaging");
+    _firebaseMessaging.getToken().then((value) {
+      print(value);
+    });
+    //  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    //   print("message recieved");
+    //   print(event.notification!.body);
+    //   print(event.data.values);
+    //  });
+    // FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    //   print('Message clicked!');
+    // });
+     getToken();  
+     getFCMToken();
+    // WidgetsBinding.instance?.addPostFrameCallback((_) => getFCMToken());
+    //getToken();  
     //  AppUtils.getStringPreferences('token').then((value) {
     //   if (value != "null") {
     //     Strings.authToken = "Bearer " + value;
@@ -75,63 +91,20 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   Widget build(BuildContext context) {
     return Container(
       child: Image.asset(
-        'assets/images/splash_p.png',
+        'assets/images/splashscreen.jpg',
         fit: BoxFit.fill,
       ),
     );
   }
 
-  getFCMToken() {
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage-: $message");
-        setState(() {
-          if (Strings.pushNotify == true) {
-            _showMyDialog(
-                message['data']['image'],
-                message['data']['title'],
-                message['data']['body'],
-                PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-          }
-        });
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("l-: $message");
-        setState(() {
-          if (Strings.pushNotify == true) {
-            _showMyDialog(
-                message['data']['image'],
-                message['data']['title'],
-                message['data']['body'],
-                PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-          }
-        });
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("r-: $message");
-        setState(() {
-          if (Strings.pushNotify == true) {
-            _showMyDialog(
-                message['data']['image'],
-                message['data']['title'],
-                message['data']['body'],
-                PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-          }
-        });
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(
-            sound: true, badge: true, alert: true, provisional: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    _firebaseMessaging.getToken().then((String token) {
+
+  getFCMToken() async 
+  {
+   _firebaseMessaging.getToken().then((String? token) {
       assert(token != null);
       setState(() {
         print("token: $token");
-        Strings.fcmToken = token;
+        Strings.fcmToken = token!;
         //  var  payload = jsonEncode(<String, dynamic>{
         //                                      "token": token,
         //                                      "device": 'Android'
@@ -144,6 +117,126 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // });
       // print(_homeScreenText);
     });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) 
+    { 
+      setState(() {
+        print("message recieved inside get");
+        print(message.notification?.body);
+        AppUtils.showToastErrorTop("Notification: ${message.notification?.body}");
+          if (Strings.pushNotify == true) {
+            print("inside if listen message-----> $message");
+            _showMyDialog(
+                (message as dynamic)['data']['image'],
+                (message as dynamic)['data']['title'],
+                (message as dynamic)['data']['body'],
+                PushRes.fromJson(jsonDecode((message as dynamic)['data']['docDetails'])[0]));
+          }
+        });
+    });
+    FirebaseMessaging.instance
+    .getInitialMessage()
+    .then((RemoteMessage? message) 
+    {
+      if (message?.notification?.body != null) 
+      {
+              if (message!.notification!.body!.contains("Signed")) 
+              {
+                 Strings.FromNotification = true;
+              }
+  }
+});
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) 
+    {
+
+        if (message.notification?.body != null) 
+       {
+              if (message.notification!.body!.contains("Signed")) 
+              {
+                 Strings.FromNotification = true;
+                 checkLogin();
+              }
+      }
+
+      print("is login  ${Strings.isLogin}");
+      print("Message--> ${message.notification?.body}");
+      // setState(() {
+      //     if (Strings.pushNotify == true) {
+      //         print("inside messageopenedApp message-----> $message");
+      //        _showMyDialog(
+      //           (message as dynamic)['data']['image'],
+      //           (message as dynamic)['data']['title'],
+      //           (message as dynamic)['data']['body'],
+      //           PushRes.fromJson(jsonDecode((message as dynamic)['data']['docDetails'])[0]));
+      //     }
+      //   });
+    });
+
+
+    // old firebase version
+
+    // _firebaseMessaging.configure(
+    //   onMessage: (Map<String, dynamic> message) async {
+    //     print("onMessage-: $message");
+    //     setState(() {
+    //       if (Strings.pushNotify == true) {
+    //         _showMyDialog(
+    //             message['data']['image'],
+    //             message['data']['title'],
+    //             message['data']['body'],
+    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
+    //       }
+    //     });
+    //   },
+
+      
+
+
+
+    //   onLaunch: (Map<String, dynamic> message) async {
+    //     print("l-: $message");
+    //     setState(() {
+    //       if (Strings.pushNotify == true) {
+    //         _showMyDialog(
+    //             message['data']['image'],
+    //             message['data']['title'],
+    //             message['data']['body'],
+    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
+    //       }
+    //     });
+    //   },
+    //   onResume: (Map<String, dynamic> message) async {
+    //     print("r-: $message");
+    //     setState(() {
+    //       if (Strings.pushNotify == true) {
+    //         _showMyDialog(
+    //             message['data']['image'],
+    //             message['data']['title'],
+    //             message['data']['body'],
+    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
+    //       }
+    //     });
+    //   },
+    // );
+    // _firebaseMessaging.requestNotificationPermissions(
+    //     const IosNotificationSettings(
+    //         sound: true, badge: true, alert: true, provisional: true));
+
+NotificationSettings settings = await _firebaseMessaging.requestPermission(
+  alert: true,
+  announcement: false,
+  badge: true,
+  provisional: true,
+  sound: true,
+);
+
+
+
+    // _firebaseMessaging.onIosSettingsRegistered
+    //     .listen((IosNotificationSettings settings) {
+    //   print("Settings registered: $settings");
+    // });
+ 
   }
 
   Future<void> _showMyDialog(imgurl, title, desc, doc) async {
@@ -384,7 +477,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   //   );
   // }
 
-  Widget image(String img, double width, double height) {
+  Widget image(String img, double width, double height) 
+  {
     return Container(
       width: width,
       height: height,
@@ -399,21 +493,51 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     );
   }
 
-  void getToken() {
+  void getToken() 
+  {
     timer = new Timer(const Duration(milliseconds: 4000), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
         if (value != null) {
           print(value);
-          if (value == "Y") {
+          
+          if (value == "Y") 
+          {
             Navigator.pushNamed(context, "/verifypin");
+           // Navigator.popAndPushNamed(context, "/comments");
           } else {
             Navigator.popAndPushNamed(context, "/login");
+            //Navigator.popAndPushNamed(context, "/comments");
+
           }
         }
       }).catchError((onError) {
         Navigator.popAndPushNamed(context, "/login");
+       // Navigator.popAndPushNamed(context, "/comments");
+
       });
     });
+  }
+  void checkLogin() 
+  {
+      AppUtils.getStringPreferences('easyAccess').then((value) {
+        if (value != null) {
+          print(value);
+          
+          if (value == "Y") 
+          {
+            Navigator.pushNamed(context, "/verifypin");
+           // Navigator.popAndPushNamed(context, "/comments");
+          } else {
+            Navigator.popAndPushNamed(context, "/login");
+            //Navigator.popAndPushNamed(context, "/comments");
+
+          }
+        }
+      }).catchError((onError) {
+        Navigator.popAndPushNamed(context, "/login");
+       // Navigator.popAndPushNamed(context, "/comments");
+
+      });
   }
 
   void getuserid() {
@@ -445,16 +569,16 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(proId).then((response) {
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          Strings.users = response.data;
+          Strings.users = response.data!;
         });
         final api = Provider.of<ApiService>(context, listen: false);
         api.fetchCats(proId).then((response) {
           AppUtils.dismissprogress();
-          if (response.status) {
+          if (response.status!) {
             setState(() {
-              Strings.categories = response.data;
+              Strings.categories = response.data!;
               Navigator.pushNamed(context, '/comments');
             });
           } else {

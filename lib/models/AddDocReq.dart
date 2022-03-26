@@ -1,11 +1,11 @@
 class AddDocReq {
-  int categoryId;
-  String description;
+  int? categoryId;
+  String? description;
   //List<String> file;
-  String file;
-  String fileName;
-  int projectId;
-  int userId;
+  String? file;
+  String? fileName;
+  int? projectId;
+  int? userId;
 
   AddDocReq(
       {this.categoryId,

@@ -17,8 +17,9 @@ import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geocoder/services/base.dart';
+import 'package:mta/models/FetchAttendenceChangedRes.dart';
 
-FancyDrawerController _controller;
+FancyDrawerController? _controller;
 
 double lat = 0.00;
 double long = 0.00;
@@ -27,6 +28,8 @@ var now = DateTime.now();
 var month = now.month.toString().padLeft(2, '0');
 var day = now.day.toString().padLeft(2, '0');
 var year = now.year.toString();
+DateTime _focusedDay = DateTime.now();
+DateTime? _selectedDay;
 var monthMatch = [
   "Jan",
   "Feb",
@@ -44,7 +47,7 @@ var monthMatch = [
 String dropdownValue = monthMatch[int.parse(month) - 1];
 
 class Attendance extends StatelessWidget {
-  const Attendance({Key key}) : super(key: key);
+  const Attendance({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +66,11 @@ class AttendanceContent extends StatefulWidget {
 
 class _AttendanceContentState extends State<AttendanceContent>
     with SingleTickerProviderStateMixin {
-  CalendarController _calendarController;
+ // CalendarController _calendarController;
   bool isgridView = true;
   bool isShowCheckInOut = true;
-  List<AttendanceData> _attendance = [];
+  List<AttendanceDataNew> _attendance = [];
+  List<AttendanceData> _attendancemain = [];
 
   void initState() {
     _controller = FancyDrawerController(
@@ -76,9 +80,9 @@ class _AttendanceContentState extends State<AttendanceContent>
           Strings.currentmenuvalue = 2;
         });
       });
-    _calendarController = CalendarController();
+    //_calendarController = CalendarController();
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
+    WidgetsBinding.instance?.addPostFrameCallback(
         (_) => getAttendance(day + "-" + month + "-" + year));
   }
 
@@ -88,7 +92,7 @@ class _AttendanceContentState extends State<AttendanceContent>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -99,7 +103,7 @@ class _AttendanceContentState extends State<AttendanceContent>
             Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
         child: FancyDrawerWrapper(
             backgroundColor: Colors.transparent,
-            controller: _controller,
+            controller: _controller!,
             drawerItems: <Widget>[
               Container(
                 padding: EdgeInsets.only(bottom: 30),
@@ -110,12 +114,12 @@ class _AttendanceContentState extends State<AttendanceContent>
                         width: 60.0,
                         height: 60.0,
                         decoration: Drawables.menudecorationImage(
-                            "assets/images/logo.jpeg", 50.0)),
+                            "assets/images/logo.jpg", 50.0)),
                     SizedBox(
                       width: 10,
                     ),
                     Text(
-                      "MTA Architects",
+                      "MTA Connect",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -190,10 +194,10 @@ class _AttendanceContentState extends State<AttendanceContent>
             ],
             child: Scaffold(
               backgroundColor:
-                  isgridView ? Color(0xFF0061b0) : Colors.grey[300],
+                  isgridView ? Color.fromARGB(255, 47, 62, 75) : Colors.grey[300],
               appBar: mainappbar(
                   ontab: menuopen,
-                  title: "Employee Attendance",
+                  title: "Attendance",
                   controller: _controller),
               body: isgridView
                   ? gridView()
@@ -275,11 +279,14 @@ class _AttendanceContentState extends State<AttendanceContent>
                                 height: 3,
                                 color: Colors.transparent,
                               ),
-                              onChanged: (String newValue) {
+                              onChanged: (String? newValue) {
                                 var index = 0;
                                 monthMatch.map((element) {
                                   // get index
-                                  index = monthMatch.indexOf(newValue);
+                                  if (newValue != null)
+                                  {
+                                    index = monthMatch.indexOf(newValue);
+                                  }
                                 }).toList();
                                 var selecetedMonth = index + 1;
                                 var editedMonth = "";
@@ -290,6 +297,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                 }
                                 getAttendance(editedMonth + "-" + year);
                                 setState(() {
+                                  if(newValue != null)
                                   dropdownValue = newValue;
                                 });
                               },
@@ -360,13 +368,13 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                             getDateFormat(
                                                                     _attendance[
                                                                             index]
-                                                                        .date,
+                                                                        .date ?? "",
                                                                     1) +
                                                                 "\n" +
                                                                 getDateFormat(
                                                                     _attendance[
                                                                             index]
-                                                                        .date,
+                                                                        .date ?? "",
                                                                     2),
                                                             style: Drawables
                                                                 .adddoccontentstyle(
@@ -380,7 +388,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                               border: Border.all(
                                                                   color: Colors
                                                                           .grey[
-                                                                      200]),
+                                                                      200]!),
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
@@ -414,7 +422,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                                 text: getTimeFormat(
                                                                     _attendance[
                                                                             index]
-                                                                        .checkInTime),
+                                                                        .checkInTime ?? ""),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -441,7 +449,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                               child: Text(
                                                                   _attendance[
                                                                           index]
-                                                                      .checkInLocation,
+                                                                      .checkInLocation ?? "",
                                                                   style: Drawables.adddoccontentstyle(
                                                                       Colors
                                                                           .grey,
@@ -470,7 +478,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                                 text: getTimeFormat(
                                                                     _attendance[
                                                                             index]
-                                                                        .checkOutTime),
+                                                                        .checkOutTime ?? ""),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -495,8 +503,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                               child: Text(
                                                                 _attendance[
                                                                         index]
-                                                                    .checkOutLocation
-                                                                    .toString(),
+                                                                    .checkOutLocation ?? "",
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -512,9 +519,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                         Text(
                                                           getHours(
                                                               _attendance[index]
-                                                                  .checkInTime,
+                                                                  .checkInTime ?? "",
                                                               _attendance[index]
-                                                                  .checkOutTime),
+                                                                  .checkOutTime ?? ""),
                                                           style: TextStyle(
                                                               color: Color(
                                                                   0xFF0061b0),
@@ -549,13 +556,60 @@ class _AttendanceContentState extends State<AttendanceContent>
         children: [
           Expanded(
               child: GestureDetector(
-            onTap: () {
+            onTap: () 
+            {
+              print("inside check");
               // checkInOut("IN");
-              if (location == '' || location == null) {
+              if (location == '' || location == null) 
+              {
                 AppUtils.showToastErrorTop(
                     "Unable to find your location, Please tap refersh icon to get your location");
-              } else {
+              } 
+              else 
+              {
+
+                if(_attendance.length != 0)
+                {
+                      var lastSignIn = _attendance.last;
+                  print("last Signin --> ${lastSignIn.checkOutTime}");
+                  if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
+                  {
+                     Widget okButton = TextButton(
+                      child: Text("OK"),
+                      onPressed: () { 
+                        Navigator.pop(context);
+                      },
+                      );
+
+                    AlertDialog alert = AlertDialog(
+                    title: Text("You haven't Checked out",style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600)),
+                    content: Text("Kindly Checkout from the Previous Session"),
+                    actions: [
+                      okButton,
+                    ],
+                    );
+
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                    return alert;
+                      },
+                    );
+                }
+                else
+                {
                 _onWillPop("IN");
+                }
+              }
+              else
+              {
+                  _onWillPop("IN");
+              }
+
+                
               }
             },
             child: Container(
@@ -579,8 +633,9 @@ class _AttendanceContentState extends State<AttendanceContent>
               if (location == '' || location == null) {
                 AppUtils.showToastErrorTop(
                     "Unable to find your location, Please tap refersh icon to get your location");
-              } else {
-                _onWillPop("OUT");
+              } else 
+              {               
+                 _onWillPop("OUT");
               }
             },
             child: Container(
@@ -677,40 +732,51 @@ class _AttendanceContentState extends State<AttendanceContent>
                 // color: Color.fromRGBO(36, 58, 142,1),
                 child: TableCalendar(
                   rowHeight: 30,
-                  calendarController: _calendarController,
+                 // calendarController: _calendarController,
+                 
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
-                    centerHeaderTitle: true,
+                   // centerHeaderTitle: true,
                     titleTextStyle: TextStyle(color: Colors.white),
                   ),
                   daysOfWeekStyle: DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(color: Colors.white)),
+                      weekdayStyle: TextStyle(color: Colors.white),
+                      weekendStyle: TextStyle(color: Colors.red)),
                   calendarStyle: CalendarStyle(
-                    weekendStyle: TextStyle(color: Colors.white),
-                    outsideWeekendStyle: TextStyle(color: Colors.white),
-                    todayStyle: TextStyle(
-                      color: Colors.white,
+                   // weekendStyle: TextStyle(color: Colors.white),
+                    //outsideWeekendStyle: TextStyle(color: Colors.white),
+                    holidayTextStyle: TextStyle(color: Colors.white),
+                    withinRangeTextStyle: TextStyle(color: Colors.white),
+                    todayTextStyle: TextStyle(
+                      color: Colors.white,backgroundColor: Colors.red
                     ),
-                    todayColor: Colors.red,
-                    selectedColor: Colors.white,
-                    selectedStyle: TextStyle(color: Colors.black),
-                    weekdayStyle: TextStyle(color: Colors.white),
+                   // todayColor: Colors.red,
+                    selectedTextStyle: TextStyle(color: Colors.black,backgroundColor: Colors.white),
+                    //selectedStyle: TextStyle(color: Colors.black),
+                   // weekdayStyle: TextStyle(color: Colors.white),
                     outsideDaysVisible: false,
-                    outsideStyle: TextStyle(color: Colors.grey),
+                   // outsideStyle: TextStyle(color: Colors.grey),
                   ),
-                  onDaySelected: (days, events, holidays) {
-                    var month1 = days.month.toString().padLeft(2, '0');
-                    var day1 = days.day.toString().padLeft(2, '0');
-                    var year1 = days.year.toString();
+                  selectedDayPredicate: (day) {
+                      return isSameDay(_selectedDay, day);
+                    },
+                  onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
+                    var month1 = selectedDay.month.toString().padLeft(2, '0');
+                    var day1 = selectedDay.day.toString().padLeft(2, '0');
+                    var year1 = selectedDay.year.toString();
                     getAttendance(day1 + "-" + month1 + "-" + year1);
-
+                    setState(() 
+                    {
+                       _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
                     if ((day1 + "-" + month1 + "-" + year1) ==
                         (day + "-" + month + "-" + year)) {
                       isShowCheckInOut = true;
                     } else {
                       isShowCheckInOut = false;
                     }
-                  },
+                  }, firstDay: DateTime.utc(2010, 10, 16), focusedDay: _focusedDay, lastDay: DateTime.utc(2030, 3, 14),
                 ),
               ),
             ],
@@ -768,11 +834,11 @@ class _AttendanceContentState extends State<AttendanceContent>
                                               child: Center(
                                                   child: Text(
                                                 getDateFormat(
-                                                        _attendance[index].date,
+                                                        _attendance[index].date ?? "",
                                                         1) +
                                                     "\n" +
                                                     getDateFormat(
-                                                        _attendance[index].date,
+                                                        _attendance[index].date ?? "",
                                                         2),
                                                 style: Drawables
                                                     .adddoccontentstyle(
@@ -782,7 +848,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                               )),
                                               decoration: BoxDecoration(
                                                   border: Border.all(
-                                                      color: Colors.grey[200]),
+                                                      color: Colors.grey[200]!),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           10)),
@@ -807,7 +873,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   TextSpan(
                                                     text: getTimeFormat(
                                                         _attendance[index]
-                                                            .checkInTime),
+                                                            .checkInTime ?? ""),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -829,7 +895,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                 Expanded(
                                                   child: Text(
                                                       _attendance[index]
-                                                          .checkInLocation,
+                                                          .checkInLocation ?? "",
                                                       style: Drawables
                                                           .adddoccontentstyle(
                                                               Colors.grey,
@@ -852,7 +918,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                   TextSpan(
                                                     text: getTimeFormat(
                                                         _attendance[index]
-                                                            .checkOutTime),
+                                                            .checkOutTime ?? ""),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -893,9 +959,9 @@ class _AttendanceContentState extends State<AttendanceContent>
                                             Text(
                                               getHours(
                                                   _attendance[index]
-                                                      .checkInTime,
+                                                      .checkInTime.toString(),
                                                   _attendance[index]
-                                                      .checkOutTime),
+                                                      .checkOutTime.toString()),
                                               style: TextStyle(
                                                   color: Color(0xFF0061b0),
                                                   fontWeight: FontWeight.w600),
@@ -921,8 +987,9 @@ class _AttendanceContentState extends State<AttendanceContent>
     );
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
+      if (currentmenu != null)
       Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
@@ -931,36 +998,130 @@ class _AttendanceContentState extends State<AttendanceContent>
       Navigator.popAndPushNamed(context, "/verifypin");
       // Navigator.popAndPushNamed(context, routename);
     } else {
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 
-  getAttendance(String date) {
+  getAttendance(String date) 
+  {
     getUserLocation();
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
-    api.getAttendance(Strings.userID, date).then((response) {
+    api.getAttendance(Strings.userID!, date).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      if (response.status) {
+      
+      if (response.status) 
+      {
         setState(() {
-          if (response.data.length > 0) {
-            _attendance = response.data;
-          } else {
-            _attendance = [];
+          if (response.data.length > 0) 
+          {
+            print("response fetched");
+            _attendancemain = response.data;
+            formatAttendanceData();
+          }
+          else
+          {
+            _attendancemain = [];
           }
         });
-      } else {
+      } else 
+      {
+        setState(() {
+          _attendance = [];
+        });
         AppUtils.showToastError(response.message);
       }
     }).catchError((onError) {
+      print("catch");
       AppUtils.dismissprogress();
-      print(onError.toString());
+      setState(() {
+        _attendance = [];
+      });
+      print("error on catch ${onError.toString()}");
     });
   }
+  formatAttendanceData()
+  {
+    _attendance.clear();
+    print("inside format");
+    print(_attendancemain.length);
+      for (var i = 0; i < _attendancemain.length; i++) 
+      {
+        print("inside if");
+        if( _attendancemain[i].checkType == "IN")
+        {
+            AttendanceDataNew test = new AttendanceDataNew();
+            print("inside Inn");
+            print("i ${i}");
+            test.checkInLocation = _attendancemain[i].locationName;
+            test.checkInTime = _attendancemain[i].checkTime;
+            test.userId = _attendancemain[i].userId;
+            DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
+            String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
+            test.date = formattedDate;
+             print("adding");
+             if(i < _attendancemain.length-1)
+             {
+                    var j= i+1;
+              
+                    if(_attendancemain[j].checkType == "OUT")
+                    {
+                      print("in else");
+                      test.checkOutLocation = _attendancemain[j].locationName;
+                      test.checkOutTime = _attendancemain[j].checkTime;
+                    }
+                   else
+                  {
+                    test.checkOutLocation = "";
+                    test.checkOutTime = "";
+                  }
+             }
+          print("testing ${test.checkInLocation}");
+           setState(() 
+           {
+                print("data while addinf");
+            print("testing ${test.checkInLocation}");
+            print("testing ${test.checkInTime}");
+            print("testing ${test.date}");
+           print("testing ${test.userId}");
 
-  Future<bool> _onWillPop(action) async {
+                _attendance.add(test);
+                print(_attendance.length);              
+                printfn();
+           });
+       
+
+
+        }
+         
+
+      }
+     
+      printfn();
+      
+  }
+  printfn()
+  {
+          for (var i = 0; i < _attendance.length; i++) 
+          {
+            print("value of i--> ${i}");
+               print("---------------Didplaying Details--------------------");
+             print("checkinloc -- ${_attendance[i].checkInLocation}");
+            print("checkintime -- ${_attendance[i].checkInTime}");
+             print("checkinuser -- ${_attendance[i].userId}");
+             print("checkoutloc -- ${_attendance[i].checkOutLocation}");
+             print("checkouttime -- ${_attendance[i].checkOutTime}"); 
+            print("date -- ${_attendance[i].date}"); 
+            print("Length -->${_attendance.length}");
+          }
+
+  }
+
+  
+  Future<bool> _onWillPop(action) async 
+  {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -1018,10 +1179,11 @@ class _AttendanceContentState extends State<AttendanceContent>
     req.latLng = lat.toString() + "," + long.toString();
     req.locationName = location;
     api.addAttendance(req).then((response) {
+      print("checking out");
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      if (response.status) {
-        AppUtils.showToastSuccess(response.message);
+      if (response.status!) {
+        AppUtils.showToastSuccess(response.message!);
         if (isgridView == true) {
           getAttendance(day + "-" + month + "-" + year);
         } else {
@@ -1030,9 +1192,10 @@ class _AttendanceContentState extends State<AttendanceContent>
         }
         setState(() {});
       } else {
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
+      print("incatch");
       AppUtils.dismissprogress();
       print(onError.toString());
     });
@@ -1058,6 +1221,7 @@ class _AttendanceContentState extends State<AttendanceContent>
   }
 
   String getTimeFormat(String date) {
+    print("date--> ${date}");
     if (date != "" && date != "null" && date != null) {
       return DateFormat().add_jm().format(DateTime.parse(date)).toString();
     } else {
@@ -1113,7 +1277,7 @@ class _AttendanceContentState extends State<AttendanceContent>
             }
           else
             {
-              await Geolocator.getCurrentPosition().then((value) => {
+              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation).then((value) => {
                     setState(
                       () {
                         AppUtils.showprogress();
@@ -1132,11 +1296,12 @@ class _AttendanceContentState extends State<AttendanceContent>
         .findAddressesFromCoordinates(new Coordinates(latt, longg));
     setState(() {
       var address = results.first;
-      location = address.addressLine;
+      location = address.addressLine!;
       // print(address.addressLine);
       // print("${address.featureName} : ${address.addressLine}");
       // AppUtils.showToastError(address.addressLine);
     });
+    print("loc det");
     AppUtils.dismissprogress();
   }
 }

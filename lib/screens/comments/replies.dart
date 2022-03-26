@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io' as Io;
-import 'package:audioplayers/audio_cache.dart';
+//import 'package:audioplayers/audio_cache.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
@@ -25,14 +25,14 @@ import 'package:audioplayers/audioplayers.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
-AnimationController _animationController;
+AnimationController? _animationController;
 AudioPlayer audioPlayer = AudioPlayer();
 AudioCache audioCache = AudioCache();
 final _userIitems = users
-    .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
+    .map((user) => MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
     .toList();
 final _catsItems = cats
-    .map((cats) => MultiSelectItem<CatsData>(cats, cats.categoryName))
+    .map((cats) => MultiSelectItem<CatsData?>(cats, cats.categoryName!))
     .toList();
 var tagedUsers = [];
 var tagedUsersId = [];
@@ -47,8 +47,10 @@ var isPlaying = false;
 var playingIndex = null;
 int audioLength = 0;
 int audioCurrentlenth = 0;
-Timer _timer;
+Timer? _timer;
 List<int> recordedData = [];
+final _audioRecorder = Record();
+
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -85,7 +87,7 @@ class RepliesContent extends StatefulWidget {
 
 class _RepliesContentState extends State<RepliesContent>
     with SingleTickerProviderStateMixin {
-  IO.Socket _socket;
+  IO.Socket? _socket;
   var _currDoc;
 
   TextEditingController _msgcontroller = TextEditingController();
@@ -97,7 +99,7 @@ class _RepliesContentState extends State<RepliesContent>
     Strings.pushNotify = false;
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
-    _animationController.repeat(reverse: true);
+    _animationController?.repeat(reverse: true);
 
     setState(() {
       tagedUsers = [];
@@ -117,8 +119,8 @@ class _RepliesContentState extends State<RepliesContent>
       'autoConnect': false,
       'query': {'token': Strings.authToken, "document_id": _currDoc.documentId}
     });
-    _socket.connect();
-    _socket.on("connect", (_) {
+    _socket?.connect();
+    _socket?.on("connect", (_) {
       print('Connected');
       getReplies();
     });
@@ -126,7 +128,7 @@ class _RepliesContentState extends State<RepliesContent>
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController?.dispose();
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -174,7 +176,7 @@ class _RepliesContentState extends State<RepliesContent>
                                 Strings.baseImageUrl +
                                     Strings
                                         .comments[Strings.selectedCommentsIndex]
-                                        .userImg);
+                                        .userImg!);
                           },
                           child: Container(
                             width: 30.0,
@@ -185,7 +187,7 @@ class _RepliesContentState extends State<RepliesContent>
                                 image: new NetworkImage(Strings.baseImageUrl +
                                     Strings
                                         .comments[Strings.selectedCommentsIndex]
-                                        .userImg),
+                                        .userImg!),
                                 fit: BoxFit.fill,
                               ),
                               borderRadius: new BorderRadius.all(
@@ -206,7 +208,7 @@ class _RepliesContentState extends State<RepliesContent>
                                     Strings
                                             .comments[
                                                 Strings.selectedCommentsIndex]
-                                            .name +
+                                            .name! +
                                         " . ",
                                     style: TextStyle(
                                         color: Colors.black,
@@ -229,7 +231,7 @@ class _RepliesContentState extends State<RepliesContent>
                                         serverDate: Strings
                                             .comments[
                                                 Strings.selectedCommentsIndex]
-                                            .date),
+                                            .date!),
                                     style: TextStyle(
                                         color: Colors.grey[600],
                                         fontWeight: FontWeight.w500))
@@ -308,7 +310,7 @@ class _RepliesContentState extends State<RepliesContent>
                                   Strings
                                           .comments[
                                               Strings.selectedCommentsIndex]
-                                          .replies
+                                          .replies!
                                           .length
                                           .toString() +
                                       " Replies",
@@ -327,11 +329,11 @@ class _RepliesContentState extends State<RepliesContent>
                     height: 20,
                   ),
                   MySeparator(
-                    color: Colors.grey[500],
+                    color: Colors.grey[500]!,
                   )
                 ],
               )),
-          Strings.comments[Strings.selectedCommentsIndex].replies.length > 0 &&
+          Strings.comments[Strings.selectedCommentsIndex].replies!.length > 0 &&
                   Strings.comments[Strings.selectedCommentsIndex].replies !=
                       null
               ? Expanded(
@@ -341,7 +343,7 @@ class _RepliesContentState extends State<RepliesContent>
                       controller: _scrollController,
                       padding: EdgeInsets.all(20),
                       itemCount: Strings.comments[Strings.selectedCommentsIndex]
-                          .replies.length,
+                          .replies!.length,
                       itemBuilder: (BuildContext ctx, int index) {
                         return Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
@@ -358,8 +360,8 @@ class _RepliesContentState extends State<RepliesContent>
                                                 Strings
                                                     .comments[Strings
                                                         .selectedCommentsIndex]
-                                                    .replies[index]
-                                                    .userImg);
+                                                    .replies![index]
+                                                    .userImg!);
                                       },
                                       child: Container(
                                         width: 30.0,
@@ -372,8 +374,8 @@ class _RepliesContentState extends State<RepliesContent>
                                                 Strings
                                                     .comments[Strings
                                                         .selectedCommentsIndex]
-                                                    .replies[index]
-                                                    .userImg),
+                                                    .replies![index]
+                                                    .userImg!),
                                             fit: BoxFit.fill,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -396,8 +398,8 @@ class _RepliesContentState extends State<RepliesContent>
                                                 Strings
                                                         .comments[Strings
                                                             .selectedCommentsIndex]
-                                                        .replies[index]
-                                                        .commentBy +
+                                                        .replies![index]
+                                                        .commentBy! +
                                                     " . ",
                                                 style: TextStyle(
                                                     color: Colors.black,
@@ -423,14 +425,16 @@ class _RepliesContentState extends State<RepliesContent>
                                                     serverDate: Strings
                                                         .comments[Strings
                                                             .selectedCommentsIndex]
-                                                        .replies[index]
-                                                        .date),
+                                                        .replies![index]
+                                                        .date!),
                                                 style: TextStyle(
                                                     color: Colors.grey[600],
                                                     fontWeight:
                                                         FontWeight.w500))
                                           ],
                                         ),
+                                        SizedBox(height: 10),
+                                        Container(child: Text(Strings.comments[index].recipient?.replaceAll('"', '') ?? ""),),
                                         Container(
                                           child: Padding(
                                               padding: EdgeInsets.all(10),
@@ -441,14 +445,14 @@ class _RepliesContentState extends State<RepliesContent>
                                                   Strings
                                                                   .comments[Strings
                                                                       .selectedCommentsIndex]
-                                                                  .replies[
+                                                                  .replies![
                                                                       index]
                                                                   .audio ==
                                                               "" ||
                                                           Strings
                                                                   .comments[Strings
                                                                       .selectedCommentsIndex]
-                                                                  .replies[
+                                                                  .replies![
                                                                       index]
                                                                   .audio ==
                                                               null
@@ -456,7 +460,7 @@ class _RepliesContentState extends State<RepliesContent>
                                                           Strings
                                                               .comments[Strings
                                                                   .selectedCommentsIndex]
-                                                              .replies[index]
+                                                              .replies![index]
                                                               .comment
                                                               .toString(),
                                                           style: Drawables
@@ -482,7 +486,7 @@ class _RepliesContentState extends State<RepliesContent>
                                                                             setState(() {
                                                                               isPlaying = true;
                                                                               playingIndex = index;
-                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
                                                                             });
                                                                           });
                                                                         } else {
@@ -492,7 +496,7 @@ class _RepliesContentState extends State<RepliesContent>
                                                                               index;
                                                                           playAudio(Strings
                                                                               .comments[Strings.selectedCommentsIndex]
-                                                                              .replies[index]
+                                                                              .replies![index]
                                                                               .audio);
                                                                         }
                                                                       });
@@ -534,13 +538,13 @@ class _RepliesContentState extends State<RepliesContent>
                                                                                 setState(() {
                                                                                   isPlaying = true;
                                                                                   playingIndex = index;
-                                                                                  playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                                  playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
                                                                                 });
                                                                               });
                                                                             } else {
                                                                               isPlaying = true;
                                                                               playingIndex = index;
-                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies[index].audio);
+                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
                                                                             }
                                                                           });
                                                                         },
@@ -614,7 +618,7 @@ class _RepliesContentState extends State<RepliesContent>
                                   height: 20,
                                 ),
                                 MySeparator(
-                                  color: Colors.grey[500],
+                                  color: Colors.grey[500]!,
                                 )
                               ],
                             ));
@@ -627,10 +631,11 @@ class _RepliesContentState extends State<RepliesContent>
               color: const Color(0xFFffffff),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
                   flex: 10,
-                  child: MultiSelectDialogField(
+                  child: MultiSelectDialogField<FetchMapedUsersData?>(
                     items: _userIitems,
                     title: Text("Tag Users"),
                     selectedColor: Color(0xFF0061b0),
@@ -658,8 +663,8 @@ class _RepliesContentState extends State<RepliesContent>
                         tagedUsers = [];
                         tagedUsersId = [];
                         results.forEach((element) {
-                          tagedUsers.add(element.name);
-                          tagedUsersId.add(element.userId);
+                          tagedUsers.add(element?.name);
+                          tagedUsersId.add(element?.userId);
                         });
                       } else {
                         tagedUsers = [];
@@ -670,7 +675,7 @@ class _RepliesContentState extends State<RepliesContent>
                 ),
                 Expanded(
                   flex: 10,
-                  child: MultiSelectDialogField(
+                  child: MultiSelectDialogField<CatsData?>(
                     items: _catsItems,
                     title: Text("Tag Categories"),
                     selectedColor: Color(0xFF0061b0),
@@ -698,8 +703,8 @@ class _RepliesContentState extends State<RepliesContent>
                         tagedCats = [];
                         tagedCatsId = [];
                         results.forEach((element) {
-                          tagedCats.add(element.categoryName);
-                          tagedCatsId.add(element.categoryId);
+                          tagedCats.add(element?.categoryName);
+                          tagedCatsId.add(element?.categoryId);
                           // tagedCats = tagedCats + "," + element.categoryName;
                           // tagedCatsId = tagedCatsId.toString() +
                           //     "," +
@@ -780,7 +785,7 @@ class _RepliesContentState extends State<RepliesContent>
                           hintStyle: TextStyle(color: Colors.grey[400]),
                           border: InputBorder.none,
                           prefixIcon: FadeTransition(
-                            opacity: _animationController,
+                            opacity: _animationController!,
                             child: startRecording == true
                                 ? Icon(Icons.mic, color: Colors.red)
                                 : SizedBox(
@@ -855,7 +860,7 @@ class _RepliesContentState extends State<RepliesContent>
   }
 
   getReplies() {
-    _socket.on("document-comments", (_data) {
+    _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
       setState(() {
@@ -882,15 +887,15 @@ class _RepliesContentState extends State<RepliesContent>
     if (!status.isGranted) {
       getPermission();
     } else {
-      await Record.start(
-        path: dir + "/MTARecordedAudio.wav",
+      await _audioRecorder.start(
+        path: dir! + "/MTARecordedAudio.wav",
         encoder: AudioEncoder.AAC,
       );
     }
   }
 
   stopRecord() async {
-    await Record.stop();
+    await _audioRecorder.stop();
   }
 
   playAudio(url) async {
@@ -941,7 +946,7 @@ class _RepliesContentState extends State<RepliesContent>
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
     final bytesData =
-        await Io.File(dir + "/MTARecordedAudio.wav").readAsBytes();
+        await Io.File(dir! + "/MTARecordedAudio.wav").readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
     String base64Encode = base64Encodes(bytesData);
     final api = Provider.of<ApiService>(context, listen: false);
@@ -949,8 +954,8 @@ class _RepliesContentState extends State<RepliesContent>
     req.audio = "data:audio/wav;base64," + base64Encode;
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status) {
-        _socket.emit(
+      if (response.status!) {
+        _socket?.emit(
             'create-document-comment',
             json.encode({
               "project_id": Strings.selectedProject[0].projectId,
@@ -971,10 +976,10 @@ class _RepliesContentState extends State<RepliesContent>
         setState(() {
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
-                Strings.selectedCatDocument[0].commentsCount + 1;
+                Strings.selectedCatDocument[0].commentsCount! + 1;
           } else {
             Strings.selectedProDocument[0].commentsCount =
-                Strings.selectedProDocument[0].commentsCount + 1;
+                Strings.selectedProDocument[0].commentsCount! + 1;
           }
           tagedUsers = [];
           tagedUsersId = [];
@@ -994,7 +999,7 @@ class _RepliesContentState extends State<RepliesContent>
           // }
         });
       } else {
-        AppUtils.showToastErrorTop(response.message);
+        AppUtils.showToastErrorTop(response.message!);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -1007,7 +1012,7 @@ class _RepliesContentState extends State<RepliesContent>
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
     } else {
-      _socket.emit(
+      _socket?.emit(
           'create-document-comment',
           json.encode({
             "project_id": Strings.selectedProject[0].projectId,
@@ -1031,10 +1036,10 @@ class _RepliesContentState extends State<RepliesContent>
       setState(() {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
-              Strings.selectedCatDocument[0].commentsCount + 1;
+              Strings.selectedCatDocument[0].commentsCount! + 1;
         } else {
           Strings.selectedProDocument[0].commentsCount =
-              Strings.selectedProDocument[0].commentsCount + 1;
+              Strings.selectedProDocument[0].commentsCount! + 1;
         }
         tagedUsers = [];
         tagedUsersId = [];
@@ -1085,8 +1090,8 @@ class _RepliesContentState extends State<RepliesContent>
   //   }
   // }
 
-  static String calculateTimeDifferenceBetween({@required String serverDate}) {
-    DateTime startDate = DateTime.parse(serverDate);
+  static String calculateTimeDifferenceBetween({@required String? serverDate}) {
+    DateTime startDate = DateTime.parse(serverDate!);
     DateTime endDate = DateTime.now();
     int seconds = endDate.difference(startDate).inSeconds;
     if (seconds < 60)

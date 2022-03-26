@@ -1,7 +1,7 @@
 class FectchProjectDocRes {
-  bool status;
-  String message;
-  List<ProjectDocData> data;
+  bool? status;
+  String? message;
+  List<ProjectDocData>? data;
 
   FectchProjectDocRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class FectchProjectDocRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<ProjectDocData>();
+      data = <ProjectDocData>[];
       json['data'].forEach((v) {
-        data.add(new ProjectDocData.fromJson(v));
+        data?.add(new ProjectDocData.fromJson(v));
       });
     }
   }
@@ -21,21 +21,21 @@ class FectchProjectDocRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class ProjectDocData {
-  int documentId;
-  String fileName;
-  String file;
-  int userId;
-  String name;
-  String createdAt;
-  String description;
-  int commentsCount;
+  int? documentId;
+  String? fileName;
+  String? file;
+  int? userId;
+  String? name;
+  String? createdAt;
+  String? description;
+  int? commentsCount;
 
   ProjectDocData(
       {this.documentId,

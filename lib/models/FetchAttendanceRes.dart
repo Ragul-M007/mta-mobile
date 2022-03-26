@@ -1,65 +1,69 @@
 class FetchAttendanceRes {
-  bool status;
-  String message;
-  List<AttendanceData> data;
-
-  FetchAttendanceRes({this.status, this.message, this.data});
-
-  FetchAttendanceRes.fromJson(Map<String, dynamic> json) {
+  FetchAttendanceRes({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+  late final bool status;
+  late final String message;
+  late final List<AttendanceData> data;
+  
+  FetchAttendanceRes.fromJson(Map<String, dynamic> json){
     status = json['status'];
     message = json['message'];
-    if (json['data'] != null) {
-      data = new List<AttendanceData>();
-      json['data'].forEach((v) {
-        data.add(new AttendanceData.fromJson(v));
-      });
-    }
+    data = List.from(json['data']).map((e)=>AttendanceData.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
-    }
-    return data;
+    final _data = <String, dynamic>{};
+    _data['status'] = status;
+    _data['message'] = message;
+    _data['data'] = data.map((e)=>e.toJson()).toList();
+    return _data;
   }
 }
 
 class AttendanceData {
-  int userId;
-  String date;
-  String checkInTime;
-  String checkOutTime;
-  String checkInLocation;
-  String checkOutLocation;
-
-  AttendanceData(
-      {this.userId,
-      this.date,
-      this.checkInTime,
-      this.checkOutTime,
-      this.checkInLocation,
-      this.checkOutLocation});
-
-  AttendanceData.fromJson(Map<String, dynamic> json) {
+  AttendanceData({
+    required this.checkType,
+    required this.checkTime,
+    required this.latLng,
+    required this.locationName,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.id,
+    required this.userId,
+  });
+  late final String checkType;
+  late final String checkTime;
+  late final String latLng;
+  late final String locationName;
+  late final String createdAt;
+  late final String updatedAt;
+  late final int id;
+  late final int userId;
+  
+  AttendanceData.fromJson(Map<String, dynamic> json){
+    checkType = json['checkType'];
+    checkTime = json['checkTime'];
+    latLng = json['latLng'];
+    locationName = json['location_name'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    id = json['id'];
     userId = json['user_id'];
-    date = json['date'];
-    checkInTime = json['check_in_time'];
-    checkOutTime = json['check_out_time'];
-    checkInLocation = json['check_in_location'];
-    checkOutLocation = json['check_out_location'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['user_id'] = this.userId;
-    data['date'] = this.date;
-    data['check_in_time'] = this.checkInTime;
-    data['check_out_time'] = this.checkOutTime;
-    data['check_in_location'] = this.checkInLocation;
-    data['check_out_location'] = this.checkOutLocation;
-    return data;
+    final _data = <String, dynamic>{};
+    _data['checkType'] = checkType;
+    _data['checkTime'] = checkTime;
+    _data['latLng'] = latLng;
+    _data['location_name'] = locationName;
+    _data['created_at'] = createdAt;
+    _data['updated_at'] = updatedAt;
+    _data['id'] = id;
+    _data['user_id'] = userId;
+    return _data;
   }
 }

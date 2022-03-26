@@ -1,5 +1,5 @@
 class SetPinReq {
-  String loginpin;
+  String? loginpin;
 
   SetPinReq({this.loginpin});
 

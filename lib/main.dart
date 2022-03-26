@@ -6,11 +6,16 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/router.dart';
 
+
+Future<void> _messageHandler(RemoteMessage message) async {
+  print('background message ${message.notification!.body}');
+}
 Future<void> main() async {
   //_setupLogging();
   // runApp(SplashScreen());
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_messageHandler);
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(SplashScreen());

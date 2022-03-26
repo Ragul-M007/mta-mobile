@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:dio/adapter.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ForgotPassReq.dart';
@@ -15,8 +17,8 @@ import 'package:mta/models/NewsRes.dart';
 import '../splashscreen.dart';
 
 bool isVerifyScreen = false;
-String codeVerifyField;
-String verificationCode;
+String? codeVerifyField;
+String? verificationCode;
 String emailIdforVerification = '';
 
 FocusNode one = new FocusNode();
@@ -56,6 +58,7 @@ class _LoginState extends State<Login> {
           child: WillPopScope(
               onWillPop: () async {
                 _onWillPop();
+                return false;
               },
               child: Provider<ApiService>(
                   create: (context) => ApiService.create(),
@@ -65,7 +68,7 @@ class _LoginState extends State<Login> {
   }
 
   Future<bool> _onWillPop() async {
-    return (await showDialog(
+    return await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: Text(
@@ -105,8 +108,7 @@ class _LoginState extends State<Login> {
               ),
             ],
           ),
-        )) ??
-        false;
+        );
   }
 }
 
@@ -118,19 +120,20 @@ class LoginContent extends StatefulWidget {
 class _LoginContentState extends State<LoginContent>
     with TickerProviderStateMixin {
   var scaffoldKey = GlobalKey<ScaffoldState>();
-  String verificationCode;
+  String? verificationCode;
   bool _isLoading = false;
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _emailIdController = TextEditingController();
-  TabController _tabController;
+  TabController? _tabController;
 
-  List<NewsResData> _newsLists;
+  List<NewsResData>? _newsLists;
 
   @override
   void initState() {
     super.initState();
+    certifcatecheck();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
+    WidgetsBinding.instance?.addPostFrameCallback((_) => getNewsFeeds());
     setState(() {
       _emailIdController.text = "";
       _passwordController.text = "";
@@ -155,42 +158,93 @@ class _LoginContentState extends State<LoginContent>
       AppUtils.showToastErrorTop("Please enter Your Password");
     } else {
       bool network = await Validators.networkconnectvitiy();
-      if (network) {
+      if (network) 
+      {
         loginreq();
       }
     }
   }
 
-  loginreq() {
+  loginreq() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
+    print("api--->  {$api}");
     LoginReq loginreq = LoginReq();
     loginreq.email = _emailIdController.text;
     loginreq.password = _passwordController.text;
     loginreq.token = Strings.fcmToken;
     Strings.authToken = '';
-    api.login(loginreq).then((response) {
+    print("loqinrequest ---> ${loginreq}");
+    api.login(loginreq).then((response) 
+    {
       AppUtils.dismissprogress();
       print('loginResponse status ${response.toJson()}');
-
-      if (response.status) {
-        AppUtils.savePreferences("emailId", response.data.emailId);
-        AppUtils.savePreferences("userId", response.data.userId);
-        if (response.data.userImg != null) {
-          AppUtils.savePreferences("profilePic", response.data.userImg);
-          Strings.profilePic = response.data.userImg;
+      assignroles()
+      {
+        if (response.data?.role == "ADMIN")
+        {
+            Strings.roleId = 1;
+        }
+        else if(response.data?.role == "STAFF")
+        {
+            Strings.roleId = 2;
+        }
+        else if(response.data?.role == "VENDOR")
+        {
+            Strings.roleId = 3;
+        }else if(response.data?.role == "CONSULTANTS")
+        {
+            Strings.roleId = 4;
+        }
+        else if(response.data?.role == "CONTRACTORS")
+        {
+            Strings.roleId = 5;
+        }
+        else if(response.data?.role == "CLIENT")
+        {
+            Strings.roleId = 6;
+        }
+      }
+      if (response.status!) {
+        print("inside status");
+        AppUtils.savePreferences("emailId", response.data?.emailId);
+        AppUtils.savePreferences("userId", response.data?.userId);
+        if (response.data?.userImg != null) {
+          print("inside if img");
+          AppUtils.savePreferences("profilePic", response.data?.userImg);
+          Strings.profilePic = response.data!.userImg!;
         } else {
+          print("inside elseif img");
           AppUtils.savePreferences("profilePic", "");
           Strings.profilePic = "";
         }
-        Strings.userID = response.data.userId;
-        Strings.username = response.data.name;
-        Strings.roleId = response.data.roleId;
-        Strings.authToken = response.token;
+        Strings.userID = response.data!.userId;
+        Strings.username = response.data!.name;
+        assignroles();
+        Strings.authToken = response.token!;
+        print("role${Strings.roleId}");
         Navigator.pushNamed(context, "/setpin");
-      } else {
-        AppUtils.showToastErrorTop(response.message);
+      } else 
+      {
+        showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: Text("Login Failed",style: TextStyle(color: Colors.red),),
+                  content: Text(response.message ?? "Unknown Error"),
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Text("OK"),
+                    ),
+                  ],
+                ),
+              );
+        //AppUtils.showToastErrorTop(response.message!);
       }
+      
     }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
@@ -437,7 +491,7 @@ class _LoginContentState extends State<LoginContent>
     return _newsLists != null
         ? ListView.builder(
             itemBuilder: (BuildContext ctx, int index) {
-              return _newsLists[index].feedType == "N"
+              return _newsLists![index].feedType == "N"
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
@@ -445,9 +499,9 @@ class _LoginContentState extends State<LoginContent>
                             onTap: () {
                               _showMyDialog(
                                   Strings.baseImageUrl +
-                                      _newsLists[index].imgUrl,
-                                  _newsLists[index].titleText,
-                                  _newsLists[index].description);
+                                      _newsLists![index].imgUrl!,
+                                  _newsLists![index].titleText,
+                                  _newsLists![index].description);
                             },
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +518,7 @@ class _LoginContentState extends State<LoginContent>
                                               BorderRadius.circular(100.0),
                                           child: Image.network(
                                               Strings.baseImageUrl +
-                                                  _newsLists[index].imgUrl)),
+                                                  (_newsLists?[index].imgUrl ?? ""))),
                                     )),
                                 SizedBox(
                                   width: 20,
@@ -475,7 +529,7 @@ class _LoginContentState extends State<LoginContent>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _newsLists[index].titleText,
+                                        _newsLists![index].titleText!,
                                         textAlign: TextAlign.left,
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
@@ -485,7 +539,7 @@ class _LoginContentState extends State<LoginContent>
                                         height: 10,
                                       ),
                                       Text(
-                                        _newsLists[index].description,
+                                        _newsLists![index].description!,
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
@@ -516,8 +570,8 @@ class _LoginContentState extends State<LoginContent>
                                           ),
                                           Text(
                                             calculateTimeDifferenceBetween(
-                                                serverDate: _newsLists[index]
-                                                    .updatedAt),
+                                                serverDate: _newsLists![index]
+                                                    .updatedAt!),
                                             textAlign: TextAlign.left,
                                             textDirection: TextDirection.ltr,
                                             style: TextStyle(
@@ -534,7 +588,7 @@ class _LoginContentState extends State<LoginContent>
                           )))
                   : SizedBox();
             },
-            itemCount: _newsLists.length,
+            itemCount: _newsLists!.length,
           )
         : SizedBox();
   }
@@ -543,7 +597,7 @@ class _LoginContentState extends State<LoginContent>
     return _newsLists != null
         ? ListView.builder(
             itemBuilder: (BuildContext ctx, int index) {
-              return _newsLists[index].feedType == "H"
+              return _newsLists![index].feedType == "H"
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
@@ -551,9 +605,9 @@ class _LoginContentState extends State<LoginContent>
                             onTap: () {
                               _showMyDialog(
                                   Strings.baseImageUrl +
-                                      _newsLists[index].imgUrl,
-                                  _newsLists[index].titleText,
-                                  _newsLists[index].description);
+                                      _newsLists![index].imgUrl!,
+                                  _newsLists![index].titleText,
+                                  _newsLists![index].description);
                             },
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,7 +624,7 @@ class _LoginContentState extends State<LoginContent>
                                               BorderRadius.circular(100.0),
                                           child: Image.network(
                                               Strings.baseImageUrl +
-                                                  _newsLists[index].imgUrl)),
+                                                  _newsLists![index].imgUrl!)),
                                     )),
                                 SizedBox(
                                   width: 20,
@@ -581,7 +635,7 @@ class _LoginContentState extends State<LoginContent>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _newsLists[index].titleText,
+                                        _newsLists![index].titleText!,
                                         textAlign: TextAlign.left,
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
@@ -591,7 +645,7 @@ class _LoginContentState extends State<LoginContent>
                                         height: 10,
                                       ),
                                       Text(
-                                        _newsLists[index].description,
+                                        _newsLists![index].description!,
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
@@ -622,8 +676,8 @@ class _LoginContentState extends State<LoginContent>
                                           ),
                                           Text(
                                             calculateTimeDifferenceBetween(
-                                                serverDate: _newsLists[index]
-                                                    .updatedAt),
+                                                serverDate: _newsLists![index]
+                                                    .updatedAt!),
                                             textAlign: TextAlign.left,
                                             textDirection: TextDirection.ltr,
                                             style: TextStyle(
@@ -640,23 +694,35 @@ class _LoginContentState extends State<LoginContent>
                           )))
                   : SizedBox();
             },
-            itemCount: _newsLists.length,
+            itemCount: _newsLists!.length,
           )
         : SizedBox();
+  }
+  certifcatecheck()
+  {
+    Dio _dio = Dio();
+    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+             (HttpClient dioClient) {
+           dioClient.badCertificateCallback =
+               ((X509Certificate cert, String host, int port) => true);
+           return dioClient;
+         };
   }
 
   getNewsFeeds() {
     AppUtils.showprogress();
+    Dio _dio = Dio();
     final api = Provider.of<ApiService>(context, listen: false);
-
-    api.news().then((response) {
+    print(api);
+    api.news().then((response) 
+    {
       AppUtils.dismissprogress();
       print('NewsResponse status ${response.toJson()}');
 
-      if (response.status) {
+      if (response.status!) {
         // Navigator.pushNamed(ctx, "/dashboard");
         setState(() {
-          _newsLists = response.data;
+          _newsLists = response.data!;
         });
       } else {
         print('error');
@@ -665,10 +731,11 @@ class _LoginContentState extends State<LoginContent>
       AppUtils.dismissprogress();
       print(onError.toString());
     });
+    print("api news----->{$api.news()}");
   }
 
-  static String calculateTimeDifferenceBetween({@required String serverDate}) {
-    DateTime startDate = DateTime.parse(serverDate);
+  static String calculateTimeDifferenceBetween({@required String? serverDate}) {
+    DateTime startDate = DateTime.parse(serverDate!);
     DateTime endDate = DateTime.now();
     int seconds = endDate.difference(startDate).inSeconds;
     if (seconds < 60)
@@ -801,7 +868,7 @@ class _LoginContentState extends State<LoginContent>
                             fourT.text +
                             fiveT.text;
 
-                        if (codeVerifyField.length < 5) {
+                        if (codeVerifyField!.length < 5) {
                           AppUtils.showToastError("Please Enter code");
                         } else {
                           otpVerifyCall(contextResetPin);
@@ -1108,13 +1175,13 @@ class _LoginContentState extends State<LoginContent>
       api.forgotPass(request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
-        if (response.status) {
+        if (response.status!) {
           Navigator.of(ctx).pop();
           emailIdforVerification = forgotPassEmailID.text;
           forgotPassEmailID.text = '';
           _otpVerify();
         } else {
-          AppUtils.showToastError(response.message);
+          AppUtils.showToastError(response.message!);
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -1133,7 +1200,7 @@ class _LoginContentState extends State<LoginContent>
     api.otpVerify(request).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      if (response.status) {
+      if (response.status!) {
         Navigator.of(ctx).pop();
         oneT.text = '';
         twoT.text = '';
@@ -1142,7 +1209,7 @@ class _LoginContentState extends State<LoginContent>
         fiveT.text = '';
         _changePass();
       } else {
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -1167,14 +1234,14 @@ class _LoginContentState extends State<LoginContent>
       api.changePass(request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
-        if (response.status) {
+        if (response.status!) {
           changePassNew.text = "";
           changePassConfirm.text = "";
           Navigator.of(ctx).pop();
 
-          AppUtils.showToastSuccess(response.message);
+          AppUtils.showToastSuccess(response.message!);
         } else {
-          AppUtils.showToastErrorTop(response.message);
+          AppUtils.showToastErrorTop(response.message!);
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = "/drawer";
-  HomeScreen({Key key}) : super(key: key);
+  HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -11,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  FancyDrawerController _controller;
+  FancyDrawerController? _controller;
 
   @override
   void initState() {
@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -47,13 +47,13 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       child: FancyDrawerWrapper(
         backgroundColor: Colors.transparent,
-        controller: _controller,
+        controller: _controller!,
         drawerItems: <Widget>[
           Container(
             child: Row(
               children: [
                 Icon(Icons.ac_unit, color: Colors.white),
-                Text("MTA Architects")
+                Text("MTA Connect")
               ],
             ),
           ),
@@ -162,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen>
                 color: Colors.black,
               ),
               onPressed: () {
-                _controller.toggle();
+                _controller?.toggle();
               },
             ),
           ),

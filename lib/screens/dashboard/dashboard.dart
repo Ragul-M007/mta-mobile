@@ -26,15 +26,15 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard>
     with SingleTickerProviderStateMixin {
-  FancyDrawerController _controller;
+  FancyDrawerController? _controller;
 
-  BuildContext ctx;
+  BuildContext? ctx;
 
   List<Data> _projectLists = [];
   List<Data> _searchLists = [];
   FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
-  String filepath;
+  String? filepath;
   var dio = Dio();
 
   String _errText = "";
@@ -50,12 +50,12 @@ class _DashboardState extends State<Dashboard>
       });
     super.initState();
     getPermission();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
+    WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -63,16 +63,16 @@ class _DashboardState extends State<Dashboard>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(proId).then((response) {
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          Strings.users = response.data;
+          Strings.users = response.data!;
         });
         final api = Provider.of<ApiService>(context, listen: false);
         api.fetchCats(proId).then((response) {
           AppUtils.dismissprogress();
-          if (response.status) {
+          if (response.status!) {
             setState(() {
-              Strings.categories = response.data;
+              Strings.categories = response.data!;
               Navigator.pushNamed(context, '/comments');
             });
           } else {
@@ -93,13 +93,13 @@ class _DashboardState extends State<Dashboard>
 
   getProjects() {
     AppUtils.showprogress();
-    final api = Provider.of<ApiService>(ctx, listen: false);
+    final api = Provider.of<ApiService>(ctx!, listen: false);
 
-    api.projects(Strings.userID).then((response) {
+    api.projects(Strings.userID!).then((response) {
       AppUtils.dismissprogress();
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          _projectLists = response.data;
+          _projectLists = response.data!;
         });
         if (Strings.isPushAvailable == true) {
           Strings.isPushAvailable = false;
@@ -108,7 +108,7 @@ class _DashboardState extends State<Dashboard>
       } else {
         setState(() {
           // _errText = "No Projects found !";
-          _errText = response.message;
+          _errText = response.message!;
         });
         // if (response.message != null) {
         //   AppUtils.showToastError(response.message);
@@ -177,6 +177,7 @@ class _DashboardState extends State<Dashboard>
     return WillPopScope(
       onWillPop: () async {
         _onWillPop();
+        return false;
       },
       child: Provider<ApiService>(
         create: (context) => ApiService.create(),
@@ -185,7 +186,7 @@ class _DashboardState extends State<Dashboard>
               Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
           child: FancyDrawerWrapper(
               backgroundColor: Colors.transparent,
-              controller: _controller,
+              controller: _controller!,
               drawerItems: <Widget>[
                 Container(
                   padding: EdgeInsets.only(bottom: 30),
@@ -196,12 +197,12 @@ class _DashboardState extends State<Dashboard>
                           width: 60.0,
                           height: 60.0,
                           decoration: Drawables.menudecorationImage(
-                              "assets/images/logo.jpeg", 50.0)),
+                              "assets/images/logo.jpg", 50.0)),
                       SizedBox(
                         width: 10,
                       ),
                       Text(
-                        "MTA Architects",
+                        "MTA Connect",
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -217,8 +218,8 @@ class _DashboardState extends State<Dashboard>
                   selectedmenuvalue: 1,
                   menutitle: "Projects",
                 ),
-                Strings.roleId != 1
-                    ? menuoption(
+                (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
+                   ? menuoption(
                         ontab: () {
                           menuRedirect(
                               routename: "/attendance", currentmenu: 2);
@@ -286,13 +287,14 @@ class _DashboardState extends State<Dashboard>
                           padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
                           child: GestureDetector(
                             onTap: () {
+                              print(Strings.baseImageUrl + Strings.profilePic!);
                               _showMyDialog(
                                   context,
-                                  Strings.baseImageUrl + Strings.profilePic,
+                                  Strings.baseImageUrl + Strings.profilePic!,
                                   Strings.username);
                             },
                             child: image(
-                                Strings.baseImageUrl + Strings.profilePic,
+                                Strings.baseImageUrl + Strings.profilePic!,
                                 40.0,
                                 40.0),
                           ))
@@ -321,7 +323,8 @@ class _DashboardState extends State<Dashboard>
                                         decoration: InputDecoration.collapsed(
                                           hintText: ' Search',
                                         ),
-                                        onChanged: (value) {
+                                        onChanged: (value) 
+                                        {
                                           if (value.isEmpty) {
                                             setState(() {
                                               _searchLists = [];
@@ -331,11 +334,12 @@ class _DashboardState extends State<Dashboard>
                                           _searchLists = [];
                                           _projectLists
                                               .forEach((projectDetail) {
-                                            if (projectDetail.projectName
+                                            if (projectDetail.projectName!
                                                 .toLowerCase()
                                                 .startsWith(
                                                     value.toLowerCase()))
                                               _searchLists.add(projectDetail);
+                                            
                                           });
                                           print(_searchLists.length);
                                           setState(() {});
@@ -366,7 +370,7 @@ class _DashboardState extends State<Dashboard>
                         ),
                         onPressed: () {
                           searchField.unfocus();
-                          _controller.toggle();
+                          _controller?.toggle();
                         },
                       ),
                     ),
@@ -429,7 +433,7 @@ class _DashboardState extends State<Dashboard>
                                                               Strings.baseImageUrl +
                                                                   _searchLists[
                                                                           index]
-                                                                      .projectImg,
+                                                                      .projectImg!,
                                                               65.0,
                                                               65.0),
                                                         ),
@@ -457,7 +461,7 @@ class _DashboardState extends State<Dashboard>
                                                                 left: 5),
                                                         child: Text(
                                                           _searchLists[index]
-                                                              .projectName,
+                                                              .projectName!,
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.black,
@@ -479,11 +483,11 @@ class _DashboardState extends State<Dashboard>
                                                             child: Text(
                                                               _searchLists[
                                                                           index]
-                                                                      .address +
+                                                                      .address! +
                                                                   ' , ' +
                                                                   _searchLists[
                                                                           index]
-                                                                      .city,
+                                                                      .city!,
                                                               overflow:
                                                                   TextOverflow
                                                                       .clip,
@@ -571,7 +575,7 @@ class _DashboardState extends State<Dashboard>
                                                                   Strings.baseImageUrl +
                                                                       _projectLists[
                                                                               index]
-                                                                          .projectImg,
+                                                                          .projectImg!,
                                                                   65.0,
                                                                   65.0),
                                                             ),
@@ -601,7 +605,7 @@ class _DashboardState extends State<Dashboard>
                                                             child: Text(
                                                               _projectLists[
                                                                       index]
-                                                                  .projectName,
+                                                                  .projectName!,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .black,
@@ -640,11 +644,11 @@ class _DashboardState extends State<Dashboard>
                                                                 child: Text(
                                                                   _projectLists[
                                                                               index]
-                                                                          .address +
+                                                                          .address! +
                                                                       ' , ' +
                                                                       _projectLists[
                                                                               index]
-                                                                          .city,
+                                                                          .city!,
                                                                   overflow:
                                                                       TextOverflow
                                                                           .clip,
@@ -699,9 +703,9 @@ class _DashboardState extends State<Dashboard>
     Navigator.pushNamed(context, '/categories');
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      Strings.currentmenuvalue = currentmenu;
+      Strings.currentmenuvalue = currentmenu!;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
@@ -710,7 +714,7 @@ class _DashboardState extends State<Dashboard>
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 

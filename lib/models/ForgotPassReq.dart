@@ -1,5 +1,5 @@
 class ForgotPassReq {
-  String emailId;
+  String? emailId;
 
   ForgotPassReq({this.emailId});
 

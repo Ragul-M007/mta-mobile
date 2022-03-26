@@ -1,6 +1,6 @@
 class ValidateOTPReq {
-  String emailId;
-  String otp;
+  String? emailId;
+  String? otp;
 
   ValidateOTPReq({this.emailId, this.otp});
 

@@ -1,6 +1,6 @@
 class AddAttendanceRes {
-  bool status;
-  String message;
+  bool? status;
+  String? message;
 
   AddAttendanceRes({this.status, this.message});
 

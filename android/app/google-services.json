@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "432746271272",
-    "project_id": "mtaskein",
-    "storage_bucket": "mtaskein.appspot.com"
+    "project_number": "98448819873",
+    "project_id": "mtaapp-c9ed6",
+    "storage_bucket": "mtaapp-c9ed6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:432746271272:android:e8f7739d9167a0e2ed5b1d",
+        "mobilesdk_app_id": "1:98448819873:android:432784ce22ff41184252e0",
         "android_client_info": {
           "package_name": "com.skein.mta"
         }
       },
       "oauth_client": [
         {
-          "client_id": "432746271272-acc09gs3h3eif8ed7tdp953sksri9h1l.apps.googleusercontent.com",
+          "client_id": "98448819873-t4dh9vpdhavgiktonsnsgcis7s9enctu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.skein.mta",
-            "certificate_hash": "1c93bbb82d360e95abf4323a557ffc5903fe5854"
+            "certificate_hash": "f5ae13016bb7daa10588c482fef983a03f4b6c3b"
           }
         },
         {
-          "client_id": "432746271272-o3t4rdt9arvnhvlj9lifeg7e8g3fkk2r.apps.googleusercontent.com",
+          "client_id": "98448819873-qmi0uf0q82762prbscpnluvsajgbi936.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCcAXqmIFzo99_lL9uy9Ldf1Q7V46rx-AM"
+          "current_key": "AIzaSyABgNJ0zZSzJ6nmsJNvY4yygc16k0lXVkA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "432746271272-o3t4rdt9arvnhvlj9lifeg7e8g3fkk2r.apps.googleusercontent.com",
+              "client_id": "98448819873-qmi0uf0q82762prbscpnluvsajgbi936.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

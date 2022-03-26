@@ -1,10 +1,10 @@
 class EditProfileReq {
-  String name;
-  String mobileNo;
-  String userImg;
-  String city;
-  String area;
-  String state;
+  String? name;
+  String? mobileNo;
+  String? userImg;
+  String? city;
+  String? area;
+  String? state;
 
   EditProfileReq(
       {this.name,
@@ -14,7 +14,8 @@ class EditProfileReq {
       this.area,
       this.state});
 
-  EditProfileReq.fromJson(Map<String, dynamic> json) {
+  EditProfileReq.fromJson(Map<String, dynamic> json) 
+  {
     name = json['name'];
     mobileNo = json['mobile_no'];
     userImg = json['user_img'];

@@ -20,7 +20,7 @@ import 'package:provider/provider.dart';
 
 import 'dart:io' as Io;
 
-FancyDrawerController _controller;
+FancyDrawerController? _controller;
 FocusNode name = new FocusNode();
 ImagePicker _picker = ImagePicker();
 
@@ -47,7 +47,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose controller
+    _controller?.dispose(); // Dispose controller
     super.dispose();
   }
 
@@ -62,7 +62,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
           child: FancyDrawerWrapper(
             backgroundColor: Colors.transparent,
-            controller: _controller,
+            controller: _controller!,
             drawerItems: <Widget>[
               Container(
                 padding: EdgeInsets.only(bottom: 30),
@@ -73,12 +73,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         width: 60.0,
                         height: 60.0,
                         decoration: Drawables.menudecorationImage(
-                            "assets/images/logo.jpeg", 50.0)),
+                            "assets/images/logo.jpg", 50.0)),
                     SizedBox(
                       width: 10,
                     ),
                     Text(
-                      "MTA Architects",
+                      "MTA Connect",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 selectedmenuvalue: 1,
                 menutitle: "Projects",
               ),
-              Strings.roleId != 1
+              (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
                   ? menuoption(
                       ontab: () {
                         menuRedirect(routename: "/attendance", currentmenu: 2);
@@ -162,9 +162,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         ));
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      Strings.currentmenuvalue = currentmenu;
+      Strings.currentmenuvalue = currentmenu!;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
@@ -174,7 +174,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
       //Navigator.pop(context);
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 }
@@ -200,8 +200,8 @@ class _ProfileContentState extends State<ProfileContent> {
   List<ProfileData> _profileData = [];
   bool loader = true;
 
-  String codeVerifyField;
-  String verificationCode;
+  String? codeVerifyField;
+  String? verificationCode;
 
   FocusNode one = new FocusNode();
   FocusNode two = new FocusNode();
@@ -213,14 +213,14 @@ class _ProfileContentState extends State<ProfileContent> {
   final threeT = TextEditingController();
   final fourT = TextEditingController();
 
-  BuildContext ctx;
+  BuildContext? ctx;
 
   var address = '';
   var editPicTap = false;
   var editProfilePictureBase64 = '';
-  Uint8List editProfilePicture;
+  Uint8List? editProfilePicture;
 
-  MemoryImage _imageAsyncWidget;
+  MemoryImage? _imageAsyncWidget;
 
   @override
   void initState() {
@@ -232,7 +232,6 @@ class _ProfileContentState extends State<ProfileContent> {
     // WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
     getProfile();
   }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -252,7 +251,7 @@ class _ProfileContentState extends State<ProfileContent> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              image(Strings.baseImageUrl + Strings.profilePic,
+                              image(Strings.baseImageUrl + Strings.profilePic!,
                                   40.0, 40.0),
                               SizedBox(
                                 width: 20,
@@ -262,7 +261,7 @@ class _ProfileContentState extends State<ProfileContent> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _profileData[0].name,
+                                    _profileData[0].name!,
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
@@ -272,7 +271,7 @@ class _ProfileContentState extends State<ProfileContent> {
                                     height: 5,
                                   ),
                                   Text(
-                                    _profileData[0].email,
+                                    _profileData[0].email!,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 15),
                                   ),
@@ -321,7 +320,7 @@ class _ProfileContentState extends State<ProfileContent> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                _controller.toggle();
+                                _controller?.toggle();
                               },
                               child: Icon(
                                 Icons.menu,
@@ -478,33 +477,37 @@ class _ProfileContentState extends State<ProfileContent> {
                 )),
     );
   }
-
-  getProfile() {
+  getProfile() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.profile().then((response) {
       AppUtils.dismissprogress();
-      print('profileResponse status ${response.toJson()}');
-      setState(() {
+      print('profileResponse status ${response.data}');
+      
+      setState(() 
+      {
         loader = false;
-        _profileData = response.data;
-        mobileField.text = _profileData[0].mobileNo;
-        userType.text = _profileData[0].role;
-        address = _profileData[0].area +
+        print("response----> ${response.data}");
+        _profileData = response.data!;
+        mobileField.text = _profileData[0].mobileNo!;
+        userType.text = _profileData[0].role!;
+        address = _profileData[0].area! +
             " , " +
-            _profileData[0].city +
+            _profileData[0].city! +
             " , " +
-            _profileData[0].state;
-        editNumber.text = _profileData[0].mobileNo;
-        editName.text = _profileData[0].name;
-        editAddress.text = _profileData[0].area;
-        editState.text = _profileData[0].state;
-        editCity.text = _profileData[0].city;
+            _profileData[0].state!;
+        editNumber.text = _profileData[0].mobileNo!;
+        editName.text = _profileData[0].name!;
+        editAddress.text = _profileData[0].area!;
+        editState.text = _profileData[0].state!;
+        editCity.text = _profileData[0].city!;
         if (_profileData[0].userImg != null) {
-          Strings.profilePic = _profileData[0].userImg;
+          Strings.profilePic = _profileData[0].userImg!;
         } else {
           Strings.profilePic = "";
         }
+      print("check");
       });
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -687,7 +690,7 @@ class _ProfileContentState extends State<ProfileContent> {
                         codeVerifyField =
                             oneT.text + twoT.text + threeT.text + fourT.text;
 
-                        if (codeVerifyField.length < 4) {
+                        if (codeVerifyField!.length < 4) {
                           AppUtils.showToastError("Please Enter Pin");
                         } else {
                           resetPin(contextResetPin);
@@ -810,13 +813,13 @@ class _ProfileContentState extends State<ProfileContent> {
       api.changePass(request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
-        if (response.status) {
-          AppUtils.showToastSuccess(response.message);
+        if (response.status!) {
+          AppUtils.showToastSuccess(response.message!);
           AppUtils.clearAllPreferences();
           Strings.isLogin = false;
           Navigator.popAndPushNamed(context, "/login");
         } else {
-          AppUtils.showToastError(response.message);
+          AppUtils.showToastError(response.message!);
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -858,7 +861,7 @@ class _ProfileContentState extends State<ProfileContent> {
                       children: [
                         Container(
                           child: editPicTap == false
-                              ? image(Strings.baseImageUrl + Strings.profilePic,
+                              ? image(Strings.baseImageUrl + Strings.profilePic!,
                                   80.0, 80.0)
                               : Container(
                                   width: 80,
@@ -866,7 +869,7 @@ class _ProfileContentState extends State<ProfileContent> {
                                   decoration: new BoxDecoration(
                                     color: const Color(0xff7c94b6),
                                     image: new DecorationImage(
-                                      image: _imageAsyncWidget,
+                                      image: _imageAsyncWidget!,
                                       fit: BoxFit.fill,
                                     ),
                                     borderRadius: new BorderRadius.all(
@@ -1071,21 +1074,21 @@ class _ProfileContentState extends State<ProfileContent> {
       if (editPicTap == true) {
         request.userImg = editProfilePictureBase64;
       }
-      // print(request.name);
-      // print(request.mobileNo);
-      // print(request.area);
-      // print(request.city);
-      // print(request.state);
-      // print(request.userImg);
-      api.editProfile(Strings.userID, request).then((response) {
+      print(request.name);
+      print(request.mobileNo);
+      print(request.area);
+      print(request.city);
+      print(request.state);
+      print(request.userImg);
+      api.editProfile(Strings.userID!, request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
-        if (response.status) {
-          AppUtils.showToastSuccess(response.message);
+        if (response.status!) {
+          AppUtils.showToastSuccess(response.message!);
           Navigator.of(ctxt).pop();
           getProfile();
         } else {
-          AppUtils.showToastError(response.message);
+          AppUtils.showToastError(response.message!);
         }
       }).catchError((onError) {
         AppUtils.dismissprogress();
@@ -1095,22 +1098,22 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   Future<void> changeProPic() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'JPG', 'jepg', 'png', 'PNG'],
     );
 
     if (result != null) {
       PlatformFile file = result.files.first;
-      final bytes = await Io.File(file.path).readAsBytes();
+      final bytes = await Io.File(file.path!).readAsBytes();
       setState(() {
         String base64Encodes(List<int> bytes) => base64.encode(bytes);
         String base64Encode = base64Encodes(bytes); //base64.encode(bytes);
         editProfilePictureBase64 =
-            "data:image/" + file.extension + ";base64," + base64Encode;
+            "data:image/" + file.extension! + ";base64," + base64Encode;
         editProfilePicture = base64.decode(base64Encode);
         editPicTap = true;
-        _imageAsyncWidget = new MemoryImage(editProfilePicture);
+        _imageAsyncWidget = new MemoryImage(editProfilePicture!);
         name.requestFocus();
         // name.dispose();
       });
@@ -1121,13 +1124,13 @@ class _ProfileContentState extends State<ProfileContent> {
 
   void takePhoto(ImageSource source) async {
     final pickedFile = await _picker.getImage(source: source);
-    final bytes = await Io.File(pickedFile.path).readAsBytes();
+    final bytes = await Io.File(pickedFile!.path).readAsBytes();
     setState(() {
       editProfilePictureBase64 =
           "data:image/jpeg;base64," + base64Encode(bytes);
       editProfilePicture = base64.decode(base64Encode(bytes));
       editPicTap = true;
-      _imageAsyncWidget = new MemoryImage(editProfilePicture);
+      _imageAsyncWidget = new MemoryImage(editProfilePicture!);
       name.requestFocus();
     });
   }
@@ -1142,8 +1145,8 @@ class _ProfileContentState extends State<ProfileContent> {
         api.setPin(value, setpinreq).then((response) {
           AppUtils.dismissprogress();
 
-          if (response.status) {
-            AppUtils.showToastSuccess(response.message);
+          if (response.status!) {
+            AppUtils.showToastSuccess(response.message!);
             AppUtils.savePreferences("easyAccess", "Y");
             Navigator.of(contextpin).pop();
             // Navigator.popAndPushNamed(context, "/verifypin");
@@ -1152,7 +1155,7 @@ class _ProfileContentState extends State<ProfileContent> {
             threeT.text = '';
             fourT.text = '';
           } else {
-            AppUtils.showToastError(response.message);
+            AppUtils.showToastError(response.message!);
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();

@@ -1,8 +1,8 @@
 class AddAttendanceReq {
-  String checkType;
-  String checkTime;
-  String latLng;
-  String locationName;
+  String? checkType;
+  String? checkTime;
+  String? latLng;
+  String? locationName;
 
   AddAttendanceReq(
       {this.checkType, this.checkTime, this.latLng, this.locationName});

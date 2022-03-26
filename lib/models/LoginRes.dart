@@ -1,8 +1,8 @@
 class LoginRes {
-  bool status;
-  String message;
-  LoginResData data;
-  String token;
+  bool? status;
+  String? message;
+  LoginResData? data;
+  String? token;
 
   LoginRes({this.status, this.message, this.data, this.token});
 
@@ -19,21 +19,22 @@ class LoginRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.toJson();
+      data['data'] = this.data?.toJson();
     }
     data['token'] = this.token;
     return data;
   }
 }
 
-class LoginResData {
-  String name;
-  int userId;
-  String emailId;
-  String mobileNo;
-  String userImg;
-  String role;
-  int roleId;
+class LoginResData 
+{
+  String? name;
+  int? userId;
+  String? emailId;
+  String? mobileNo;
+  String? userImg;
+  String? role;
+  int? roleId;
 
   LoginResData(
       {this.name,

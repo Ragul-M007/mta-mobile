@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
@@ -24,19 +27,23 @@ import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/SetPinReq.dart';
+import 'package:mta/models/UserAccessreq.dart';
 import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';    
+// 
 import 'package:retrofit/retrofit.dart';
-
 part 'ApiService.g.dart';
 
 // Run this code in termial to generate ApiService.g.dart file
-//flutter packages pub run build_runner watch --delete-conflicting-outputs
+// flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-@RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+// @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+
+@RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
@@ -49,6 +56,9 @@ abstract class ApiService {
 
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);
+  
+  @PUT("/projects/putCategory/{user_id}")
+  Future<LoginRes> userAccess(@Path("user_id") String id, @Body() UserAccessReq body);
 
   @GET("/projects?user_id={user_id}")
   Future<DashboardRes> projects(@Path("user_id") int id);
@@ -60,12 +70,12 @@ abstract class ApiService {
   Future<ProfileRes> profile();
 
   @GET(
-      "/projects/getDocuments?category_id={category_id}&project_id={project_id}")
+      "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
   Future<FetchCategoryDocRes> getCategoryDoc(
-      @Path("category_id") int id, @Path("project_id") int pid);
+      @Path("category_id") int id, @Path("project_id") int pid,@Path("users_id") int userid);
 
-  @GET("/projects/getDocuments?project_id={project_id}")
-  Future<FectchProjectDocRes> getProjectDoc(@Path("project_id") int id);
+  @GET("/projects/getDocuments?project_id={project_id}&&users_id={users_id}")
+  Future<FectchProjectDocRes> getProjectDoc(@Path("project_id") int id, @Path("users_id") int userid);
 
   @GET("/categories?project_id={project_id}")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
@@ -79,6 +89,7 @@ abstract class ApiService {
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
       @Path("user_id") int id, @Path("date") String date);
+
 
   @GET("/categories?project_id={project_id}")
   Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
@@ -112,29 +123,34 @@ abstract class ApiService {
   static ApiService create() {
     final dio = Dio();
     try {
+      print("trying dio");
       dio.interceptors.add(PrettyDioLogger());
       dio.interceptors
-          .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
+          .add(InterceptorsWrapper(onRequest: (options,handler) async {
         options.headers["Content-Type"] = "application/json";
         options.headers["x-access-token"] = Strings.authToken;
         //options.headers["Host"] = "<calculated when request is sent>";
         options.followRedirects = false;
         options.validateStatus = (status) {
-          Strings.statusCode = status;
+          Strings.statusCode = status!;
           if (status == 401) {
             Strings.isLogin = false;
             AppUtils.showToastError(
                 "Session has been expired ! Please login again");
 
-            navigatorKey.currentState.popAndPushNamed('/verifypin');
+            navigatorKey.currentState?.popAndPushNamed('/verifypin');
             // return false;
           }
           return status < 500;
         };
-        return options;
+        print("Printing api service");
+       // print("dio api service-->${ApiService(dio)}");
+        return handler.next(options);
+       // return options;
       }));
       return ApiService(dio);
     } on DioError catch (error) {
+      print("went inside error");
       print(error.error);
       return ApiService(dio);
     }

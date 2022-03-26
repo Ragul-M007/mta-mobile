@@ -1,7 +1,7 @@
 class FetchCategoryDocRes {
-  bool status;
-  String message;
-  List<FetchCategoryDoc> data;
+  bool? status;
+  String? message;
+  List<FetchCategoryDoc>? data;
 
   FetchCategoryDocRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class FetchCategoryDocRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<FetchCategoryDoc>();
+      data = <FetchCategoryDoc>[];
       json['data'].forEach((v) {
-        data.add(new FetchCategoryDoc.fromJson(v));
+        data?.add(new FetchCategoryDoc.fromJson(v));
       });
     }
   }
@@ -21,21 +21,21 @@ class FetchCategoryDocRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class FetchCategoryDoc {
-  int documentId;
-  String fileName;
-  String file;
-  int userId;
-  String name;
-  String createdAt;
-  String description;
-  int commentsCount;
+  int? documentId;
+  String? fileName;
+  String? file;
+  int? userId;
+  String? name;
+  String? createdAt;
+  String? description;
+  int? commentsCount;
 
   FetchCategoryDoc(
       {this.documentId,

@@ -1,16 +1,16 @@
 class CommentsRes {
-  int commentId;
-  int parentCommentId;
-  String comment;
-  String audio;
-  String date;
-  String recipientId;
-  String recipient;
-  String categoryIdList;
-  String categoryList;
-  String name;
-  String userImg;
-  List<Replies> replies;
+  int? commentId;
+  int? parentCommentId;
+  String? comment;
+  String? audio;
+  String? date;
+  String? recipientId;
+  String? recipient;
+  String? categoryIdList;
+  String? categoryList;
+  String? name;
+  String? userImg;
+  List<Replies>? replies;
 
   CommentsRes(
       {this.commentId,
@@ -39,9 +39,9 @@ class CommentsRes {
     name = json['name'];
     userImg = json['user_img'];
     if (json['replies'] != null) {
-      replies = new List<Replies>();
+      replies = <Replies>[];
       json['replies'].forEach((v) {
-        replies.add(new Replies.fromJson(v));
+        replies?.add(new Replies.fromJson(v));
       });
     }
   }
@@ -60,24 +60,24 @@ class CommentsRes {
     data['name'] = this.name;
     data['user_img'] = this.userImg;
     if (this.replies != null) {
-      data['replies'] = this.replies.map((v) => v.toJson()).toList();
+      data['replies'] = this.replies?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class Replies {
-  String date;
-  String comment;
-  String audio;
-  String userImg;
-  String recipient;
-  String commentBy;
-  int commentId;
-  String recipientId;
-  String categoryList;
-  String categoryIdList;
-  int parentCommentId;
+  String? date;
+  String? comment;
+  String? audio;
+  String? userImg;
+  String? recipient;
+  String? commentBy;
+  int? commentId;
+  String? recipientId;
+  String? categoryList;
+  String? categoryIdList;
+  int? parentCommentId;
 
   Replies(
       {this.date,

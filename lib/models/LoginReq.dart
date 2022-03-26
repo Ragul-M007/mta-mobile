@@ -1,8 +1,8 @@
 class LoginReq {
-  String email;
-  String password;
-  String loginpin;
-  String token;
+  String? email;
+  String? password;
+  String? loginpin;
+  String? token;
   // String emailId;
   // String country;
 

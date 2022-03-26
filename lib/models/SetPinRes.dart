@@ -1,6 +1,6 @@
 class SetPinRes {
-  bool status;
-  String message;
+  bool? status;
+  String? message;
 
   SetPinRes({this.status, this.message});
 

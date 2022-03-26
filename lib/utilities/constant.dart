@@ -1,11 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 
 Widget menuoption({
-  @required Function ontab,
+  @required void Function()? ontab,
   @required selectedmenuvalue,
-  @required String menutitle,
+  @required String? menutitle,
 }) {
   return GestureDetector(
     onTap: ontab,
@@ -19,7 +21,7 @@ Widget menuoption({
       ),
       padding: EdgeInsets.fromLTRB(30, 4, 0, 4),
       child: Text(
-        menutitle,
+        menutitle!,
         style: TextStyle(
           fontSize: 17,
           color: Strings.currentmenuvalue == selectedmenuvalue
@@ -32,7 +34,7 @@ Widget menuoption({
   );
 }
 
-Widget appbar(String title) {
+PreferredSizeWidget appbar(String title) {
   return AppBar(
     iconTheme: IconThemeData(color: Colors.black),
     backgroundColor: Colors.white,
@@ -58,8 +60,8 @@ Widget appbar(String title) {
   );
 }
 
-Widget mainappbar(
-    {@required Function ontab, @required String title, @required controller}) {
+PreferredSizeWidget mainappbar(
+    {@required Function? ontab, @required String? title, @required controller}) {
   return AppBar(
     iconTheme: IconThemeData(color: Colors.black),
     backgroundColor: Colors.white,
@@ -67,7 +69,7 @@ Widget mainappbar(
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
     elevation: 8,
     title: Text(
-      title,
+      title!,
       style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
     ),
     leading: SizedBox(
@@ -87,13 +89,13 @@ Widget mainappbar(
   );
 }
 
-Widget button({@required Function ontab, @required String buttoncontent}) {
+Widget button({@required VoidCallback? ontab, @required String? buttoncontent}) {
   return GestureDetector(
     onTap: ontab,
     child: Container(
       child: Center(
           child: Text(
-        buttoncontent,
+        buttoncontent!,
         style: TextStyle(
             fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
         textAlign: TextAlign.center,

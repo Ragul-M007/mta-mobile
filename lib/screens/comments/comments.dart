@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io' as Io;
-import 'package:audioplayers/audio_cache.dart';
+//import 'package:audioplayers/audio_cache.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
@@ -26,14 +26,14 @@ import 'package:audioplayers/audioplayers.dart';
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
 
-AnimationController _animationController;
+AnimationController? _animationController;
 AudioPlayer audioPlayer = AudioPlayer();
 AudioCache audioCache = AudioCache();
 final _userIitems = users
-    .map((user) => MultiSelectItem<FetchMapedUsersData>(user, user.name))
+    .map((user) => MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
     .toList();
 final _catsItems = cats
-    .map((cats) => MultiSelectItem<CatsData>(cats, cats.categoryName))
+    .map((cats) => MultiSelectItem<CatsData?>(cats, cats.categoryName!))
     .toList();
 var tagedUsers = [];
 var tagedUsersId = [];
@@ -48,17 +48,21 @@ var isPlaying = false;
 var playingIndex = null;
 int audioLength = 0;
 int audioCurrentlenth = 0;
-Timer _timer;
+Timer? _timer;
 List<int> recordedData = [];
+final _audioRecorder = Record();
 
 class Comments extends StatefulWidget {
-  const Comments({Key key}) : super(key: key);
+    static const String routeName = "/comments";
+
+  const Comments({Key? key}) : super(key: key);
 
   @override
   _CommentsState createState() => _CommentsState();
 }
 
-class _CommentsState extends State<Comments> {
+class _CommentsState extends State<Comments> 
+{
   @override
   Widget build(BuildContext context) {
     return Provider<ApiService>(
@@ -71,9 +75,12 @@ class _CommentsState extends State<Comments> {
   }
 
   @override
-  void initState() {
+  void initState() 
+  {
     // TODO: implement initState
     super.initState();
+
+    
   }
 }
 
@@ -86,18 +93,19 @@ class CommentsContent extends StatefulWidget {
 
 class _CommentsContentState extends State<CommentsContent>
     with SingleTickerProviderStateMixin {
-  IO.Socket _socket;
+  IO.Socket? _socket;
   var _currDoc;
   TextEditingController _msgcontroller = TextEditingController();
   ScrollController _scrollController = new ScrollController();
   FocusNode msgField = new FocusNode();
   @override
-  void initState() {
+  void initState() 
+  {
     super.initState();
     Strings.pushNotify = false;
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
-    _animationController.repeat(reverse: true);
+    _animationController?.repeat(reverse: true);
 
     setState(() {
       tagedUsers = [];
@@ -112,13 +120,15 @@ class _CommentsContentState extends State<CommentsContent>
       _currDoc = Strings.selectedProDocument[0];
     }
     // getUserCats();
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
+    _socket = IO.io(Strings.socketUrl, <String, dynamic>
+    {
       'transports': ['websocket'],
       'autoConnect': false,
       'query': {'token': Strings.authToken, "document_id": _currDoc.documentId}
     });
-    _socket.connect();
-    _socket.on("connect", (_) {
+    _socket?.connect();
+    _socket?.on("connect", (_) 
+    {
       print('Connected');
       getComments();
     });
@@ -133,8 +143,9 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() {
-    _animationController.dispose();
+  void dispose() 
+  {
+    _animationController?.dispose();
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -159,6 +170,7 @@ class _CommentsContentState extends State<CommentsContent>
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -175,7 +187,7 @@ class _CommentsContentState extends State<CommentsContent>
                   child: Row(
                     children: [
                       Image.asset(
-                          getFileExt(Strings.category == true
+                          getFileExt((Strings.category == true)
                               ? Strings.selectedCatDocument[0].file
                               : Strings.selectedProDocument[0].file),
                           width: 30.0,
@@ -185,8 +197,8 @@ class _CommentsContentState extends State<CommentsContent>
                       ),
                       Text(
                           Strings.category == true
-                              ? Strings.selectedCatDocument[0].fileName
-                              : Strings.selectedProDocument[0].fileName,
+                              ? "${Strings.selectedCatDocument[0].fileName}"
+                              : "${Strings.selectedProDocument[0].fileName}",
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.w600))
                     ],
@@ -239,7 +251,7 @@ class _CommentsContentState extends State<CommentsContent>
                                             context,
                                             Strings.baseImageUrl +
                                                 Strings
-                                                    .comments[index].userImg);
+                                                    .comments[index].userImg!);
                                       },
                                       child: Container(
                                         width: 30.0,
@@ -249,8 +261,8 @@ class _CommentsContentState extends State<CommentsContent>
                                           image: new DecorationImage(
                                             image: new NetworkImage(
                                                 Strings.baseImageUrl +
-                                                    Strings.comments[index]
-                                                        .userImg),
+                                                    (Strings.comments[index]
+                                                        .userImg ?? "") ),
                                             fit: BoxFit.fill,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -270,7 +282,7 @@ class _CommentsContentState extends State<CommentsContent>
                                               CrossAxisAlignment.end,
                                           children: [
                                             Text(
-                                                Strings.comments[index].name +
+                                                Strings.comments[index].name! +
                                                     " . ",
                                                 style: TextStyle(
                                                     color: Colors.black,
@@ -304,6 +316,8 @@ class _CommentsContentState extends State<CommentsContent>
                                         SizedBox(
                                           height: 12,
                                         ),
+                                        Container(child: Text(Strings.comments[index].recipient?.replaceAll('"', '') ?? ""),),
+                                        SizedBox(height: 10),
                                         Container(
                                           child: Padding(
                                               padding: EdgeInsets.all(10),
@@ -456,7 +470,7 @@ class _CommentsContentState extends State<CommentsContent>
                                                     },
                                                     child: Text(
                                                       Strings.comments[index]
-                                                              .replies.length
+                                                              .replies!.length
                                                               .toString() +
                                                           "  Replies",
                                                       style: TextStyle(
@@ -486,7 +500,7 @@ class _CommentsContentState extends State<CommentsContent>
                                   height: 20,
                                 ),
                                 MySeparator(
-                                  color: Colors.grey[500],
+                                  color: Colors.grey[500]!,
                                 )
                               ],
                             ));
@@ -499,10 +513,12 @@ class _CommentsContentState extends State<CommentsContent>
               color: const Color(0xFFffffff),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
                   flex: 10,
-                  child: MultiSelectDialogField(
+                  child: MultiSelectDialogField<FetchMapedUsersData?>(
                     items: _userIitems,
                     title: Text("Tag Users"),
                     selectedColor: Color(0xFF0061b0),
@@ -529,9 +545,10 @@ class _CommentsContentState extends State<CommentsContent>
                       if (results.length > 0) {
                         tagedUsers = [];
                         tagedUsersId = [];
-                        results.forEach((element) {
-                          tagedUsers.add(element.name);
-                          tagedUsersId.add(element.userId);
+                        results.forEach((element) 
+                        {
+                           tagedUsers.add(element?.name);
+                           tagedUsersId.add(element?.userId);
                         });
                       } else {
                         tagedUsers = [];
@@ -542,7 +559,7 @@ class _CommentsContentState extends State<CommentsContent>
                 ),
                 Expanded(
                   flex: 10,
-                  child: MultiSelectDialogField(
+                  child: MultiSelectDialogField<CatsData?>(
                     items: _catsItems,
                     title: Text("Tag Categories"),
                     selectedColor: Color(0xFF0061b0),
@@ -569,14 +586,18 @@ class _CommentsContentState extends State<CommentsContent>
                       if (results.length > 0) {
                         tagedCats = [];
                         tagedCatsId = [];
-                        results.forEach((element) {
-                          tagedCats.add(element.categoryName);
-                          tagedCatsId.add(element.categoryId);
+                        results.forEach((element)
+                         {
+                          tagedCats.add(element?.categoryName);
+                          tagedCatsId.add(element?.categoryId);
                           // tagedCats = tagedCats + "," + element.categoryName;
                           // tagedCatsId = tagedCatsId.toString() +
                           //     "," +
                           //     element.categoryId.toString();
                         });
+                        results = [];
+
+                        
                       } else {
                         tagedCats = [];
                         tagedCatsId = [];
@@ -652,7 +673,7 @@ class _CommentsContentState extends State<CommentsContent>
                           hintStyle: TextStyle(color: Colors.grey[400]),
                           border: InputBorder.none,
                           prefixIcon: FadeTransition(
-                            opacity: _animationController,
+                            opacity: _animationController!,
                             child: startRecording == true
                                 ? Icon(Icons.mic, color: Colors.red)
                                 : SizedBox(
@@ -726,8 +747,9 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() {
-    _socket.on("document-comments", (_data) {
+  getComments() 
+  {
+    _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
 
@@ -750,7 +772,6 @@ class _CommentsContentState extends State<CommentsContent>
       });
     });
   }
-
   recordComments() async {
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
@@ -758,16 +779,17 @@ class _CommentsContentState extends State<CommentsContent>
     if (!status.isGranted) {
       getPermission();
     } else {
-      await Record.start(
-        path: dir + "/MTARecordedAudio.wav",
+      await _audioRecorder.start(
+        path: dir! + "/MTARecordedAudio.wav",
         encoder: AudioEncoder.AAC,
       );
     }
+  ;}
+ Future<void> stopRecord() async {
+   _audioRecorder.stop();
   }
 
-  stopRecord() async {
-    await Record.stop();
-  }
+
 
   playAudio(url) async {
     // var dir = await ExtStorage.getExternalStoragePublicDirectory(
@@ -782,22 +804,26 @@ class _CommentsContentState extends State<CommentsContent>
         audioLength = seconds;
       });
     });
-    audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    audioPlayer.onAudioPositionChanged.listen((Duration p) 
+    {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerCompletion.listen((event) {
-      setState(() {
+    audioPlayer.onPlayerCompletion.listen((event) 
+    {
+      setState(() 
+      {
         audioLength = 0;
         audioCurrentlenth = 0;
         playingIndex = null;
         isPlaying = false;
       });
     });
-    audioPlayer.onPlayerError.listen((msg) {
+    audioPlayer.onPlayerError.listen((msg) 
+    {
       print('audioPlayer error : $msg');
     });
   }
@@ -817,16 +843,17 @@ class _CommentsContentState extends State<CommentsContent>
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
     final bytesData =
-        await Io.File(dir + "/MTARecordedAudio.wav").readAsBytes();
+        await Io.File(dir! + "/MTARecordedAudio.wav").readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
     String base64Encode = base64Encodes(bytesData);
     final api = Provider.of<ApiService>(context, listen: false);
     AudioReq req = AudioReq();
     req.audio = "data:audio/wav;base64," + base64Encode;
+    print("base64Encode--> $base64Encode");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status) {
-        _socket.emit(
+      if (response.status!) {
+        _socket?.emit(
             'create-document-comment',
             json.encode({
               "project_id": Strings.selectedProject[0].projectId,
@@ -842,13 +869,14 @@ class _CommentsContentState extends State<CommentsContent>
               "category_list": json.encode(tagedCats)
             }));
 
-        setState(() {
+        setState(() 
+        {
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
-                Strings.selectedCatDocument[0].commentsCount + 1;
+                Strings.selectedCatDocument[0].commentsCount! + 1;
           } else {
             Strings.selectedProDocument[0].commentsCount =
-                Strings.selectedProDocument[0].commentsCount + 1;
+                Strings.selectedProDocument[0].commentsCount! + 1;
           }
           tagedUsers = [];
           tagedUsersId = [];
@@ -868,7 +896,7 @@ class _CommentsContentState extends State<CommentsContent>
           // }
         });
       } else {
-        AppUtils.showToastErrorTop(response.message);
+        AppUtils.showToastErrorTop(response.message!);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -881,7 +909,7 @@ class _CommentsContentState extends State<CommentsContent>
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
     } else {
-      _socket.emit(
+      _socket?.emit(
           'create-document-comment',
           json.encode({
             "project_id": Strings.selectedProject[0].projectId,
@@ -903,10 +931,10 @@ class _CommentsContentState extends State<CommentsContent>
       setState(() {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
-              Strings.selectedCatDocument[0].commentsCount + 1;
+              Strings.selectedCatDocument[0].commentsCount! + 1;
         } else {
           Strings.selectedProDocument[0].commentsCount =
-              Strings.selectedProDocument[0].commentsCount + 1;
+              Strings.selectedProDocument[0].commentsCount! + 1;
         }
         tagedUsers = [];
         tagedUsersId = [];
@@ -928,9 +956,9 @@ class _CommentsContentState extends State<CommentsContent>
     }
   }
 
-  String getFileExt(String fileName) {
-    var file = fileName.split(".");
-    var fileExt = file[1];
+  String getFileExt(String? fileName) {
+    var file = fileName?.split(".");
+    var fileExt = file?[1];
     if (fileExt == "png" || fileExt == "PNG") {
       return "assets/icons/png.png";
     } else if (fileExt == "jpg" ||
@@ -957,8 +985,8 @@ class _CommentsContentState extends State<CommentsContent>
     }
   }
 
-  static String calculateTimeDifferenceBetween({@required String serverDate}) {
-    DateTime startDate = DateTime.parse(serverDate);
+  static String calculateTimeDifferenceBetween({@required String? serverDate}) {
+    DateTime startDate = DateTime.parse(serverDate!);
     //print(DateFormat.MMMEd().format(startDate));
     DateTime endDate = DateTime.now();
 

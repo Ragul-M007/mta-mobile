@@ -1,7 +1,7 @@
 class FetchMapedCatRes {
-  bool status;
-  String message;
-  List<CatsData> data;
+  bool? status;
+  String? message;
+  List<CatsData>? data;
 
   FetchMapedCatRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class FetchMapedCatRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<CatsData>();
+      data = <CatsData>[];
       json['data'].forEach((v) {
-        data.add(new CatsData.fromJson(v));
+        data?.add(new CatsData.fromJson(v));
       });
     }
   }
@@ -21,17 +21,17 @@ class FetchMapedCatRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class CatsData {
-  int categoryId;
-  String categoryName;
-  String description;
-  int projectId;
+  int? categoryId;
+  String? categoryName;
+  String? description;
+  int? projectId;
 
   CatsData(
       {this.categoryId, this.categoryName, this.description, this.projectId});

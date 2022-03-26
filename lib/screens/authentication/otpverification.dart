@@ -9,10 +9,11 @@ class Otpverification extends StatefulWidget {
   _OtpverificationState createState() => _OtpverificationState();
 }
 
-class _OtpverificationState extends State<Otpverification> {
+class _OtpverificationState extends State<Otpverification> 
+{
   final mobileField = TextEditingController();
-  String codeVerifyField;
-  String verificationCode;
+  String? codeVerifyField;
+  String? verificationCode;
 
   bool _isLoading = false;
   bool isVerifyScreen = false;
@@ -120,8 +121,8 @@ class _OtpverificationState extends State<Otpverification> {
                                     fiveT.text +
                                     sixT.text;
                                 print(codeVerifyField);
-                                print("${codeVerifyField.length}");
-                                if (codeVerifyField.length < 6) {
+                                print("${codeVerifyField!.length}");
+                                if (codeVerifyField!.length < 6) {
                                 } else {
                                   signin();
                                 }

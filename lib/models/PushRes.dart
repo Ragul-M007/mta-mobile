@@ -1,9 +1,9 @@
 class PushRes {
-  String file;
-  int projectId;
-  String fileName;
-  int documentId;
-  String projectName;
+  String? file;
+  int? projectId;
+  String? fileName;
+  int? documentId;
+  String? projectName;
 
   PushRes(
       {this.file,

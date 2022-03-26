@@ -22,7 +22,8 @@ mixin Drawables {
 
   static final bgOrangeGradient = Container(
     decoration: BoxDecoration(
-      color: CustomColors.appthemecolor,
+      //color: CustomColors.appthemecolor,
+      color:Colors.white
     ),
   );
 

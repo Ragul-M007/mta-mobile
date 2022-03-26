@@ -10,10 +10,10 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
-FancyDrawerController _controller;
+FancyDrawerController? _controller;
 
 class Newshighlights extends StatelessWidget {
-  const Newshighlights({Key key}) : super(key: key);
+  const Newshighlights({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +32,8 @@ class NewshighlightsContent extends StatefulWidget {
 
 class _NewshighlightsContentState extends State<NewshighlightsContent>
     with TickerProviderStateMixin {
-  List<NewsResData> _newsLists;
-  TabController _tabController;
+  List<NewsResData>? _newsLists;
+  TabController? _tabController;
 
   void initState() {
     _controller = FancyDrawerController(
@@ -46,14 +46,14 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
 
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
+    WidgetsBinding.instance?.addPostFrameCallback((_) => getNewsFeeds());
   }
 
   menuopen() {}
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -64,7 +64,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
           Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
       child: FancyDrawerWrapper(
         backgroundColor: Colors.transparent,
-        controller: _controller,
+        controller: _controller!,
         drawerItems: <Widget>[
           Container(
             padding: EdgeInsets.only(bottom: 30),
@@ -75,12 +75,12 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                     width: 60.0,
                     height: 60.0,
                     decoration: Drawables.menudecorationImage(
-                        "assets/images/logo.jpeg", 50.0)),
+                        "assets/images/logo.jpg", 50.0)),
                 SizedBox(
                   width: 10,
                 ),
                 Text(
-                  "MTA Architects",
+                  "MTA Connect",
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -96,7 +96,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
             selectedmenuvalue: 1,
             menutitle: "Projects",
           ),
-          Strings.roleId != 1
+          (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
               ? menuoption(
                   ontab: () {
                     menuRedirect(routename: "/attendance", currentmenu: 2);
@@ -156,25 +156,27 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
           ),
         ],
         child: Scaffold(
-            appBar: mainappbar(
-                ontab: menuopen,
-                title: "News & Heighlights",
-                controller: _controller),
+            appBar: mainappbar(ontab: menuopen, title: "News & Highlights", controller: _controller),
+            // mainappbar(
+            //     ontab: menuopen,
+            //     title: "News & Heighlights",
+            //     controller: _controller),
+          
             body: tabbarwidget()),
       ),
     ));
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      Strings.currentmenuvalue = currentmenu;
+      Strings.currentmenuvalue = currentmenu!;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       // Navigator.popAndPushNamed(context, routename);
       Navigator.popAndPushNamed(context, "/verifypin");
     } else {
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 
@@ -234,7 +236,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     return _newsLists != null
         ? ListView.builder(
             itemBuilder: (BuildContext ctx, int index) {
-              return _newsLists[index].feedType == "N"
+              return _newsLists![index].feedType == "N"
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
@@ -242,9 +244,9 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                             onTap: () {
                               _showMyDialog(
                                   Strings.baseImageUrl +
-                                      _newsLists[index].imgUrl,
-                                  _newsLists[index].titleText,
-                                  _newsLists[index].description);
+                                      _newsLists![index].imgUrl!,
+                                  _newsLists![index].titleText,
+                                  _newsLists![index].description);
                             },
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +263,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                               BorderRadius.circular(100.0),
                                           child: Image.network(
                                               Strings.baseImageUrl +
-                                                  _newsLists[index].imgUrl)),
+                                                  (_newsLists![index].imgUrl ?? ""))),
                                     )),
                                 SizedBox(
                                   width: 20,
@@ -272,7 +274,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _newsLists[index].titleText,
+                                        _newsLists![index].titleText!,
                                         textAlign: TextAlign.left,
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
@@ -282,7 +284,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                         height: 10,
                                       ),
                                       Text(
-                                        _newsLists[index].description,
+                                        _newsLists![index].description!,
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
@@ -313,8 +315,8 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                           ),
                                           Text(
                                             calculateTimeDifferenceBetween(
-                                                serverDate: _newsLists[index]
-                                                    .updatedAt),
+                                                serverDate: _newsLists![index]
+                                                    .updatedAt!),
                                             textAlign: TextAlign.left,
                                             textDirection: TextDirection.ltr,
                                             style: TextStyle(
@@ -331,7 +333,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                           )))
                   : SizedBox();
             },
-            itemCount: _newsLists.length,
+            itemCount: _newsLists!.length,
           )
         : SizedBox();
   }
@@ -340,7 +342,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     return _newsLists != null
         ? ListView.builder(
             itemBuilder: (BuildContext ctx, int index) {
-              return _newsLists[index].feedType == "H"
+              return _newsLists![index].feedType == "H"
                   ? Container(
                       child: Padding(
                           padding: EdgeInsets.all(25),
@@ -348,9 +350,9 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                             onTap: () {
                               _showMyDialog(
                                   Strings.baseImageUrl +
-                                      _newsLists[index].imgUrl,
-                                  _newsLists[index].titleText,
-                                  _newsLists[index].description);
+                                      _newsLists![index].imgUrl!,
+                                  _newsLists![index].titleText,
+                                  _newsLists![index].description);
                             },
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +369,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                               BorderRadius.circular(100.0),
                                           child: Image.network(
                                               Strings.baseImageUrl +
-                                                  _newsLists[index].imgUrl)),
+                                                  _newsLists![index].imgUrl!)),
                                     )),
                                 SizedBox(
                                   width: 20,
@@ -378,7 +380,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _newsLists[index].titleText,
+                                        _newsLists![index].titleText!,
                                         textAlign: TextAlign.left,
                                         textDirection: TextDirection.ltr,
                                         style: TextStyle(
@@ -388,7 +390,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                         height: 10,
                                       ),
                                       Text(
-                                        _newsLists[index].description,
+                                        _newsLists![index].description!,
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
@@ -419,8 +421,8 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                                           ),
                                           Text(
                                             calculateTimeDifferenceBetween(
-                                                serverDate: _newsLists[index]
-                                                    .updatedAt),
+                                                serverDate: _newsLists![index]
+                                                    .updatedAt!),
                                             textAlign: TextAlign.left,
                                             textDirection: TextDirection.ltr,
                                             style: TextStyle(
@@ -437,7 +439,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
                           )))
                   : SizedBox();
             },
-            itemCount: _newsLists.length,
+            itemCount: _newsLists!.length,
           )
         : SizedBox();
   }
@@ -450,13 +452,13 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
       AppUtils.dismissprogress();
       print('NewsResponse status ${response.toJson()}');
 
-      if (response.status) {
+      if (response.status!) {
         // Navigator.pushNamed(ctx, "/dashboard");
         setState(() {
           _newsLists = response.data;
         });
       } else {
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -464,8 +466,8 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     });
   }
 
-  static String calculateTimeDifferenceBetween({@required String serverDate}) {
-    DateTime startDate = DateTime.parse(serverDate);
+  static String calculateTimeDifferenceBetween({@required String? serverDate}) {
+    DateTime startDate = DateTime.parse(serverDate!);
     DateTime endDate = DateTime.now();
     int seconds = endDate.difference(startDate).inSeconds;
     if (seconds < 60)

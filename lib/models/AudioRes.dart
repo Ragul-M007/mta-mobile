@@ -1,7 +1,7 @@
 class AudioRes {
-  String data;
-  String message;
-  bool status;
+  String? data;
+  String? message;
+  bool? status;
 
   AudioRes({this.data, this.message, this.status});
 

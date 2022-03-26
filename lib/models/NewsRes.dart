@@ -1,7 +1,7 @@
 class NewsRes {
-  bool status;
-  String message;
-  List<NewsResData> data;
+  bool? status;
+  String? message;
+  List<NewsResData>? data;
 
   NewsRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class NewsRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<NewsResData>();
+      data = <NewsResData>[];
       json['data'].forEach((v) {
-        data.add(new NewsResData.fromJson(v));
+        data?.add(new NewsResData.fromJson(v));
       });
     }
   }
@@ -21,20 +21,20 @@ class NewsRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class NewsResData {
-  int id;
-  String titleText;
-  String description;
-  String imgUrl;
-  String feedType;
-  String createdAt;
-  String updatedAt;
+  int? id;
+  String? titleText;
+  String? description;
+  String? imgUrl;
+  String? feedType;
+  String? createdAt;
+  String? updatedAt;
 
   NewsResData(
       {this.id,

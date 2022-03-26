@@ -1,7 +1,7 @@
 class ProfileRes {
-  bool status;
-  String message;
-  List<ProfileData> data;
+  bool? status;
+  String? message;
+  List<ProfileData>? data;
 
   ProfileRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class ProfileRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<ProfileData>();
+      data = <ProfileData>[];
       json['data'].forEach((v) {
-        data.add(new ProfileData.fromJson(v));
+        data?.add(new ProfileData.fromJson(v));
       });
     }
   }
@@ -21,28 +21,28 @@ class ProfileRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class ProfileData {
-  int userId;
-  String name;
-  String email;
-  int roleId;
-  String mobileNo;
-  String status;
-  String userImg;
-  String dob;
-  String city;
-  String area;
-  String state;
-  String anniverDate;
-  String createdAt;
-  String role;
-  String updatedAt;
+  int? userId;
+  String? name;
+  String? email;
+  int? roleId;
+  String? mobileNo;
+  String? status;
+  String? userImg;
+  String? dob;
+  String? city;
+  String? area;
+  String? state;
+  String? anniverDate;
+  String? createdAt;
+  String? role;
+  String? updatedAt;
 
   ProfileData(
       {this.userId,

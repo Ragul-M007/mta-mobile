@@ -1,13 +1,15 @@
 class AudioReq {
-  String audio;
+  String? audio;
 
   AudioReq({this.audio});
 
-  AudioReq.fromJson(Map<String, dynamic> json) {
+  AudioReq.fromJson(Map<String, dynamic> json) 
+  {
     audio = json['audio'];
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() 
+  {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['audio'] = this.audio;
     return data;

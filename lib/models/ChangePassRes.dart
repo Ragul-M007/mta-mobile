@@ -1,6 +1,6 @@
 class ChangePassRes {
-  bool status;
-  String message;
+  bool? status;
+  String? message;
 
   ChangePassRes({this.status, this.message});
 

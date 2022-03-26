@@ -17,7 +17,8 @@ class AppUtils {
   /// Shared Preferences starts here
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  static savePreferences(String key, dynamic value) async {
+  static savePreferences(String key, dynamic value) async 
+  {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     if (value is bool) {
       sharedPrefs.setBool(key, value);
@@ -25,12 +26,14 @@ class AppUtils {
       sharedPrefs.setString(key, value);
     } else if (value is int) {
       sharedPrefs.setInt(key, value);
-    } else if (value is List<String>) {
+    } else if (value is List<String>) 
+    {
       sharedPrefs.setStringList(key, value);
     }
   }
 
-  static Future<String> getStringPreferences(String key) async {
+  static Future<String> getStringPreferences(String key) async 
+  {
     final sharedPrefs = await SharedPreferences.getInstance();
     String pref = sharedPrefs.getString(key) ?? "null";
     return pref;

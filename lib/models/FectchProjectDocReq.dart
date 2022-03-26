@@ -1,5 +1,5 @@
 class FetchProjectDocReq {
-  int projectId;
+  int? projectId;
 
   FetchProjectDocReq({this.projectId});
 

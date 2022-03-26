@@ -9,7 +9,7 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
-FancyDrawerController _controller;
+FancyDrawerController? _controller;
 
 class Contactus extends StatefulWidget {
   static const String routeName = "/contactus";
@@ -35,7 +35,7 @@ class _ContactusState extends State<Contactus>
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose controller
+    _controller?.dispose(); // Dispose controller
     super.dispose();
   }
 
@@ -50,7 +50,7 @@ class _ContactusState extends State<Contactus>
               Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
           child: FancyDrawerWrapper(
             backgroundColor: Colors.transparent,
-            controller: _controller,
+            controller: _controller!,
             drawerItems: <Widget>[
               Container(
                 padding: EdgeInsets.only(bottom: 30),
@@ -61,12 +61,12 @@ class _ContactusState extends State<Contactus>
                         width: 60.0,
                         height: 60.0,
                         decoration: Drawables.menudecorationImage(
-                            "assets/images/logo.jpeg", 50.0)),
+                            "assets/images/logo.jpg", 50.0)),
                     SizedBox(
                       width: 10,
                     ),
                     Text(
-                      "MTA Architects",
+                      "MTA Connect",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -82,7 +82,7 @@ class _ContactusState extends State<Contactus>
                 selectedmenuvalue: 1,
                 menutitle: "Projects",
               ),
-              Strings.roleId != 1
+              (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
                   ? menuoption(
                       ontab: () {
                         menuRedirect(routename: "/attendance", currentmenu: 2);
@@ -150,9 +150,9 @@ class _ContactusState extends State<Contactus>
         ));
   }
 
-  menuRedirect({@required String routename, int currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      Strings.currentmenuvalue = currentmenu;
+      Strings.currentmenuvalue = currentmenu!;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
@@ -161,7 +161,7 @@ class _ContactusState extends State<Contactus>
       //Navigator.popAndPushNamed(context, routename);
     } else {
       //Navigator.pop(context);
-      Navigator.pushNamed(context, routename);
+      Navigator.pushNamed(context, routename!);
     }
   }
 }
@@ -171,8 +171,13 @@ class ContactusContent extends StatefulWidget {
   _ContactusContentState createState() => _ContactusContentState();
 }
 
-class _ContactusContentState extends State<ContactusContent> {
+class _ContactusContentState extends State<ContactusContent> 
+{
   final mobileField = TextEditingController();
+  final mobileField1 = TextEditingController();
+  final mobilechennai = TextEditingController();
+  final emailChennai = TextEditingController();
+
   final userType = TextEditingController();
   final password = TextEditingController();
 
@@ -182,9 +187,14 @@ class _ContactusContentState extends State<ContactusContent> {
   var address = '';
 
   @override
-  void initState() {
-    mobileField.text = "9987878898";
-    userType.text = "mtaenquiry@gmail.com";
+  void initState() 
+  {
+    mobileField.text = "98940 61990, 98940 71990,\n0421-4341114 ";
+    mobileField1.text = "";
+    mobilechennai.text = "96292 11990, 044-22342848";
+    //mobileField2.text = "0421-4341114";
+    userType.text = "info@multitechcorp.in";
+    emailChennai.text = "info@mtadesigns.com";
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) => getContactus());
     //getContactus();
@@ -192,7 +202,9 @@ class _ContactusContentState extends State<ContactusContent> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return SingleChildScrollView(
+      child:
+    SafeArea(
         child: loader
             ? Padding(padding: EdgeInsets.all(0.0))
             : Stack(
@@ -212,7 +224,7 @@ class _ContactusContentState extends State<ContactusContent> {
                                 width: 60.0,
                                 height: 60.0,
                                 decoration: Drawables.menudecorationImage(
-                                    "assets/images/logo.jpeg", 50.0)),
+                                    "assets/images/logo.jpg", 50.0)),
                             SizedBox(
                               width: 20,
                             ),
@@ -221,7 +233,7 @@ class _ContactusContentState extends State<ContactusContent> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "MTA Architects",
+                                  "MTA Connect",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -259,7 +271,7 @@ class _ContactusContentState extends State<ContactusContent> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _controller.toggle();
+                              _controller?.toggle();
                             },
                             child: Icon(
                               Icons.menu,
@@ -289,25 +301,17 @@ class _ContactusContentState extends State<ContactusContent> {
                         borderRadius: BorderRadius.circular(15)),
                     child: Padding(
                         padding: EdgeInsets.all(30),
-                        child: Row(
+                        child: Column(children: [Row(
                           children: [
                             Icon(Icons.pin_drop),
                             SizedBox(
-                              width: 2,
+                              width: 5,
                             ),
-                            Text(
-                              "MTA , 12th street, RJ Nagar, Tiruppur",
-                              overflow: TextOverflow.clip,
-                            )
+                            Column(crossAxisAlignment: CrossAxisAlignment.start,children: [Text("MTA Tirupur",style: TextStyle(fontWeight: FontWeight.bold),),SizedBox(height: 5,),Text("74/33, Singaravelan Nagar,"),SizedBox(height: 3,),Text("Sakthi Theatre Road, Tirupur - 641603")],)
                           ],
-                        )),
-                  ),
-                  Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.fromLTRB(
-                          10, MediaQuery.of(context).size.height * .40, 10, 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                        SizedBox(height: 20,),
+                        Column(crossAxisAlignment: CrossAxisAlignment.start, 
                         children: [
                           Text(
                             "Phone Number",
@@ -315,15 +319,14 @@ class _ContactusContentState extends State<ContactusContent> {
                                 color: Color(0xFF0061b0),
                                 fontWeight: FontWeight.bold),
                           ),
+                          
                           TextField(
                             enabled: false,
                             controller: mobileField,
                             decoration:
                                 InputDecoration(prefixIcon: Icon(Icons.call)),
                           ),
-                          SizedBox(
-                            height: 20,
-                          ),
+                          SizedBox(height: 20,),
                           Text(
                             "Email",
                             style: TextStyle(
@@ -336,6 +339,63 @@ class _ContactusContentState extends State<ContactusContent> {
                             decoration:
                                 InputDecoration(prefixIcon: Icon(Icons.email)),
                           ),
+                          SizedBox(height: 20,),
+                          Row(children: [Icon(Icons.pin_drop),
+                            SizedBox(
+                              width: 5,
+                            ),
+
+                            Column(crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [Text("MTA Chennai",style: TextStyle(fontWeight: FontWeight.bold),),SizedBox(height: 5,),Text("25/41 Vembuli Subedar St,"),SizedBox(height: 3,),Text("Alandur, Guindy - 600016"),SizedBox(height: 3,)],),
+                            ],)
+                          
+                          ],
+                        ),
+                        SizedBox(height: 20,),
+                        Column(crossAxisAlignment: CrossAxisAlignment.start, 
+                        children: [
+                          Text(
+                            "Phone Number",
+                            style: TextStyle(
+                                color: Color(0xFF0061b0),
+                                fontWeight: FontWeight.bold),
+                          ),
+                          
+                          TextField(
+                            enabled: false,
+                            controller: mobilechennai,
+                            decoration:
+                                InputDecoration(prefixIcon: Icon(Icons.call)),
+                          ),
+                          SizedBox(height: 20,),
+                          Text(
+                            "Email",
+                            style: TextStyle(
+                                color: Color(0xFF0061b0),
+                                fontWeight: FontWeight.bold),
+                          ),
+                          TextField(
+                            enabled: false,
+                            controller: emailChennai,
+                            decoration:
+                                InputDecoration(prefixIcon: Icon(Icons.email)),
+                          ),
+
+                        ],)],),
+                        
+                        ),
+                  ),
+                  Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.fromLTRB(
+                          10, MediaQuery.of(context).size.height * .40, 10, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [                                                  
+                          SizedBox(
+                            height: 20,
+                          ),
+                          
                           // SizedBox(
                           //   height: 20,
                           // ),
@@ -356,7 +416,7 @@ class _ContactusContentState extends State<ContactusContent> {
                         ],
                       )),
                 ],
-              ));
+              )));
   }
 
   // getContactus() {

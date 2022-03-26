@@ -1,7 +1,7 @@
 class ChangePassReq {
-  String emailId;
-  String password;
-  String newPassword;
+  String? emailId;
+  String? password;
+  String? newPassword;
 
   ChangePassReq({this.emailId, this.password, this.newPassword});
 

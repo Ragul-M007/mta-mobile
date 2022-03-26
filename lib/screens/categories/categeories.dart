@@ -8,8 +8,10 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/FetchMapedUsersRes.dart';
+
 class Categories extends StatelessWidget {
-  const Categories({Key key}) : super(key: key);
+  const Categories({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +35,90 @@ class CategoriesContent extends StatefulWidget {
 
 class _CategoriesContentState extends State<CategoriesContent> {
   List<FectchCatsData> _catsList = [];
+  List<FetchMapedUsersData>? users;
   String _errText = "";
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getCategories());
+    getUserCats();
+    WidgetsBinding.instance!.addPostFrameCallback((_) => getCategories());
+
+    print("image url");
+    print(Strings.baseImageUrl +
+                        Strings.selectedProject[0].projectImg!);
+  }
+
+  getUserCats() 
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
+      if (response.status!) 
+      {
+        setState(() {
+          Strings.users = response.data!;
+          users = response.data!; 
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  Future<void> _showMyDialogProject() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Column(
+                  children: [
+                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        new Icon(Icons.close, size: 22.0, color: Colors.black)
+                      ]),
+                      Text("Assigned Users",
+                      style: TextStyle(fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
+                    Container(
+                      height: MediaQuery.of(context).size.width * 1,
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      child: ListView.builder(
+        itemCount: users?.length,
+        itemBuilder: (context, index) {
+          return Column(
+            children: [
+              Card(
+                color: Color.fromRGBO(230, 230, 230, 1),
+                child: ListTile(
+                  title: Text(users?[index].name ?? "",
+                  ),
+                  subtitle: Text(users?[index].prof ?? ""),
+                      onTap: (){
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+                    ),
+                  ],
+                )),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    print("role--> ${Strings.roleId }");
     return Column(
       children: [
         Padding(
@@ -54,27 +132,27 @@ class _CategoriesContentState extends State<CategoriesContent> {
                   color: const Color(0xff7c94b6),
                   image: new DecorationImage(
                     image: new NetworkImage(Strings.baseImageUrl +
-                        Strings.selectedProject[0].projectImg),
+                        Strings.selectedProject[0].projectImg!),
                     fit: BoxFit.fill,
                   ),
                   borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                 ),
               ),
               SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-              GestureDetector(
-                onTap: () {
-                  Strings.category = false;
-                  Navigator.pushNamed(context, '/viewdoclist');
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                        Strings.category = false;
+                        Navigator.pushNamed(context, '/viewdoclist');
+                    },
+                    child: Row(
                       children: [
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.4,
                           child: Text(
-                            Strings.selectedProject[0].projectName,
+                            Strings.selectedProject[0].projectName!,
                             style: Drawables.adddoccontentstyle(
                                 Colors.black, 18.0, FontWeight.w500),
                           ),
@@ -97,19 +175,27 @@ class _CategoriesContentState extends State<CategoriesContent> {
                             child: Text(
                               "View Project Docs",
                               style: Drawables.adddoccontentstyle(
-                                  Colors.grey[600], 12.0, FontWeight.w600),
+                                  Colors.grey[600]!, 12.0, FontWeight.w600),
                             ),
                           ),
                         ),
+                        
                       ],
                     ),
-                    SizedBox(
-                      height: 7,
-                    ),
-                    Row(
+                  ),
+                  
+                  SizedBox(
+                    height: 7,
+                  ),
+                  if(Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 6)
+                  GestureDetector(
+                    onTap: (){
+                      _showMyDialogProject();
+                    },
+                    child: Row(
                       children: [
                         Container(
-                          width: 15.0,
+                          width:MediaQuery.of(context).size.width * 0.04,
                           height: 15.0,
                           decoration: new BoxDecoration(
                             image: new DecorationImage(
@@ -121,19 +207,88 @@ class _CategoriesContentState extends State<CategoriesContent> {
                           ),
                         ),
                         SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          Strings.selectedProject[0].address +
+                          width: MediaQuery.of(context).size.width * 0.36,
+                          child: Text(
+                          Strings.selectedProject[0].address! +
                               ' , ' +
-                              Strings.selectedProject[0].city,
+                              Strings.selectedProject[0].city!,
                           style: Drawables.adddoccontentstyle(
                               Colors.grey, 13.0, FontWeight.normal),
-                        )
+                        ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Icon(
+                          Icons.people,
+                          color: Color(0xFF0061b0),
+                          size: 20,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(
+                              "View Members",
+                              style: Drawables.adddoccontentstyle(
+                                  Colors.grey[600]!, 12.0, FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                        
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  // Row(
+                  //   crossAxisAlignment: CrossAxisAlignment.end,
+                  //   children: [
+                      // Container(
+                      //   width: 15.0,
+                      //   height: 15.0,
+                      //   decoration: new BoxDecoration(
+                      //     image: new DecorationImage(
+                      //       image: new AssetImage("assets/icons/pin.png"),
+                      //       fit: BoxFit.fill,
+                      //     ),
+                      //     borderRadius:
+                      //         new BorderRadius.all(new Radius.circular(50.0)),
+                      //   ),
+                      // ),
+                  //     SizedBox(
+                  //       width: 10,
+                  //     ),
+                  //     Text(
+                  //       Strings.selectedProject[0].address! +
+                  //           ' , ' +
+                  //           Strings.selectedProject[0].city!,
+                  //       style: Drawables.adddoccontentstyle(
+                  //           Colors.grey, 13.0, FontWeight.normal),
+                  //     ),
+                  //     SizedBox(width:20),
+                  //     Icon(
+                  //       Icons.info_outlined,
+                  //       color: Color(0xFF0061b0),
+                  //       size: 20,
+                  //     ),
+                  //     SizedBox(
+                  //       width: 5,
+                  //     ),
+                  //     Align(
+                  //       child: SizedBox(
+                  //         width: MediaQuery.of(context).size.width * 0.25,
+                  //         child: Text(
+                  //           "View Project Docs",
+                  //           style: Drawables.adddoccontentstyle(
+                  //               Colors.grey[600]!, 12.0, FontWeight.w600),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                ],
               )
             ],
           ),
@@ -158,7 +313,7 @@ class _CategoriesContentState extends State<CategoriesContent> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                      child: Text(_catsList[index].categoryName,
+                                      child: Text(_catsList[index].categoryName!,
                                           style: Drawables.adddoccontentstyle(
                                               Colors.black87,
                                               14.0,
@@ -207,12 +362,12 @@ class _CategoriesContentState extends State<CategoriesContent> {
   getCategories() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-    api.getCats(Strings.selectedProject[0].projectId).then((response) {
+    api.getCats(Strings.selectedProject[0].projectId!).then((response) {
       AppUtils.dismissprogress();
       print('categoiresResponse status ${response.toJson()}');
-      if (response.status) {
+      if (response.status!) {
         setState(() {
-          _catsList = response.data;
+          _catsList = response.data!;
         });
       } else {
         setState(() {

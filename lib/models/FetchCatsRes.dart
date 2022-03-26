@@ -1,7 +1,7 @@
 class FectchCatsRes {
-  bool status;
-  String message;
-  List<FectchCatsData> data;
+  bool? status;
+  String? message;
+  List<FectchCatsData>? data;
 
   FectchCatsRes({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class FectchCatsRes {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = new List<FectchCatsData>();
+      data = <FectchCatsData>[];
       json['data'].forEach((v) {
-        data.add(new FectchCatsData.fromJson(v));
+        data?.add(new FectchCatsData.fromJson(v));
       });
     }
   }
@@ -21,17 +21,17 @@ class FectchCatsRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data?.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class FectchCatsData {
-  int categoryId;
-  String categoryName;
-  String description;
-  int projectId;
+  int? categoryId;
+  String? categoryName;
+  String? description;
+  int? projectId;
 
   FectchCatsData(
       {this.categoryId, this.categoryName, this.description, this.projectId});

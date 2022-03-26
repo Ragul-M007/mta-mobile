@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
@@ -8,6 +9,7 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mta/screens/attendance/attendance.dart';
 
 class Verifypin extends StatefulWidget {
   static const String routeName = "/verifypin";
@@ -18,8 +20,8 @@ class Verifypin extends StatefulWidget {
 
 class _VerifypinState extends State<Verifypin> {
   final mobileField = TextEditingController();
-  String codeVerifyField;
-  String verificationCode;
+  String? codeVerifyField;
+  String? verificationCode;
 
   bool _isLoading = false;
 
@@ -33,7 +35,7 @@ class _VerifypinState extends State<Verifypin> {
   final threeT = TextEditingController();
   final fourT = TextEditingController();
 
-  BuildContext ctx;
+  BuildContext? ctx;
   Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
@@ -81,7 +83,7 @@ class _VerifypinState extends State<Verifypin> {
 
   signin() {
     AppUtils.showprogress();
-    final api = Provider.of<ApiService>(ctx, listen: false);
+    final api = Provider.of<ApiService>(ctx!, listen: false);
     LoginReq loginreq = LoginReq();
 
     AppUtils.getStringPreferences('emailId').then((value) {
@@ -95,26 +97,61 @@ class _VerifypinState extends State<Verifypin> {
         api.login(loginreq).then((response) {
           AppUtils.dismissprogress();
           print('verifyPinResponse status ${response.toJson()}');
+          assignroles()
+      {
+        if (response.data?.role == "ADMIN")
+        {
+            Strings.roleId = 1;
+        }
+        else if(response.data?.role == "STAFF")
+        {
+            Strings.roleId = 2;
+        }
+        else if(response.data?.role == "VENDOR")
+        {
+            Strings.roleId = 3;
+        }else if(response.data?.role == "CONSULTANTS")
+        {
+            Strings.roleId = 4;
+        }
+        else if(response.data?.role == "CONTRACTORS")
+        {
+            Strings.roleId = 5;
+        }
+        else if(response.data?.role == "CLIENT")
+        {
+            Strings.roleId = 6;
+        }
+      }
 
-          if (response.status) {
-            AppUtils.savePreferences("emailId", response.data.emailId);
-            AppUtils.savePreferences("userId", response.data.userId);
-            if (response.data.userImg != null) {
-              AppUtils.savePreferences("profilePic", response.data.userImg);
-              Strings.profilePic = response.data.userImg;
+          if (response.status!) {
+            AppUtils.savePreferences("emailId", response.data!.emailId);
+            AppUtils.savePreferences("userId", response.data!.userId);
+            if (response.data!.userImg != null) {
+              AppUtils.savePreferences("profilePic", response.data!.userImg);
+              Strings.profilePic = response.data!.userImg!;
             } else {
               AppUtils.savePreferences("profilePic", "");
               Strings.profilePic = "";
             }
-            Strings.userID = response.data.userId;
-            Strings.authToken = response.token;
-            Strings.username = response.data.name;
-            Strings.roleId = response.data.roleId;
+            Strings.userID = response.data!.userId;
+            Strings.authToken = response.token!;
+            Strings.username = response.data!.name;
+            assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
-            Navigator.pushNamed(ctx, "/dashboard");
+            if(Strings.FromNotification)
+            {
+                Strings.FromNotification = false;
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
+            }
+            else
+            {
+                Navigator.pushNamed(ctx!, "/dashboard");
+            }
+
           } else {
-            AppUtils.showToastError(response.message);
+            AppUtils.showToastError(response.message!);
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
@@ -127,8 +164,10 @@ class _VerifypinState extends State<Verifypin> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
+      onWillPop: () async 
+      {
         _onWillPop();
+        return false;
       },
       child: Provider<ApiService>(
         create: (context) => ApiService.create(),
@@ -226,8 +265,8 @@ class _VerifypinState extends State<Verifypin> {
                         codeVerifyField =
                             oneT.text + twoT.text + threeT.text + fourT.text;
                         print(codeVerifyField);
-                        print("${codeVerifyField.length}");
-                        if (codeVerifyField.length < 4) {
+                        print("${codeVerifyField!.length}");
+                        if (codeVerifyField!.length < 4) {
                           AppUtils.showToastError("Please Enter Pin");
                         } else {
                           signin();
@@ -260,7 +299,8 @@ class _VerifypinState extends State<Verifypin> {
     );
   }
 
-  Widget _box(val) {
+  Widget _box(val) 
+  {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Container(
@@ -269,7 +309,9 @@ class _VerifypinState extends State<Verifypin> {
         height: 50,
         width: 40,
         child: TextField(
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
+          textInputAction: TextInputAction.done,          
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}'))],
           maxLength: 1,
           autofocus: true,
           controller: val == 1
