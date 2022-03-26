@@ -351,7 +351,6 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                       Strings.selectedCatDocument = [];
                                       Strings.selectedCatDocument
                                           .add(_searchList[index]);
-
                                       getUserCats();
                                     },
                                     child: Row(
@@ -515,7 +514,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                       .add(_categorydocsList[
                                                           index]);
 
-                                                  // getUserCats();
+                                                   getUserCats();
                                                 },
                                                 child: Row(
                                                   crossAxisAlignment:
