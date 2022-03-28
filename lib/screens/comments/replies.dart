@@ -185,9 +185,9 @@ class _RepliesContentState extends State<RepliesContent>
                               color: const Color(0xff7c94b6),
                               image: new DecorationImage(
                                 image: new NetworkImage(Strings.baseImageUrl +
-                                    Strings
+                                    (Strings
                                         .comments[Strings.selectedCommentsIndex]
-                                        .userImg!),
+                                        .userImg ?? "") ),
                                 fit: BoxFit.fill,
                               ),
                               borderRadius: new BorderRadius.all(
@@ -434,7 +434,7 @@ class _RepliesContentState extends State<RepliesContent>
                                           ],
                                         ),
                                         SizedBox(height: 10),
-                                        Container(child: Text(Strings.comments[index].recipient?.replaceAll('"', '') ?? ""),),
+                                        Container(child: Text(Strings.comments[Strings.selectedCommentsIndex].replies![index].recipient!),),
                                         Container(
                                           child: Padding(
                                               padding: EdgeInsets.all(10),
