@@ -8,7 +8,7 @@ part of 'ApiService.dart';
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    baseUrl ??= 'https://demo.emeetify.com:81/mta';
   }
 
   final Dio _dio;

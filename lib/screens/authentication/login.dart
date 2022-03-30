@@ -264,7 +264,7 @@ class _LoginContentState extends State<LoginContent>
                 decoration: new BoxDecoration(
                   color: Colors.white,
                   image: new DecorationImage(
-                    image: new AssetImage("assets/images/background1.png"),
+                    image: new AssetImage("assets/images/logo.jpg"),
                     fit: BoxFit.fill,
                   ),
                 ),

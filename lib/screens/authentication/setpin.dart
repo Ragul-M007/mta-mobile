@@ -84,7 +84,7 @@ class _SetpinState extends State<Setpin> {
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 image: new DecorationImage(
-                  image: new AssetImage("assets/images/background1.png"),
+                  image: new AssetImage("assets/images/logo.jpg"),
                   fit: BoxFit.fill,
                 ),
               ),

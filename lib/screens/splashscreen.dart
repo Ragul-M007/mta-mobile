@@ -151,7 +151,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
 
         if (message.notification?.body != null) 
        {
-              if (message.notification!.body!.contains("Signed")) 
+              if (message.notification!.body!.contains("logout")) 
               {
                  Strings.FromNotification = true;
                  checkLogin();
