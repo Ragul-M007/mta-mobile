@@ -5,7 +5,8 @@ class AddDocRes {
 
   AddDocRes({this.status, this.message, this.data});
 
-  AddDocRes.fromJson(Map<String, dynamic> json) {
+  AddDocRes.fromJson(Map<String, dynamic> json) 
+  {
     status = json['status'];
     message = json['Message'];
     if (json['data'] != null) {

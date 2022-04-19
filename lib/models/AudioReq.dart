@@ -1,17 +1,45 @@
 class AudioReq {
   String? audio;
+  String? categoryIdList;
+  String? categoryList;
+  int? documentId;
+  String? recipientId;
+  String? recipient;
+  int? userId;
+  int? parent_comment_id;
 
-  AudioReq({this.audio});
 
-  AudioReq.fromJson(Map<String, dynamic> json) 
-  {
+  AudioReq(
+      {this.audio,
+      this.categoryIdList,
+      this.categoryList,
+      this.documentId,
+      this.recipientId,
+      this.recipient,
+      this.userId,
+      this.parent_comment_id});
+
+  AudioReq.fromJson(Map<String, dynamic> json) {
     audio = json['audio'];
+    categoryIdList = json['category_id_list'];
+    categoryList = json['category_list'];
+    documentId = json['document_id'];
+    recipientId = json['recipient_id'];
+    recipient = json['recipient'];
+    userId = json['user_id'];
+    parent_comment_id = json['parent_comment_id'];
   }
 
-  Map<String, dynamic> toJson() 
-  {
+  Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['audio'] = this.audio;
+    data['category_id_list'] = this.categoryIdList;
+    data['category_list'] = this.categoryList;
+    data['document_id'] = this.documentId;
+    data['recipient_id'] = this.recipient;
+    data['recipient'] = this.recipientId;
+    data['user_id'] = this.userId;
+    data['parent_comment_id'] = this.parent_comment_id;
     return data;
   }
 }

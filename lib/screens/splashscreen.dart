@@ -60,8 +60,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   @override
   void initState() {
     super.initState();
-    
-       _firebaseMessaging.subscribeToTopic("messaging");
+
+    _firebaseMessaging.subscribeToTopic("messaging");
     _firebaseMessaging.getToken().then((value) {
       print(value);
     });
@@ -73,10 +73,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     // FirebaseMessaging.onMessageOpenedApp.listen((message) {
     //   print('Message clicked!');
     // });
-     getToken();  
-     getFCMToken();
+    getToken();
+    getFCMToken();
     // WidgetsBinding.instance?.addPostFrameCallback((_) => getFCMToken());
-    //getToken();  
+    //getToken();
     //  AppUtils.getStringPreferences('token').then((value) {
     //   if (value != "null") {
     //     Strings.authToken = "Bearer " + value;
@@ -97,10 +97,9 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     );
   }
 
-
   getFCMToken() async 
   {
-   _firebaseMessaging.getToken().then((String? token) {
+    _firebaseMessaging.getToken().then((String? token) {
       assert(token != null);
       setState(() {
         print("token: $token");
@@ -118,44 +117,38 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print(_homeScreenText);
     });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) 
-    { 
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       setState(() {
         print("message recieved inside get");
         print(message.notification?.body);
-        AppUtils.showToastErrorTop("Notification: ${message.notification?.body}");
-          if (Strings.pushNotify == true) {
-            print("inside if listen message-----> $message");
-            _showMyDialog(
-                (message as dynamic)['data']['image'],
-                (message as dynamic)['data']['title'],
-                (message as dynamic)['data']['body'],
-                PushRes.fromJson(jsonDecode((message as dynamic)['data']['docDetails'])[0]));
-          }
-        });
+        AppUtils.showToastErrorTop(
+            "Notification: ${message.notification?.body}");
+        if (Strings.pushNotify == true) {
+          print("inside if listen message-----> $message");
+          _showMyDialog(
+              (message as dynamic)['data']['image'],
+              (message as dynamic)['data']['title'],
+              (message as dynamic)['data']['body'],
+              PushRes.fromJson(
+                  jsonDecode((message as dynamic)['data']['docDetails'])[0]));
+        }
+      });
     });
     FirebaseMessaging.instance
-    .getInitialMessage()
-    .then((RemoteMessage? message) 
-    {
-      if (message?.notification?.body != null) 
-      {
-              if (message!.notification!.body!.contains("Signed")) 
-              {
-                 Strings.FromNotification = true;
-              }
-  }
-});
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) 
-    {
-
-        if (message.notification?.body != null) 
-       {
-              if (message.notification!.body!.contains("logout")) 
-              {
-                 Strings.FromNotification = true;
-                 checkLogin();
-              }
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
+      if (message?.notification?.body != null) {
+        if (message!.notification!.body!.contains("Signed")) {
+          Strings.FromNotification = true;
+        }
+      }
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (message.notification?.body != null) {
+        if (message.notification!.body!.contains("logout")) {
+          Strings.FromNotification = true;
+          checkLogin();
+        }
       }
 
       print("is login  ${Strings.isLogin}");
@@ -172,7 +165,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       //   });
     });
 
-
     // old firebase version
 
     // _firebaseMessaging.configure(
@@ -188,10 +180,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     //       }
     //     });
     //   },
-
-      
-
-
 
     //   onLaunch: (Map<String, dynamic> message) async {
     //     print("l-: $message");
@@ -222,21 +210,18 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     //     const IosNotificationSettings(
     //         sound: true, badge: true, alert: true, provisional: true));
 
-NotificationSettings settings = await _firebaseMessaging.requestPermission(
-  alert: true,
-  announcement: false,
-  badge: true,
-  provisional: true,
-  sound: true,
-);
-
-
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      provisional: true,
+      sound: true,
+    );
 
     // _firebaseMessaging.onIosSettingsRegistered
     //     .listen((IosNotificationSettings settings) {
     //   print("Settings registered: $settings");
     // });
- 
   }
 
   Future<void> _showMyDialog(imgurl, title, desc, doc) async {
@@ -477,8 +462,7 @@ NotificationSettings settings = await _firebaseMessaging.requestPermission(
   //   );
   // }
 
-  Widget image(String img, double width, double height) 
-  {
+  Widget image(String img, double width, double height) {
     return Container(
       width: width,
       height: height,
@@ -493,17 +477,15 @@ NotificationSettings settings = await _firebaseMessaging.requestPermission(
     );
   }
 
-  void getToken() 
-  {
+  void getToken() {
     timer = new Timer(const Duration(milliseconds: 4000), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
         if (value != null) {
           print(value);
-          
-          if (value == "Y") 
-          {
+
+          if (value == "Y") {
             Navigator.pushNamed(context, "/verifypin");
-           // Navigator.popAndPushNamed(context, "/comments");
+            // Navigator.popAndPushNamed(context, "/comments");
           } else {
             Navigator.popAndPushNamed(context, "/login");
             //Navigator.popAndPushNamed(context, "/comments");
@@ -512,32 +494,29 @@ NotificationSettings settings = await _firebaseMessaging.requestPermission(
         }
       }).catchError((onError) {
         Navigator.popAndPushNamed(context, "/login");
-       // Navigator.popAndPushNamed(context, "/comments");
-
+        // Navigator.popAndPushNamed(context, "/comments");
       });
     });
   }
-  void checkLogin() 
-  {
-      AppUtils.getStringPreferences('easyAccess').then((value) {
-        if (value != null) {
-          print(value);
-          
-          if (value == "Y") 
-          {
-            Navigator.pushNamed(context, "/verifypin");
-           // Navigator.popAndPushNamed(context, "/comments");
-          } else {
-            Navigator.popAndPushNamed(context, "/login");
-            //Navigator.popAndPushNamed(context, "/comments");
 
-          }
+  void checkLogin() {
+    AppUtils.getStringPreferences('easyAccess').then((value) {
+      if (value != null) {
+        print(value);
+
+        if (value == "Y") {
+          Navigator.pushNamed(context, "/verifypin");
+          // Navigator.popAndPushNamed(context, "/comments");
+        } else {
+          Navigator.popAndPushNamed(context, "/login");
+          //Navigator.popAndPushNamed(context, "/comments");
+
         }
-      }).catchError((onError) {
-        Navigator.popAndPushNamed(context, "/login");
-       // Navigator.popAndPushNamed(context, "/comments");
-
-      });
+      }
+    }).catchError((onError) {
+      Navigator.popAndPushNamed(context, "/login");
+      // Navigator.popAndPushNamed(context, "/comments");
+    });
   }
 
   void getuserid() {

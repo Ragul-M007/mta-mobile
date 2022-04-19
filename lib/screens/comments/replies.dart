@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
@@ -371,11 +372,11 @@ class _RepliesContentState extends State<RepliesContent>
                                           image: new DecorationImage(
                                             image: new NetworkImage(Strings
                                                     .baseImageUrl +
-                                                Strings
+                                                (Strings
                                                     .comments[Strings
                                                         .selectedCommentsIndex]
                                                     .replies![index]
-                                                    .userImg!),
+                                                    .userImg ?? "")),
                                             fit: BoxFit.fill,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -952,28 +953,42 @@ class _RepliesContentState extends State<RepliesContent>
     final api = Provider.of<ApiService>(context, listen: false);
     AudioReq req = AudioReq();
     req.audio = "data:audio/wav;base64," + base64Encode;
+    req.categoryIdList = json.encode(tagedCatsId);
+    req.categoryList =  json.encode(tagedCats);
+    req.documentId = Strings.category == true
+                  ? Strings.selectedCatDocument[0].documentId
+                  : Strings.selectedProDocument[0].documentId;
+    req.recipientId = json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
+    req.recipient = json.encode(tagedUsersId);
+    req.parent_comment_id = Strings.comments[Strings.selectedCommentsIndex].commentId;
+    req.userId = Strings.userID;
+    var dat = jsonEncode(req);
+    print("Printing data -- > $dat");
+    log("data--> $dat");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) {
-        _socket?.emit(
-            'create-document-comment',
-            json.encode({
-              "project_id": Strings.selectedProject[0].projectId,
-              "project_name": Strings.selectedProject[0].projectName,
-              "audio": response.data,
-              "comment": _msgcontroller.text,
-              "document_id": Strings.category == true
-                  ? Strings.selectedCatDocument[0].documentId
-                  : Strings.selectedProDocument[0].documentId,
-              'recipient_id': json.encode(tagedUsersId),
-              'recipient': json.encode(tagedUsers),
-              "category_id_list": json.encode(tagedCatsId),
-              "category_list": json.encode(tagedCats),
-              'parent_comment_id':
-                  Strings.comments[Strings.selectedCommentsIndex].commentId
-            }));
-
-        setState(() {
+      if (response.status!) 
+      {
+        
+        // _socket?.emit(
+        //     'create-document-comment',
+        //     json.encode({
+        //       "project_id": Strings.selectedProject[0].projectId,
+        //       "project_name": Strings.selectedProject[0].projectName,
+        //       "audio": response.data,
+        //       "comment": _msgcontroller.text,
+        //       "document_id": Strings.category == true
+        //           ? Strings.selectedCatDocument[0].documentId
+        //           : Strings.selectedProDocument[0].documentId,
+        //       'recipient_id': json.encode(tagedUsersId),
+        //       'recipient': json.encode(tagedUsers),
+        //       "category_id_list": json.encode(tagedCatsId),
+        //       "category_list": json.encode(tagedCats),
+        //       'parent_comment_id':
+        //           Strings.comments[Strings.selectedCommentsIndex].commentId
+        //     }));
+        setState(() 
+        {
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + 1;

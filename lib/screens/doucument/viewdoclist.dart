@@ -942,14 +942,17 @@ class _ViewDocContentState extends State<ViewDocContent> {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
-      if (response.status!) {
+      if (response.status!) 
+      {
         setState(() {
           Strings.users = response.data!;
         });
         final api = Provider.of<ApiService>(context, listen: false);
+        print("PRo id ${Strings.selectedProject[0].projectId!}");
         api.fetchCats(Strings.selectedProject[0].projectId!).then((response) {
           AppUtils.dismissprogress();
-          if (response.status!) {
+          if (response.status!) 
+          {
             setState(() {
               Strings.categories = response.data!;
               Navigator.pushNamed(context, '/comments');
@@ -960,9 +963,12 @@ class _ViewDocContentState extends State<ViewDocContent> {
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
-          print(onError.toString());
+          print("Catched $onError");
         });
-      } else {
+      } else 
+      {
+        Navigator.pushNamed(context, '/comments');
+        AppUtils.dismissprogress();
         print('error');
       }
     }).catchError((onError) {

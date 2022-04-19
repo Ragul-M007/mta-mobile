@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
@@ -53,7 +54,7 @@ List<int> recordedData = [];
 final _audioRecorder = Record();
 
 class Comments extends StatefulWidget {
-    static const String routeName = "/comments";
+  static const String routeName = "/comments";
 
   const Comments({Key? key}) : super(key: key);
 
@@ -61,8 +62,7 @@ class Comments extends StatefulWidget {
   _CommentsState createState() => _CommentsState();
 }
 
-class _CommentsState extends State<Comments> 
-{
+class _CommentsState extends State<Comments> {
   @override
   Widget build(BuildContext context) {
     return Provider<ApiService>(
@@ -74,14 +74,7 @@ class _CommentsState extends State<Comments>
         ));
   }
 
-  @override
-  void initState() 
-  {
-    // TODO: implement initState
-    super.initState();
-
-    
-  }
+  
 }
 
 class CommentsContent extends StatefulWidget {
@@ -127,8 +120,7 @@ class _CommentsContentState extends State<CommentsContent>
       'query': {'token': Strings.authToken, "document_id": _currDoc.documentId}
     });
     _socket?.connect();
-    _socket?.on("connect", (_) 
-    {
+    _socket?.on("connect", (_) {
       print('Connected');
       getComments();
     });
@@ -143,8 +135,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() 
-  {
+  void dispose() {
     _animationController?.dispose();
     super.dispose();
     Strings.pushNotify = true;
@@ -170,7 +161,6 @@ class _CommentsContentState extends State<CommentsContent>
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -262,7 +252,8 @@ class _CommentsContentState extends State<CommentsContent>
                                             image: new NetworkImage(
                                                 Strings.baseImageUrl +
                                                     (Strings.comments[index]
-                                                        .userImg ?? "") ),
+                                                            .userImg ??
+                                                        "")),
                                             fit: BoxFit.fill,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -316,7 +307,12 @@ class _CommentsContentState extends State<CommentsContent>
                                         SizedBox(
                                           height: 12,
                                         ),
-                                        Container(child: Text(Strings.comments[index].recipient?.replaceAll('"', '') ?? ""),),
+                                        Container(
+                                          child: Text(Strings
+                                                  .comments[index].recipient
+                                                  ?.replaceAll('"', '') ??
+                                              ""),
+                                        ),
                                         SizedBox(height: 10),
                                         Container(
                                           child: Padding(
@@ -545,10 +541,9 @@ class _CommentsContentState extends State<CommentsContent>
                       if (results.length > 0) {
                         tagedUsers = [];
                         tagedUsersId = [];
-                        results.forEach((element) 
-                        {
-                           tagedUsers.add(element?.name);
-                           tagedUsersId.add(element?.userId);
+                        results.forEach((element) {
+                          tagedUsers.add(element?.name);
+                          tagedUsersId.add(element?.userId);
                         });
                       } else {
                         tagedUsers = [];
@@ -586,18 +581,17 @@ class _CommentsContentState extends State<CommentsContent>
                       if (results.length > 0) {
                         tagedCats = [];
                         tagedCatsId = [];
-                        results.forEach((element)
-                         {
+                        results.forEach((element) {
                           tagedCats.add(element?.categoryName);
                           tagedCatsId.add(element?.categoryId);
+
+                          print("Added data");
                           // tagedCats = tagedCats + "," + element.categoryName;
                           // tagedCatsId = tagedCatsId.toString() +
                           //     "," +
                           //     element.categoryId.toString();
                         });
                         results = [];
-
-                        
                       } else {
                         tagedCats = [];
                         tagedCatsId = [];
@@ -747,19 +741,20 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() 
-  {
+  getComments() {
+    print("Getting comments");
     _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
-
-      setState(() {
+      setState(() 
+      {
         Strings.comments = [];
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
 
-        _timer = new Timer(const Duration(milliseconds: 1000), () {
+        _timer = new Timer(const Duration(milliseconds: 1000), () 
+        {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             curve: Curves.fastOutSlowIn,
@@ -772,6 +767,7 @@ class _CommentsContentState extends State<CommentsContent>
       });
     });
   }
+
   recordComments() async {
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
@@ -784,17 +780,18 @@ class _CommentsContentState extends State<CommentsContent>
         encoder: AudioEncoder.AAC,
       );
     }
-  ;}
- Future<void> stopRecord() async {
-   _audioRecorder.stop();
+    ;
   }
 
-
+  Future<void> stopRecord() async {
+    _audioRecorder.stop();
+  }
 
   playAudio(url) async {
     // var dir = await ExtStorage.getExternalStoragePublicDirectory(
     //     ExtStorage.DIRECTORY_DOWNLOADS);
     // String url = dir + "/MTARecordedAudio.wav";
+    print(Strings.baseImageUrl + url);
     await audioPlayer.play(Strings.baseImageUrl + url,
         volume: 5, stayAwake: false);
     audioPlayer.onDurationChanged.listen((Duration d) {
@@ -804,26 +801,22 @@ class _CommentsContentState extends State<CommentsContent>
         audioLength = seconds;
       });
     });
-    audioPlayer.onAudioPositionChanged.listen((Duration p) 
-    {
+    audioPlayer.onAudioPositionChanged.listen((Duration p) {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerCompletion.listen((event) 
-    {
-      setState(() 
-      {
+    audioPlayer.onPlayerCompletion.listen((event) {
+      setState(() {
         audioLength = 0;
         audioCurrentlenth = 0;
         playingIndex = null;
         isPlaying = false;
       });
     });
-    audioPlayer.onPlayerError.listen((msg) 
-    {
+    audioPlayer.onPlayerError.listen((msg) {
       print('audioPlayer error : $msg');
     });
   }
@@ -842,42 +835,78 @@ class _CommentsContentState extends State<CommentsContent>
     AppUtils.showprogress();
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
+        print("direct $dir");
     final bytesData =
         await Io.File(dir! + "/MTARecordedAudio.wav").readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
     String base64Encode = base64Encodes(bytesData);
     final api = Provider.of<ApiService>(context, listen: false);
     AudioReq req = AudioReq();
+    print("taggedID--> ${tagedCatsId.length}");
+
     req.audio = "data:audio/wav;base64," + base64Encode;
-    print("base64Encode--> $base64Encode");
+
+    req.categoryIdList = json.encode(tagedCatsId);
+    req.categoryList = json.encode(tagedCats);
+    //var removeQuotes =  json.encode(tagedCats).replaceAll("", '');
+    //print("removeQuotes---> $removeQuotes");
+
+    req.documentId = Strings.category == true
+        ? Strings.selectedCatDocument[0].documentId
+        : Strings.selectedProDocument[0].documentId;
+    req.recipientId =
+        json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
+    req.recipient = json.encode(tagedUsersId);
+
+    req.userId = Strings.userID;
+    var dat = jsonEncode(req);
+    print("Printing data -- > $dat");
+    log("data--> $dat");
+    // var audioRequest = json.encode({
+    //           "audio": "data:audio/wav;base64," + base64Encode,
+    //           "category_id_list": json.encode(tagedCatsId),
+    //           "category_list": json.encode(tagedCats),
+    //           "document_id": Strings.category == true
+    //               ? Strings.selectedCatDocument[0].documentId
+    //               : Strings.selectedProDocument[0].documentId,
+    //           'recipient_id': json.encode(tagedUsersId),
+    //           'user_id': Strings.userID,
+
+    //         });
+    //         print(audioRequest);
+    // print("base64Encode--> $base64Encode");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) {
-        _socket?.emit(
-            'create-document-comment',
-            json.encode({
-              "project_id": Strings.selectedProject[0].projectId,
-              "project_name": Strings.selectedProject[0].projectName,
-              "audio": response.data,
-              "comment": _msgcontroller.text,
-              "document_id": Strings.category == true
-                  ? Strings.selectedCatDocument[0].documentId
-                  : Strings.selectedProDocument[0].documentId,
-              'recipient_id': json.encode(tagedUsersId),
-              'recipient': json.encode(tagedUsers),
-              "category_id_list": json.encode(tagedCatsId),
-              "category_list": json.encode(tagedCats)
-            }));
+      if (response.status!) 
+      {
+        // _socket?.emit(
+        //     'create-document-comment',
+        //     // json.encode({
+        //     //   "project_id": Strings.selectedProject[0].projectId,
+        //     //   "project_name": Strings.selectedProject[0].projectName,
+        //     //   "audio": response.data,
+        //     //   "comment": _msgcontroller.text,
+        //     //   "document_id": Strings.category == true
+        //     //       ? Strings.selectedCatDocument[0].documentId
+        //     //       : Strings.selectedProDocument[0].documentId,
+        //     //   'recipient_id': json.encode(tagedUsersId),
+        //     //   'recipient': json.encode(tagedUsers),
+        //     //   "category_id_list": json.encode(tagedCatsId),
+        //     //   "category_list": json.encode(tagedCats)
+        //     // })
+        //      );
 
         setState(() 
         {
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + 1;
-          } else {
+          } else 
+          {
             Strings.selectedProDocument[0].commentsCount =
                 Strings.selectedProDocument[0].commentsCount! + 1;
           }
+          
           tagedUsers = [];
           tagedUsersId = [];
           tagedCats = [];
@@ -895,10 +924,12 @@ class _CommentsContentState extends State<CommentsContent>
           //   showscroll = false;
           // }
         });
-      } else {
+      } else 
+      {
         AppUtils.showToastErrorTop(response.message!);
       }
-    }).catchError((onError) {
+    }).catchError((onError) 
+    {
       AppUtils.dismissprogress();
       print(onError.toString());
     });

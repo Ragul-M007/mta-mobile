@@ -7,11 +7,13 @@ import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/others/pdfviewer.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_web_browser/flutter_web_browser.dart';
 
 FancyDrawerController? _controller;
 List<NotificationData> _msgList = [];
@@ -49,6 +51,7 @@ class _NotificationContentState extends State<NotificationContent>
 
     WidgetsBinding.instance?.addPostFrameCallback((_) => getNotification());
   }
+
   menuopen() {}
 
   @override
@@ -167,10 +170,51 @@ class _NotificationContentState extends State<NotificationContent>
                         padding: EdgeInsets.all(20),
                         itemBuilder: (BuildContext ctx, int index) {
                           return GestureDetector(
-                            onTap: () 
-                            {
-                              var data = 
+                            onTap: () async {
+                              var dataUrl;
+                              if (_msgList[index].imgUrl != null &&
+                                  _msgList[index].imgUrl != "") 
+                                {
+                                if (_msgList[index].imgUrl!.contains(".pdf")) 
+                                {
+                                    Strings.pdfDoc = Strings.baseImageUrl + _msgList[index].imgUrl!;
+                                     Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => Pdfviewer()));
+                                   // dataUrl = 'https://docs.google.com/viewer?url=${Strings.baseImageUrl + (_msgList[index].imgUrl ?? "")}';
+                                } else 
+                                {
+                                    dataUrl = Strings.baseImageUrl + _msgList[index].imgUrl!;
+                                }
+                              }
+                              if(dataUrl!= null && dataUrl != "")
                               {
+                                FlutterWebBrowser.openWebPage(
+                                url: dataUrl,
+                                customTabsOptions: const CustomTabsOptions(
+                                  colorScheme: CustomTabsColorScheme.dark,
+                                  // toolbarColor: Strings,
+                                  // secondaryToolbarColor: Colors.green,
+                                  // navigationBarColor: Colors.amber,
+                                  shareState: CustomTabsShareState.on,
+                                  instantAppsEnabled: true,
+                                  showTitle: true,
+                                  urlBarHidingEnabled: true,
+                                ),
+                                safariVCOptions:
+                                    const SafariViewControllerOptions(
+                                  barCollapsingEnabled: true,
+                                  preferredBarTintColor: Colors.green,
+                                  preferredControlTintColor: Colors.amber,
+                                  dismissButtonStyle:
+                                      SafariViewControllerDismissButtonStyle
+                                          .close,
+                                  modalPresentationCapturesStatusBarAppearance:
+                                      true,
+                                ),
+                              );
+                              }
+
+                              var data = {
                                 "document_id":
                                     _msgList[index].docDetail?[0].documentId,
                                 "file": _msgList[index].docDetail?[0].file,
@@ -227,6 +271,13 @@ class _NotificationContentState extends State<NotificationContent>
                                                         Colors.black87,
                                                         14.0,
                                                         FontWeight.w500)),
+                                                        SizedBox(height: 5,),
+                                                        Text(_msgList[index].createdAt!,
+                                                style: Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.black87,
+                                                        14.0,
+                                                        FontWeight.w500)),
                                           ],
                                         ),
                                       ),
@@ -240,7 +291,8 @@ class _NotificationContentState extends State<NotificationContent>
                                                   image: new NetworkImage(
                                                       Strings.baseImageUrl +
                                                           (_msgList[index]
-                                                              .imgUrl ?? "")),
+                                                                  .imgUrl ??
+                                                              "")),
                                                   fit: BoxFit.fill,
                                                 ),
                                                 borderRadius: new BorderRadius
@@ -299,8 +351,7 @@ class _NotificationContentState extends State<NotificationContent>
       } else {
         AppUtils.showToastError(response.message!);
       }
-    }).catchError((onError) 
-    {
+    }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
     });

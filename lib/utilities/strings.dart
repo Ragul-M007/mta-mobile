@@ -10,7 +10,9 @@ mixin Strings
 {
   static String authToken = '';
   //static String baseImageUrl = "https://demo.emeetify.com:81/";
-  static String socketUrl = 'https://demo.emeetify.com:5012/';
+  //static String socketUrl = 'https://demo.emeetify.com:5012/';
+  static String socketUrl = 'https://mta.multitechcorp.in:5012/';
+
   //static String socketUrl = 'https://demo.emeetify.com:81/';
   static String imageUrl = 'https://demo.emeetify.com:5016/';
   static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
@@ -59,7 +61,7 @@ mixin Strings
   static String? district;
   static String? dateofbirth;
   static String? preferedcourse;
-
+  static String? pdfDoc;
   static List<ProjectDocData> selectedNotifyDocument = [];
   static bool selectedNotifyDocumentFlag = false;
 }

@@ -44,7 +44,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.skein.mta"
-        minSdkVersion 19
+        minSdkVersion 21
         compileSdkVersion = 31
         targetSdkVersion 31
         versionCode flutterVersionCode.toInteger()

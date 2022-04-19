@@ -40,9 +40,9 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
- @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+  //@RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
-//@RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
 
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
@@ -120,13 +120,15 @@ abstract class ApiService {
   /// Request and Response Body
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  static ApiService create() {
+  static ApiService create() 
+  {
     final dio = Dio();
     try {
       print("trying dio");
       dio.interceptors.add(PrettyDioLogger());
       dio.interceptors
-          .add(InterceptorsWrapper(onRequest: (options,handler) async {
+          .add(InterceptorsWrapper(onRequest: (options,handler) async 
+          {
         options.headers["Content-Type"] = "application/json";
         options.headers["x-access-token"] = Strings.authToken;
         //options.headers["Host"] = "<calculated when request is sent>";
