@@ -52,7 +52,6 @@ Timer? _timer;
 List<int> recordedData = [];
 final _audioRecorder = Record();
 
-
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
 
@@ -130,6 +129,7 @@ class _RepliesContentState extends State<RepliesContent>
   @override
   void dispose() {
     _animationController?.dispose();
+    _socket?.disconnect();
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -187,8 +187,10 @@ class _RepliesContentState extends State<RepliesContent>
                               image: new DecorationImage(
                                 image: new NetworkImage(Strings.baseImageUrl +
                                     (Strings
-                                        .comments[Strings.selectedCommentsIndex]
-                                        .userImg ?? "") ),
+                                            .comments[
+                                                Strings.selectedCommentsIndex]
+                                            .userImg ??
+                                        "")),
                                 fit: BoxFit.fill,
                               ),
                               borderRadius: new BorderRadius.all(
@@ -373,10 +375,11 @@ class _RepliesContentState extends State<RepliesContent>
                                             image: new NetworkImage(Strings
                                                     .baseImageUrl +
                                                 (Strings
-                                                    .comments[Strings
-                                                        .selectedCommentsIndex]
-                                                    .replies![index]
-                                                    .userImg ?? "")),
+                                                        .comments[Strings
+                                                            .selectedCommentsIndex]
+                                                        .replies![index]
+                                                        .userImg ??
+                                                    "")),
                                             fit: BoxFit.fill,
                                           ),
                                           borderRadius: new BorderRadius.all(
@@ -435,7 +438,13 @@ class _RepliesContentState extends State<RepliesContent>
                                           ],
                                         ),
                                         SizedBox(height: 10),
-                                        Container(child: Text(Strings.comments[Strings.selectedCommentsIndex].replies![index].recipient!),),
+                                        Container(
+                                          child: Text(Strings
+                                              .comments[
+                                                  Strings.selectedCommentsIndex]
+                                              .replies![index]
+                                              .recipient!),
+                                        ),
                                         Container(
                                           child: Padding(
                                               padding: EdgeInsets.all(10),
@@ -954,22 +963,22 @@ class _RepliesContentState extends State<RepliesContent>
     AudioReq req = AudioReq();
     req.audio = "data:audio/wav;base64," + base64Encode;
     req.categoryIdList = json.encode(tagedCatsId);
-    req.categoryList =  json.encode(tagedCats);
+    req.categoryList = json.encode(tagedCats);
     req.documentId = Strings.category == true
-                  ? Strings.selectedCatDocument[0].documentId
-                  : Strings.selectedProDocument[0].documentId;
-    req.recipientId = json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
+        ? Strings.selectedCatDocument[0].documentId
+        : Strings.selectedProDocument[0].documentId;
+    req.recipientId =
+        json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
     req.recipient = json.encode(tagedUsersId);
-    req.parent_comment_id = Strings.comments[Strings.selectedCommentsIndex].commentId;
+    req.parent_comment_id =
+        Strings.comments[Strings.selectedCommentsIndex].commentId;
     req.userId = Strings.userID;
     var dat = jsonEncode(req);
     print("Printing data -- > $dat");
     log("data--> $dat");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) 
-      {
-        
+      if (response.status!) {
         // _socket?.emit(
         //     'create-document-comment',
         //     json.encode({
@@ -989,6 +998,13 @@ class _RepliesContentState extends State<RepliesContent>
         //     }));
         setState(() 
         {
+          _socket?.disconnect();
+          _socket?.connect();
+          _socket?.on("connect", (_) {
+            print('Connected');
+            getReplies();
+          });
+
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + 1;

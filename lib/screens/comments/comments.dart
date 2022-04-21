@@ -124,7 +124,6 @@ class _CommentsContentState extends State<CommentsContent>
       print('Connected');
       getComments();
     });
-
     // _socket.on("create-document-comment", (data) {
     //   print("messages" + data);
     // });
@@ -135,8 +134,11 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() {
+  void dispose() 
+  {
     _animationController?.dispose();
+
+    _socket?.disconnect();
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -741,7 +743,8 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() {
+  getComments() 
+  {
     print("Getting comments");
     _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
@@ -752,7 +755,7 @@ class _CommentsContentState extends State<CommentsContent>
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
-
+          
         _timer = new Timer(const Duration(milliseconds: 1000), () 
         {
           _scrollController.animateTo(
@@ -898,6 +901,12 @@ class _CommentsContentState extends State<CommentsContent>
 
         setState(() 
         {
+          _socket?.disconnect();
+          _socket?.connect();
+          _socket?.on("connect", (_) {
+      print('Connected');
+      getComments();
+    });
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + 1;

@@ -500,12 +500,14 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                           Colors.black87,
                                                           14.0,
                                                           FontWeight.w500),
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 1,
                                                 ),
                                               ),
                                               SizedBox(height: 7.0),
                                               GestureDetector(
                                                 onTap: () {
-                                                  print("Comments clicked");
+                                                  print("Comments clicking");
                                                   Strings.selectedDocsIndex =
                                                       index;
                                                   Strings.selectedCatDocument =
@@ -661,7 +663,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             children: [
                                               Padding(
                                                 padding:
-                                                    EdgeInsets.only(left: 10),
+                                                    EdgeInsets.fromLTRB(10, 0, 10, 0),
                                                 child: Text(
                                                   _docsList[index].fileName!,
                                                   style: Drawables
@@ -669,6 +671,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                           Colors.black87,
                                                           14.0,
                                                           FontWeight.w500),
+                                                           overflow: TextOverflow.ellipsis,
+                                                          maxLines: 2
                                                 ),
                                               ),
                                               SizedBox(height: 7.0),
