@@ -773,35 +773,50 @@ class _RepliesContentState extends State<RepliesContent>
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(50)),
                         color: Colors.white),
-                    child: TextField(
-                      controller: _msgcontroller,
-                      onChanged: (value) {
-                        if (value.length > 0) {
-                          setState(() {
-                            typing = true;
-                          });
-                        } else {
-                          setState(() {
-                            typing = false;
-                          });
-                        }
-                      },
-                      style: TextStyle(color: Colors.black),
-                      focusNode: msgField,
-                      decoration: InputDecoration(
-                          hintText: startRecording == true
-                              ? elapsedTime
-                              : "Type your comment..",
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          border: InputBorder.none,
-                          prefixIcon: FadeTransition(
-                            opacity: _animationController!,
-                            child: startRecording == true
-                                ? Icon(Icons.mic, color: Colors.red)
-                                : SizedBox(
-                                    width: 0,
-                                  ),
-                          )),
+                    child: Row(
+                      children: [
+                        InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/adddocComments');
+                            },
+                            child: Icon(Icons.attach_file)),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.02,
+                        ),
+                        Container(
+                          width:MediaQuery.of(context).size.width * 0.6,
+                          child: TextField(
+                            controller: _msgcontroller,
+                            onChanged: (value) {
+                              if (value.length > 0) {
+                                setState(() {
+                                  typing = true;
+                                });
+                              } else {
+                                setState(() {
+                                  typing = false;
+                                });
+                              }
+                            },
+                            style: TextStyle(color: Colors.black),
+                            focusNode: msgField,
+                            decoration: InputDecoration(
+                                hintText: startRecording == true
+                                    ? elapsedTime
+                                    : "Type your comment..",
+                                hintStyle: TextStyle(color: Colors.grey[400]),
+                                border: InputBorder.none,
+                                prefixIcon: FadeTransition(
+                                  opacity: _animationController!,
+                                  child: startRecording == true
+                                      ? Icon(Icons.mic, color: Colors.red)
+                                      : SizedBox(
+                                          width: 0,
+                                        ),
+                                )),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -965,8 +980,8 @@ class _RepliesContentState extends State<RepliesContent>
     req.categoryIdList = json.encode(tagedCatsId);
     req.categoryList = json.encode(tagedCats);
     req.documentId = Strings.category == true
-        ? Strings.selectedCatDocument[0].documentId
-        : Strings.selectedProDocument[0].documentId;
+        ? int.parse(Strings.selectedCatDocument[0].documentId!)
+        : int.parse(Strings.selectedProDocument[0].documentId!);
     req.recipientId =
         json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
     req.recipient = json.encode(tagedUsersId);
@@ -1007,10 +1022,10 @@ class _RepliesContentState extends State<RepliesContent>
 
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
-                Strings.selectedCatDocument[0].commentsCount! + 1;
+                Strings.selectedCatDocument[0].commentsCount! + "1";
           } else {
             Strings.selectedProDocument[0].commentsCount =
-                Strings.selectedProDocument[0].commentsCount! + 1;
+                Strings.selectedProDocument[0].commentsCount! + "1";
           }
           tagedUsers = [];
           tagedUsersId = [];
@@ -1067,10 +1082,10 @@ class _RepliesContentState extends State<RepliesContent>
       setState(() {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
-              Strings.selectedCatDocument[0].commentsCount! + 1;
+              Strings.selectedCatDocument[0].commentsCount! + "1";
         } else {
           Strings.selectedProDocument[0].commentsCount =
-              Strings.selectedProDocument[0].commentsCount! + 1;
+              Strings.selectedProDocument[0].commentsCount! + "1";
         }
         tagedUsers = [];
         tagedUsersId = [];

@@ -28,14 +28,14 @@ class FetchCategoryDocRes {
 }
 
 class FetchCategoryDoc {
-  int? documentId;
+  String? documentId;
   String? fileName;
   String? file;
-  int? userId;
+  String? userId;
   String? name;
   String? createdAt;
   String? description;
-  int? commentsCount;
+  String? commentsCount;
 
   FetchCategoryDoc(
       {this.documentId,
@@ -48,14 +48,14 @@ class FetchCategoryDoc {
       this.commentsCount});
 
   FetchCategoryDoc.fromJson(Map<String, dynamic> json) {
-    documentId = json['document_id'];
+    documentId = json['document_id'].toString();
     fileName = json['file_name'];
     file = json['file'];
-    userId = json['user_id'];
+    userId = json['user_id'].toString();
     name = json['name'];
     createdAt = json['created_at'];
     description = json['description'];
-    commentsCount = json['commentsCount'];
+    commentsCount = json['commentsCount'].toString();
   }
 
   Map<String, dynamic> toJson() {

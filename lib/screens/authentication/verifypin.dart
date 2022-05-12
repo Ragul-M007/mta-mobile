@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +35,15 @@ class _VerifypinState extends State<Verifypin> {
   final twoT = TextEditingController();
   final threeT = TextEditingController();
   final fourT = TextEditingController();
+ 
+ 
+ @override
+  void initState() {
+    super.initState();
+    print("Testing message--> ${Strings.testing}");
+    print("Testing bool--> ${Strings.fromNotificationComments}");
+  }
+  
 
   BuildContext? ctx;
   Future<bool> _onWillPop() async {
@@ -144,6 +154,11 @@ class _VerifypinState extends State<Verifypin> {
             {
                 Strings.FromNotification = false;
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
+            }
+            else if(Strings.fromNotificationComments)
+            {
+                Strings.FromNotification = false;
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Comments()));
             }
             else
             {

@@ -4,6 +4,7 @@ import 'package:mta/screens/authentication/setpin.dart';
 import 'package:mta/screens/authentication/verifypin.dart';
 import 'package:mta/screens/categories/categeories.dart';
 import 'package:mta/screens/categories/categoriesinfo.dart';
+import 'package:mta/screens/comments/adddocComments.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
 import 'package:mta/screens/others/contactus.dart';
@@ -75,6 +76,9 @@ class RoutesGenerator {
         break;
       case '/notification':
         return MaterialPageRoute(builder: (_) => PushNotification());
+        break;
+      case '/adddocComments':
+        return MaterialPageRoute(builder: (_) => AddDocComments());
         break;
       default:
         return _errorRoute();

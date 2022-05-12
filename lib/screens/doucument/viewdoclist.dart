@@ -745,7 +745,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
     );
   }
 
-  getDocs() {
+  getDocs() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
@@ -804,7 +805,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
             //   AppUtils.showToastError("No Documents found !");
             // }
           }
-        }).catchError((onError) {
+        }).catchError((onError) 
+        {
           AppUtils.dismissprogress();
           print(onError.toString());
         });
@@ -830,7 +832,14 @@ class _ViewDocContentState extends State<ViewDocContent> {
       return "assets/icons/txt.png";
     } else if (fileExt == "ppt" || fileExt == "PPT") {
       return "assets/icons/ppt.png";
-    } else if (fileExt == "xls" ||
+    } else if (fileExt == "mpeg" || fileExt == "mpg") {
+      return "assets/icons/mpg.png";
+    } 
+     else if (fileExt == "wav" || fileExt == "mp3") {
+      return "assets/icons/mp3.png";
+    } 
+    
+     else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
         fileExt == "xlsb" ||

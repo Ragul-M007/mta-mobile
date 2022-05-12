@@ -120,10 +120,18 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       setState(() {
         print("message recieved inside get");
+        print(jsonEncode(message.data));
+        ProjectDocData peo = ProjectDocData.fromJson(message.data);
+      var check =  jsonEncode(peo);
+
+        print("Check--> $check");
+         Strings.selectedProDocument.add(peo);
+         print("dataaa ${Strings.selectedProDocument[0].documentId}");
         print(message.notification?.body);
         AppUtils.showToastErrorTop(
             "Notification: ${message.notification?.body}");
         if (Strings.pushNotify == true) {
+
           print("inside if listen message-----> $message");
           _showMyDialog(
               (message as dynamic)['data']['image'],
@@ -137,8 +145,19 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
+        //Map<String, dynamic> map = message?.data;
+         ProjectDocData peo = ProjectDocData.fromJson(message?.data);
+         Strings.selectedProDocument.add(peo);
+         Strings.fromNotificationComments = true;
+          // message?.data.forEach((key, value) {
+          //   print("key: $key, value: $value");
+          //   Strings.testing = value;
+            
+          //  // String.selectedProDocument = message.data;
+          // });
       if (message?.notification?.body != null) {
-        if (message!.notification!.body!.contains("Signed")) {
+        if (message!.notification!.body!.contains("Signed")) 
+        {
           Strings.FromNotification = true;
         }
       }
@@ -147,6 +166,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       if (message.notification?.body != null) {
         if (message.notification!.body!.contains("logout")) {
           Strings.FromNotification = true;
+          checkLogin();
+        }
+        if (message.notification!.body!.contains("Commented")) {
+          Strings.fromNotificationComments = true;
           checkLogin();
         }
       }

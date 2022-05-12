@@ -8,7 +8,8 @@ class FectchProjectDocRes {
   FectchProjectDocRes.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    if (json['data'] != null) {
+    if (json['data'] != null)
+    {
       data = <ProjectDocData>[];
       json['data'].forEach((v) {
         data?.add(new ProjectDocData.fromJson(v));
@@ -28,14 +29,14 @@ class FectchProjectDocRes {
 }
 
 class ProjectDocData {
-  int? documentId;
+  String? documentId;
   String? fileName;
   String? file;
-  int? userId;
+  String? userId;
   String? name;
   String? createdAt;
   String? description;
-  int? commentsCount;
+  String? commentsCount;
 
   ProjectDocData(
       {this.documentId,
@@ -47,18 +48,20 @@ class ProjectDocData {
       this.description,
       this.commentsCount});
 
-  ProjectDocData.fromJson(Map<String, dynamic> json) {
-    documentId = json['document_id'];
+  ProjectDocData.fromJson(Map<String, dynamic>? json) 
+  {
+    documentId = json!['document_id'].toString();
     fileName = json['file_name'];
     file = json['file'];
-    userId = json['user_id'];
+    userId = json['user_id'].toString();
     name = json['name'];
     createdAt = json['created_at'];
     description = json['description'];
-    commentsCount = json['commentsCount'];
+    commentsCount = json['commentsCount'].toString();
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() 
+  {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['document_id'] = this.documentId;
     data['file_name'] = this.fileName;

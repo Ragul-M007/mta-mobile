@@ -1,5 +1,6 @@
 class AudioReq {
   String? audio;
+  String? comment;
   String? categoryIdList;
   String? categoryList;
   int? documentId;
@@ -11,6 +12,7 @@ class AudioReq {
 
   AudioReq(
       {this.audio,
+      this.comment,
       this.categoryIdList,
       this.categoryList,
       this.documentId,
@@ -21,6 +23,7 @@ class AudioReq {
 
   AudioReq.fromJson(Map<String, dynamic> json) {
     audio = json['audio'];
+    comment = json['comment'];
     categoryIdList = json['category_id_list'];
     categoryList = json['category_list'];
     documentId = json['document_id'];
@@ -33,6 +36,7 @@ class AudioReq {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['audio'] = this.audio;
+    data['comment'] = this.comment;
     data['category_id_list'] = this.categoryIdList;
     data['category_list'] = this.categoryList;
     data['document_id'] = this.documentId;

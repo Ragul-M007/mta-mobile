@@ -1001,8 +1001,10 @@ class _LoginContentState extends State<LoginContent>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
+
                           new Icon(Icons.close,
                               size: 22.0, color: Colors.black),
+                              
                         ],
                       ),
                     ),

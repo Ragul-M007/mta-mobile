@@ -40,7 +40,7 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-  //@RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+ // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
 
@@ -139,7 +139,6 @@ abstract class ApiService {
             Strings.isLogin = false;
             AppUtils.showToastError(
                 "Session has been expired ! Please login again");
-
             navigatorKey.currentState?.popAndPushNamed('/verifypin');
             // return false;
           }

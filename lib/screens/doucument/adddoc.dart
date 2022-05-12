@@ -278,7 +278,8 @@ class _AddDocContentState extends State<AddDocContent>
 
   Widget uploadButton() {
     return GestureDetector(
-      onTap: () async {
+      onTap: () async 
+      {
         // FilePickerResult result = await FilePicker.platform.pickFiles(
         //   type: FileType.custom,
         //   allowedExtensions: [
@@ -293,7 +294,8 @@ class _AddDocContentState extends State<AddDocContent>
         //   ],
         // );
         FilePickerResult? result = await FilePicker.platform.pickFiles();
-        if (result != null) {
+        if (result != null) 
+        {
           PlatformFile file = result.files.first;
           final bytes = await Io.File(file.path!).readAsBytes();
           String base64Encodes(List<int> bytes) => base64.encode(bytes);
@@ -332,7 +334,8 @@ class _AddDocContentState extends State<AddDocContent>
   {
     if (docTitle.text.trim() == "" ||
         docTitle.text == null ||
-        docTitle.text == "null") {
+        docTitle.text == "null") 
+        {
       AppUtils.showToastError("Please select Document");
     } else {
       AppUtils.showprogress();

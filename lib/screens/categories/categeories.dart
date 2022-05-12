@@ -20,7 +20,14 @@ class Categories extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.grey[300],
         appBar: appbar("Project Details"),
-        body: CategoriesContent(),
+        body: WillPopScope(
+          child: CategoriesContent(),
+          onWillPop: () {
+            print("moving back");
+            Navigator.pushNamed(context, '/viewdoclist');
+            throw 'Change';
+          },
+        ),
       ),
     );
   }
@@ -43,19 +50,16 @@ class _CategoriesContentState extends State<CategoriesContent> {
     WidgetsBinding.instance!.addPostFrameCallback((_) => getCategories());
 
     print("image url");
-    print(Strings.baseImageUrl +
-                        Strings.selectedProject[0].projectImg!);
+    print(Strings.baseImageUrl + Strings.selectedProject[0].projectImg!);
   }
 
-  getUserCats() 
-  {
+  getUserCats() {
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
-      if (response.status!) 
-      {
+      if (response.status!) {
         setState(() {
           Strings.users = response.data!;
-          users = response.data!; 
+          users = response.data!;
         });
       } else {
         print('error');
@@ -79,34 +83,38 @@ class _CategoriesContentState extends State<CategoriesContent> {
                 },
                 child: Column(
                   children: [
-                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        new Icon(Icons.close, size: 22.0, color: Colors.black)
-                      ]),
-                      Text("Assigned Users",
-                      style: TextStyle(fontWeight: FontWeight.bold),),
-                      SizedBox(height: 10,),
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      new Icon(Icons.close, size: 22.0, color: Colors.black)
+                    ]),
+                    Text(
+                      "Assigned Users",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     Container(
                       height: MediaQuery.of(context).size.width * 1,
                       width: MediaQuery.of(context).size.width * 0.9,
                       child: ListView.builder(
-        itemCount: users?.length,
-        itemBuilder: (context, index) {
-          return Column(
-            children: [
-              Card(
-                color: Color.fromRGBO(230, 230, 230, 1),
-                child: ListTile(
-                  title: Text(users?[index].name ?? "",
-                  ),
-                  subtitle: Text(users?[index].prof ?? ""),
-                      onTap: (){
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+                        itemCount: users?.length,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: [
+                              Card(
+                                color: Color.fromRGBO(230, 230, 230, 1),
+                                child: ListTile(
+                                  title: Text(
+                                    users?[index].name ?? "",
+                                  ),
+                                  subtitle: Text(users?[index].prof ?? ""),
+                                  onTap: () {},
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ],
                 )),
@@ -118,7 +126,7 @@ class _CategoriesContentState extends State<CategoriesContent> {
 
   @override
   Widget build(BuildContext context) {
-    print("role--> ${Strings.roleId }");
+    print("role--> ${Strings.roleId}");
     return Column(
       children: [
         Padding(
@@ -143,9 +151,9 @@ class _CategoriesContentState extends State<CategoriesContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: (){
-                        Strings.category = false;
-                        Navigator.pushNamed(context, '/viewdoclist');
+                    onTap: () {
+                      Strings.category = false;
+                      Navigator.pushNamed(context, '/viewdoclist');
                     },
                     child: Row(
                       children: [
@@ -179,84 +187,84 @@ class _CategoriesContentState extends State<CategoriesContent> {
                             ),
                           ),
                         ),
-                        
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(
                     height: 7,
                   ),
-                  if(Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 6)
-                  GestureDetector(
-                    onTap: (){
-                      _showMyDialogProject();
-                    },
-                    child: Row(
-                      children: [
-                        Container(
-                          width:MediaQuery.of(context).size.width * 0.04,
-                          height: 15.0,
-                          decoration: new BoxDecoration(
-                            image: new DecorationImage(
-                              image: new AssetImage("assets/icons/pin.png"),
-                              fit: BoxFit.fill,
+                  if (Strings.roleId == 1 ||
+                      Strings.roleId == 2 ||
+                      Strings.roleId == 6)
+                    GestureDetector(
+                      onTap: () {
+                        _showMyDialogProject();
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.04,
+                            height: 15.0,
+                            decoration: new BoxDecoration(
+                              image: new DecorationImage(
+                                image: new AssetImage("assets/icons/pin.png"),
+                                fit: BoxFit.fill,
+                              ),
+                              borderRadius: new BorderRadius.all(
+                                  new Radius.circular(50.0)),
                             ),
-                            borderRadius:
-                                new BorderRadius.all(new Radius.circular(50.0)),
                           ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.36,
-                          child: Text(
-                          Strings.selectedProject[0].address! +
-                              ' , ' +
-                              Strings.selectedProject[0].city!,
-                          style: Drawables.adddoccontentstyle(
-                              Colors.grey, 13.0, FontWeight.normal),
-                        ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Icon(
-                          Icons.people,
-                          color: Color(0xFF0061b0),
-                          size: 20,
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.25,
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.36,
                             child: Text(
-                              "View Members",
+                              Strings.selectedProject[0].address! +
+                                  ' , ' +
+                                  Strings.selectedProject[0].city!,
                               style: Drawables.adddoccontentstyle(
-                                  Colors.grey[600]!, 12.0, FontWeight.w600),
+                                  Colors.grey, 13.0, FontWeight.normal),
                             ),
                           ),
-                        ),
-                        
-                      ],
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Icon(
+                            Icons.people,
+                            color: Color(0xFF0061b0),
+                            size: 20,
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              child: Text(
+                                "View Members",
+                                style: Drawables.adddoccontentstyle(
+                                    Colors.grey[600]!, 12.0, FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   // Row(
                   //   crossAxisAlignment: CrossAxisAlignment.end,
                   //   children: [
-                      // Container(
-                      //   width: 15.0,
-                      //   height: 15.0,
-                      //   decoration: new BoxDecoration(
-                      //     image: new DecorationImage(
-                      //       image: new AssetImage("assets/icons/pin.png"),
-                      //       fit: BoxFit.fill,
-                      //     ),
-                      //     borderRadius:
-                      //         new BorderRadius.all(new Radius.circular(50.0)),
-                      //   ),
-                      // ),
+                  // Container(
+                  //   width: 15.0,
+                  //   height: 15.0,
+                  //   decoration: new BoxDecoration(
+                  //     image: new DecorationImage(
+                  //       image: new AssetImage("assets/icons/pin.png"),
+                  //       fit: BoxFit.fill,
+                  //     ),
+                  //     borderRadius:
+                  //         new BorderRadius.all(new Radius.circular(50.0)),
+                  //   ),
+                  // ),
                   //     SizedBox(
                   //       width: 10,
                   //     ),
@@ -313,7 +321,8 @@ class _CategoriesContentState extends State<CategoriesContent> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                      child: Text(_catsList[index].categoryName!,
+                                      child: Text(
+                                          _catsList[index].categoryName!,
                                           style: Drawables.adddoccontentstyle(
                                               Colors.black87,
                                               14.0,

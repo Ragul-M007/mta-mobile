@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
 import 'package:ext_storage/ext_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/CommentsRes.dart';
@@ -15,6 +17,7 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +26,7 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
@@ -53,6 +57,9 @@ Timer? _timer;
 List<int> recordedData = [];
 final _audioRecorder = Record();
 
+String file64 = '';
+String? fileExt;
+
 class Comments extends StatefulWidget {
   static const String routeName = "/comments";
 
@@ -73,8 +80,6 @@ class _CommentsState extends State<Comments> {
           body: CommentsContent(),
         ));
   }
-
-  
 }
 
 class CommentsContent extends StatefulWidget {
@@ -91,9 +96,11 @@ class _CommentsContentState extends State<CommentsContent>
   TextEditingController _msgcontroller = TextEditingController();
   ScrollController _scrollController = new ScrollController();
   FocusNode msgField = new FocusNode();
+  String? filepath;
+
+  var _key;
   @override
-  void initState() 
-  {
+  void initState() {
     super.initState();
     Strings.pushNotify = false;
     _animationController = new AnimationController(
@@ -113,11 +120,11 @@ class _CommentsContentState extends State<CommentsContent>
       _currDoc = Strings.selectedProDocument[0];
     }
     // getUserCats();
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>
-    {
+    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
-      'query': {'token': Strings.authToken, "document_id": _currDoc.documentId}
+      'query': {'token': Strings.authToken, "document_id": _currDoc.documentId
+      }
     });
     _socket?.connect();
     _socket?.on("connect", (_) {
@@ -134,8 +141,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() 
-  {
+  void dispose() {
     _animationController?.dispose();
 
     _socket?.disconnect();
@@ -146,6 +152,107 @@ class _CommentsContentState extends State<CommentsContent>
     tagedCats = [];
     tagedCatsId = [];
     // Strings.comments = [];
+  }
+
+  void _downloadfile(serverURL, filename) async {
+    String? path;
+    if (Platform.isAndroid) {
+      path = await ExtStorage.getExternalStoragePublicDirectory(
+          ExtStorage.DIRECTORY_DOWNLOADS);
+    } else if (Platform.isIOS) {
+      print("ios");
+      var vpath = await getApplicationDocumentsDirectory();
+      String pathStr = vpath.toString();
+      if (pathStr != null && pathStr.length >= 5) {
+        path = pathStr.substring(12, pathStr.length);
+      }
+      if (path != null && path.length >= 1) {
+        path = path.substring(0, path.length - 1);
+      }
+    }
+    AppUtils.showprogress();
+    AppUtils.showToast('Downloading');
+
+    var filenames = serverURL.split("/");
+    print("serverURL--> $serverURL");
+    //var fileName = filename;//filenames[1];
+    var extn = getFileExtension(serverURL);
+    var nospace = filename.replaceAll(' ', '');
+    var fileName = nospace + extn;
+    print("url--> $fileName");
+    String fullPath = "$path/$fileName";
+    setState(() {
+      filepath = fullPath;
+    });
+    var downloadedFile = await downloadFile(serverURL, fileName, path!);
+    print("downloaded file $downloadedFile");
+    openFile(downloadedFile);
+  }
+
+  Future<void> openFile(filePath) async {
+    await OpenFile.open(filePath);
+  }
+
+  Future<String> downloadFile(String url, String fileName, String dir) async {
+    HttpClient httpClient = new HttpClient();
+    File file;
+    String filePath = '';
+    String myUrl = '';
+
+    try {
+      myUrl = Strings.baseImageUrl + url;
+      var request = await httpClient.getUrl(Uri.parse(myUrl));
+      var response = await request.close();
+      print("printing url ---> $myUrl");
+      if (response.statusCode == 200) {
+        var bytes = await consolidateHttpClientResponseBytes(response);
+        filePath = '$dir/$fileName';
+        file = File(filePath);
+        await file.writeAsBytes(bytes);
+      } else if (response.statusCode == 404) 
+      {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+        filePath = 'Error code: ' + response.statusCode.toString();
+      }
+    } catch (ex) {
+      AppUtils.dismissprogress();
+      filePath = 'Can not fetch url';
+    }
+    AppUtils.dismissprogress();
+    return filePath;
+  }
+
+  String getFileExtension(String fileName) {
+    var file = fileName.split(".");
+    var fileExt = file[1];
+    if (fileExt == "png" || fileExt == "PNG") {
+      return ".png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return ".jpg";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return ".pdf";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return ".txt";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return ".ppt";
+    } else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return ".xls";
+    } else {
+      print("File extnsion--> $fileExt");
+      return ".$fileExt";
+    }
   }
 
   Stopwatch watch = Stopwatch();
@@ -323,14 +430,14 @@ class _CommentsContentState extends State<CommentsContent>
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Strings.comments[index]
+                                                  (Strings.comments[index]
                                                                   .audio ==
                                                               "" ||
                                                           Strings
                                                                   .comments[
                                                                       index]
                                                                   .audio ==
-                                                              null
+                                                              null)
                                                       ? Text(
                                                           Strings
                                                               .comments[index]
@@ -343,62 +450,14 @@ class _CommentsContentState extends State<CommentsContent>
                                                                   14.0,
                                                                   FontWeight
                                                                       .w400))
-                                                      : Row(
-                                                          children: [
-                                                            isPlaying == false
-                                                                ? GestureDetector(
-                                                                    onTap: () {
-                                                                      setState(
-                                                                          () {
-                                                                        if (isPlaying ==
-                                                                            true) {
-                                                                          stopAudio();
-                                                                          _timer = new Timer(
-                                                                              const Duration(milliseconds: 500),
-                                                                              () {
-                                                                            setState(() {
-                                                                              isPlaying = true;
-                                                                              playingIndex = index;
-                                                                              playAudio(Strings.comments[index].audio);
-                                                                            });
-                                                                          });
-                                                                        } else {
-                                                                          isPlaying =
-                                                                              true;
-                                                                          playingIndex =
-                                                                              index;
-                                                                          playAudio(Strings
-                                                                              .comments[index]
-                                                                              .audio);
-                                                                        }
-                                                                      });
-                                                                    },
-                                                                    child: new Icon(
-                                                                        Icons
-                                                                            .play_arrow,
-                                                                        size:
-                                                                            28.0),
-                                                                  )
-                                                                : playingIndex ==
-                                                                        index
+                                                      : (Strings.comments[index]
+                                                              .audio!
+                                                              .contains(".wav"))
+                                                          ? Row(
+                                                              children: [
+                                                                isPlaying ==
+                                                                        false
                                                                     ? GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          setState(
-                                                                              () {
-                                                                            isPlaying =
-                                                                                false;
-                                                                          });
-
-                                                                          stopAudio();
-                                                                        },
-                                                                        child: new Icon(
-                                                                            Icons
-                                                                                .stop,
-                                                                            size:
-                                                                                28.0),
-                                                                      )
-                                                                    : GestureDetector(
                                                                         onTap:
                                                                             () {
                                                                           setState(
@@ -425,37 +484,140 @@ class _CommentsContentState extends State<CommentsContent>
                                                                                 .play_arrow,
                                                                             size:
                                                                                 28.0),
-                                                                      ),
-                                                            SizedBox(
-                                                              width: 10,
-                                                            ),
-                                                            Slider(
-                                                              value: playingIndex ==
-                                                                      index
-                                                                  ? audioCurrentlenth
-                                                                      .toDouble()
-                                                                  : 0,
-                                                              min: 0,
-                                                              max: playingIndex ==
-                                                                      index
-                                                                  ? audioLength
-                                                                      .toDouble()
-                                                                  : 0,
-                                                              onChanged: (double
-                                                                  value) {
-                                                                setState(() {
-                                                                  playingIndex ==
+                                                                      )
+                                                                    : playingIndex ==
+                                                                            index
+                                                                        ? GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              setState(() {
+                                                                                isPlaying = false;
+                                                                              });
+
+                                                                              stopAudio();
+                                                                            },
+                                                                            child:
+                                                                                new Icon(Icons.stop, size: 28.0),
+                                                                          )
+                                                                        : GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              setState(() {
+                                                                                if (isPlaying == true) {
+                                                                                  stopAudio();
+                                                                                  _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                    setState(() {
+                                                                                      isPlaying = true;
+                                                                                      playingIndex = index;
+                                                                                      playAudio(Strings.comments[index].audio);
+                                                                                    });
+                                                                                  });
+                                                                                } else {
+                                                                                  isPlaying = true;
+                                                                                  playingIndex = index;
+                                                                                  playAudio(Strings.comments[index].audio);
+                                                                                }
+                                                                              });
+                                                                            },
+                                                                            child:
+                                                                                new Icon(Icons.play_arrow, size: 28.0),
+                                                                          ),
+                                                                SizedBox(
+                                                                  width: 10,
+                                                                ),
+                                                                Slider(
+                                                                  value: playingIndex ==
                                                                           index
-                                                                      ? audioCurrentlenth =
-                                                                          value
-                                                                              .toInt()
-                                                                      : 0;
-                                                                  // _currentSliderValue = value;
-                                                                });
+                                                                      ? audioCurrentlenth
+                                                                          .toDouble()
+                                                                      : 0,
+                                                                  min: 0,
+                                                                  max: playingIndex ==
+                                                                          index
+                                                                      ? audioLength
+                                                                          .toDouble()
+                                                                      : 0,
+                                                                  onChanged:
+                                                                      (double
+                                                                          value) {
+                                                                    setState(
+                                                                        () {
+                                                                      playingIndex ==
+                                                                              index
+                                                                          ? audioCurrentlenth =
+                                                                              value.toInt()
+                                                                          : 0;
+                                                                      // _currentSliderValue = value;
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            )
+                                                          : InkWell(
+                                                              onTap: () {
+                                                                _downloadfile(
+                                                                    Strings
+                                                                        .comments[
+                                                                            index]
+                                                                        .audio,
+                                                                    "test1");
                                                               },
+                                                              child: Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Stack(
+                                                                      children: [
+                                                                        Container(
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                Colors.grey.withOpacity(0.1),
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(10),
+                                                                          ),
+                                                                          padding:
+                                                                              EdgeInsets.all(10),
+                                                                          child:
+                                                                              Image.asset(
+                                                                            getFileExt(Strings.comments[index].audio ?? "test.mpg"),
+                                                                            width:
+                                                                                80,
+                                                                            height:
+                                                                                80,
+                                                                          ),
+                                                                        ),
+                                                                        Positioned(
+                                                                          top:
+                                                                              20,
+                                                                          left:
+                                                                              40,
+                                                                          child: Container(
+                                                                              child: Icon(
+                                                                            Icons.download_rounded,
+                                                                            size:
+                                                                                20.0,
+                                                                          )),
+                                                                        ),
+                                                                      ]),
+                                                                  SizedBox(
+                                                                    width: 10,
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                        Strings.comments[index].comment ??
+                                                                            "",
+                                                                        maxLines:
+                                                                            20,
+                                                                        style: Drawables.adddoccontentstyle(
+                                                                            Colors.black45,
+                                                                            14.0,
+                                                                            FontWeight.w400)),
+                                                                  )
+                                                                ],
+                                                              ),
                                                             ),
-                                                          ],
-                                                        ),
                                                   SizedBox(
                                                     height: 10,
                                                   ),
@@ -647,35 +809,50 @@ class _CommentsContentState extends State<CommentsContent>
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(50)),
                         color: Colors.white),
-                    child: TextField(
-                      controller: _msgcontroller,
-                      onChanged: (value) {
-                        if (value.length > 0) {
-                          setState(() {
-                            typing = true;
-                          });
-                        } else {
-                          setState(() {
-                            typing = false;
-                          });
-                        }
-                      },
-                      style: TextStyle(color: Colors.black),
-                      focusNode: msgField,
-                      decoration: InputDecoration(
-                          hintText: startRecording == true
-                              ? elapsedTime
-                              : "Type your comment..",
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          border: InputBorder.none,
-                          prefixIcon: FadeTransition(
-                            opacity: _animationController!,
-                            child: startRecording == true
-                                ? Icon(Icons.mic, color: Colors.red)
-                                : SizedBox(
-                                    width: 0,
-                                  ),
-                          )),
+                    child: Row(
+                      children: [
+                        InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/adddocComments');
+                            },
+                            child: Icon(Icons.attach_file)),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.02,
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: TextField(
+                            controller: _msgcontroller,
+                            onChanged: (value) {
+                              if (value.length > 0) {
+                                setState(() {
+                                  typing = true;
+                                });
+                              } else {
+                                setState(() {
+                                  typing = false;
+                                });
+                              }
+                            },
+                            style: TextStyle(color: Colors.black),
+                            focusNode: msgField,
+                            decoration: InputDecoration(
+                                hintText: startRecording == true
+                                    ? elapsedTime
+                                    : "Type your comment..",
+                                hintStyle: TextStyle(color: Colors.grey[400]),
+                                border: InputBorder.none,
+                                prefixIcon: FadeTransition(
+                                  opacity: _animationController!,
+                                  child: startRecording == true
+                                      ? Icon(Icons.mic, color: Colors.red)
+                                      : SizedBox(
+                                          width: 0,
+                                        ),
+                                )),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -743,21 +920,18 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() 
-  {
+  getComments() {
     print("Getting comments");
     _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
-      setState(() 
-      {
+      setState(() {
         Strings.comments = [];
         for (var item in _data) {
           Strings.comments.add(CommentsRes.fromJson(item));
         }
-          
-        _timer = new Timer(const Duration(milliseconds: 1000), () 
-        {
+
+        _timer = new Timer(const Duration(milliseconds: 1000), () {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             curve: Curves.fastOutSlowIn,
@@ -765,7 +939,7 @@ class _CommentsContentState extends State<CommentsContent>
           );
           msgField.unfocus();
           Strings.selectedProDocument[0].commentsCount =
-              Strings.comments.length;
+              Strings.comments.length.toString();
         });
       });
     });
@@ -834,11 +1008,34 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
+  getDocuments() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      final bytes = await Io.File(file.path!).readAsBytes();
+      String base64Encodes(List<int> bytes) => base64.encode(bytes);
+      String base64Encode = base64Encodes(bytes); //base64.encode(bytes);
+      file64 = base64Encode;
+      fileExt = file.extension;
+      // print(bytes);
+      // print(base64Encode);
+      // print(file.size);
+      // print(file.extension);
+      // print(file.path);
+      setState(() {
+        // var title = file.name.split(".");
+        // docTitle.text = title[0];
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
+
   sendAudio() async {
     AppUtils.showprogress();
     var dir = await ExtStorage.getExternalStoragePublicDirectory(
         ExtStorage.DIRECTORY_DOWNLOADS);
-        print("direct $dir");
+    print("direct $dir");
     final bytesData =
         await Io.File(dir! + "/MTARecordedAudio.wav").readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
@@ -855,8 +1052,8 @@ class _CommentsContentState extends State<CommentsContent>
     //print("removeQuotes---> $removeQuotes");
 
     req.documentId = Strings.category == true
-        ? Strings.selectedCatDocument[0].documentId
-        : Strings.selectedProDocument[0].documentId;
+        ? int.parse(Strings.selectedCatDocument[0].documentId!)
+        :int.parse( Strings.selectedProDocument[0].documentId!);
     req.recipientId =
         json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
     req.recipient = json.encode(tagedUsersId);
@@ -880,8 +1077,7 @@ class _CommentsContentState extends State<CommentsContent>
     // print("base64Encode--> $base64Encode");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) 
-      {
+      if (response.status!) {
         // _socket?.emit(
         //     'create-document-comment',
         //     // json.encode({
@@ -899,23 +1095,21 @@ class _CommentsContentState extends State<CommentsContent>
         //     // })
         //      );
 
-        setState(() 
-        {
+        setState(() {
           _socket?.disconnect();
           _socket?.connect();
           _socket?.on("connect", (_) {
-      print('Connected');
-      getComments();
-    });
+            print('Connected');
+            getComments();
+          });
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
-                Strings.selectedCatDocument[0].commentsCount! + 1;
-          } else 
-          {
+                Strings.selectedCatDocument[0].commentsCount! + "1";
+          } else {
             Strings.selectedProDocument[0].commentsCount =
-                Strings.selectedProDocument[0].commentsCount! + 1;
+                Strings.selectedProDocument[0].commentsCount! + "1";
           }
-          
+
           tagedUsers = [];
           tagedUsersId = [];
           tagedCats = [];
@@ -933,12 +1127,10 @@ class _CommentsContentState extends State<CommentsContent>
           //   showscroll = false;
           // }
         });
-      } else 
-      {
+      } else {
         AppUtils.showToastErrorTop(response.message!);
       }
-    }).catchError((onError) 
-    {
+    }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
     });
@@ -971,10 +1163,10 @@ class _CommentsContentState extends State<CommentsContent>
       setState(() {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
-              Strings.selectedCatDocument[0].commentsCount! + 1;
+              Strings.selectedCatDocument[0].commentsCount! + "1";
         } else {
           Strings.selectedProDocument[0].commentsCount =
-              Strings.selectedProDocument[0].commentsCount! + 1;
+              Strings.selectedProDocument[0].commentsCount! + "1";
         }
         tagedUsers = [];
         tagedUsersId = [];
@@ -996,10 +1188,13 @@ class _CommentsContentState extends State<CommentsContent>
     }
   }
 
-  String getFileExt(String? fileName) {
+  String getFileExt(String? fileName) 
+  {
+    print("Filename--> $fileName");
     var file = fileName?.split(".");
     var fileExt = file?[1];
-    if (fileExt == "png" || fileExt == "PNG") {
+    if (fileExt == "png" || fileExt == "PNG") 
+    {
       return "assets/icons/png.png";
     } else if (fileExt == "jpg" ||
         fileExt == "jepg" ||
@@ -1014,6 +1209,10 @@ class _CommentsContentState extends State<CommentsContent>
       return "assets/icons/txt.png";
     } else if (fileExt == "ppt" || fileExt == "PPT") {
       return "assets/icons/ppt.png";
+    } else if (fileExt == "mpeg" || fileExt == "mpg") {
+      return "assets/icons/mpg.png";
+    } else if (fileExt == "wav" || fileExt == "mp3") {
+      return "assets/icons/mp3.png";
     } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
