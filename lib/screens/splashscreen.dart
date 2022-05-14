@@ -117,8 +117,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print(_homeScreenText);
     });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) 
+    {
       setState(() {
+
         print("message recieved inside get");
         print(jsonEncode(message.data));
         ProjectDocData peo = ProjectDocData.fromJson(message.data);
@@ -144,17 +146,21 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
     FirebaseMessaging.instance
         .getInitialMessage()
-        .then((RemoteMessage? message) {
+        .then((RemoteMessage? message) 
+        {
         //Map<String, dynamic> map = message?.data;
+         Strings.testing = "myvalue";
          ProjectDocData peo = ProjectDocData.fromJson(message?.data);
          Strings.selectedProDocument.add(peo);
          Strings.fromNotificationComments = true;
+
           // message?.data.forEach((key, value) {
           //   print("key: $key, value: $value");
           //   Strings.testing = value;
             
           //  // String.selectedProDocument = message.data;
           // });
+
       if (message?.notification?.body != null) {
         if (message!.notification!.body!.contains("Signed")) 
         {
@@ -162,13 +168,20 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         }
       }
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (message.notification?.body != null) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) 
+    {
+      if (message.notification?.body != null) 
+      {
         if (message.notification!.body!.contains("logout")) {
           Strings.FromNotification = true;
           checkLogin();
         }
-        if (message.notification!.body!.contains("Commented")) {
+        if (message.notification!.title!.contains("Commented")) 
+        {
+          print("Inside Commented");
+          ProjectDocData peo = ProjectDocData.fromJson(message.data);
+          Strings.selectedProDocument.clear();
+         Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
           checkLogin();
         }
@@ -523,7 +536,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   void checkLogin() {
-    AppUtils.getStringPreferences('easyAccess').then((value) {
+    AppUtils.getStringPreferences('easyAccess').then((value) 
+    {
       if (value != null) {
         print(value);
 

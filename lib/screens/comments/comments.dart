@@ -34,10 +34,10 @@ List<CatsData> cats = Strings.categories;
 AnimationController? _animationController;
 AudioPlayer audioPlayer = AudioPlayer();
 AudioCache audioCache = AudioCache();
-final _userIitems = users
+var _userIitems = users
     .map((user) => MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
     .toList();
-final _catsItems = cats
+var _catsItems = cats
     .map((cats) => MultiSelectItem<CatsData?>(cats, cats.categoryName!))
     .toList();
 var tagedUsers = [];
@@ -48,6 +48,7 @@ var showscroll = true;
 var typing = false;
 var showtoastinfo = false;
 var startRecording = false;
+var initialCommentCheck = true;
 
 var isPlaying = false;
 var playingIndex = null;
@@ -59,8 +60,10 @@ final _audioRecorder = Record();
 
 String file64 = '';
 String? fileExt;
+IO.Socket? _socket;
 
-class Comments extends StatefulWidget {
+class Comments extends StatefulWidget 
+{
   static const String routeName = "/comments";
 
   const Comments({Key? key}) : super(key: key);
@@ -77,7 +80,22 @@ class _CommentsState extends State<Comments> {
         child: Scaffold(
           appBar: appbar("Comments"),
           backgroundColor: Colors.grey[300],
-          body: CommentsContent(),
+          body: WillPopScope(
+              child: CommentsContent(),
+              onWillPop: () 
+              {
+                initialCommentCheck = true;
+                 _socket?.disconnect();
+                if (Strings.fromNotificationComments == true) 
+                {
+                  Strings.fromNotificationComments = false;
+                  Navigator.pushNamed(context, '/dashboard');
+                } else 
+                {
+                  Navigator.pushNamed(context, '/viewdoclist');
+                }
+                throw 'Screen Change';
+              }),
         ));
   }
 }
@@ -91,7 +109,6 @@ class CommentsContent extends StatefulWidget {
 
 class _CommentsContentState extends State<CommentsContent>
     with SingleTickerProviderStateMixin {
-  IO.Socket? _socket;
   var _currDoc;
   TextEditingController _msgcontroller = TextEditingController();
   ScrollController _scrollController = new ScrollController();
@@ -102,12 +119,20 @@ class _CommentsContentState extends State<CommentsContent>
   @override
   void initState() {
     super.initState();
+    getUserCats();
+    getuserCatgories();
+
+    print("initial value check-->> $initialCommentCheck");
+    initialCommentCheck = true;
+
+    print("init state variable assigned--> $initialCommentCheck");
     Strings.pushNotify = false;
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
     _animationController?.repeat(reverse: true);
 
-    setState(() {
+    setState(() 
+    {
       tagedUsers = [];
       tagedUsersId = [];
       tagedCats = [];
@@ -123,13 +148,16 @@ class _CommentsContentState extends State<CommentsContent>
     _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
-      'query': {'token': Strings.authToken, "document_id": _currDoc.documentId
-      }
+      'query': {'token': Strings.authToken, "document_id": _currDoc.documentId,
+      'forceNew': false,}
     });
     _socket?.connect();
-    _socket?.on("connect", (_) {
+    AppUtils.showprogress();
+    _socket?.on("connect", (_)  {
       print('Connected');
-      getComments();
+        print("Calling function");
+        getComments();
+     //_socket?.disconnect();
     });
     // _socket.on("create-document-comment", (data) {
     //   print("messages" + data);
@@ -141,7 +169,8 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() {
+  void dispose() 
+  {
     _animationController?.dispose();
 
     _socket?.disconnect();
@@ -151,7 +180,56 @@ class _CommentsContentState extends State<CommentsContent>
     tagedUsersId = [];
     tagedCats = [];
     tagedCatsId = [];
+    print("dispose variable assigned--> $initialCommentCheck");
     // Strings.comments = [];
+  }
+
+  getUserCats() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
+
+    api.fetchUsers(projectid).then((response) {
+      if (response.status!) {
+        setState(() {
+          Strings.users = response.data!;
+          users = response.data!;
+          _userIitems = users
+              .map((user) =>
+                  MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
+              .toList();
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  getuserCatgories() 
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
+    api.fetchCats(projectid).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) 
+      {
+        setState(() {
+          Strings.categories = response.data!;
+          cats = response.data!;
+          _catsItems = cats
+              .map((cats) =>
+                  MultiSelectItem<CatsData?>(cats, cats.categoryName!))
+              .toList();
+        });
+      } else {
+        print('No categories');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print("Catched $onError");
+    });
   }
 
   void _downloadfile(serverURL, filename) async {
@@ -193,7 +271,8 @@ class _CommentsContentState extends State<CommentsContent>
     await OpenFile.open(filePath);
   }
 
-  Future<String> downloadFile(String url, String fileName, String dir) async {
+  Future<String> downloadFile(String url, String fileName, String dir) async 
+  {
     HttpClient httpClient = new HttpClient();
     File file;
     String filePath = '';
@@ -209,8 +288,7 @@ class _CommentsContentState extends State<CommentsContent>
         filePath = '$dir/$fileName';
         file = File(filePath);
         await file.writeAsBytes(bytes);
-      } else if (response.statusCode == 404) 
-      {
+      } else if (response.statusCode == 404) {
         AppUtils.dismissprogress();
         AppUtils.showToastError("Sorry, File  not Found !");
       } else {
@@ -269,7 +347,8 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -356,7 +435,7 @@ class _CommentsContentState extends State<CommentsContent>
                                         width: 30.0,
                                         height: 30.0,
                                         decoration: new BoxDecoration(
-                                          color: const Color(0xff7c94b6),
+                                          color: Color.fromRGBO(124, 148, 182, 1),
                                           image: new DecorationImage(
                                             image: new NetworkImage(
                                                 Strings.baseImageUrl +
@@ -560,7 +639,7 @@ class _CommentsContentState extends State<CommentsContent>
                                                                         .comments[
                                                                             index]
                                                                         .audio,
-                                                                    "test1");
+                                                                    Strings.comments[index].commentId.toString());
                                                               },
                                                               child: Row(
                                                                 crossAxisAlignment:
@@ -581,7 +660,8 @@ class _CommentsContentState extends State<CommentsContent>
                                                                               EdgeInsets.all(10),
                                                                           child:
                                                                               Image.asset(
-                                                                            getFileExt(Strings.comments[index].audio ?? "test.mpg"),
+                                                                            getFileExt(Strings.comments[index].audio ??
+                                                                                "test.mpg"),
                                                                             width:
                                                                                 80,
                                                                             height:
@@ -605,7 +685,7 @@ class _CommentsContentState extends State<CommentsContent>
                                                                     width: 10,
                                                                   ),
                                                                   Expanded(
-                                                                    child: Text(
+                                                                    child: Text(Strings.comments[index].comment == "undefined"?"":
                                                                         Strings.comments[index].comment ??
                                                                             "",
                                                                         maxLines:
@@ -920,17 +1000,31 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() {
+  getComments() async 
+  {
     print("Getting comments");
-    _socket?.on("document-comments", (_data) {
+    _socket?.on("document-comments", (_data) 
+    {
       print('fromServer $_data');
-      msgField.unfocus();
-      setState(() {
+      setState(() 
+      {
+          print("Dta chacek--> $initialCommentCheck");
+      if(initialCommentCheck)
+      {
+        print("getting inside");
+        msgField.unfocus();
+      setState(() 
+      {
         Strings.comments = [];
-        for (var item in _data) {
-          Strings.comments.add(CommentsRes.fromJson(item));
+        for (var item in _data) 
+        {
+          setState(() {
+            Strings.comments.add(CommentsRes.fromJson(item));
+          initialCommentCheck = false;
+          });
+          
         }
-
+           // _socket?.dispose();
         _timer = new Timer(const Duration(milliseconds: 1000), () {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
@@ -942,7 +1036,9 @@ class _CommentsContentState extends State<CommentsContent>
               Strings.comments.length.toString();
         });
       });
+      }
     });
+          });
   }
 
   recordComments() async {
@@ -1053,7 +1149,7 @@ class _CommentsContentState extends State<CommentsContent>
 
     req.documentId = Strings.category == true
         ? int.parse(Strings.selectedCatDocument[0].documentId!)
-        :int.parse( Strings.selectedProDocument[0].documentId!);
+        : int.parse(Strings.selectedProDocument[0].documentId!);
     req.recipientId =
         json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
     req.recipient = json.encode(tagedUsersId);
@@ -1154,13 +1250,14 @@ class _CommentsContentState extends State<CommentsContent>
             'recipient_id': json.encode(tagedUsersId),
             'recipient': json.encode(tagedUsers),
             "category_id_list": json.encode(tagedCatsId),
-            "category_list": json.encode(tagedCats)
+            "category_list": json.encode(tagedCats),
+            "user_id": Strings.userID
           }));
-
       // print(tagedUsers);
       // print(tagedCatsId);
       // print(tagedCats);
-      setState(() {
+      setState(() 
+      {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
               Strings.selectedCatDocument[0].commentsCount! + "1";
@@ -1184,17 +1281,17 @@ class _CommentsContentState extends State<CommentsContent>
         // } else {
         //   showscroll = false;
         // }
+        initialCommentCheck = true;
+        getComments();
       });
     }
   }
 
-  String getFileExt(String? fileName) 
-  {
+  String getFileExt(String? fileName) {
     print("Filename--> $fileName");
     var file = fileName?.split(".");
     var fileExt = file?[1];
-    if (fileExt == "png" || fileExt == "PNG") 
-    {
+    if (fileExt == "png" || fileExt == "PNG") {
       return "assets/icons/png.png";
     } else if (fileExt == "jpg" ||
         fileExt == "jepg" ||

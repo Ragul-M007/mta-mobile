@@ -44,7 +44,9 @@ part 'ApiService.g.dart';
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
 
-abstract class ApiService {
+abstract class ApiService 
+{
+
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
 //////////////////////////////////////////////////////////////////////////////////////////

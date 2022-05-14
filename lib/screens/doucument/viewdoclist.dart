@@ -28,7 +28,10 @@ class ViewDocScreen extends StatelessWidget {
         child: Scaffold(
           appBar: appbar("Documents"),
           backgroundColor: Colors.grey[300],
-          body: ViewDocContent(),
+          body: WillPopScope(child: ViewDocContent(),onWillPop:(){
+          Navigator.pushNamed(context, '/categories');
+            throw 'Screen Change';
+          }),
         ));
   }
 }
@@ -40,7 +43,8 @@ class ViewDocContent extends StatefulWidget {
   _ViewDocContentState createState() => _ViewDocContentState();
 }
 
-class _ViewDocContentState extends State<ViewDocContent> {
+class _ViewDocContentState extends State<ViewDocContent> 
+{
   List<ProjectDocData> _docsList = [];
   List<FetchCategoryDoc> _categorydocsList = [];
 
@@ -167,25 +171,28 @@ class _ViewDocContentState extends State<ViewDocContent> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/adddoc');
-              },
-              child: Image.asset("assets/icons/addDoc.png",
-                  width: 120.0, height: 120.0)),
-          Text(
-            "Add Documents",
-            style: Drawables.adddoccontentstyle(
-                Colors.black, 20.0, FontWeight.w600),
-          ),
-          Text(
-            Strings.category == true
-                ? Strings.selectedProject[0].projectName! +
-                    " >> " +
-                    Strings.selectedCategory[0].categoryName!
-                : Strings.selectedProject[0].projectName!,
-            style: Drawables.adddoccontentstyle(
-                Colors.black45, 15.0, FontWeight.w400),
+          // GestureDetector(
+          //     onTap: () {
+          //       Navigator.pushNamed(context, '/adddoc');
+          //     },
+          //     child: Image.asset("assets/icons/addDoc.png",
+          //         width: 120.0, height: 120.0)),
+          // Text(
+          //   "Add Documents",
+          //   style: Drawables.adddoccontentstyle(
+          //       Colors.black, 20.0, FontWeight.w600),
+          // ),
+          Container(
+            padding: EdgeInsets.only(top: 30.0, bottom: 10.0),
+            child: Text(
+              Strings.category == true
+                  ? Strings.selectedProject[0].projectName! +
+                      " >> " +
+                      Strings.selectedCategory[0].categoryName!
+                  : Strings.selectedProject[0].projectName!,
+              style: Drawables.adddoccontentstyle(
+                  Colors.black, 25.0, FontWeight.bold,),
+            ),
           ),
           Padding(
             padding: EdgeInsets.all(15),
@@ -250,7 +257,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                         ),
                         onTap: () {
                           print("search");
-                          webcheck();
+                         // webcheck();
                         },
                       )
                     ],
@@ -962,7 +969,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
         });
         final api = Provider.of<ApiService>(context, listen: false);
         print("PRo id ${Strings.selectedProject[0].projectId!}");
-        api.fetchCats(Strings.selectedProject[0].projectId!).then((response) {
+        api.fetchCats(Strings.selectedProject[0].projectId!).then((response) 
+        {
           AppUtils.dismissprogress();
           if (response.status!) 
           {

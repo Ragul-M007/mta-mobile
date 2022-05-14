@@ -8,18 +8,16 @@ import 'package:mta/models/FetchMapedUsersRes.dart';
 
 mixin Strings 
 {
-
-
   static String testing = 'novalue';
   static bool fromNotificationComments = false;
   static String authToken = '';
+  static bool fromReplies = false;
   //static String baseImageUrl = "https://demo.emeetify.com:81/";
  // static String socketUrl = 'https://demo.emeetify.com:5012/';
   static String socketUrl = 'https://mta.multitechcorp.in:5012/';
-  //static String socketUrl = 'https://demo.emeetify.com:81/';
+ // static String socketUrl = 'https://demo.emeetify.com:81/';
   static String imageUrl = 'https://demo.emeetify.com:5016/';
   static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
-
 
   static String? profilePic;
   static int currentmenuvalue = 1;

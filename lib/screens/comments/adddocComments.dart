@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +32,7 @@ final _catsItems = cats
     .toList();
 List<FetchMapedUsersData?> selectedUsers = <FetchMapedUsersData>[];
 String selectedUser = "";
+bool fromReplies = false;
 List<CatsData> cats = Strings.categories;
 
 class AddDocComments extends StatelessWidget {
@@ -101,6 +101,12 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
   void initState() {
     super.initState();
+    if(Strings.fromReplies)
+    {
+      Strings.fromReplies = false;
+      fromReplies = true;
+    }
+    
     // getUserCats();
   }
 
@@ -167,7 +173,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 25, vertical: 15.0),
               child: Text(
-                "Description",
+                "Comments",
                 style: Drawables.adddoccontentstyle(
                     Colors.black45, 14.0, FontWeight.w400),
               ),
@@ -426,8 +432,12 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
           json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
       req.recipient = json.encode(tagedUsersId);
       req.comment = docDesc.text;
-       req.parent_comment_id =
+      if(fromReplies == true)
+      {
+         req.parent_comment_id =
         Strings.comments[Strings.selectedCommentsIndex].commentId;
+      }
+      
       print("docDesc--> ${docDesc.text}");
 
       req.userId = Strings.userID;
@@ -448,6 +458,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
           // setState(() {});
           AppUtils.showToastSuccess("Document uploaded successfully");
+           Navigator.pushNamed(context, '/comments');
         } else {
           AppUtils.showToastError(response.message!);
         }

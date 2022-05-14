@@ -157,7 +157,6 @@ class _VerifypinState extends State<Verifypin> {
             }
             else if(Strings.fromNotificationComments)
             {
-                Strings.FromNotification = false;
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => Comments()));
             }
             else

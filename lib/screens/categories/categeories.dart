@@ -23,9 +23,8 @@ class Categories extends StatelessWidget {
         body: WillPopScope(
           child: CategoriesContent(),
           onWillPop: () {
-            print("moving back");
-            Navigator.pushNamed(context, '/viewdoclist');
-            throw 'Change';
+            Navigator.pushNamed(context, '/dashboard');
+            throw 'Screen Change';
           },
         ),
       ),

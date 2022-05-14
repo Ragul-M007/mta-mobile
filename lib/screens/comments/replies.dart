@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
 import 'package:ext_storage/ext_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/CommentsRes.dart';
@@ -15,6 +17,7 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +46,7 @@ var showscroll = true;
 var typing = false;
 var showtoastinfo = false;
 var startRecording = false;
+var initialCommentCheck = true;
 
 var isPlaying = false;
 var playingIndex = null;
@@ -51,6 +55,7 @@ int audioCurrentlenth = 0;
 Timer? _timer;
 List<int> recordedData = [];
 final _audioRecorder = Record();
+String? filepath;
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -97,6 +102,7 @@ class _RepliesContentState extends State<RepliesContent>
   void initState() {
     super.initState();
     Strings.pushNotify = false;
+    initialCommentCheck = true;
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
     _animationController?.repeat(reverse: true);
@@ -124,6 +130,140 @@ class _RepliesContentState extends State<RepliesContent>
       print('Connected');
       getReplies();
     });
+  }
+
+  String getFileExt(String? fileName) {
+    print("Filename--> $fileName");
+    var file = fileName?.split(".");
+    var fileExt = file?[1];
+    if (fileExt == "png" || fileExt == "PNG") {
+      return "assets/icons/png.png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return "assets/icons/jpg.png";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return "assets/icons/pdf.png";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return "assets/icons/txt.png";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return "assets/icons/ppt.png";
+    } else if (fileExt == "mpeg" || fileExt == "mpg") {
+      return "assets/icons/mpg.png";
+    } else if (fileExt == "wav" || fileExt == "mp3") {
+      return "assets/icons/mp3.png";
+    } else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return "assets/icons/xls.png";
+    } else {
+      return "assets/icons/doc.png";
+    }
+  }
+
+  void _downloadfile(serverURL, filename) async {
+    String? path;
+    if (Platform.isAndroid) {
+      path = await ExtStorage.getExternalStoragePublicDirectory(
+          ExtStorage.DIRECTORY_DOWNLOADS);
+    } else if (Platform.isIOS) {
+      print("ios");
+      var vpath = await getApplicationDocumentsDirectory();
+      String pathStr = vpath.toString();
+      if (pathStr != null && pathStr.length >= 5) {
+        path = pathStr.substring(12, pathStr.length);
+      }
+      if (path != null && path.length >= 1) {
+        path = path.substring(0, path.length - 1);
+      }
+    }
+    AppUtils.showprogress();
+    AppUtils.showToast('Downloading');
+
+    var filenames = serverURL.split("/");
+    print("serverURL--> $serverURL");
+    //var fileName = filename;//filenames[1];
+    var extn = getFileExtension(serverURL);
+    var nospace = filename.replaceAll(' ', '');
+    var fileName = nospace + extn;
+    print("url--> $fileName");
+    String fullPath = "$path/$fileName";
+    setState(() {
+      filepath = fullPath;
+    });
+    var downloadedFile = await downloadFile(serverURL, fileName, path!);
+    print("downloaded file $downloadedFile");
+    openFile(downloadedFile);
+  }
+
+  Future<void> openFile(filePath) async {
+    await OpenFile.open(filePath);
+  }
+
+  Future<String> downloadFile(String url, String fileName, String dir) async {
+    HttpClient httpClient = new HttpClient();
+    File file;
+    String filePath = '';
+    String myUrl = '';
+
+    try {
+      myUrl = Strings.baseImageUrl + url;
+      var request = await httpClient.getUrl(Uri.parse(myUrl));
+      var response = await request.close();
+      print("printing url ---> $myUrl");
+      if (response.statusCode == 200) {
+        var bytes = await consolidateHttpClientResponseBytes(response);
+        filePath = '$dir/$fileName';
+        file = File(filePath);
+        await file.writeAsBytes(bytes);
+      } else if (response.statusCode == 404) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+        filePath = 'Error code: ' + response.statusCode.toString();
+      }
+    } catch (ex) {
+      AppUtils.dismissprogress();
+      filePath = 'Can not fetch url';
+    }
+    AppUtils.dismissprogress();
+    return filePath;
+  }
+
+  String getFileExtension(String fileName) {
+    var file = fileName.split(".");
+    var fileExt = file[1];
+    if (fileExt == "png" || fileExt == "PNG") {
+      return ".png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return ".jpg";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return ".pdf";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return ".txt";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return ".ppt";
+    } else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return ".xls";
+    } else {
+      print("File extnsion--> $fileExt");
+      return ".$fileExt";
+    }
   }
 
   @override
@@ -271,12 +411,15 @@ class _RepliesContentState extends State<RepliesContent>
                                                       Colors.black45,
                                                       14.0,
                                                       FontWeight.w400))
-                                          : Text("Audio Message",
-                                              style:
-                                                  Drawables.adddoccontentstyle(
-                                                      Colors.black45,
-                                                      14.0,
-                                                      FontWeight.w400)),
+                                          : Image.asset(
+                                              getFileExt(
+                                                Strings
+                                                    .comments[Strings
+                                                        .selectedCommentsIndex]
+                                                    .audio,
+                                              ),
+                                              width: 30,
+                                              height: 30),
                                       SizedBox(
                                         height: 10,
                                       ),
@@ -480,63 +623,17 @@ class _RepliesContentState extends State<RepliesContent>
                                                                   14.0,
                                                                   FontWeight
                                                                       .w400))
-                                                      : Row(
-                                                          children: [
-                                                            isPlaying == false
-                                                                ? GestureDetector(
-                                                                    onTap: () {
-                                                                      setState(
-                                                                          () {
-                                                                        if (isPlaying ==
-                                                                            true) {
-                                                                          stopAudio();
-                                                                          _timer = new Timer(
-                                                                              const Duration(milliseconds: 500),
-                                                                              () {
-                                                                            setState(() {
-                                                                              isPlaying = true;
-                                                                              playingIndex = index;
-                                                                              playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
-                                                                            });
-                                                                          });
-                                                                        } else {
-                                                                          isPlaying =
-                                                                              true;
-                                                                          playingIndex =
-                                                                              index;
-                                                                          playAudio(Strings
-                                                                              .comments[Strings.selectedCommentsIndex]
-                                                                              .replies![index]
-                                                                              .audio);
-                                                                        }
-                                                                      });
-                                                                    },
-                                                                    child: new Icon(
-                                                                        Icons
-                                                                            .play_arrow,
-                                                                        size:
-                                                                            28.0),
-                                                                  )
-                                                                : playingIndex ==
-                                                                        index
+                                                      : (Strings
+                                                              .comments[Strings
+                                                                  .selectedCommentsIndex]
+                                                              .replies![index]
+                                                              .audio!
+                                                              .contains(".wav"))
+                                                          ? Row(
+                                                              children: [
+                                                                isPlaying ==
+                                                                        false
                                                                     ? GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          setState(
-                                                                              () {
-                                                                            isPlaying =
-                                                                                false;
-                                                                          });
-
-                                                                          stopAudio();
-                                                                        },
-                                                                        child: new Icon(
-                                                                            Icons
-                                                                                .stop,
-                                                                            size:
-                                                                                28.0),
-                                                                      )
-                                                                    : GestureDetector(
                                                                         onTap:
                                                                             () {
                                                                           setState(
@@ -563,37 +660,149 @@ class _RepliesContentState extends State<RepliesContent>
                                                                                 .play_arrow,
                                                                             size:
                                                                                 28.0),
-                                                                      ),
-                                                            SizedBox(
-                                                              width: 10,
-                                                            ),
-                                                            Slider(
-                                                              value: playingIndex ==
-                                                                      index
-                                                                  ? audioCurrentlenth
-                                                                      .toDouble()
-                                                                  : 0,
-                                                              min: 0,
-                                                              max: playingIndex ==
-                                                                      index
-                                                                  ? audioLength
-                                                                      .toDouble()
-                                                                  : 0,
-                                                              onChanged: (double
-                                                                  value) {
-                                                                setState(() {
-                                                                  playingIndex ==
+                                                                      )
+                                                                    : playingIndex ==
+                                                                            index
+                                                                        ? GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              setState(() {
+                                                                                isPlaying = false;
+                                                                              });
+
+                                                                              stopAudio();
+                                                                            },
+                                                                            child:
+                                                                                new Icon(Icons.stop, size: 28.0),
+                                                                          )
+                                                                        : GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              setState(() {
+                                                                                if (isPlaying == true) {
+                                                                                  stopAudio();
+                                                                                  _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                    setState(() {
+                                                                                      isPlaying = true;
+                                                                                      playingIndex = index;
+                                                                                      playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
+                                                                                    });
+                                                                                  });
+                                                                                } else {
+                                                                                  isPlaying = true;
+                                                                                  playingIndex = index;
+                                                                                  playAudio(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio);
+                                                                                }
+                                                                              });
+                                                                            },
+                                                                            child:
+                                                                                new Icon(Icons.play_arrow, size: 28.0),
+                                                                          ),
+                                                                SizedBox(
+                                                                  width: 10,
+                                                                ),
+                                                                Slider(
+                                                                  value: playingIndex ==
                                                                           index
-                                                                      ? audioCurrentlenth =
-                                                                          value
-                                                                              .toInt()
-                                                                      : 0;
-                                                                  // _currentSliderValue = value;
-                                                                });
+                                                                      ? audioCurrentlenth
+                                                                          .toDouble()
+                                                                      : 0,
+                                                                  min: 0,
+                                                                  max: playingIndex ==
+                                                                          index
+                                                                      ? audioLength
+                                                                          .toDouble()
+                                                                      : 0,
+                                                                  onChanged:
+                                                                      (double
+                                                                          value) {
+                                                                    setState(
+                                                                        () {
+                                                                      playingIndex ==
+                                                                              index
+                                                                          ? audioCurrentlenth =
+                                                                              value.toInt()
+                                                                          : 0;
+                                                                      // _currentSliderValue = value;
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            )
+                                                          : InkWell(
+                                                              onTap: () {
+                                                                _downloadfile(
+                                                                    Strings
+                                                                        .comments[Strings
+                                                                            .selectedCommentsIndex]
+                                                                        .replies![
+                                                                            index]
+                                                                        .audio,
+                                                                    Strings
+                                                                        .comments[Strings
+                                                                            .selectedCommentsIndex]
+                                                                        .replies![
+                                                                            index]
+                                                                        .commentId
+                                                                        .toString());
                                                               },
+                                                              child: Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Stack(
+                                                                      children: [
+                                                                        Container(
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                Colors.grey.withOpacity(0.1),
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(10),
+                                                                          ),
+                                                                          padding:
+                                                                              EdgeInsets.all(10),
+                                                                          child:
+                                                                              Image.asset(
+                                                                            getFileExt(Strings.comments[Strings.selectedCommentsIndex].replies![index].audio ??
+                                                                                "test.mpg"),
+                                                                            width:
+                                                                                80,
+                                                                            height:
+                                                                                80,
+                                                                          ),
+                                                                        ),
+                                                                        Positioned(
+                                                                          top:
+                                                                              20,
+                                                                          left:
+                                                                              40,
+                                                                          child: Container(
+                                                                              child: Icon(
+                                                                            Icons.download_rounded,
+                                                                            size:
+                                                                                20.0,
+                                                                          )),
+                                                                        ),
+                                                                      ]),
+                                                                  SizedBox(
+                                                                    width: 10,
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                        Strings.comments[Strings.selectedCommentsIndex].replies![index].comment ??
+                                                                            "",
+                                                                        maxLines:
+                                                                            20,
+                                                                        style: Drawables.adddoccontentstyle(
+                                                                            Colors.black45,
+                                                                            14.0,
+                                                                            FontWeight.w400)),
+                                                                  )
+                                                                ],
+                                                              ),
                                                             ),
-                                                          ],
-                                                        ),
                                                   // Text(
                                                   //     Strings
                                                   //         .comments[Strings
@@ -777,6 +986,8 @@ class _RepliesContentState extends State<RepliesContent>
                       children: [
                         InkWell(
                             onTap: () {
+                              _socket?.disconnect();
+                              Strings.fromReplies = true;
                               Navigator.pushNamed(context, '/adddocComments');
                             },
                             child: Icon(Icons.attach_file)),
@@ -784,7 +995,7 @@ class _RepliesContentState extends State<RepliesContent>
                           width: MediaQuery.of(context).size.width * 0.02,
                         ),
                         Container(
-                          width:MediaQuery.of(context).size.width * 0.6,
+                          width: MediaQuery.of(context).size.width * 0.6,
                           child: TextField(
                             controller: _msgcontroller,
                             onChanged: (value) {
@@ -888,20 +1099,27 @@ class _RepliesContentState extends State<RepliesContent>
     _socket?.on("document-comments", (_data) {
       print('fromServer $_data');
       msgField.unfocus();
-      setState(() {
-        Strings.comments = [];
-        for (var item in _data) {
-          Strings.comments.add(CommentsRes.fromJson(item));
-        }
-        _timer = new Timer(const Duration(milliseconds: 1000), () {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            curve: Curves.fastOutSlowIn,
-            duration: const Duration(seconds: 1),
-          );
-          msgField.unfocus();
+
+      if (initialCommentCheck) 
+      {
+        print("check");
+        setState(() {
+          Strings.comments = [];
+          for (var item in _data) {
+            Strings.comments.add(CommentsRes.fromJson(item));
+          }
+          _timer = new Timer(const Duration(milliseconds: 1000), () 
+          {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              curve: Curves.fastOutSlowIn,
+              duration: const Duration(seconds: 1),
+            );
+            msgField.unfocus();
+          });
+          initialCommentCheck = false; 
         });
-      });
+      }
     });
   }
 
@@ -1011,8 +1229,7 @@ class _RepliesContentState extends State<RepliesContent>
         //       'parent_comment_id':
         //           Strings.comments[Strings.selectedCommentsIndex].commentId
         //     }));
-        setState(() 
-        {
+        setState(() {
           _socket?.disconnect();
           _socket?.connect();
           _socket?.on("connect", (_) {
@@ -1079,12 +1296,12 @@ class _RepliesContentState extends State<RepliesContent>
       // print(tagedUsers);
       // print(tagedCatsId);
       // print(tagedCats);
-      setState(() {
+      setState(() 
+      {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
               Strings.selectedCatDocument[0].commentsCount! + "1";
-        } else {
-          Strings.selectedProDocument[0].commentsCount =
+        } else {          Strings.selectedProDocument[0].commentsCount =
               Strings.selectedProDocument[0].commentsCount! + "1";
         }
         tagedUsers = [];
@@ -1100,6 +1317,8 @@ class _RepliesContentState extends State<RepliesContent>
           duration: const Duration(seconds: 1),
         );
         msgField.unfocus();
+        initialCommentCheck = true;
+        getReplies();
         // } else {
         //   showscroll = false;
         // }
