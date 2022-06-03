@@ -995,7 +995,7 @@ class _AttendanceContentState extends State<AttendanceContent>
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       Strings.isLogin = false;
-      Navigator.popAndPushNamed(context, "/verifypin");
+      Navigator.popAndPushNamed(context, "/login");
       // Navigator.popAndPushNamed(context, routename);
     } else {
       Navigator.pushNamed(context, routename!);

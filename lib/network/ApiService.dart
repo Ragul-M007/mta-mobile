@@ -43,6 +43,8 @@ part 'ApiService.g.dart';
  // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+   // @RestApi(baseUrl: "http://192.168.1.132:5777/mta")
+
 
 abstract class ApiService 
 {
@@ -68,8 +70,8 @@ abstract class ApiService
   @GET("/newsfeed")
   Future<NewsRes> news();
 
-  @GET("/users/profile")
-  Future<ProfileRes> profile();
+  @GET("/users/profile/{user_id}")
+  Future<ProfileRes> profile(@Path("user_id") int user_id);
 
   @GET(
       "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
@@ -114,6 +116,10 @@ abstract class ApiService
   @PUT("/users/{user_id}")
   Future<ChangePassRes> editProfile(
       @Path("user_id") int id, @Body() EditProfileReq body);
+
+  @DELETE("/users/removeImage/{user_id}")
+  Future<ChangePassRes> removeProPic(
+      @Path("user_id") int id);
 
   @POST("/utils/getAudioUrl")
   Future<AudioRes> uploadAudio(@Body() AudioReq body);

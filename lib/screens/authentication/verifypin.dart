@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -104,6 +105,11 @@ class _VerifypinState extends State<Verifypin> {
         // print(loginreq.email);
         // print(loginreq.loginpin);
         //Navigator.pushNamed(ctx, "/dashboard");
+
+        var dat = jsonEncode(loginreq);
+
+        print(dat);
+        
         api.login(loginreq).then((response) {
           AppUtils.dismissprogress();
           print('verifyPinResponse status ${response.toJson()}');

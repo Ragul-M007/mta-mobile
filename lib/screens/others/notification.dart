@@ -332,7 +332,7 @@ class _NotificationContentState extends State<NotificationContent>
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       //Navigator.popAndPushNamed(context, routename);
-      Navigator.popAndPushNamed(context, "/verifypin");
+      Navigator.popAndPushNamed(context, "/login");
     } else {
       Navigator.pushNamed(context, routename!);
     }

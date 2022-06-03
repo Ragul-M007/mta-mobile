@@ -167,15 +167,18 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     ));
   }
 
-  menuRedirect({@required String? routename, int? currentmenu}) {
+  menuRedirect({@required String? routename, int? currentmenu}) 
+  {
     setState(() {
       Strings.currentmenuvalue = currentmenu!;
     });
-    if (routename == "/login") {
+    if (routename == "/login") 
+    {
       //AppUtils.clearAllPreferences();
       // Navigator.popAndPushNamed(context, routename);
-      Navigator.popAndPushNamed(context, "/verifypin");
-    } else {
+      Navigator.popAndPushNamed(context, "/login");
+    } else 
+    {
       Navigator.pushNamed(context, routename!);
     }
   }

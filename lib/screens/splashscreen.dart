@@ -119,9 +119,12 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) 
     {
-      setState(() {
+      setState(() 
+      {
 
         print("message recieved inside get");
+        print("data received ---  ${message.data}");
+        print(message.data);
         print(jsonEncode(message.data));
         ProjectDocData peo = ProjectDocData.fromJson(message.data);
       var check =  jsonEncode(peo);

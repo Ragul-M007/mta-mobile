@@ -157,7 +157,7 @@ class _ContactusState extends State<Contactus>
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
-      Navigator.popAndPushNamed(context, "/verifypin");
+      Navigator.popAndPushNamed(context, "/login");
       //Navigator.popAndPushNamed(context, routename);
     } else {
       //Navigator.pop(context);

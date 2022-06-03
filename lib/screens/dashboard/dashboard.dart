@@ -293,10 +293,32 @@ class _DashboardState extends State<Dashboard>
                                   Strings.baseImageUrl + Strings.profilePic!,
                                   Strings.username);
                             },
-                            child: image(
-                                Strings.baseImageUrl + Strings.profilePic!,
-                                40.0,
-                                40.0),
+                            child: CircleAvatar(
+                              backgroundImage: (
+                                  Strings.profilePic !=
+                                      "")
+                              ? NetworkImage(Strings.baseImageUrl +
+                                  (Strings.profilePic ??
+                                      ""))
+                              :  AssetImage("assets/icons/account.png",)
+                                      as ImageProvider,
+                          backgroundColor: Colors.grey.withOpacity(0.3),
+                            )
+                            // Strings.profilePic == null
+                            //     ? Image.asset(
+                            //         "assets/images/user.png",
+                            //         height: 40,
+                            //         width: 40,
+                            //       )
+                            //     : Image.network(
+                            //         Strings.baseImageUrl + Strings.profilePic!,
+                            //         height: 40,
+                            //         width: 40,
+                            //       ),
+                            // image.(
+                            //     Strings.baseImageUrl + Strings.profilePic!,
+                            //     40.0,
+                            //     40.0),
                           ))
                     ],
                     bottom: PreferredSize(
@@ -711,7 +733,7 @@ class _DashboardState extends State<Dashboard>
       //AppUtils.clearAllPreferences();
       //Navigator.pop(context);
       Strings.isLogin = false;
-      Navigator.popAndPushNamed(context, "/verifypin");
+      Navigator.popAndPushNamed(context, "/login");
     } else {
       //Navigator.pop(context);
       Navigator.pushNamed(context, routename!);
@@ -864,7 +886,7 @@ class _DashboardState extends State<Dashboard>
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.75,
-                  height: MediaQuery.of(context).size.height * 0.75,
+                 // height: MediaQuery.of(context).size.height * 0.75,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -872,31 +894,43 @@ class _DashboardState extends State<Dashboard>
                       SizedBox(
                         height: 20,
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                      Center(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0061b0),
+                              fontWeight: FontWeight.w600),
+                        ),
                       ),
                       SizedBox(
                         height: 20,
                       ),
+                      Center(
+                        child: CircleAvatar(
+                          radius: 100,
+                                backgroundImage: (
+                                    Strings.profilePic !=
+                                        "")
+                                ? NetworkImage(Strings.baseImageUrl +
+                                    (Strings.profilePic ??
+                                        ""))
+                                :  AssetImage("assets/icons/account.png")
+                                        as ImageProvider,
+                            backgroundColor: Colors.grey.withOpacity(0.3),
+                              ),
+                      )
                     ],
                   ),
-                  decoration: new BoxDecoration(
-                    color: Colors.transparent,
-                    image: new DecorationImage(
-                      image: new NetworkImage(imgurl),
-                      fit: BoxFit.contain,
-                    ),
-                    borderRadius:
-                        new BorderRadius.all(new Radius.circular(10.0)),
-                  ),
+                  // decoration: new BoxDecoration(
+                  //   color: Colors.transparent,
+                  //   image: new DecorationImage(
+                  //     image: new NetworkImage(imgurl),
+                  //     fit: BoxFit.contain,
+                  //   ),
+                  //   borderRadius:
+                  //       new BorderRadius.all(new Radius.circular(10.0)),
+                  // ),
                 )),
           ),
         );

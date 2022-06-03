@@ -6,7 +6,8 @@ part of 'ApiService.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-class _ApiService implements ApiService {
+class _ApiService implements ApiService 
+{
   _ApiService(this._dio, {this.baseUrl}) {
     baseUrl ??= 'https://mta.multitechcorp.in/mta';
   }
@@ -99,7 +100,7 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<ProfileRes> profile() async {
+  Future<ProfileRes> profile(user_id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -107,7 +108,7 @@ class _ApiService implements ApiService {
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<ProfileRes>(
             Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/profile',
+                .compose(_dio.options, '/users/profile/${user_id}',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = ProfileRes.fromJson(_result.data!);
@@ -325,6 +326,22 @@ class _ApiService implements ApiService {
         _setStreamType<ChangePassRes>(
             Options(method: 'PUT', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/users/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = ChangePassRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> removeProPic(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<ChangePassRes>(
+            Options(method: 'DELETE', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/users/removeImage/${id}',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = ChangePassRes.fromJson(_result.data!);

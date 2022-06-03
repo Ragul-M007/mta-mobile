@@ -842,7 +842,7 @@ class _RepliesContentState extends State<RepliesContent>
                               ],
                             ));
                       }))
-              : SizedBox(),
+              : Spacer(),
           Container(
             padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
             decoration: BoxDecoration(
@@ -1096,18 +1096,22 @@ class _RepliesContentState extends State<RepliesContent>
   }
 
   getReplies() {
-    _socket?.on("document-comments", (_data) {
+    print("Getting replied");
+    _socket?.on("document-comments", (_data) 
+    {
       print('fromServer $_data');
       msgField.unfocus();
-
       if (initialCommentCheck) 
       {
-        print("check");
+        print("validation passed");
         setState(() {
           Strings.comments = [];
           for (var item in _data) {
             Strings.comments.add(CommentsRes.fromJson(item));
           }
+          setState(() {
+            initialCommentCheck = false;
+          });
           _timer = new Timer(const Duration(milliseconds: 1000), () 
           {
             _scrollController.animateTo(
@@ -1117,7 +1121,6 @@ class _RepliesContentState extends State<RepliesContent>
             );
             msgField.unfocus();
           });
-          initialCommentCheck = false; 
         });
       }
     });
@@ -1270,7 +1273,9 @@ class _RepliesContentState extends State<RepliesContent>
     });
   }
 
-  postReplies() {
+  postReplies() 
+  {
+    print("Posting replies");
     // print(json.encode(tagedUsersId.toString()));
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
@@ -1311,12 +1316,13 @@ class _RepliesContentState extends State<RepliesContent>
         _msgcontroller.text = '';
         typing = false;
         // if (showscroll != true) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          curve: Curves.fastOutSlowIn,
-          duration: const Duration(seconds: 1),
-        );
+        // _scrollController.animateTo(
+        //   _scrollController.position.maxScrollExtent,
+        //   curve: Curves.fastOutSlowIn,
+        //   duration: const Duration(seconds: 1),
+        // );
         msgField.unfocus();
+        print("Changing variable status");
         initialCommentCheck = true;
         getReplies();
         // } else {

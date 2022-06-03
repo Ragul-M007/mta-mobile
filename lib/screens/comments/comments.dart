@@ -62,8 +62,7 @@ String file64 = '';
 String? fileExt;
 IO.Socket? _socket;
 
-class Comments extends StatefulWidget 
-{
+class Comments extends StatefulWidget {
   static const String routeName = "/comments";
 
   const Comments({Key? key}) : super(key: key);
@@ -82,16 +81,13 @@ class _CommentsState extends State<Comments> {
           backgroundColor: Colors.grey[300],
           body: WillPopScope(
               child: CommentsContent(),
-              onWillPop: () 
-              {
+              onWillPop: () {
                 initialCommentCheck = true;
-                 _socket?.disconnect();
-                if (Strings.fromNotificationComments == true) 
-                {
+                _socket?.disconnect();
+                if (Strings.fromNotificationComments == true) {
                   Strings.fromNotificationComments = false;
                   Navigator.pushNamed(context, '/dashboard');
-                } else 
-                {
+                } else {
                   Navigator.pushNamed(context, '/viewdoclist');
                 }
                 throw 'Screen Change';
@@ -131,8 +127,7 @@ class _CommentsContentState extends State<CommentsContent>
         vsync: this, duration: Duration(milliseconds: 500));
     _animationController?.repeat(reverse: true);
 
-    setState(() 
-    {
+    setState(() {
       tagedUsers = [];
       tagedUsersId = [];
       tagedCats = [];
@@ -148,16 +143,19 @@ class _CommentsContentState extends State<CommentsContent>
     _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
-      'query': {'token': Strings.authToken, "document_id": _currDoc.documentId,
-      'forceNew': false,}
+      'query': {
+        'token': Strings.authToken,
+        "document_id": _currDoc.documentId,
+        'forceNew': false,
+      }
     });
     _socket?.connect();
     AppUtils.showprogress();
-    _socket?.on("connect", (_)  {
+    _socket?.on("connect", (_) {
       print('Connected');
-        print("Calling function");
-        getComments();
-     //_socket?.disconnect();
+      print("Calling function");
+      getComments();
+      //_socket?.disconnect();
     });
     // _socket.on("create-document-comment", (data) {
     //   print("messages" + data);
@@ -169,8 +167,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  void dispose() 
-  {
+  void dispose() {
     _animationController?.dispose();
 
     _socket?.disconnect();
@@ -207,14 +204,12 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  getuserCatgories() 
-  {
+  getuserCatgories() {
     final api = Provider.of<ApiService>(context, listen: false);
     int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
     api.fetchCats(projectid).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) 
-      {
+      if (response.status!) {
         setState(() {
           Strings.categories = response.data!;
           cats = response.data!;
@@ -271,8 +266,7 @@ class _CommentsContentState extends State<CommentsContent>
     await OpenFile.open(filePath);
   }
 
-  Future<String> downloadFile(String url, String fileName, String dir) async 
-  {
+  Future<String> downloadFile(String url, String fileName, String dir) async {
     HttpClient httpClient = new HttpClient();
     File file;
     String filePath = '';
@@ -347,8 +341,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -435,7 +428,8 @@ class _CommentsContentState extends State<CommentsContent>
                                         width: 30.0,
                                         height: 30.0,
                                         decoration: new BoxDecoration(
-                                          color: Color.fromRGBO(124, 148, 182, 1),
+                                          color:
+                                              Color.fromRGBO(124, 148, 182, 1),
                                           image: new DecorationImage(
                                             image: new NetworkImage(
                                                 Strings.baseImageUrl +
@@ -639,7 +633,11 @@ class _CommentsContentState extends State<CommentsContent>
                                                                         .comments[
                                                                             index]
                                                                         .audio,
-                                                                    Strings.comments[index].commentId.toString());
+                                                                    Strings
+                                                                        .comments[
+                                                                            index]
+                                                                        .commentId
+                                                                        .toString());
                                                               },
                                                               child: Row(
                                                                 crossAxisAlignment:
@@ -685,9 +683,12 @@ class _CommentsContentState extends State<CommentsContent>
                                                                     width: 10,
                                                                   ),
                                                                   Expanded(
-                                                                    child: Text(Strings.comments[index].comment == "undefined"?"":
-                                                                        Strings.comments[index].comment ??
-                                                                            "",
+                                                                    child: Text(
+                                                                        Strings.comments[index].comment ==
+                                                                                "undefined"
+                                                                            ? ""
+                                                                            : Strings.comments[index].comment ??
+                                                                                "",
                                                                         maxLines:
                                                                             20,
                                                                         style: Drawables.adddoccontentstyle(
@@ -745,109 +746,112 @@ class _CommentsContentState extends State<CommentsContent>
                               ],
                             ));
                       }))
-              : SizedBox(),
-          Container(
-            padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              color: const Color(0xFFffffff),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  flex: 10,
-                  child: MultiSelectDialogField<FetchMapedUsersData?>(
-                    items: _userIitems,
-                    title: Text("Tag Users"),
-                    selectedColor: Color(0xFF0061b0),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0061b0).withOpacity(0.1),
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
-                      border: Border.all(
+              : Spacer(),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFFffffff),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    flex: 10,
+                    child: MultiSelectDialogField<FetchMapedUsersData?>(
+                      items: _userIitems,
+                      title: Text("Tag Users"),
+                      selectedColor: Color(0xFF0061b0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0061b0).withOpacity(0.1),
+                        borderRadius: BorderRadius.all(Radius.circular(40)),
+                        border: Border.all(
+                          color: Color(0xFF0061b0),
+                          width: 2,
+                        ),
+                      ),
+                      buttonIcon: Icon(
+                        Icons.person,
                         color: Color(0xFF0061b0),
-                        width: 2,
                       ),
-                    ),
-                    buttonIcon: Icon(
-                      Icons.person,
-                      color: Color(0xFF0061b0),
-                    ),
-                    buttonText: Text(
-                      "Tag Users",
-                      style: TextStyle(
-                        color: Color(0xFF0061b0).withOpacity(0.5),
-                        fontSize: 16,
+                      buttonText: Text(
+                        "Tag Users",
+                        style: TextStyle(
+                          color: Color(0xFF0061b0).withOpacity(0.5),
+                          fontSize: 16,
+                        ),
                       ),
+                      onConfirm: (results) {
+                        if (results.length > 0) {
+                          tagedUsers = [];
+                          tagedUsersId = [];
+                          results.forEach((element) {
+                            tagedUsers.add(element?.name);
+                            tagedUsersId.add(element?.userId);
+                          });
+                        } else {
+                          tagedUsers = [];
+                          tagedUsersId = [];
+                        }
+                      },
                     ),
-                    onConfirm: (results) {
-                      if (results.length > 0) {
-                        tagedUsers = [];
-                        tagedUsersId = [];
-                        results.forEach((element) {
-                          tagedUsers.add(element?.name);
-                          tagedUsersId.add(element?.userId);
-                        });
-                      } else {
-                        tagedUsers = [];
-                        tagedUsersId = [];
-                      }
-                    },
                   ),
-                ),
-                Expanded(
-                  flex: 10,
-                  child: MultiSelectDialogField<CatsData?>(
-                    items: _catsItems,
-                    title: Text("Tag Categories"),
-                    selectedColor: Color(0xFF0061b0),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0061b0).withOpacity(0.1),
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
-                      border: Border.all(
+                  Expanded(
+                    flex: 10,
+                    child: MultiSelectDialogField<CatsData?>(
+                      items: _catsItems,
+                      title: Text("Tag Categories"),
+                      selectedColor: Color(0xFF0061b0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0061b0).withOpacity(0.1),
+                        borderRadius: BorderRadius.all(Radius.circular(40)),
+                        border: Border.all(
+                          color: Color(0xFF0061b0),
+                          width: 2,
+                        ),
+                      ),
+                      buttonIcon: Icon(
+                        Icons.category,
                         color: Color(0xFF0061b0),
-                        width: 2,
                       ),
-                    ),
-                    buttonIcon: Icon(
-                      Icons.category,
-                      color: Color(0xFF0061b0),
-                    ),
-                    buttonText: Text(
-                      "Tag Categories",
-                      style: TextStyle(
-                        color: Color(0xFF0061b0).withOpacity(0.5),
-                        fontSize: 16,
+                      buttonText: Text(
+                        "Tag Categories",
+                        style: TextStyle(
+                          color: Color(0xFF0061b0).withOpacity(0.5),
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                    onConfirm: (results) {
-                      if (results.length > 0) {
-                        tagedCats = [];
-                        tagedCatsId = [];
-                        results.forEach((element) {
-                          tagedCats.add(element?.categoryName);
-                          tagedCatsId.add(element?.categoryId);
+                      onConfirm: (results) {
+                        if (results.length > 0) {
+                          tagedCats = [];
+                          tagedCatsId = [];
+                          results.forEach((element) {
+                            tagedCats.add(element?.categoryName);
+                            tagedCatsId.add(element?.categoryId);
 
-                          print("Added data");
-                          // tagedCats = tagedCats + "," + element.categoryName;
-                          // tagedCatsId = tagedCatsId.toString() +
-                          //     "," +
-                          //     element.categoryId.toString();
-                        });
-                        results = [];
-                      } else {
-                        tagedCats = [];
-                        tagedCatsId = [];
-                      }
-                      //_selectedAnimals = results;
-                    },
-                  ),
-                )
-              ],
+                            print("Added data");
+                            // tagedCats = tagedCats + "," + element.categoryName;
+                            // tagedCatsId = tagedCatsId.toString() +
+                            //     "," +
+                            //     element.categoryId.toString();
+                          });
+                          results = [];
+                        } else {
+                          tagedCats = [];
+                          tagedCatsId = [];
+                        }
+                        //_selectedAnimals = results;
+                      },
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 10),
+          // SizedBox(height: 10),
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -1005,40 +1009,44 @@ class _CommentsContentState extends State<CommentsContent>
     print("Getting comments");
     _socket?.on("document-comments", (_data) 
     {
-      print('fromServer $_data');
-      setState(() 
+      //print('fromServer $_data');
+
+      print('fromServer');
+
+      if (initialCommentCheck) 
       {
-          print("Dta chacek--> $initialCommentCheck");
-      if(initialCommentCheck)
-      {
-        print("getting inside");
-        msgField.unfocus();
-      setState(() 
-      {
-        Strings.comments = [];
-        for (var item in _data) 
+        setState(() 
         {
-          setState(() {
-            Strings.comments.add(CommentsRes.fromJson(item));
-          initialCommentCheck = false;
-          });
-          
-        }
-           // _socket?.dispose();
-        _timer = new Timer(const Duration(milliseconds: 1000), () {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            curve: Curves.fastOutSlowIn,
-            duration: const Duration(seconds: 1),
-          );
+          print("Dta chacek--> $initialCommentCheck");
+          print("getting inside");
           msgField.unfocus();
-          Strings.selectedProDocument[0].commentsCount =
-              Strings.comments.length.toString();
-        });
-      });
-      }
-    });
+            Strings.comments = [];
+            for (var item in _data) {
+                Strings.comments.add(CommentsRes.fromJson(item));
+                print("set state");
+            }
+            setState(() {
+              initialCommentCheck = false;
+            print("Comments fetched changing to false");
+            // _socket?.dispose();
+            _timer = new Timer(const Duration(milliseconds: 1000), () 
+            {
+              _scrollController.animateTo(
+                _scrollController.position.maxScrollExtent,
+                curve: Curves.fastOutSlowIn,
+                duration: const Duration(seconds: 1),
+              );
+              msgField.unfocus();
+              Strings.selectedProDocument[0].commentsCount =
+                  Strings.comments.length.toString();
+            });
           });
+        });
+      }
+      setState(() {
+          print(initialCommentCheck);
+      });
+    }); 
   }
 
   recordComments() async {
@@ -1256,8 +1264,7 @@ class _CommentsContentState extends State<CommentsContent>
       // print(tagedUsers);
       // print(tagedCatsId);
       // print(tagedCats);
-      setState(() 
-      {
+      setState(() {
         if (Strings.category == true) {
           Strings.selectedCatDocument[0].commentsCount =
               Strings.selectedCatDocument[0].commentsCount! + "1";
@@ -1308,7 +1315,10 @@ class _CommentsContentState extends State<CommentsContent>
       return "assets/icons/ppt.png";
     } else if (fileExt == "mpeg" || fileExt == "mpg") {
       return "assets/icons/mpg.png";
-    } else if (fileExt == "wav" || fileExt == "mp3") {
+    } else if (fileExt == "mp4") {
+      return "assets/icons/mpg.png";
+    }
+     else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
     } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
