@@ -13,6 +13,7 @@ import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/others/notification.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -84,10 +85,18 @@ class _CommentsState extends State<Comments> {
               onWillPop: () {
                 initialCommentCheck = true;
                 _socket?.disconnect();
+                _socket?.dispose();
                 if (Strings.fromNotificationComments == true) {
                   Strings.fromNotificationComments = false;
                   Navigator.pushNamed(context, '/dashboard');
-                } else {
+                } else if (Strings.fromNotificationScren)
+                {
+                  Strings.fromNotificationScren = false;
+                                Navigator.of(context).pushReplacementNamed('/notification');
+
+                }
+                
+                 else {
                   Navigator.pushNamed(context, '/viewdoclist');
                 }
                 throw 'Screen Change';
@@ -112,12 +121,20 @@ class _CommentsContentState extends State<CommentsContent>
   String? filepath;
 
   var _key;
+
+  String? projectname;
   @override
   void initState() {
     super.initState();
+    if(Strings.fromNotificationComments)
+    {
+      updateNotification(Strings.notificationID);
+    }
     getUserCats();
     getuserCatgories();
+    getProjectDetails();
 
+    
     print("initial value check-->> $initialCommentCheck");
     initialCommentCheck = true;
 
@@ -171,6 +188,7 @@ class _CommentsContentState extends State<CommentsContent>
     _animationController?.dispose();
 
     _socket?.disconnect();
+    _socket?.dispose();
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -203,7 +221,25 @@ class _CommentsContentState extends State<CommentsContent>
       print(onError.toString());
     });
   }
-
+ getProjectDetails() 
+ {
+   print("project details called");
+    final api = Provider.of<ApiService>(context, listen: false);
+    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
+    api.getProjectName(projectid).then((response) {
+      if (response.status!) {
+        setState(() {
+          print("project name ---> {response.data![0].projectName}");
+        projectname = response.data![0].projectName ?? "";
+        });
+      } else {
+        print('No categories');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print("Catched $onError");
+    });
+  }
   getuserCatgories() {
     final api = Provider.of<ApiService>(context, listen: false);
     int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
@@ -397,6 +433,15 @@ class _CommentsContentState extends State<CommentsContent>
                 )
               ],
             ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 10, top: 5,bottom: 5),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Project: ${projectname ?? ""}",
+                  style: TextStyle(
+                      color: Colors.grey, fontWeight: FontWeight.w600)),
+            )
           ),
           Divider(),
           Strings.comments.length > 0
@@ -1009,12 +1054,12 @@ class _CommentsContentState extends State<CommentsContent>
     print("Getting comments");
     _socket?.on("document-comments", (_data) 
     {
-      //print('fromServer $_data');
 
       print('fromServer');
 
       if (initialCommentCheck) 
       {
+        log('fromServer comments $_data');
         setState(() 
         {
           print("Dta chacek--> $initialCommentCheck");
@@ -1292,6 +1337,21 @@ class _CommentsContentState extends State<CommentsContent>
         getComments();
       });
     }
+  }
+  updateNotification(notificationId) {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateNotificationStatus(notificationId).then((response) {
+      if (response.status!) {
+       // AppUtils.showToastError("Unable to update status");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
+    });
   }
 
   String getFileExt(String? fileName) {

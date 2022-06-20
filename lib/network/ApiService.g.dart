@@ -6,10 +6,9 @@ part of 'ApiService.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-class _ApiService implements ApiService 
-{
+class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    baseUrl ??= 'https://demo.emeetify.com:81/mta';
   }
 
   final Dio _dio;
@@ -249,6 +248,22 @@ class _ApiService implements ApiService
   }
 
   @override
+  Future<ProjectDetailsRes> getProjectName(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<ProjectDetailsRes>(
+            Options(method: 'GET', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/projects/getProject/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = ProjectDetailsRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<NotificationRes> notification() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -326,6 +341,22 @@ class _ApiService implements ApiService
         _setStreamType<ChangePassRes>(
             Options(method: 'PUT', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/users/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = ChangePassRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> updateNotificationStatus(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<ChangePassRes>(
+            Options(method: 'PUT', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/utils/updateNotification/${id}',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = ChangePassRes.fromJson(_result.data!);

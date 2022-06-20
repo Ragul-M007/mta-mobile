@@ -31,6 +31,7 @@ class FectchProjectDocRes {
 }
 
 class ProjectDocData {
+  String? notiId;
   String? projectId;
   String? documentId;
   String? fileName;
@@ -40,10 +41,13 @@ class ProjectDocData {
   String? createdAt;
   String? description;
   String? commentsCount;
+  String? commentId;
 
   ProjectDocData(
     
       {
+        this.notiId,
+        this.commentId,
       this.projectId,
       this.documentId,
       this.fileName,
@@ -54,11 +58,13 @@ class ProjectDocData {
       this.description,
       this.commentsCount});
 
-  ProjectDocData.fromJson(Map<String, dynamic>? json) 
+  ProjectDocData.fromJson(Map<String, dynamic> json) 
   {
-    documentId = json!['document_id'].toString();
+    commentId = json["parent_comment_id"];
+    documentId = json['document_id'].toString();
     projectId = json['project_id'].toString();
     fileName = json['file_name'];
+    notiId = json['noti_id'];
     file = json['file'];
     userId = json['user_id'].toString();
     name = json['name'];
@@ -73,6 +79,8 @@ class ProjectDocData {
     data['document_id'] = this.documentId;
         data['project_id'] = this.projectId;
     data['file_name'] = this.fileName;
+    data['parent_comment_id'] = this.commentId;
+    data['noti_id'] = this.notiId;
     data['file'] = this.file;
     data['user_id'] = this.userId;
     data['name'] = this.name;

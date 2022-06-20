@@ -26,6 +26,7 @@ import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
+import 'package:mta/models/ProjectDetails.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/models/UserAccessreq.dart';
 import 'package:mta/models/validateOTPReq.dart';
@@ -40,9 +41,9 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
- // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+  @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
-  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+ // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
    // @RestApi(baseUrl: "http://192.168.1.132:5777/mta")
 
 
@@ -101,8 +102,12 @@ abstract class ApiService
   @GET("/projects/getmappedUser?project_id={project_id}")
   Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);
 
+  @GET("/projects/getProject/{project_id}")
+  Future<ProjectDetailsRes> getProjectName(@Path("project_id") int id);
+
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
+
 
   @POST("/users/changePassword")
   Future<ChangePassRes> changePass(@Body() ChangePassReq body);
@@ -116,6 +121,10 @@ abstract class ApiService
   @PUT("/users/{user_id}")
   Future<ChangePassRes> editProfile(
       @Path("user_id") int id, @Body() EditProfileReq body);
+
+  @PUT("/utils/updateNotification/{noti_id}")
+  Future<ChangePassRes> updateNotificationStatus(
+      @Path("noti_id") int id);
 
   @DELETE("/users/removeImage/{user_id}")
   Future<ChangePassRes> removeProPic(

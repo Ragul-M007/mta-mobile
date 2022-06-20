@@ -97,8 +97,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     );
   }
 
-  getFCMToken() async 
-  {
+  getFCMToken() async {
     _firebaseMessaging.getToken().then((String? token) {
       assert(token != null);
       setState(() {
@@ -117,77 +116,75 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print(_homeScreenText);
     });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) 
-    {
-      setState(() 
-      {
-
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      setState(() {
         print("message recieved inside get");
-        print("data received ---  ${message.data}");
+        print("data received ---  ${message.notification!.body}");
+        //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
         print(message.data);
-        print(jsonEncode(message.data));
+        print("Direct data data -->${jsonEncode(message.data)}");
         ProjectDocData peo = ProjectDocData.fromJson(message.data);
-      var check =  jsonEncode(peo);
+        var check = jsonEncode(peo);
 
         print("Check--> $check");
-         Strings.selectedProDocument.add(peo);
-         print("dataaa ${Strings.selectedProDocument[0].documentId}");
+        Strings.selectedProDocument.add(peo);
+        print("dataaa ${Strings.selectedProDocument[0].documentId}");
         print(message.notification?.body);
         AppUtils.showToastErrorTop(
-            "Notification: ${message.notification?.body}");
+            "You have a new notification");
         if (Strings.pushNotify == true) {
-
           print("inside if listen message-----> $message");
-          _showMyDialog(
-              (message as dynamic)['data']['image'],
-              (message as dynamic)['data']['title'],
-              (message as dynamic)['data']['body'],
-              PushRes.fromJson(
-                  jsonDecode((message as dynamic)['data']['docDetails'])[0]));
+
+          // _showMyDialog(
+          //     (message as dynamic)['data']['image'],
+          //     (message as dynamic)['data']['title'],
+          //     (message as dynamic)['data']['body'],
+          //     PushRes.fromJson(
+          //         jsonDecode((message as dynamic)['data']['docDetails'])[0]));
         }
       });
     });
     FirebaseMessaging.instance
         .getInitialMessage()
-        .then((RemoteMessage? message) 
-        {
-        //Map<String, dynamic> map = message?.data;
-         Strings.testing = "myvalue";
-         ProjectDocData peo = ProjectDocData.fromJson(message?.data);
-         Strings.selectedProDocument.add(peo);
-         Strings.fromNotificationComments = true;
+        .then((RemoteMessage? message) {
+      //Map<String, dynamic> map = message?.data;
+      Strings.testing = "myvalue";
+      ProjectDocData peo = ProjectDocData.fromJson(message!.data);
+      Strings.selectedProDocument.add(peo);
+      Strings.fromNotificationComments = true;
+      print(jsonEncode(peo));
+      int id = int.parse(peo.notiId!);
+      Strings.notificationID = id;
+      // message?.data.forEach((key, value) {
+      //   print("key: $key, value: $value");
+      //   Strings.testing = value;
 
-          // message?.data.forEach((key, value) {
-          //   print("key: $key, value: $value");
-          //   Strings.testing = value;
-            
-          //  // String.selectedProDocument = message.data;
-          // });
+      //  // String.selectedProDocument = message.data;
+      // });
 
-      if (message?.notification?.body != null) {
-        if (message!.notification!.body!.contains("Signed")) 
-        {
+      if (message.notification?.body != null) {
+        if (message.notification!.body!.contains("Signed")) {
           Strings.FromNotification = true;
         }
       }
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) 
-    {
-      if (message.notification?.body != null) 
-      {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (message.notification?.body != null) {
         if (message.notification!.body!.contains("logout")) {
           Strings.FromNotification = true;
           checkLogin();
         }
-        if (message.notification!.title!.contains("Commented")) 
-        {
-          print("Inside Commented");
+       
+
+          print(message.data);
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
           Strings.selectedProDocument.clear();
-         Strings.selectedProDocument.add(peo);
+          Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
+          print(jsonEncode(peo));
           checkLogin();
-        }
+                int id = int.parse(peo.notiId!);
+          Strings.notificationID = id;
       }
 
       print("is login  ${Strings.isLogin}");
@@ -263,7 +260,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     // });
   }
 
-  Future<void> _showMyDialog(imgurl, title, desc, doc) async {
+  _showMyDialog(imgurl, title, desc, doc) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -346,8 +343,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                       }));
                       Strings.isPushAvailable = true;
                       if (Strings.isLogin == true) {
-                        Strings.isPushAvailable = false;
-                        getUserCats(doc.projectId);
                       } else {
                         AppUtils.showToastErrorTop("Please login");
                       }
@@ -539,8 +534,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   void checkLogin() {
-    AppUtils.getStringPreferences('easyAccess').then((value) 
-    {
+    AppUtils.getStringPreferences('easyAccess').then((value) {
       if (value != null) {
         print(value);
 
@@ -556,6 +550,22 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     }).catchError((onError) {
       Navigator.popAndPushNamed(context, "/login");
       // Navigator.popAndPushNamed(context, "/comments");
+    });
+  }
+
+  updateNotification(notificationId) {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateNotificationStatus(notificationId).then((response) {
+      if (response.status!) {
+        AppUtils.showToastError("Unable to update status");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
     });
   }
 

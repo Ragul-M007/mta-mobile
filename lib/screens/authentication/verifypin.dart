@@ -7,6 +7,7 @@ import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
+import 'package:mta/screens/comments/replies.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -163,7 +164,16 @@ class _VerifypinState extends State<Verifypin> {
             }
             else if(Strings.fromNotificationComments)
             {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Comments()));
+                if(Strings.selectedProDocument[0].commentId == null)
+                {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Comments()));
+
+                }
+                else
+                {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Replies()));
+                }
+
             }
             else
             {

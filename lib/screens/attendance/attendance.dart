@@ -186,7 +186,49 @@ class _AttendanceContentState extends State<AttendanceContent>
               // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/login", currentmenu: 9);
+showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to logout from the App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+,
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );
+                  
                 },
                 selectedmenuvalue: 9,
                 menutitle: "Logout",

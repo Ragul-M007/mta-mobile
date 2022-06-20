@@ -32,10 +32,10 @@ List<CatsData> cats = Strings.categories;
 AnimationController? _animationController;
 AudioPlayer audioPlayer = AudioPlayer();
 AudioCache audioCache = AudioCache();
-final _userIitems = users
+var _userIitems = users
     .map((user) => MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
     .toList();
-final _catsItems = cats
+var _catsItems = cats
     .map((cats) => MultiSelectItem<CatsData?>(cats, cats.categoryName!))
     .toList();
 var tagedUsers = [];
@@ -56,6 +56,8 @@ Timer? _timer;
 List<int> recordedData = [];
 final _audioRecorder = Record();
 String? filepath;
+IO.Socket? _socket;
+
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -72,15 +74,20 @@ class _RepliesState extends State<Replies> {
         child: Scaffold(
           appBar: appbar("Replies"),
           backgroundColor: Colors.grey[300],
-          body: RepliesContent(),
+          body: WillPopScope(
+            onWillPop: (){
+              _socket?.disconnect();
+              _socket?.dispose();
+
+                                Navigator.pushNamed(context, '/comments');
+                                throw 'Replies';
+
+            },
+            child: RepliesContent()),
         ));
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+ 
 }
 
 class RepliesContent extends StatefulWidget {
@@ -91,8 +98,8 @@ class RepliesContent extends StatefulWidget {
 }
 
 class _RepliesContentState extends State<RepliesContent>
-    with SingleTickerProviderStateMixin {
-  IO.Socket? _socket;
+    with SingleTickerProviderStateMixin 
+    {
   var _currDoc;
 
   TextEditingController _msgcontroller = TextEditingController();
@@ -103,6 +110,13 @@ class _RepliesContentState extends State<RepliesContent>
     super.initState();
     Strings.pushNotify = false;
     initialCommentCheck = true;
+
+    if(Strings.fromNotificationComments)
+    {
+      updateNotification(Strings.notificationID);
+    }
+    getUserCats();
+    getuserCatgories();
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
     _animationController?.repeat(reverse: true);
@@ -130,6 +144,91 @@ class _RepliesContentState extends State<RepliesContent>
       print('Connected');
       getReplies();
     });
+  }
+
+   updateNotification(notificationId) {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateNotificationStatus(notificationId).then((response) {
+      if (response.status!) {
+       // AppUtils.showToastError("Unable to update status");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
+    });
+  }
+  getUserCats() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
+
+    api.fetchUsers(projectid).then((response) {
+      if (response.status!) {
+        setState(() {
+          Strings.users = response.data!;
+          users = response.data!;
+          _userIitems = users
+              .map((user) =>
+                  MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
+              .toList();
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+ 
+  getuserCatgories() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
+    api.fetchCats(projectid).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+        setState(() {
+          Strings.categories = response.data!;
+          cats = response.data!;
+          _catsItems = cats
+              .map((cats) =>
+                  MultiSelectItem<CatsData?>(cats, cats.categoryName!))
+              .toList();
+        });
+      } else {
+        print('No categories');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print("Catched $onError");
+    });
+  }
+
+  getIndex()
+  {
+    print("indexing");
+    for(int i = 0; i<Strings.comments.length; i++) 
+    {
+
+      print(" String data from comments${Strings.comments[i].commentId.toString()}");
+
+      print(" Stored comment id ${Strings.selectedProDocument[0].commentId}");
+
+        if(Strings.comments[i].commentId.toString() == Strings.selectedProDocument[0].commentId)
+        {
+          print("inside");
+          setState(() {
+                      Strings.selectedCommentsIndex = i;
+
+                      print("selected comment index is $i");
+          });
+        }
+
+
+    }
   }
 
   String getFileExt(String? fileName) {
@@ -268,9 +367,10 @@ class _RepliesContentState extends State<RepliesContent>
 
   @override
   void dispose() {
+      super.dispose();
     _animationController?.dispose();
     _socket?.disconnect();
-    super.dispose();
+    _socket?.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
     tagedUsersId = [];
@@ -1095,23 +1195,25 @@ class _RepliesContentState extends State<RepliesContent>
     );
   }
 
-  getReplies() {
+  getReplies() async {
     print("Getting replied");
     _socket?.on("document-comments", (_data) 
     {
-      print('fromServer $_data');
+      log('fromServer $_data');
       msgField.unfocus();
       if (initialCommentCheck) 
       {
         print("validation passed");
-        setState(() {
+        setState(()  {
           Strings.comments = [];
           for (var item in _data) {
             Strings.comments.add(CommentsRes.fromJson(item));
           }
-          setState(() {
-            initialCommentCheck = false;
-          });
+          if(Strings.fromNotificationComments)
+          {
+              getIndex();
+          }
+          initialCommentCheck = false;
           _timer = new Timer(const Duration(milliseconds: 1000), () 
           {
             _scrollController.animateTo(
@@ -1237,6 +1339,7 @@ class _RepliesContentState extends State<RepliesContent>
           _socket?.connect();
           _socket?.on("connect", (_) {
             print('Connected');
+            initialCommentCheck = true;
             getReplies();
           });
 

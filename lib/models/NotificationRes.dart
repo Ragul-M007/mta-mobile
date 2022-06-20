@@ -11,7 +11,7 @@ class NotificationRes {
     if (json['data'] != null) {
       data = <NotificationData>[];
       json['data'].forEach((v) {
-        data?.add(new NotificationData.fromJson(v));
+        data!.add(new NotificationData.fromJson(v));
       });
     }
   }
@@ -21,81 +21,102 @@ class NotificationRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data?.map((v) => v.toJson()).toList();
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
 class NotificationData {
+  int? notiId;
   String? title;
   String? description;
+  DocDetail? docDetail;
   String? imgUrl;
-  List<DocDetail>? docDetail;
   String? createdAt;
+  int? readStatus;
 
   NotificationData(
-      {this.title,
+      {this.notiId,
+      this.title,
       this.description,
-      this.imgUrl,
       this.docDetail,
-      this.createdAt});
+      this.imgUrl,
+      this.createdAt,
+      this.readStatus});
 
   NotificationData.fromJson(Map<String, dynamic> json) {
+    notiId = json['noti_id'];
     title = json['title'];
     description = json['description'];
+    docDetail = json['doc_detail'] != null
+        ? new DocDetail.fromJson(json['doc_detail'])
+        : null;
     imgUrl = json['img_url'];
-    if (json['doc_detail'] != null) {
-      docDetail = <DocDetail>[];
-      json['doc_detail'].forEach((v) {
-        docDetail?.add(new DocDetail.fromJson(v));
-      });
-    }
     createdAt = json['created_at'];
+    readStatus = json['read_status'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['noti_id'] = this.notiId;
     data['title'] = this.title;
     data['description'] = this.description;
-    data['img_url'] = this.imgUrl;
     if (this.docDetail != null) {
-      data['doc_detail'] = this.docDetail?.map((v) => v.toJson()).toList();
+      data['doc_detail'] = this.docDetail!.toJson();
     }
+    data['img_url'] = this.imgUrl;
     data['created_at'] = this.createdAt;
+    data['read_status'] = this.readStatus;
     return data;
   }
 }
 
 class DocDetail {
-  int? documentId;
-  String? fileName;
   String? file;
+  int? categoryId;
+  String? updatedAt;
   int? projectId;
-  String? projectName;
+  int? userId;
+  String? fileName;
+  String? createdAt;
+  String? description;
+  int? documentId;
 
   DocDetail(
-      {this.documentId,
-      this.fileName,
-      this.file,
+      {this.file,
+      this.categoryId,
+      this.updatedAt,
       this.projectId,
-      this.projectName});
+      this.userId,
+      this.fileName,
+      this.createdAt,
+      this.description,
+      this.documentId});
 
   DocDetail.fromJson(Map<String, dynamic> json) {
-    documentId = json['document_id'];
-    fileName = json['file_name'];
     file = json['file'];
+    categoryId = json['category_id'];
+    updatedAt = json['updated_at'];
     projectId = json['project_id'];
-    projectName = json['project_name'];
+    userId = json['user_id'];
+    fileName = json['file_name'];
+    createdAt = json['created_at'];
+    description = json['description'];
+    documentId = json['document_id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['document_id'] = this.documentId;
-    data['file_name'] = this.fileName;
     data['file'] = this.file;
+    data['category_id'] = this.categoryId;
+    data['updated_at'] = this.updatedAt;
     data['project_id'] = this.projectId;
-    data['project_name'] = this.projectName;
+    data['user_id'] = this.userId;
+    data['file_name'] = this.fileName;
+    data['created_at'] = this.createdAt;
+    data['description'] = this.description;
+    data['document_id'] = this.documentId;
     return data;
   }
 }

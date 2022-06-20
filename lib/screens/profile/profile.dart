@@ -17,6 +17,10 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
+import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:pin_input_text_field/pin_input_text_field.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 import 'dart:io' as Io;
 
@@ -149,8 +153,48 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                },
+showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to logout from the App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+,
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );                },
                 selectedmenuvalue: 9,
                 menutitle: "Logout",
               ),
@@ -210,10 +254,10 @@ class _ProfileContentState extends State<ProfileContent> {
   FocusNode three = new FocusNode();
   FocusNode four = new FocusNode();
 
-  final oneT = TextEditingController();
-  final twoT = TextEditingController();
-  final threeT = TextEditingController();
-  final fourT = TextEditingController();
+  var oneT = TextEditingController();
+  var twoT = TextEditingController();
+  var threeT = TextEditingController();
+  var fourT = TextEditingController();
 
   BuildContext? ctx;
 
@@ -234,6 +278,7 @@ class _ProfileContentState extends State<ProfileContent> {
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
     getProfile();
+    fillData();
   }
 
   @override
@@ -255,9 +300,19 @@ class _ProfileContentState extends State<ProfileContent> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Strings.profilePic == ""? CircleAvatar(backgroundImage: AssetImage("assets/icons/account.png",),backgroundColor: Colors.grey.withOpacity(0.2),):
-                              image(Strings.baseImageUrl + Strings.profilePic!,
-                                  40.0, 40.0),
+                              Strings.profilePic == ""
+                                  ? CircleAvatar(
+                                      backgroundImage: AssetImage(
+                                        "assets/icons/account.png",
+                                      ),
+                                      backgroundColor:
+                                          Colors.grey.withOpacity(0.2),
+                                    )
+                                  : image(
+                                      Strings.baseImageUrl +
+                                          Strings.profilePic!,
+                                      40.0,
+                                      40.0),
                               SizedBox(
                                 width: 20,
                               ),
@@ -483,6 +538,13 @@ class _ProfileContentState extends State<ProfileContent> {
     );
   }
 
+  fillData() {
+    print("data--> ${threeT.text}");
+    twoT.text = " ";
+    threeT.text = " ";
+    fourT.text = " ";
+  }
+
   getProfile() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
@@ -529,8 +591,7 @@ class _ProfileContentState extends State<ProfileContent> {
     );
   }
 
-  Widget image(String img, double width, double height) 
-  {
+  Widget image(String img, double width, double height) {
     return Container(
       width: width,
       height: height,
@@ -659,70 +720,96 @@ class _ProfileContentState extends State<ProfileContent> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext contextResetPin) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.of(contextResetPin).pop();
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(contextResetPin).size.width * 0.75,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          new Icon(Icons.close,
-                              size: 22.0, color: Colors.black),
-                        ],
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(contextResetPin).pop();
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(contextResetPin).size.width * 0.75,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            new Icon(Icons.close,
+                                size: 22.0, color: Colors.black),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      "Reset your 4 digit secret pin to your application",
-                      style: TextStyle(color: const Color(0xFF9e9e9e)),
-                    ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    _boxBuilder(contextResetPin),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        codeVerifyField =
-                            oneT.text + twoT.text + threeT.text + fourT.text;
-
-                        if (codeVerifyField!.length < 4) {
-                          AppUtils.showToastError("Please Enter Pin");
-                        } else {
-                          resetPin(contextResetPin);
-                        }
-                      },
-                      child: Container(
-                        child: Center(
-                            child: Text(
-                          "SAVE",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Colors.white),
-                          textAlign: TextAlign.center,
-                        )),
-                        width: MediaQuery.of(contextResetPin).size.width * 0.8,
-                        height: 40,
-                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
-                        decoration: BoxDecoration(
-                            color: Color(0xFF0061b0),
-                            borderRadius: BorderRadius.circular(25)),
+                      Text(
+                        "Reset your 4 digit secret pin to your application",
+                        style: TextStyle(color: const Color(0xFF9e9e9e)),
                       ),
-                    )
-                  ],
-                )),
-          ),
-        );
+                      SizedBox(
+                        height: 3.0,
+                      ),
+                      PinFieldAutoFill(
+                          cursor: Cursor(
+                            width: 2,
+                            height: 40,
+                            color: Colors.blue,
+                            radius: Radius.circular(1),
+                            enabled: true,
+                          ),
+                          decoration: UnderlineDecoration(
+                            textStyle:
+                                TextStyle(fontSize: 20, color: Colors.black),
+                            colorBuilder: FixedColorBuilder(
+                                Colors.black.withOpacity(0.3)),
+                          ),
+                          autoFocus: true,
+                          onCodeSubmitted: (String code) {
+                            if (codeVerifyField!.length < 4) {
+                            AppUtils.showToastError("Please enter 4 digit Pin");
+                          } else {
+                            resetPin(contextResetPin);
+                          }
+                          }, //code submitted callback
+                          onCodeChanged: (String? code) {
+                            codeVerifyField = code;
+                          }, //code changed callback
+                          codeLength: 4),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          print(codeVerifyField);
+                          if (codeVerifyField!.length < 4) {
+                            AppUtils.showToastError("Please enter 4 digit Pin");
+                          } else {
+                            resetPin(contextResetPin);
+                          }
+                        },
+                        child: Container(
+                          child: Center(
+                              child: Text(
+                            "SAVE",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Colors.white),
+                            textAlign: TextAlign.center,
+                          )),
+                          width:
+                              MediaQuery.of(contextResetPin).size.width * 0.8,
+                          height: 40,
+                          margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                          decoration: BoxDecoration(
+                              color: Color(0xFF0061b0),
+                              borderRadius: BorderRadius.circular(25)),
+                        ),
+                      )
+                    ],
+                  )),
+            ),
+          );
+        });
       },
     );
   }
@@ -770,6 +857,7 @@ class _ProfileContentState extends State<ProfileContent> {
           textAlign: TextAlign.center,
           onChanged: (value) {
             print(value);
+            print("inside");
             if (value == '') {
               FocusScope.of(contextResetPin).requestFocus(
                 val == 4
@@ -790,7 +878,6 @@ class _ProfileContentState extends State<ProfileContent> {
                             ? four
                             : null,
               );
-              print("not null");
             }
           },
         ),
@@ -803,8 +890,7 @@ class _ProfileContentState extends State<ProfileContent> {
       AppUtils.showToastError("Please enter Old Password");
     } else if (changePassNew.text.trim() == "") {
       AppUtils.showToastError("Please enter New Password");
-    } else if (changePassConfirm.text.trim() == "") 
-    {
+    } else if (changePassConfirm.text.trim() == "") {
       AppUtils.showToastError("Please enter Confirm Password");
     } else if (changePassNew.text.trim() != changePassConfirm.text.trim()) {
       AppUtils.showToastError(
@@ -816,6 +902,8 @@ class _ProfileContentState extends State<ProfileContent> {
       request.emailId = _profileData[0].email;
       request.newPassword = changePassNew.text;
       request.password = changePassOld.text;
+      var dat = jsonEncode(request);
+      print(dat);
       api.changePass(request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
@@ -839,254 +927,271 @@ class _ProfileContentState extends State<ProfileContent> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext ctx) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    editPicTap = false;
-                  });
-                  Navigator.of(ctx).pop();
-                },
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(ctx).size.width * 0.75,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            new Icon(Icons.close,
-                                size: 22.0, color: Colors.black),
-                          ],
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      editPicTap = false;
+                    });
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: MediaQuery.of(ctx).size.width * 0.75,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              new Icon(Icons.close,
+                                  size: 22.0, color: Colors.black),
+                            ],
+                          ),
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            child: editPicTap == false
-                                ? (Strings.profilePic == "" ? CircleAvatar(child: Image.asset("assets/icons/account.png"),radius: 40,backgroundColor: Colors.grey.withOpacity(0.3),) :image(
-                                    Strings.baseImageUrl + Strings.profilePic!,
-                                    80.0,
-                                    80.0))
-                                : Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration: new BoxDecoration(
-                                      color: const Color(0xff7c94b6),
-                                      image: new DecorationImage(
-                                        image: _imageAsyncWidget!,
-                                        fit: BoxFit.fill,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              child: editPicTap == false
+                                  ? (Strings.profilePic == ""
+                                      ? CircleAvatar(
+                                          child: Image.asset(
+                                              "assets/icons/account.png"),
+                                          radius: 40,
+                                          backgroundColor:
+                                              Colors.grey.withOpacity(0.3),
+                                        )
+                                      : image(
+                                          Strings.baseImageUrl +
+                                              Strings.profilePic!,
+                                          80.0,
+                                          80.0))
+                                  : Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: new BoxDecoration(
+                                        color: const Color(0xff7c94b6),
+                                        image: new DecorationImage(
+                                          image: _imageAsyncWidget!,
+                                          fit: BoxFit.fill,
+                                        ),
+                                        borderRadius: new BorderRadius.all(
+                                            new Radius.circular(50.0)),
                                       ),
-                                      borderRadius: new BorderRadius.all(
-                                          new Radius.circular(50.0)),
+                                    ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Column(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    //changeProPic();
+                                    takePhoto(ImageSource.camera);
+                                  },
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.add_a_photo,
+                                            size: 20, color: Color(0xFF0061b0)),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text(
+                                          "Camera",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  //changeProPic();
-                                  takePhoto(ImageSource.camera);
-                                },
-                                child: Container(
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.add_a_photo,
-                                          size: 20, color: Color(0xFF0061b0)),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        "Camera",
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    //changeProPic();
+                                    takePhoto(ImageSource.gallery);
+                                  },
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.collections,
+                                            size: 20, color: Color(0xFF0061b0)),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text(
+                                          "Gallery",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  //changeProPic();
-                                  takePhoto(ImageSource.gallery);
-                                },
-                                child: Container(
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.collections,
-                                          size: 20, color: Color(0xFF0061b0)),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        "Gallery",
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    //changeProPic();
+                                    //takePhoto(ImageSource.gallery);
+                                    //removeImage = true;
+                                    //_editProfileSave(context);
+
+                                    setState(() {
+                                      //editPicTap = false;
+                                      removeImage = true;
+                                      Strings.profilePic = "";
+                                    });
+                                    // removeProPic();
+                                  },
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete,
+                                            size: 20, color: Color(0xFF0061b0)),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text(
+                                          "Delete Image",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  //changeProPic();
-                                  //takePhoto(ImageSource.gallery);
-                                  //removeImage = true;
-                                  //_editProfileSave(context);
-                                  removeProPic();
-                                },
-                                child: Container(
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.collections,
-                                          size: 20, color: Color(0xFF0061b0)),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        "Delete Image",
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Name",
-                        style: TextStyle(
-                            color: Color(0xFF0061b0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        focusNode: name,
-                        controller: editName,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.person,
-                                size: 14, color: Color(0xFF0061b0))),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Phone Number",
-                        style: TextStyle(
-                            color: Color(0xFF0061b0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        controller: editNumber,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.call,
-                                size: 14, color: Color(0xFF0061b0))),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "State",
-                        style: TextStyle(
-                            color: Color(0xFF0061b0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        controller: editState,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.home,
-                                size: 14, color: Color(0xFF0061b0))),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "City",
-                        style: TextStyle(
-                            color: Color(0xFF0061b0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        controller: editCity,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.location_city,
-                                size: 14, color: Color(0xFF0061b0))),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        "Address",
-                        style: TextStyle(
-                            color: Color(0xFF0061b0),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        controller: editAddress,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.location_pin,
-                                size: 14, color: Color(0xFF0061b0))),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          _editProfileSave(ctx);
-                        },
-                        child: Container(
-                          child: Center(
-                              child: Text(
-                            "SAVE",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color: Colors.white),
-                            textAlign: TextAlign.center,
-                          )),
-                          width: MediaQuery.of(ctx).size.width * 0.8,
-                          height: 40,
-                          margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
-                          decoration: BoxDecoration(
-                              color: Color(0xFF0061b0),
-                              borderRadius: BorderRadius.circular(25)),
+                              ],
+                            )
+                          ],
                         ),
-                      )
-                    ],
-                  ),
-                )),
-          ),
-        );
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Name",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          focusNode: name,
+                          controller: editName,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.person,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Phone Number",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editNumber,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.call,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "State",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editState,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.home,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "City",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editCity,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.location_city,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Address",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editAddress,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.location_pin,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            _editProfileSave(ctx);
+                          },
+                          child: Container(
+                            child: Center(
+                                child: Text(
+                              "SAVE",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.white),
+                              textAlign: TextAlign.center,
+                            )),
+                            width: MediaQuery.of(ctx).size.width * 0.8,
+                            height: 40,
+                            margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                            decoration: BoxDecoration(
+                                color: Color(0xFF0061b0),
+                                borderRadius: BorderRadius.circular(25)),
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
+            ),
+          );
+        });
       },
     );
   }
@@ -1114,11 +1219,7 @@ class _ProfileContentState extends State<ProfileContent> {
       if (editPicTap == true) {
         request.userImg = editProfilePictureBase64;
       }
-      if (removeImage == true) {
-        print("removeImage");
-        request.userImg = "";
-        removeImage == false;
-      }
+
       print(request.name);
       print(request.mobileNo);
       print(request.area);
@@ -1133,8 +1234,14 @@ class _ProfileContentState extends State<ProfileContent> {
         print('Response status ${response.toJson()}');
         if (response.status!) {
           AppUtils.showToastSuccess(response.message!);
-          Navigator.of(ctxt).pop();
-          getProfile();
+
+          if (removeImage == true) {
+            print("removeImage");
+            removeProPic();
+          } else {
+            Navigator.of(ctxt).pop();
+            getProfile();
+          }
         } else {
           AppUtils.showToastError(response.message!);
         }
@@ -1188,6 +1295,7 @@ class _ProfileContentState extends State<ProfileContent> {
     final api = Provider.of<ApiService>(context, listen: false);
     SetPinReq setpinreq = SetPinReq();
     setpinreq.loginpin = codeVerifyField;
+    codeVerifyField = "";
     AppUtils.getIntPreferences('userId').then((value) {
       if (value != null) {
         api.setPin(value, setpinreq).then((response) {
@@ -1219,8 +1327,8 @@ class _ProfileContentState extends State<ProfileContent> {
     api.removeProPic(Strings.userID!).then((response) {
       if (response.status!) {
         AppUtils.dismissprogress();
-         Navigator.of(context).pop();
-          getProfile();
+        Navigator.of(context).pop();
+        getProfile();
         AppUtils.showToast("Profile picture removed Successfully.");
       } else {
         AppUtils.dismissprogress();

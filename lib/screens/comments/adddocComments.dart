@@ -101,12 +101,11 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
   void initState() {
     super.initState();
-    if(Strings.fromReplies)
-    {
+    if (Strings.fromReplies) {
       Strings.fromReplies = false;
       fromReplies = true;
     }
-    
+
     // getUserCats();
   }
 
@@ -412,7 +411,11 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
         extension = "data:image/jpeg;base64,";
       } else if (fileExt == 'mp3' || fileExt == 'wav' || fileExt == 'aac') {
         extension = "data:audio/wav;base64,";
-      } else if (fileExt == 'mp4' || fileExt == 'mov' || fileExt == 'flv' || fileExt == 'mkv' || fileExt == 'avi') {
+      } else if (fileExt == 'mp4' ||
+          fileExt == 'mov' ||
+          fileExt == 'flv' ||
+          fileExt == 'mkv' ||
+          fileExt == 'avi') {
         extension = "data:video/" + "mpeg" + ";base64,";
       } else {
         extension = "data:application/" + fileExt! + ";base64,";
@@ -427,17 +430,16 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
       req.categoryList = json.encode(tagedCats);
       req.documentId = Strings.category == true
           ? int.parse(Strings.selectedCatDocument[0].documentId!)
-          : int.parse( Strings.selectedProDocument[0].documentId!);
+          : int.parse(Strings.selectedProDocument[0].documentId!);
       req.recipientId =
           json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
       req.recipient = json.encode(tagedUsersId);
       req.comment = docDesc.text;
-      if(fromReplies == true)
-      {
-         req.parent_comment_id =
-        Strings.comments[Strings.selectedCommentsIndex].commentId;
+      if (fromReplies == true) {
+        req.parent_comment_id =
+            Strings.comments[Strings.selectedCommentsIndex].commentId;
       }
-      
+
       print("docDesc--> ${docDesc.text}");
 
       req.userId = Strings.userID;
@@ -458,7 +460,12 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
           // setState(() {});
           AppUtils.showToastSuccess("Document uploaded successfully");
-           Navigator.pushNamed(context, '/comments');
+
+          if (fromReplies) {
+            Navigator.pushReplacementNamed(context, '/replies');
+          } else {
+            Navigator.pushReplacementNamed(context, '/comments');
+          }
         } else {
           AppUtils.showToastError(response.message!);
         }

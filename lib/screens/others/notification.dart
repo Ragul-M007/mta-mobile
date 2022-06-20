@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -14,6 +15,8 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:intl/intl.dart';
+import '../comments/comments.dart';
 
 FancyDrawerController? _controller;
 List<NotificationData> _msgList = [];
@@ -152,8 +155,48 @@ class _NotificationContentState extends State<NotificationContent>
           // ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/login", currentmenu: 9);
-            },
+showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to logout from the App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+,
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );            },
             selectedmenuvalue: 9,
             menutitle: "Logout",
           ),
@@ -173,74 +216,91 @@ class _NotificationContentState extends State<NotificationContent>
                             onTap: () async {
                               var dataUrl;
                               if (_msgList[index].imgUrl != null &&
-                                  _msgList[index].imgUrl != "") 
-                                {
-                                if (_msgList[index].imgUrl!.contains(".pdf")) 
-                                {
-                                    Strings.pdfDoc = Strings.baseImageUrl + _msgList[index].imgUrl!;
-                                     Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) => Pdfviewer()));
-                                   // dataUrl = 'https://docs.google.com/viewer?url=${Strings.baseImageUrl + (_msgList[index].imgUrl ?? "")}';
-                                } else 
-                                {
-                                    dataUrl = Strings.baseImageUrl + _msgList[index].imgUrl!;
+                                  _msgList[index].imgUrl != "") {
+                                if (_msgList[index].imgUrl!.contains(".pdf")) {
+                                  Strings.pdfDoc = Strings.baseImageUrl +
+                                      _msgList[index].imgUrl!;
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          Pdfviewer()));
+                                  // dataUrl = 'https://docs.google.com/viewer?url=${Strings.baseImageUrl + (_msgList[index].imgUrl ?? "")}';
+                                } else {
+                                  dataUrl = Strings.baseImageUrl +
+                                      _msgList[index].imgUrl!;
                                 }
                               }
-                              if(dataUrl!= null && dataUrl != "")
-                              {
+                              if (dataUrl != null && dataUrl != "") {
                                 FlutterWebBrowser.openWebPage(
-                                url: dataUrl,
-                                customTabsOptions: const CustomTabsOptions(
-                                  colorScheme: CustomTabsColorScheme.dark,
-                                  // toolbarColor: Strings,
-                                  // secondaryToolbarColor: Colors.green,
-                                  // navigationBarColor: Colors.amber,
-                                  shareState: CustomTabsShareState.on,
-                                  instantAppsEnabled: true,
-                                  showTitle: true,
-                                  urlBarHidingEnabled: true,
-                                ),
-                                safariVCOptions:
-                                    const SafariViewControllerOptions(
-                                  barCollapsingEnabled: true,
-                                  preferredBarTintColor: Colors.green,
-                                  preferredControlTintColor: Colors.amber,
-                                  dismissButtonStyle:
-                                      SafariViewControllerDismissButtonStyle
-                                          .close,
-                                  modalPresentationCapturesStatusBarAppearance:
-                                      true,
-                                ),
-                              );
+                                  url: dataUrl,
+                                  customTabsOptions: const CustomTabsOptions(
+                                    colorScheme: CustomTabsColorScheme.dark,
+                                    // toolbarColor: Strings,
+                                    // secondaryToolbarColor: Colors.green,
+                                    // navigationBarColor: Colors.amber,
+                                    shareState: CustomTabsShareState.on,
+                                    instantAppsEnabled: true,
+                                    showTitle: true,
+                                    urlBarHidingEnabled: true,
+                                  ),
+                                  safariVCOptions:
+                                      const SafariViewControllerOptions(
+                                    barCollapsingEnabled: true,
+                                    preferredBarTintColor: Colors.green,
+                                    preferredControlTintColor: Colors.amber,
+                                    dismissButtonStyle:
+                                        SafariViewControllerDismissButtonStyle
+                                            .close,
+                                    modalPresentationCapturesStatusBarAppearance:
+                                        true,
+                                  ),
+                                );
                               }
 
-                              var data = {
-                                "document_id":
-                                    _msgList[index].docDetail?[0].documentId,
-                                "file": _msgList[index].docDetail?[0].file,
-                                "file_name":
-                                    _msgList[index].docDetail?[0].fileName,
-                                // "user_id": 4,
-                                // "name": "Super Admin",
-                                // "created_at": "2021-05-03 08:09:51",
-                                // "description": "Sample Images",
-                                "commentsCount": 0
-                              };
+                              Strings.selectedProDocument.clear();
+                              var dat = jsonEncode(_msgList[index].docDetail);
+                              var decoded = jsonDecode(dat);
+                              ProjectDocData peo =
+                                  ProjectDocData.fromJson(decoded);
+                              print(jsonEncode(peo));
+                              Strings.selectedProDocument.add(peo);
+                              Strings.fromNotificationScren = true;
+                              if (_msgList[index]
+                                  .title!
+                                  .contains("Commented")) {
+                                updateNotification(
+                                    _msgList[index].notiId, true);
+                              } else {
+                                updateNotification(
+                                    _msgList[index].notiId, false);
+                              }
+
+                              // var data = {
+                              //   "document_id":
+                              //       _msgList[index].docDetail?[0].documentId,
+                              //   "file": _msgList[index].docDetail?[0].file,
+                              //   "file_name":
+                              //       _msgList[index].docDetail?[0].fileName,
+                              //   // "user_id": 4,
+                              //   // "name": "Super Admin",
+                              //   // "created_at": "2021-05-03 08:09:51",
+                              //   // "description": "Sample Images",
+                              //   "commentsCount": 0
+                              // };
                               // Strings.selectedNotifyDocumentFlag = true;
                               // Strings.selectedNotifyDocument = [];
                               // Strings.selectedNotifyDocument
                               //     .add(ProjectDocData.fromJson(data));
-                              Strings.category = false;
-                              Strings.selectedProDocument = [];
+                              // Strings.category = false;
+                              // Strings.selectedProDocument = [];
 
-                              Strings.selectedProDocument
-                                  .add(ProjectDocData.fromJson(data));
-                              Strings.selectedProject.add(Data.fromJson({
-                                "project_id":
-                                    _msgList[index].docDetail?[0].projectId,
-                                "project_name":
-                                    _msgList[index].docDetail?[0].projectName
-                              }));
+                              // Strings.selectedProDocument
+                              //     .add(ProjectDocData.fromJson(data));
+                              // Strings.selectedProject.add(Data.fromJson({
+                              //   "project_id":
+                              //       _msgList[index].docDetail?[0].projectId,
+                              //   "project_name":
+                              //       _msgList[index].docDetail?[0].projectName
+                              // }));
                               // getUserCats(
                               //     _msgList[index].docDetail?[0].projectId);
                             },
@@ -271,35 +331,28 @@ class _NotificationContentState extends State<NotificationContent>
                                                         Colors.black87,
                                                         14.0,
                                                         FontWeight.w500)),
-                                                        SizedBox(height: 5,),
-                                                        Text(_msgList[index].createdAt!,
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            
+                                            Text(DateFormat.jm().format(DateTime.parse(_msgList[index].createdAt!)),
                                                 style: Drawables
                                                     .adddoccontentstyle(
-                                                        Colors.black87,
+                                                        Colors.grey,
+                                                        14.0,
+                                                        FontWeight.w500)),
+                                                        SizedBox(height: 2,),
+                                                        Text(DateFormat.MMMMEEEEd().format(DateTime.parse(_msgList[index].createdAt!)),
+                                                style: Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.grey,
                                                         14.0,
                                                         FontWeight.w500)),
                                           ],
                                         ),
                                       ),
-                                      _msgList[index].imgUrl != ""
-                                          ? Container(
-                                              width: 40.0,
-                                              height: 40.0,
-                                              decoration: new BoxDecoration(
-                                                color: const Color(0xff7c94b6),
-                                                image: new DecorationImage(
-                                                  image: new NetworkImage(
-                                                      Strings.baseImageUrl +
-                                                          (_msgList[index]
-                                                                  .imgUrl ??
-                                                              "")),
-                                                  fit: BoxFit.fill,
-                                                ),
-                                                borderRadius: new BorderRadius
-                                                        .all(
-                                                    new Radius.circular(50.0)),
-                                              ),
-                                            )
+                                      _msgList[index].imgUrl != null
+                                          ? Image.asset(getFileExt(_msgList[index].imgUrl!),width: 30,height: 30,)
                                           : SizedBox(),
                                     ],
                                   ),
@@ -338,6 +391,42 @@ class _NotificationContentState extends State<NotificationContent>
     }
   }
 
+  String getFileExt(String fileName) {
+    var file = fileName.split(".");
+    var fileExt = file[1];
+    if (fileExt == "png" || fileExt == "PNG") {
+      return "assets/icons/png.png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return "assets/icons/jpg.png";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return "assets/icons/pdf.png";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return "assets/icons/txt.png";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return "assets/icons/ppt.png";
+    } else if (fileExt == "mpeg" || fileExt == "mpg") {
+      return "assets/icons/mpg.png";
+    } 
+     else if (fileExt == "wav" || fileExt == "mp3") {
+      return "assets/icons/mp3.png";
+    } 
+    
+     else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return "assets/icons/xls.png";
+    } else {
+      return "assets/icons/doc.png";
+    }
+  }
+
   getNotification() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
@@ -349,10 +438,41 @@ class _NotificationContentState extends State<NotificationContent>
           _msgList = response.data!;
         });
       } else {
+        setState(() {
+          _msgList.clear();
+          AppUtils.showToastError(response.message!);
+        });
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  updateNotification(notificationId, bool toComments) {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateNotificationStatus(notificationId).then((response) {
+      if (response.status!) {
+        AppUtils.dismissprogress();
+
+        if(toComments)
+        {
+        Navigator.of(context).pushReplacementNamed('/comments');
+
+        }
+        else
+        {
+          Navigator.of(context).pushReplacementNamed('/replies');
+
+        }
+      } else {
+        AppUtils.dismissprogress();
         AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
       print(onError.toString());
     });
   }
