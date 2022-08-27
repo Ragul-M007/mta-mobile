@@ -156,7 +156,11 @@ class _LoginContentState extends State<LoginContent>
       AppUtils.showToastErrorTop("Please enter Your Password");
     } else if (_passwordController.text.trim() == "") {
       AppUtils.showToastErrorTop("Please enter Your Password");
-    } else {
+    }else if(_emailIdController.text.trim() == "accounts@multitechcorp.in")
+    {
+        AppUtils.showToastError("Sorry! You doesn't have access on Mobile App. Kindly Login from the Web Application.");
+    }
+     else {
       bool network = await Validators.networkconnectvitiy();
       if (network) 
       {

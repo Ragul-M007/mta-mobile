@@ -11,6 +11,7 @@ import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
+import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/EditProfileReq.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
@@ -41,9 +42,9 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-  @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+ // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
- // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
    // @RestApi(baseUrl: "http://192.168.1.132:5777/mta")
 
 
@@ -129,6 +130,12 @@ abstract class ApiService
   @DELETE("/users/removeImage/{user_id}")
   Future<ChangePassRes> removeProPic(
       @Path("user_id") int id);
+
+  @DELETE("/users/deleteDeviceId/{user_id}")
+  Future<CommentsRes> removeDeviceId(
+      @Path("user_id") int id);
+
+     
 
   @POST("/utils/getAudioUrl")
   Future<AudioRes> uploadAudio(@Body() AudioReq body);

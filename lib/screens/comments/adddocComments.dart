@@ -445,6 +445,8 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
       req.userId = Strings.userID;
       String base64Data = extension + file64;
       req.audio = base64Data;
+      req.projectId = Strings.selectedProject[0].projectId;
+
       var dat = jsonEncode(req);
       log("data--> $dat");
 

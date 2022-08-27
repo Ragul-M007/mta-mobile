@@ -8,7 +8,7 @@ part of 'ApiService.dart';
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://demo.emeetify.com:81/mta';
+    baseUrl ??= 'https://mta.multitechcorp.in/mta';
   }
 
   final Dio _dio;
@@ -376,6 +376,22 @@ class _ApiService implements ApiService {
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = ChangePassRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<CommentsRes> removeDeviceId(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<CommentsRes>(
+            Options(method: 'DELETE', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/users/deleteDeviceId/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = CommentsRes.fromJson(_result.data!);
     return value;
   }
 

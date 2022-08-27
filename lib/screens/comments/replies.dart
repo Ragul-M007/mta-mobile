@@ -26,6 +26,8 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
@@ -57,7 +59,8 @@ List<int> recordedData = [];
 final _audioRecorder = Record();
 String? filepath;
 IO.Socket? _socket;
-
+int? projectId;
+String? projectname = "";
 
 class Replies extends StatefulWidget {
   static const String routeName = "/replies";
@@ -72,10 +75,12 @@ class _RepliesState extends State<Replies> {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: appbar("Replies"),
           backgroundColor: Colors.grey[300],
           body: WillPopScope(
             onWillPop: (){
+              Strings.categoriesforReply = false;
               _socket?.disconnect();
               _socket?.dispose();
 
@@ -103,8 +108,9 @@ class _RepliesContentState extends State<RepliesContent>
   var _currDoc;
 
   TextEditingController _msgcontroller = TextEditingController();
-  ScrollController _scrollController = new ScrollController();
-  FocusNode msgField = new FocusNode();
+ final ItemScrollController itemScrollController = ItemScrollController();
+final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();  FocusNode msgField = new FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -115,21 +121,28 @@ class _RepliesContentState extends State<RepliesContent>
     {
       updateNotification(Strings.notificationID);
     }
+    if(Strings.categoriesforReply)
+    {
+        projectId = Strings.selectedProject[0].projectId!;
+    }
+    else
+    {
+        projectId = int.parse(Strings.selectedProDocument[0].projectId ?? "0");
+    }
     getUserCats();
     getuserCatgories();
+    getProjectDetails();
     _animationController = new AnimationController(
         vsync: this, duration: Duration(milliseconds: 500));
     _animationController?.repeat(reverse: true);
 
-    setState(() {
       tagedUsers = [];
       tagedUsersId = [];
       tagedCats = [];
       tagedCatsId = [];
       // Strings.comments = [];
-    });
 
-    if (Strings.category == true) {
+    if (Strings.categoriesforReply == true) {
       _currDoc = Strings.selectedCatDocument[0];
     } else {
       _currDoc = Strings.selectedProDocument[0];
@@ -163,9 +176,7 @@ class _RepliesContentState extends State<RepliesContent>
   }
   getUserCats() {
     final api = Provider.of<ApiService>(context, listen: false);
-    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
-
-    api.fetchUsers(projectid).then((response) {
+    api.fetchUsers(projectId!).then((response) {
       if (response.status!) {
         setState(() {
           Strings.users = response.data!;
@@ -183,11 +194,29 @@ class _RepliesContentState extends State<RepliesContent>
       print(onError.toString());
     });
   }
+  getProjectDetails() {
+    print("project details called");
+    final api = Provider.of<ApiService>(context, listen: false);
+
+    api.getProjectName(projectId!).then((response) {
+      if (response.status!) {
+        setState(() {
+          print("project name ---> {response.data![0].projectName}");
+          projectname = response.data![0].projectName ?? "";
+        });
+      } else {
+        print('No categories');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print("Catched $onError");
+    });
+  }
  
   getuserCatgories() {
     final api = Provider.of<ApiService>(context, listen: false);
-    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
-    api.fetchCats(projectid).then((response) {
+
+       api.fetchCats(projectId!).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
@@ -217,7 +246,7 @@ class _RepliesContentState extends State<RepliesContent>
 
       print(" Stored comment id ${Strings.selectedProDocument[0].commentId}");
 
-        if(Strings.comments[i].commentId.toString() == Strings.selectedProDocument[0].commentId)
+        if(Strings.comments[i].commentId.toString() == Strings.selectedProDocument[0].commentId.toString())
         {
           print("inside");
           setState(() {
@@ -394,6 +423,7 @@ class _RepliesContentState extends State<RepliesContent>
 
   @override
   Widget build(BuildContext context) {
+    print("Refreshed");
     return Scaffold(
       backgroundColor: Colors.grey[300],
       body: Column(
@@ -419,24 +449,23 @@ class _RepliesContentState extends State<RepliesContent>
                                         .comments[Strings.selectedCommentsIndex]
                                         .userImg!);
                           },
-                          child: Container(
-                            width: 30.0,
-                            height: 30.0,
-                            decoration: new BoxDecoration(
-                              color: const Color(0xff7c94b6),
-                              image: new DecorationImage(
-                                image: new NetworkImage(Strings.baseImageUrl +
+                          child: CircleAvatar(
+                          radius: 10,
+                                backgroundImage: Strings
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      
+                                                      .userImg != null 
+                                ? NetworkImage(Strings.baseImageUrl +
                                     (Strings
-                                            .comments[
-                                                Strings.selectedCommentsIndex]
-                                            .userImg ??
-                                        "")),
-                                fit: BoxFit.fill,
-                              ),
-                              borderRadius: new BorderRadius.all(
-                                  new Radius.circular(50.0)),
-                            ),
-                          ),
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      
+                                                      .userImg!))
+                                :  AssetImage("assets/icons/account.png")
+                                      as ImageProvider,
+                            backgroundColor: Colors.grey.withOpacity(0.3),
+                              )
                         ),
                         SizedBox(
                           width: 10,
@@ -583,10 +612,11 @@ class _RepliesContentState extends State<RepliesContent>
                   Strings.comments[Strings.selectedCommentsIndex].replies !=
                       null
               ? Expanded(
-                  child: ListView.builder(
-                      shrinkWrap: true,
+                  child: ScrollablePositionedList.builder(
+                      //shrinkWrap: true,
                       reverse: true,
-                      controller: _scrollController,
+                        itemScrollController: itemScrollController,
+                      itemPositionsListener: itemPositionsListener,
                       padding: EdgeInsets.all(20),
                       itemCount: Strings.comments[Strings.selectedCommentsIndex]
                           .replies!.length,
@@ -609,26 +639,24 @@ class _RepliesContentState extends State<RepliesContent>
                                                     .replies![index]
                                                     .userImg!);
                                       },
-                                      child: Container(
-                                        width: 30.0,
-                                        height: 30.0,
-                                        decoration: new BoxDecoration(
-                                          color: const Color(0xff7c94b6),
-                                          image: new DecorationImage(
-                                            image: new NetworkImage(Strings
-                                                    .baseImageUrl +
-                                                (Strings
-                                                        .comments[Strings
-                                                            .selectedCommentsIndex]
-                                                        .replies![index]
-                                                        .userImg ??
-                                                    "")),
-                                            fit: BoxFit.fill,
-                                          ),
-                                          borderRadius: new BorderRadius.all(
-                                              new Radius.circular(50.0)),
-                                        ),
-                                      ),
+                                      
+                                      child: CircleAvatar(
+                          radius: 10,
+                                backgroundImage: Strings
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      .replies![index]
+                                                      .userImg != null 
+                                ? NetworkImage(Strings.baseImageUrl +
+                                    (Strings
+                                                      .comments[Strings
+                                                          .selectedCommentsIndex]
+                                                      .replies![index]
+                                                      .userImg!))
+                                :  AssetImage("assets/icons/account.png")
+                                      as ImageProvider,
+                            backgroundColor: Colors.grey.withOpacity(0.3),
+                              ),
                                     ),
                                     SizedBox(
                                       width: 10,
@@ -1209,18 +1237,22 @@ class _RepliesContentState extends State<RepliesContent>
           for (var item in _data) {
             Strings.comments.add(CommentsRes.fromJson(item));
           }
-          if(Strings.fromNotificationComments)
+          print("notiiii ${Strings.fromNotificationComments}");
+          if(Strings.fromNotificationComments || Strings.fromNotificationReply)
           {
               getIndex();
           }
           initialCommentCheck = false;
-          _timer = new Timer(const Duration(milliseconds: 1000), () 
+          _timer = new Timer(const Duration(milliseconds: 100), () 
           {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              curve: Curves.fastOutSlowIn,
-              duration: const Duration(seconds: 1),
-            );
+  //              itemScrollController.scrollTo(
+  // index: Strings.comments[Strings.selectedCommentsIndex]
+  //                         .replies!.length,
+  // duration: Duration(seconds: 1),
+  // curve: Curves.easeInOutCubic);
+  itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsIndex]
+                          .replies!.length);
+           
             msgField.unfocus();
           });
         });
@@ -1302,7 +1334,7 @@ class _RepliesContentState extends State<RepliesContent>
     req.audio = "data:audio/wav;base64," + base64Encode;
     req.categoryIdList = json.encode(tagedCatsId);
     req.categoryList = json.encode(tagedCats);
-    req.documentId = Strings.category == true
+    req.documentId = Strings.categoriesforReply == true
         ? int.parse(Strings.selectedCatDocument[0].documentId!)
         : int.parse(Strings.selectedProDocument[0].documentId!);
     req.recipientId =
@@ -1311,57 +1343,40 @@ class _RepliesContentState extends State<RepliesContent>
     req.parent_comment_id =
         Strings.comments[Strings.selectedCommentsIndex].commentId;
     req.userId = Strings.userID;
+    req.projectId = Strings.selectedProject[0].projectId;
     var dat = jsonEncode(req);
     print("Printing data -- > $dat");
     log("data--> $dat");
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-        // _socket?.emit(
-        //     'create-document-comment',
-        //     json.encode({
-        //       "project_id": Strings.selectedProject[0].projectId,
-        //       "project_name": Strings.selectedProject[0].projectName,
-        //       "audio": response.data,
-        //       "comment": _msgcontroller.text,
-        //       "document_id": Strings.category == true
-        //           ? Strings.selectedCatDocument[0].documentId
-        //           : Strings.selectedProDocument[0].documentId,
-        //       'recipient_id': json.encode(tagedUsersId),
-        //       'recipient': json.encode(tagedUsers),
-        //       "category_id_list": json.encode(tagedCatsId),
-        //       "category_list": json.encode(tagedCats),
-        //       'parent_comment_id':
-        //           Strings.comments[Strings.selectedCommentsIndex].commentId
-        //     }));
-        setState(() {
           _socket?.disconnect();
           _socket?.connect();
           _socket?.on("connect", (_) {
             print('Connected');
             initialCommentCheck = true;
+                      AppUtils.showToastSuccess("Audio sent successfully");
             getReplies();
-          });
 
-          if (Strings.category == true) {
+          if (Strings.categoriesforReply == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + "1";
           } else {
             Strings.selectedProDocument[0].commentsCount =
                 Strings.selectedProDocument[0].commentsCount! + "1";
           }
-          tagedUsers = [];
-          tagedUsersId = [];
-          tagedCats = [];
-          tagedCatsId = [];
+          // tagedUsers = [];
+          // tagedUsersId = [];
+          // tagedCats = [];
+          // tagedCatsId = [];
           _msgcontroller.text = '';
           typing = false;
           // if (showscroll != true) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            curve: Curves.fastOutSlowIn,
-            duration: const Duration(seconds: 1),
-          );
+          // _scrollController.animateTo(
+          //   _scrollController.position.maxScrollExtent,
+          //   curve: Curves.fastOutSlowIn,
+          //   duration: const Duration(seconds: 1),
+          // );
           msgField.unfocus();
           // } else {
           //   showscroll = false;
@@ -1386,11 +1401,11 @@ class _RepliesContentState extends State<RepliesContent>
       _socket?.emit(
           'create-document-comment',
           json.encode({
-            "project_id": Strings.selectedProject[0].projectId,
-            "project_name": Strings.selectedProject[0].projectName,
+            "project_id": projectId,
+           "project_name": projectname,
             "audio": "",
             "comment": _msgcontroller.text,
-            "document_id": Strings.category == true
+            "document_id": Strings.categoriesforReply == true
                 ? Strings.selectedCatDocument[0].documentId
                 : Strings.selectedProDocument[0].documentId,
             'recipient_id': json.encode(tagedUsersId),
@@ -1398,24 +1413,26 @@ class _RepliesContentState extends State<RepliesContent>
             "category_id_list": json.encode(tagedCatsId),
             "category_list": json.encode(tagedCats),
             'parent_comment_id':
-                Strings.comments[Strings.selectedCommentsIndex].commentId
+                Strings.comments[Strings.selectedCommentsIndex].commentId,
+            "user_id": Strings.userID
+
           }));
+          AppUtils.showToastSuccess("Comment sent successfully");
 
       // print(tagedUsers);
       // print(tagedCatsId);
       // print(tagedCats);
-      setState(() 
-      {
-        if (Strings.category == true) {
+      
+        if (Strings.categoriesforReply == true) {
           Strings.selectedCatDocument[0].commentsCount =
               Strings.selectedCatDocument[0].commentsCount! + "1";
         } else {          Strings.selectedProDocument[0].commentsCount =
               Strings.selectedProDocument[0].commentsCount! + "1";
         }
-        tagedUsers = [];
-        tagedUsersId = [];
-        tagedCats = [];
-        tagedCatsId = [];
+        // tagedUsers = [];
+        // tagedUsersId = [];
+        // tagedCats = [];
+        // tagedCatsId = [];
         _msgcontroller.text = '';
         typing = false;
         // if (showscroll != true) {
@@ -1431,7 +1448,6 @@ class _RepliesContentState extends State<RepliesContent>
         // } else {
         //   showscroll = false;
         // }
-      });
     }
   }
 

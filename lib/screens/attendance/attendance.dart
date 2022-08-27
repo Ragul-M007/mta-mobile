@@ -215,7 +215,10 @@ showDialog(
                 ),
               ),
               TextButton(
-                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+                onPressed: () {
+                  menuRedirect(routename: "/login", currentmenu: 9);
+                  AppUtils.removeDeviceId(context);
+                }
 ,
                 child: new Text(
                   'Yes',

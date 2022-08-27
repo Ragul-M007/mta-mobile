@@ -89,6 +89,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
 
   @override
   Widget build(BuildContext context) {
+    Strings.ctx = context;
     return Container(
       child: Image.asset(
         'assets/images/splashscreen.jpg',
@@ -103,21 +104,12 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       setState(() {
         print("token: $token");
         Strings.fcmToken = token!;
-        //  var  payload = jsonEncode(<String, dynamic>{
-        //                                      "token": token,
-        //                                      "device": 'Android'
-        //                                    });
-        //  service.postToken(payload);
-        // Strings.fcmToken = token;
       });
-      // setState(() {
-      //   _homeScreenText = "Push Messaging token: $token";
-      // });
-      // print(_homeScreenText);
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      setState(() {
+      setState(() 
+      {
         print("message recieved inside get");
         print("data received ---  ${message.notification!.body}");
         //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
@@ -130,121 +122,53 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         Strings.selectedProDocument.add(peo);
         print("dataaa ${Strings.selectedProDocument[0].documentId}");
         print(message.notification?.body);
-        AppUtils.showToastErrorTop(
-            "You have a new notification");
+        AppUtils.showToastErrorTop("You have a new notification!");
         if (Strings.pushNotify == true) {
           print("inside if listen message-----> $message");
-
-          // _showMyDialog(
-          //     (message as dynamic)['data']['image'],
-          //     (message as dynamic)['data']['title'],
-          //     (message as dynamic)['data']['body'],
-          //     PushRes.fromJson(
-          //         jsonDecode((message as dynamic)['data']['docDetails'])[0]));
         }
       });
     });
     FirebaseMessaging.instance
         .getInitialMessage()
-        .then((RemoteMessage? message) {
-      //Map<String, dynamic> map = message?.data;
-      Strings.testing = "myvalue";
-      ProjectDocData peo = ProjectDocData.fromJson(message!.data);
-      Strings.selectedProDocument.add(peo);
-      Strings.fromNotificationComments = true;
-      print(jsonEncode(peo));
-      int id = int.parse(peo.notiId!);
-      Strings.notificationID = id;
-      // message?.data.forEach((key, value) {
-      //   print("key: $key, value: $value");
-      //   Strings.testing = value;
-
-      //  // String.selectedProDocument = message.data;
-      // });
-
-      if (message.notification?.body != null) {
-        if (message.notification!.body!.contains("Signed")) {
+        .then((RemoteMessage? message) 
+        {
+      if (message?.notification?.title != null) {
+        if (message!.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
+        } else if (message.notification!.title!.contains("Commented") ||
+            message.notification!.title!.contains("Replied")) {
+          print("inside");
+          ProjectDocData peo = ProjectDocData.fromJson(message.data);
+          Strings.selectedProDocument.add(peo);
+          Strings.fromNotificationComments = true;
+          print(jsonEncode(peo));
+          int id = int.parse(peo.notiId!);
+          Strings.notificationID = id;
         }
       }
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (message.notification?.body != null) {
-        if (message.notification!.body!.contains("logout")) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      if (message.notification?.body != null) 
+      {
+        print(message.notification?.body);
+        if (message.notification!.title!.contains("logout")) {
           Strings.FromNotification = true;
-          checkLogin();
-        }
-       
-
+          await checkLogin();
+        } else if (message.notification!.title!.contains("Commented") ||
+            message.notification!.title!.contains("Replied")) {
+          print("test inside");
           print(message.data);
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
           Strings.selectedProDocument.clear();
           Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
           print(jsonEncode(peo));
-          checkLogin();
-                int id = int.parse(peo.notiId!);
+          await checkLogin();
+          int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+        }
       }
-
-      print("is login  ${Strings.isLogin}");
-      print("Message--> ${message.notification?.body}");
-      // setState(() {
-      //     if (Strings.pushNotify == true) {
-      //         print("inside messageopenedApp message-----> $message");
-      //        _showMyDialog(
-      //           (message as dynamic)['data']['image'],
-      //           (message as dynamic)['data']['title'],
-      //           (message as dynamic)['data']['body'],
-      //           PushRes.fromJson(jsonDecode((message as dynamic)['data']['docDetails'])[0]));
-      //     }
-      //   });
     });
-
-    // old firebase version
-
-    // _firebaseMessaging.configure(
-    //   onMessage: (Map<String, dynamic> message) async {
-    //     print("onMessage-: $message");
-    //     setState(() {
-    //       if (Strings.pushNotify == true) {
-    //         _showMyDialog(
-    //             message['data']['image'],
-    //             message['data']['title'],
-    //             message['data']['body'],
-    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-    //       }
-    //     });
-    //   },
-
-    //   onLaunch: (Map<String, dynamic> message) async {
-    //     print("l-: $message");
-    //     setState(() {
-    //       if (Strings.pushNotify == true) {
-    //         _showMyDialog(
-    //             message['data']['image'],
-    //             message['data']['title'],
-    //             message['data']['body'],
-    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-    //       }
-    //     });
-    //   },
-    //   onResume: (Map<String, dynamic> message) async {
-    //     print("r-: $message");
-    //     setState(() {
-    //       if (Strings.pushNotify == true) {
-    //         _showMyDialog(
-    //             message['data']['image'],
-    //             message['data']['title'],
-    //             message['data']['body'],
-    //             PushRes.fromJson(jsonDecode(message['data']['docDetails'])[0]));
-    //       }
-    //     });
-    //   },
-    // );
-    // _firebaseMessaging.requestNotificationPermissions(
-    //     const IosNotificationSettings(
-    //         sound: true, badge: true, alert: true, provisional: true));
 
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
@@ -514,11 +438,15 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   void getToken() {
     timer = new Timer(const Duration(milliseconds: 4000), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
+
+                  print("value outside--> $value");
+
         if (value != null) {
-          print(value);
+          print("value inside--> $value");
 
           if (value == "Y") {
-            Navigator.pushNamed(context, "/verifypin");
+            print("test");
+            Navigator.popAndPushNamed(context, "/verifypin");
             // Navigator.popAndPushNamed(context, "/comments");
           } else {
             Navigator.popAndPushNamed(context, "/login");
@@ -527,28 +455,34 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           }
         }
       }).catchError((onError) {
+        print(onError);
         Navigator.popAndPushNamed(context, "/login");
         // Navigator.popAndPushNamed(context, "/comments");
       });
     });
   }
 
-  void checkLogin() {
+  checkLogin() {
     AppUtils.getStringPreferences('easyAccess').then((value) {
+      print("Checking $value");
       if (value != null) {
         print(value);
 
         if (value == "Y") {
-          Navigator.pushNamed(context, "/verifypin");
+         // Navigator.pushNamed(context, "/verifypin",);
+            navigatorKey.currentState?.pushNamed('/verifypin');
+
+
           // Navigator.popAndPushNamed(context, "/comments");
         } else {
-          Navigator.popAndPushNamed(context, "/login");
+            navigatorKey.currentState?.pushNamed('/login');
           //Navigator.popAndPushNamed(context, "/comments");
 
         }
       }
     }).catchError((onError) {
-      Navigator.popAndPushNamed(context, "/login");
+      print("inside catch error: " + onError.message);
+      //Navigator.popAndPushNamed(context, "/login");
       // Navigator.popAndPushNamed(context, "/comments");
     });
   }

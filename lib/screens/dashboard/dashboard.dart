@@ -302,7 +302,10 @@ class _DashboardState extends State<Dashboard>
                 ),
               ),
               TextButton(
-                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+                onPressed: (){
+                  menuRedirect(routename: "/login", currentmenu: 9);
+                  AppUtils.removeDeviceId(ctx);
+                }                  
 ,
                 child: new Text(
                   'Yes',
@@ -604,6 +607,7 @@ class _DashboardState extends State<Dashboard>
                                               ),
                                               child: new GridTile(
                                                 child: Container(
+                                                  //color: Colors.green,
                                                   height: 50,
                                                   width: 50,
                                                   child: Padding(
@@ -611,9 +615,11 @@ class _DashboardState extends State<Dashboard>
                                                           EdgeInsets.fromLTRB(
                                                               10, 10, 10, 10),
                                                       child: Row(
+                                                        
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
+                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
                                                           GestureDetector(
                                                             onTap: () {
@@ -644,7 +650,10 @@ class _DashboardState extends State<Dashboard>
                                                                   65.0),
                                                             ),
                                                           ),
-                                                          Container()
+                                                          Container(
+                                                            margin: EdgeInsets.fromLTRB(10, 12, 0, 0),
+                                                            child: Text(_projectLists[index].status!,style:TextStyle(color: _projectLists[index].status! == "Active"?Colors.lightGreen:_projectLists[index].status! =="Completed"? Colors.green:_projectLists[index].status! == "Cancelled"? Colors.red:Colors.yellow))),
+
                                                         ],
                                                       )),
                                                 ),

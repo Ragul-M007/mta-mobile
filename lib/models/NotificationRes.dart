@@ -10,7 +10,8 @@ class NotificationRes {
     message = json['message'];
     if (json['data'] != null) {
       data = <NotificationData>[];
-      json['data'].forEach((v) {
+      json['data'].forEach((v) 
+      {
         data!.add(new NotificationData.fromJson(v));
       });
     }
@@ -82,6 +83,7 @@ class DocDetail {
   String? createdAt;
   String? description;
   int? documentId;
+  String? commentId;
 
   DocDetail(
       {this.file,
@@ -90,6 +92,7 @@ class DocDetail {
       this.projectId,
       this.userId,
       this.fileName,
+      this.commentId,
       this.createdAt,
       this.description,
       this.documentId});
@@ -101,6 +104,7 @@ class DocDetail {
     projectId = json['project_id'];
     userId = json['user_id'];
     fileName = json['file_name'];
+    commentId = json['parent_comment_id'].toString();
     createdAt = json['created_at'];
     description = json['description'];
     documentId = json['document_id'];
@@ -114,6 +118,7 @@ class DocDetail {
     data['project_id'] = this.projectId;
     data['user_id'] = this.userId;
     data['file_name'] = this.fileName;
+    data['parent_comment_id'] = this.commentId;
     data['created_at'] = this.createdAt;
     data['description'] = this.description;
     data['document_id'] = this.documentId;

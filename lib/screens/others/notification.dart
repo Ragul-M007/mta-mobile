@@ -184,7 +184,10 @@ showDialog(
                 ),
               ),
               TextButton(
-                onPressed: () =>                   menuRedirect(routename: "/login", currentmenu: 9)
+                onPressed: () {
+                 menuRedirect(routename: "/login", currentmenu: 9);
+                  AppUtils.removeDeviceId(context);
+                }
 ,
                 child: new Text(
                   'Yes',
@@ -266,7 +269,8 @@ showDialog(
                               Strings.fromNotificationScren = true;
                               if (_msgList[index]
                                   .title!
-                                  .contains("Commented")) {
+                                  .contains("Commented")) 
+                                  {
                                 updateNotification(
                                     _msgList[index].notiId, true);
                               } else {
@@ -463,6 +467,7 @@ showDialog(
         }
         else
         {
+          Strings.fromNotificationReply = true;
           Navigator.of(context).pushReplacementNamed('/replies');
 
         }

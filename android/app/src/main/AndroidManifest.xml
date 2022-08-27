@@ -26,6 +26,7 @@
                     android:resource="@xml/filepaths"
                     tools:replace="android:resource" />
         </provider>
+
         <activity
             android:name=".MainActivity"
             android:exported ="true"

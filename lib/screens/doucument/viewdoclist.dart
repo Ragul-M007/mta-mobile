@@ -183,15 +183,20 @@ class _ViewDocContentState extends State<ViewDocContent>
           //       Colors.black, 20.0, FontWeight.w600),
           // ),
           Container(
-            padding: EdgeInsets.only(top: 30.0, bottom: 10.0),
-            child: Text(
-              Strings.category == true
-                  ? Strings.selectedProject[0].projectName! +
-                      " >> " +
-                      Strings.selectedCategory[0].categoryName!
-                  : Strings.selectedProject[0].projectName!,
-              style: Drawables.adddoccontentstyle(
-                  Colors.black, 25.0, FontWeight.bold,),
+            padding: EdgeInsets.only(top: 30.0, bottom: 10.0,right: 20,left: 20),
+            child: Center(
+              child: Text(
+                
+                Strings.category == true
+                    ? Strings.selectedProject[0].projectName! +
+                        " >> " +
+                        Strings.selectedCategory[0].categoryName!
+                    : Strings.selectedProject[0].projectName!,
+                style: Drawables.adddoccontentstyle(
+                    Colors.black, 25.0, FontWeight.bold,),
+                    maxLines: 3,
+                    textAlign: TextAlign.center,
+              ),
             ),
           ),
           Padding(
@@ -340,6 +345,7 @@ class _ViewDocContentState extends State<ViewDocContent>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                 
                                   Padding(
                                     padding: EdgeInsets.only(left: 10),
                                     child: Text(
@@ -349,6 +355,10 @@ class _ViewDocContentState extends State<ViewDocContent>
                                           14.0,
                                           FontWeight.w500),
                                     ),
+                                  ),
+                                   Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text("Created on: ${getForamtDate(_searchList[index].createdAt)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
                                   ),
                                   SizedBox(height: 7.0),
                                   GestureDetector(
@@ -511,6 +521,11 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                           maxLines: 1,
                                                 ),
                                               ),
+                                              Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text("Created on: ${getForamtDate(_categorydocsList[index]
+                                                            .createdAt!)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
+                                  ),
                                               SizedBox(height: 7.0),
                                               GestureDetector(
                                                 onTap: () {
@@ -682,7 +697,12 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                           maxLines: 2
                                                 ),
                                               ),
-                                              SizedBox(height: 7.0),
+                                              Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Text("Created on: ${getForamtDate(_docsList[index]
+                                                            .createdAt!)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
+                                  ),
+                                              SizedBox(height: 5.0),
                                               GestureDetector(
                                                 onTap: () {
                                                   print("Comments final");

@@ -4,6 +4,7 @@ class AudioReq {
   String? categoryIdList;
   String? categoryList;
   int? documentId;
+  int? projectId;
   String? recipientId;
   String? recipient;
   int? userId;
@@ -16,6 +17,7 @@ class AudioReq {
       this.categoryIdList,
       this.categoryList,
       this.documentId,
+      this.projectId,
       this.recipientId,
       this.recipient,
       this.userId,
@@ -27,6 +29,7 @@ class AudioReq {
     categoryIdList = json['category_id_list'];
     categoryList = json['category_list'];
     documentId = json['document_id'];
+    projectId = json['project_id'];
     recipientId = json['recipient_id'];
     recipient = json['recipient'];
     userId = json['user_id'];
@@ -40,6 +43,7 @@ class AudioReq {
     data['category_id_list'] = this.categoryIdList;
     data['category_list'] = this.categoryList;
     data['document_id'] = this.documentId;
+    data['project_id'] = this.projectId;
     data['recipient_id'] = this.recipient;
     data['recipient'] = this.recipientId;
     data['user_id'] = this.userId;

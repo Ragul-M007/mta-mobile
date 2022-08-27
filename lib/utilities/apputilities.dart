@@ -1,8 +1,13 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mta/utilities/strings.dart';
+import 'package:provider/provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../network/ApiService.dart';
 
 class AppUtils {
   // Field Focus
@@ -122,5 +127,19 @@ class AppUtils {
     print('dismiss');
 
     EasyLoading.dismiss();
+  }
+
+  static void removeDeviceId(ctx) {
+    final api = Provider.of<ApiService>(ctx!, listen: false);
+    AppUtils.getIntPreferences('userId').then((value) {
+      if (value != null) {
+        api.removeDeviceId(Strings.userID!).then((response) {
+
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      }
+    });
   }
 }

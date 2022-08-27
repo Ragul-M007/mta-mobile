@@ -28,6 +28,7 @@ import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
@@ -50,6 +51,7 @@ var typing = false;
 var showtoastinfo = false;
 var startRecording = false;
 var initialCommentCheck = true;
+List<String> docImg = [];
 
 var isPlaying = false;
 var playingIndex = null;
@@ -78,25 +80,23 @@ class _CommentsState extends State<Comments> {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: appbar("Comments"),
           backgroundColor: Colors.grey[300],
           body: WillPopScope(
               child: CommentsContent(),
               onWillPop: () {
+                Strings.category = false;
                 initialCommentCheck = true;
                 _socket?.disconnect();
                 _socket?.dispose();
                 if (Strings.fromNotificationComments == true) {
                   Strings.fromNotificationComments = false;
                   Navigator.pushNamed(context, '/dashboard');
-                } else if (Strings.fromNotificationScren)
-                {
+                } else if (Strings.fromNotificationScren) {
                   Strings.fromNotificationScren = false;
-                                Navigator.of(context).pushReplacementNamed('/notification');
-
-                }
-                
-                 else {
+                  Navigator.of(context).pushReplacementNamed('/notification');
+                } else {
                   Navigator.pushNamed(context, '/viewdoclist');
                 }
                 throw 'Screen Change';
@@ -116,9 +116,13 @@ class _CommentsContentState extends State<CommentsContent>
     with SingleTickerProviderStateMixin {
   var _currDoc;
   TextEditingController _msgcontroller = TextEditingController();
-  ScrollController _scrollController = new ScrollController();
+  //ScrollController _scrollController = new ScrollController();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
   FocusNode msgField = new FocusNode();
   String? filepath;
+  int? projectId;
 
   var _key;
 
@@ -126,15 +130,20 @@ class _CommentsContentState extends State<CommentsContent>
   @override
   void initState() {
     super.initState();
-    if(Strings.fromNotificationComments)
-    {
+    if (Strings.fromNotificationComments) {
       updateNotification(Strings.notificationID);
+    }
+    if (Strings.category) 
+    {
+      projectId = Strings.selectedProject[0].projectId!;
+      Strings.categoriesforReply = true;
+    } else {
+      projectId = int.parse(Strings.selectedProDocument[0].projectId ?? "0");
     }
     getUserCats();
     getuserCatgories();
     getProjectDetails();
 
-    
     print("initial value check-->> $initialCommentCheck");
     initialCommentCheck = true;
 
@@ -157,7 +166,8 @@ class _CommentsContentState extends State<CommentsContent>
       _currDoc = Strings.selectedProDocument[0];
     }
     // getUserCats();
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
+    _socket = IO.io(Strings.socketUrl, <String, dynamic>
+    {
       'transports': ['websocket'],
       'autoConnect': false,
       'query': {
@@ -167,6 +177,10 @@ class _CommentsContentState extends State<CommentsContent>
       }
     });
     _socket?.connect();
+    _socket?.onConnect((_) {
+    print('connect');
+});
+    print("connection established");
     AppUtils.showprogress();
     _socket?.on("connect", (_) {
       print('Connected');
@@ -201,9 +215,8 @@ class _CommentsContentState extends State<CommentsContent>
 
   getUserCats() {
     final api = Provider.of<ApiService>(context, listen: false);
-    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
 
-    api.fetchUsers(projectid).then((response) {
+    api.fetchUsers(projectId!).then((response) {
       if (response.status!) {
         setState(() {
           Strings.users = response.data!;
@@ -221,16 +234,16 @@ class _CommentsContentState extends State<CommentsContent>
       print(onError.toString());
     });
   }
- getProjectDetails() 
- {
-   print("project details called");
+
+  getProjectDetails() {
+    print("project details called");
     final api = Provider.of<ApiService>(context, listen: false);
-    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
-    api.getProjectName(projectid).then((response) {
+
+    api.getProjectName(projectId!).then((response) {
       if (response.status!) {
         setState(() {
           print("project name ---> {response.data![0].projectName}");
-        projectname = response.data![0].projectName ?? "";
+          projectname = response.data![0].projectName ?? "";
         });
       } else {
         print('No categories');
@@ -240,10 +253,11 @@ class _CommentsContentState extends State<CommentsContent>
       print("Catched $onError");
     });
   }
+
   getuserCatgories() {
     final api = Provider.of<ApiService>(context, listen: false);
-    int projectid = int.parse(Strings.selectedProDocument[0].projectId ?? "71");
-    api.fetchCats(projectid).then((response) {
+
+    api.fetchCats(projectId!).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
@@ -411,387 +425,386 @@ class _CommentsContentState extends State<CommentsContent>
                     ],
                   ),
                 ),
-                Container(
-                  child: Row(
-                    children: [
-                      Image.asset("assets/icons/Comments.png",
-                          width: 15.0, height: 15.0),
-                      SizedBox(width: 10),
-                      Text(
-                          // Strings.category == true
-                          //     ? Strings.selectedCatDocument[0].commentsCount
-                          //             .toString() +
-                          //         " Comments"
-                          //     : Strings.selectedProDocument[0].commentsCount
-                          //             .toString() +
-                          //         " Comments",
-                          Strings.comments.length.toString(),
-                          style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w600))
-                    ],
-                  ),
-                )
+                // Container(
+                //   child: Row(
+                //     children: [
+                //       Image.asset("assets/icons/Comments.png",
+                //           width: 15.0, height: 15.0),
+                //       SizedBox(width: 10),
+                //       // Text(
+                //       //     // Strings.category == true
+                //       //     //     ? Strings.selectedCatDocument[0].commentsCount
+                //       //     //             .toString() +
+                //       //     //         " Comments"
+                //       //     //     : Strings.selectedProDocument[0].commentsCount
+                //       //     //             .toString() +
+                //       //     //         " Comments",
+                //       //     Strings.comments.length.toString(),
+                //       //     style: TextStyle(
+                //       //         color: Colors.black, fontWeight: FontWeight.w600))
+                //     ],
+                //   ),
+                // )
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 10, top: 5,bottom: 5),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Project: ${projectname ?? ""}",
-                  style: TextStyle(
-                      color: Colors.grey, fontWeight: FontWeight.w600)),
-            )
-          ),
+              padding: EdgeInsets.only(left: 10, top: 5, bottom: 5),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Project: ${projectname ?? ""}",
+                    style: TextStyle(
+                        color: Colors.grey, fontWeight: FontWeight.w600)),
+              )),
           Divider(),
           Strings.comments.length > 0
               ? Expanded(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      reverse: true,
-                      controller: _scrollController,
-                      itemCount: Strings.comments.length,
-                      padding: EdgeInsets.all(20),
-                      itemBuilder: (BuildContext ctx, int index) {
-                        return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        _showMyDialog(
-                                            context,
-                                            Strings.baseImageUrl +
-                                                Strings
-                                                    .comments[index].userImg!);
-                                      },
-                                      child: Container(
-                                        width: 30.0,
-                                        height: 30.0,
-                                        decoration: new BoxDecoration(
-                                          color:
-                                              Color.fromRGBO(124, 148, 182, 1),
-                                          image: new DecorationImage(
-                                            image: new NetworkImage(
-                                                Strings.baseImageUrl +
-                                                    (Strings.comments[index]
-                                                            .userImg ??
-                                                        "")),
-                                            fit: BoxFit.fill,
-                                          ),
-                                          borderRadius: new BorderRadius.all(
-                                              new Radius.circular(50.0)),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                                Strings.comments[index].name! +
-                                                    " . ",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.w600)),
-                                            Container(
-                                              width: 18.0,
-                                              height: 18.0,
-                                              child: IconButton(
-                                                padding:
-                                                    new EdgeInsets.all(0.0),
-                                                color: Colors.grey,
-                                                icon: new Icon(Icons.update,
-                                                    size: 18.0),
-                                                onPressed: () {},
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 1,
-                                            ),
-                                            Text(
-                                                calculateTimeDifferenceBetween(
-                                                    serverDate: Strings
-                                                        .comments[index].date),
-                                                style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontWeight:
-                                                        FontWeight.w500))
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 12,
-                                        ),
-                                        Container(
-                                          child: Text(Strings
-                                                  .comments[index].recipient
-                                                  ?.replaceAll('"', '') ??
-                                              ""),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Container(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
+                child: ScrollablePositionedList.builder(
+                     shrinkWrap: true,
+                    //reverse: true,
+                    itemScrollController: itemScrollController,
+                    itemPositionsListener: itemPositionsListener,
+                    itemCount: Strings.comments.length,
+                    padding: EdgeInsets.all(20),
+                    itemBuilder: (BuildContext ctx, int index) {
+                      return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showMyDialog(
+                                          context,
+                                          Strings.baseImageUrl +
+                                              Strings
+                                                  .comments[index].userImg!);
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage: Strings
+                                                  .comments[index].userImg !=
+                                              null
+                                          ? NetworkImage(
+                                              Strings.baseImageUrl +
                                                   (Strings.comments[index]
-                                                                  .audio ==
-                                                              "" ||
-                                                          Strings
-                                                                  .comments[
-                                                                      index]
-                                                                  .audio ==
-                                                              null)
-                                                      ? Text(
-                                                          Strings
-                                                              .comments[index]
-                                                              .comment
-                                                              .toString(),
-                                                          style: Drawables
-                                                              .adddoccontentstyle(
-                                                                  Colors
-                                                                      .black45,
-                                                                  14.0,
-                                                                  FontWeight
-                                                                      .w400))
-                                                      : (Strings.comments[index]
-                                                              .audio!
-                                                              .contains(".wav"))
-                                                          ? Row(
-                                                              children: [
-                                                                isPlaying ==
-                                                                        false
-                                                                    ? GestureDetector(
-                                                                        onTap:
+                                                      .userImg!))
+                                          : AssetImage(
+                                                  "assets/icons/account.png")
+                                              as ImageProvider,
+                                      backgroundColor:
+                                          Colors.grey.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                              Strings.comments[index].name! +
+                                                  " . ",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight:
+                                                      FontWeight.w600)),
+                                          Container(
+                                            width: 18.0,
+                                            height: 18.0,
+                                            child: IconButton(
+                                              padding:
+                                                  new EdgeInsets.all(0.0),
+                                              color: Colors.grey,
+                                              icon: new Icon(Icons.update,
+                                                  size: 18.0),
+                                              onPressed: () {},
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 1,
+                                          ),
+                                          Text(
+                                              calculateTimeDifferenceBetween(
+                                                  serverDate: Strings
+                                                      .comments[index].date),
+                                              style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontWeight:
+                                                      FontWeight.w500))
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 12,
+                                      ),
+                                      Container(
+                                        child: Text(Strings
+                                                .comments[index].recipient
+                                                ?.replaceAll('"', '') ??
+                                            ""),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Container(
+                                        child: Padding(
+                                            padding: EdgeInsets.all(10),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                (Strings.comments[index]
+                                                                .audio ==
+                                                            "" ||
+                                                        Strings
+                                                                .comments[
+                                                                    index]
+                                                                .audio ==
+                                                            null)
+                                                    ? Text(
+                                                        Strings
+                                                            .comments[index]
+                                                            .comment
+                                                            .toString(),
+                                                        style: Drawables
+                                                            .adddoccontentstyle(
+                                                                Colors
+                                                                    .black45,
+                                                                14.0,
+                                                                FontWeight
+                                                                    .w400))
+                                                    : (Strings.comments[index]
+                                                            .audio!
+                                                            .contains(".wav"))
+                                                        ? Row(
+                                                            children: [
+                                                              isPlaying ==
+                                                                      false
+                                                                  ? GestureDetector(
+                                                                      onTap:
+                                                                          () {
+                                                                        setState(
                                                                             () {
-                                                                          setState(
+                                                                          if (isPlaying ==
+                                                                              true) {
+                                                                            stopAudio();
+                                                                            _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                              setState(() {
+                                                                                isPlaying = true;
+                                                                                playingIndex = index;
+                                                                                playAudio(Strings.comments[index].audio);
+                                                                              });
+                                                                            });
+                                                                          } else {
+                                                                            isPlaying = true;
+                                                                            playingIndex = index;
+                                                                            playAudio(Strings.comments[index].audio);
+                                                                          }
+                                                                        });
+                                                                      },
+                                                                      child: new Icon(
+                                                                          Icons
+                                                                              .play_arrow,
+                                                                          size:
+                                                                              28.0),
+                                                                    )
+                                                                  : playingIndex ==
+                                                                          index
+                                                                      ? GestureDetector(
+                                                                          onTap:
                                                                               () {
-                                                                            if (isPlaying ==
-                                                                                true) {
-                                                                              stopAudio();
-                                                                              _timer = new Timer(const Duration(milliseconds: 500), () {
-                                                                                setState(() {
-                                                                                  isPlaying = true;
-                                                                                  playingIndex = index;
-                                                                                  playAudio(Strings.comments[index].audio);
-                                                                                });
-                                                                              });
-                                                                            } else {
-                                                                              isPlaying = true;
-                                                                              playingIndex = index;
-                                                                              playAudio(Strings.comments[index].audio);
-                                                                            }
-                                                                          });
-                                                                        },
-                                                                        child: new Icon(
-                                                                            Icons
-                                                                                .play_arrow,
-                                                                            size:
-                                                                                28.0),
-                                                                      )
-                                                                    : playingIndex ==
-                                                                            index
-                                                                        ? GestureDetector(
-                                                                            onTap:
-                                                                                () {
-                                                                              setState(() {
-                                                                                isPlaying = false;
-                                                                              });
-
-                                                                              stopAudio();
-                                                                            },
-                                                                            child:
-                                                                                new Icon(Icons.stop, size: 28.0),
-                                                                          )
-                                                                        : GestureDetector(
-                                                                            onTap:
-                                                                                () {
-                                                                              setState(() {
-                                                                                if (isPlaying == true) {
-                                                                                  stopAudio();
-                                                                                  _timer = new Timer(const Duration(milliseconds: 500), () {
-                                                                                    setState(() {
-                                                                                      isPlaying = true;
-                                                                                      playingIndex = index;
-                                                                                      playAudio(Strings.comments[index].audio);
-                                                                                    });
+                                                                            setState(() {
+                                                                              isPlaying = false;
+                                                                            });
+              
+                                                                            stopAudio();
+                                                                          },
+                                                                          child:
+                                                                              new Icon(Icons.stop, size: 28.0),
+                                                                        )
+                                                                      : GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            setState(() {
+                                                                              if (isPlaying == true) {
+                                                                                stopAudio();
+                                                                                _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                  setState(() {
+                                                                                    isPlaying = true;
+                                                                                    playingIndex = index;
+                                                                                    playAudio(Strings.comments[index].audio);
                                                                                   });
-                                                                                } else {
-                                                                                  isPlaying = true;
-                                                                                  playingIndex = index;
-                                                                                  playAudio(Strings.comments[index].audio);
-                                                                                }
-                                                                              });
-                                                                            },
-                                                                            child:
-                                                                                new Icon(Icons.play_arrow, size: 28.0),
-                                                                          ),
+                                                                                });
+                                                                              } else {
+                                                                                isPlaying = true;
+                                                                                playingIndex = index;
+                                                                                playAudio(Strings.comments[index].audio);
+                                                                              }
+                                                                            });
+                                                                          },
+                                                                          child:
+                                                                              new Icon(Icons.play_arrow, size: 28.0),
+                                                                        ),
+                                                              SizedBox(
+                                                                width: 10,
+                                                              ),
+                                                              Slider(
+                                                                value: playingIndex ==
+                                                                        index
+                                                                    ? audioCurrentlenth
+                                                                        .toDouble()
+                                                                    : 0,
+                                                                min: 0,
+                                                                max: playingIndex ==
+                                                                        index
+                                                                    ? audioLength
+                                                                        .toDouble()
+                                                                    : 0,
+                                                                onChanged:
+                                                                    (double
+                                                                        value) {
+                                                                  setState(
+                                                                      () {
+                                                                    playingIndex ==
+                                                                            index
+                                                                        ? audioCurrentlenth =
+                                                                            value.toInt()
+                                                                        : 0;
+                                                                    // _currentSliderValue = value;
+                                                                  });
+                                                                },
+                                                              ),
+                                                            ],
+                                                          )
+                                                        : InkWell(
+                                                            onTap: () {
+                                                              _downloadfile(
+                                                                  Strings
+                                                                      .comments[
+                                                                          index]
+                                                                      .audio,
+                                                                  Strings
+                                                                      .comments[
+                                                                          index]
+                                                                      .commentId
+                                                                      .toString());
+                                                            },
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Stack(
+                                                                    children: [
+                                                                      Container(
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color:
+                                                                              Colors.grey.withOpacity(0.1),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(10),
+                                                                        ),
+                                                                        padding:
+                                                                            EdgeInsets.all(10),
+                                                                        child:
+                                                                            Image.asset(
+                                                                          docImg[index],
+                                                                          width:
+                                                                              80,
+                                                                          height:
+                                                                              80,
+                                                                        ),
+                                                                      ),
+                                                                      Positioned(
+                                                                        top:
+                                                                            20,
+                                                                        left:
+                                                                            40,
+                                                                        child: Container(
+                                                                            child: Icon(
+                                                                          Icons.download_rounded,
+                                                                          size:
+                                                                              20.0,
+                                                                        )),
+                                                                      ),
+                                                                    ]),
                                                                 SizedBox(
                                                                   width: 10,
                                                                 ),
-                                                                Slider(
-                                                                  value: playingIndex ==
-                                                                          index
-                                                                      ? audioCurrentlenth
-                                                                          .toDouble()
-                                                                      : 0,
-                                                                  min: 0,
-                                                                  max: playingIndex ==
-                                                                          index
-                                                                      ? audioLength
-                                                                          .toDouble()
-                                                                      : 0,
-                                                                  onChanged:
-                                                                      (double
-                                                                          value) {
-                                                                    setState(
-                                                                        () {
-                                                                      playingIndex ==
-                                                                              index
-                                                                          ? audioCurrentlenth =
-                                                                              value.toInt()
-                                                                          : 0;
-                                                                      // _currentSliderValue = value;
-                                                                    });
-                                                                  },
-                                                                ),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                      Strings.comments[index].comment ==
+                                                                              "undefined"
+                                                                          ? ""
+                                                                          : Strings.comments[index].comment ??
+                                                                              "",
+                                                                      maxLines:
+                                                                          20,
+                                                                      style: Drawables.adddoccontentstyle(
+                                                                          Colors.black45,
+                                                                          14.0,
+                                                                          FontWeight.w400)),
+                                                                )
                                                               ],
-                                                            )
-                                                          : InkWell(
-                                                              onTap: () {
-                                                                _downloadfile(
-                                                                    Strings
-                                                                        .comments[
-                                                                            index]
-                                                                        .audio,
-                                                                    Strings
-                                                                        .comments[
-                                                                            index]
-                                                                        .commentId
-                                                                        .toString());
-                                                              },
-                                                              child: Row(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Stack(
-                                                                      children: [
-                                                                        Container(
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            color:
-                                                                                Colors.grey.withOpacity(0.1),
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(10),
-                                                                          ),
-                                                                          padding:
-                                                                              EdgeInsets.all(10),
-                                                                          child:
-                                                                              Image.asset(
-                                                                            getFileExt(Strings.comments[index].audio ??
-                                                                                "test.mpg"),
-                                                                            width:
-                                                                                80,
-                                                                            height:
-                                                                                80,
-                                                                          ),
-                                                                        ),
-                                                                        Positioned(
-                                                                          top:
-                                                                              20,
-                                                                          left:
-                                                                              40,
-                                                                          child: Container(
-                                                                              child: Icon(
-                                                                            Icons.download_rounded,
-                                                                            size:
-                                                                                20.0,
-                                                                          )),
-                                                                        ),
-                                                                      ]),
-                                                                  SizedBox(
-                                                                    width: 10,
-                                                                  ),
-                                                                  Expanded(
-                                                                    child: Text(
-                                                                        Strings.comments[index].comment ==
-                                                                                "undefined"
-                                                                            ? ""
-                                                                            : Strings.comments[index].comment ??
-                                                                                "",
-                                                                        maxLines:
-                                                                            20,
-                                                                        style: Drawables.adddoccontentstyle(
-                                                                            Colors.black45,
-                                                                            14.0,
-                                                                            FontWeight.w400)),
-                                                                  )
-                                                                ],
-                                                              ),
                                                             ),
-                                                  SizedBox(
-                                                    height: 10,
+                                                          ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Strings.category = false;
+                                                    Strings.selectedCommentsIndex =
+                                                        index;
+                                                    Navigator.pushNamed(
+                                                        context, '/replies');
+                                                  },
+                                                  child: Text(
+                                                    Strings.comments[index]
+                                                            .replies!.length
+                                                            .toString() +
+                                                        "  Replies",
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xFF0061b0),
+                                                        fontWeight:
+                                                            FontWeight.w600),
                                                   ),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      Strings.selectedCommentsIndex =
-                                                          index;
-                                                      Navigator.pushNamed(
-                                                          context, '/replies');
-                                                    },
-                                                    child: Text(
-                                                      Strings.comments[index]
-                                                              .replies!.length
-                                                              .toString() +
-                                                          "  Replies",
-                                                      style: TextStyle(
-                                                          color:
-                                                              Color(0xFF0061b0),
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                  )
-                                                ],
-                                              )),
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.75,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadiusDirectional
-                                                      .circular(10)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                MySeparator(
-                                  color: Colors.grey[500]!,
-                                )
-                              ],
-                            ));
-                      }))
+                                                )
+                                              ],
+                                            )),
+                                        width: MediaQuery.of(context)
+                                                .size
+                                                .width *
+                                            0.75,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadiusDirectional
+                                                    .circular(10)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              MySeparator(
+                                color: Colors.grey[500]!,
+                              )
+                            ],
+                          ));
+                    }),
+              )
               : Spacer(),
+          //Strings.comments.length > 0 ?Spacer():SizedBox(),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -896,7 +909,6 @@ class _CommentsContentState extends State<CommentsContent>
               ),
             ),
           ),
-          // SizedBox(height: 10),
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -1049,49 +1061,52 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() async 
-  {
+  getComments() async {
     print("Getting comments");
-    _socket?.on("document-comments", (_data) 
-    {
-
+    _socket?.on("document-comments", (_data) {
       print('fromServer');
 
-      if (initialCommentCheck) 
-      {
+      if (initialCommentCheck) {
         log('fromServer comments $_data');
-        setState(() 
-        {
+        setState(() {
           print("Dta chacek--> $initialCommentCheck");
           print("getting inside");
           msgField.unfocus();
-            Strings.comments = [];
-            for (var item in _data) {
-                Strings.comments.add(CommentsRes.fromJson(item));
-                print("set state");
-            }
-            setState(() {
-              initialCommentCheck = false;
-            print("Comments fetched changing to false");
-            // _socket?.dispose();
-            _timer = new Timer(const Duration(milliseconds: 1000), () 
-            {
-              _scrollController.animateTo(
-                _scrollController.position.maxScrollExtent,
-                curve: Curves.fastOutSlowIn,
-                duration: const Duration(seconds: 1),
-              );
-              msgField.unfocus();
-              Strings.selectedProDocument[0].commentsCount =
-                  Strings.comments.length.toString();
-            });
+          Strings.comments = [];
+          for (var item in _data) {
+            Strings.comments.add(CommentsRes.fromJson(item));
+            print("set state");
+          }
+          getextImg();
+          // setState(() {
+          initialCommentCheck = false;
+          print("Comments fetched changing to false");
+          // _socket?.dispose();
+
+          _timer = new Timer(const Duration(milliseconds: 100), () async {
+            //   _scrollController.animateTo(
+            //   _scrollController.position.maxScrollExtent,
+            //   curve: Curves.easeOut,
+            //   duration: const Duration(seconds: 2),
+            // );
+          // await  itemScrollController.scrollTo(
+          //       index: Strings.comments.length,
+          //       duration: Duration(seconds: 1),
+          //       curve: Curves.easeInOutCubic);
+
+          itemScrollController.jumpTo(index: 0);
+
+            msgField.unfocus();
+            Strings.selectedProDocument[0].commentsCount =
+                Strings.comments.length.toString();
           });
+          //  });
         });
       }
       setState(() {
-          print(initialCommentCheck);
+        print(initialCommentCheck);
       });
-    }); 
+    });
   }
 
   recordComments() async {
@@ -1208,6 +1223,7 @@ class _CommentsContentState extends State<CommentsContent>
     req.recipient = json.encode(tagedUsersId);
 
     req.userId = Strings.userID;
+    req.projectId = Strings.selectedProject[0].projectId;
     var dat = jsonEncode(req);
     print("Printing data -- > $dat");
     log("data--> $dat");
@@ -1227,30 +1243,13 @@ class _CommentsContentState extends State<CommentsContent>
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-        // _socket?.emit(
-        //     'create-document-comment',
-        //     // json.encode({
-        //     //   "project_id": Strings.selectedProject[0].projectId,
-        //     //   "project_name": Strings.selectedProject[0].projectName,
-        //     //   "audio": response.data,
-        //     //   "comment": _msgcontroller.text,
-        //     //   "document_id": Strings.category == true
-        //     //       ? Strings.selectedCatDocument[0].documentId
-        //     //       : Strings.selectedProDocument[0].documentId,
-        //     //   'recipient_id': json.encode(tagedUsersId),
-        //     //   'recipient': json.encode(tagedUsers),
-        //     //   "category_id_list": json.encode(tagedCatsId),
-        //     //   "category_list": json.encode(tagedCats)
-        //     // })
-        //      );
-
-        setState(() {
-          _socket?.disconnect();
-          _socket?.connect();
-          _socket?.on("connect", (_) {
-            print('Connected');
-            getComments();
-          });
+        AppUtils.showToastSuccess("Audio sent successfully");
+        _socket?.disconnect();
+        _socket?.connect();
+        _socket?.on("connect", (_) {
+          print('Connected');
+          initialCommentCheck = true;
+          getComments();
           if (Strings.category == true) {
             Strings.selectedCatDocument[0].commentsCount =
                 Strings.selectedCatDocument[0].commentsCount! + "1";
@@ -1259,18 +1258,18 @@ class _CommentsContentState extends State<CommentsContent>
                 Strings.selectedProDocument[0].commentsCount! + "1";
           }
 
-          tagedUsers = [];
-          tagedUsersId = [];
-          tagedCats = [];
-          tagedCatsId = [];
+          // tagedUsers = [];
+          // tagedUsersId = [];
+          // tagedCats = [];
+          // tagedCatsId = [];
           _msgcontroller.text = '';
           typing = false;
           // if (showscroll != true) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            curve: Curves.fastOutSlowIn,
-            duration: const Duration(seconds: 1),
-          );
+          // _scrollController.animateTo(
+          //   _scrollController.position.maxScrollExtent,
+          //   curve: Curves.fastOutSlowIn,
+          //   duration: const Duration(seconds: 1),
+          // );
           msgField.unfocus();
           // } else {
           //   showscroll = false;
@@ -1285,7 +1284,7 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  postComments() {
+  postComments() async {
     // print(json.encode(tagedUsersId.toString()));
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
@@ -1293,8 +1292,8 @@ class _CommentsContentState extends State<CommentsContent>
       _socket?.emit(
           'create-document-comment',
           json.encode({
-            "project_id": Strings.selectedProject[0].projectId,
-            "project_name": Strings.selectedProject[0].projectName,
+            "project_id": projectId!,
+            "project_name": projectname,
             "audio": "",
             "comment": _msgcontroller.text,
             "document_id": Strings.category == true
@@ -1306,43 +1305,46 @@ class _CommentsContentState extends State<CommentsContent>
             "category_list": json.encode(tagedCats),
             "user_id": Strings.userID
           }));
+
+      AppUtils.showToastSuccess("Comment sent successfully");
       // print(tagedUsers);
       // print(tagedCatsId);
       // print(tagedCats);
-      setState(() {
-        if (Strings.category == true) {
-          Strings.selectedCatDocument[0].commentsCount =
-              Strings.selectedCatDocument[0].commentsCount! + "1";
-        } else {
-          Strings.selectedProDocument[0].commentsCount =
-              Strings.selectedProDocument[0].commentsCount! + "1";
-        }
-        tagedUsers = [];
-        tagedUsersId = [];
-        tagedCats = [];
-        tagedCatsId = [];
-        _msgcontroller.text = '';
-        typing = false;
-        // if (showscroll != true) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          curve: Curves.fastOutSlowIn,
-          duration: const Duration(seconds: 1),
-        );
-        msgField.unfocus();
-        // } else {
-        //   showscroll = false;
-        // }
-        initialCommentCheck = true;
-        getComments();
-      });
+      if (Strings.category == true) {
+        Strings.selectedCatDocument[0].commentsCount =
+            Strings.selectedCatDocument[0].commentsCount! + "1";
+      } else {
+        Strings.selectedProDocument[0].commentsCount =
+            Strings.selectedProDocument[0].commentsCount! + "1";
+      }
+      // tagedUsers = [];
+      // tagedUsersId = [];
+      // tagedCats = [];
+      // tagedCatsId = [];
+      _msgcontroller.text = '';
+      typing = false;
+
+      print("Command posred");
+      // if (showscroll != true) {
+      // _scrollController.animateTo(
+      //   _scrollController.position.maxScrollExtent,
+      //   curve: Curves.fastOutSlowIn,
+      //   duration: const Duration(seconds: 1),
+      // );
+      msgField.unfocus();
+      // } else {
+      //   showscroll = false;
+      // }
+      initialCommentCheck = true;
+      getComments();
     }
   }
+
   updateNotification(notificationId) {
     final api = Provider.of<ApiService>(context, listen: false);
     api.updateNotificationStatus(notificationId).then((response) {
       if (response.status!) {
-       // AppUtils.showToastError("Unable to update status");
+        // AppUtils.showToastError("Unable to update status");
       } else {
         AppUtils.dismissprogress();
         AppUtils.showToastError(response.message!);
@@ -1377,8 +1379,7 @@ class _CommentsContentState extends State<CommentsContent>
       return "assets/icons/mpg.png";
     } else if (fileExt == "mp4") {
       return "assets/icons/mpg.png";
-    }
-     else if (fileExt == "wav" || fileExt == "mp3") {
+    } else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
     } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
@@ -1463,6 +1464,13 @@ class _CommentsContentState extends State<CommentsContent>
     String secondsStr = (seconds % 60).toString().padLeft(2, '0');
 
     return "$hoursStr:$minutesStr:$secondsStr";
+  }
+
+  void getextImg() {
+    docImg = [];
+    for (var i = 0; i < Strings.comments.length; i++) {
+      docImg.add(getFileExt(Strings.comments[i].audio ?? "test.mpg"));
+    }
   }
 }
 
