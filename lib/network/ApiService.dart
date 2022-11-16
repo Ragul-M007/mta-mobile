@@ -20,6 +20,7 @@ import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
@@ -59,6 +60,9 @@ abstract class ApiService
 
   @POST("/users/login")
   Future<LoginRes> login(@Body() LoginReq body);
+
+  @POST("/users/publicusersignup")
+  Future<ChangePassRes>signUplogin(@Body() SignUpReq body);
 
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);

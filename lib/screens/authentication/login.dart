@@ -35,6 +35,19 @@ final fiveT = TextEditingController();
 final changePassConfirm = TextEditingController();
 final changePassNew = TextEditingController();
 
+
+final mobileField = TextEditingController();
+  final userType = TextEditingController();
+  final password = TextEditingController();
+  // final changePassConfirm = TextEditingController();
+  // final changePassNew = TextEditingController();
+  final changePassOld = TextEditingController();
+  final editNumber = TextEditingController();
+  final editAddress = TextEditingController();
+  final editName = TextEditingController();
+  final editState = TextEditingController();
+  final editCity = TextEditingController();
+
 final forgotPassEmailID = TextEditingController();
 
 class Login extends StatefulWidget {
@@ -403,16 +416,20 @@ class _LoginContentState extends State<LoginContent>
                             ),
                           ),
                           SizedBox(height: 10.0),
-                          Align(
-                            alignment: Alignment.bottomRight,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              
+                              Align(
+                            alignment: Alignment.bottomLeft,
                             child: Container(
                               margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
                               child: GestureDetector(
                                 onTap: () {
-                                  _forgotPass();
+                                  _signUp();
                                 },
-                                child: Text(
-                                  "Forgot Password ?",
+                                child: Text(    
+                                  "SignUp",
                                   style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.black,
@@ -421,6 +438,27 @@ class _LoginContentState extends State<LoginContent>
                               ),
                             ),
                           ),
+                          Align(
+                                alignment: Alignment.bottomRight,
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _forgotPass();
+                                    },
+                                    child: Text(
+                                      "Forgot Password ?",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                           
                         ],
                       ),
                     ),
@@ -1088,7 +1126,8 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  Future<void> _forgotPass() async {
+  Future<void> _forgotPass() async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1139,6 +1178,154 @@ class _LoginContentState extends State<LoginContent>
                     SizedBox(
                       height: 20,
                     ),
+                    InkWell(
+                      onTap: () {
+                        _generateOtp(context);
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "SUBMIT",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(ctxd).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _signUp() async 
+  {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext ctxd) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(ctxd).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(ctxd).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "SIGNUP",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Name",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          // focusNode: name,
+                          controller: editName,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.person,
+                                  )),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Phone Number",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editNumber,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.call,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "State",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editState,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.home,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "City",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editCity,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.location_city,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Address",
+                          style: TextStyle(
+                              color: Color(0xFF0061b0),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        TextField(
+                          controller: editAddress,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.location_pin,
+                                  size: 14, color: Color(0xFF0061b0))),
+                        ),
+                    SizedBox(
+                      height: 20,
+                    ),
+
                     InkWell(
                       onTap: () {
                         _generateOtp(context);
