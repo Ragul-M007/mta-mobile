@@ -15,6 +15,7 @@ import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:open_file/open_file.dart';
 import 'package:dio/dio.dart';
 
@@ -40,6 +41,12 @@ class _DashboardState extends State<Dashboard>
   String _errText = "";
   void initState() {
     super.initState();
+
+    if(Strings.roleId == 7)
+    {
+        AppUtils.showprogress();
+    }
+    print("checkval--> ${Strings.roleId}");
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 100))
       ..addListener(() {
@@ -128,7 +135,8 @@ class _DashboardState extends State<Dashboard>
     });
   }
 
-  Future<bool> _onWillPop() async {
+  Future<bool> _onWillPop() async 
+  {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -217,18 +225,28 @@ class _DashboardState extends State<Dashboard>
                     menuRedirect(routename: "/dashboard", currentmenu: 1);
                   },
                   selectedmenuvalue: 1,
-                  menutitle: "Projects",
+                  menutitle: Strings.roleId == 7 ? "Home":"Projects",
                 ),
-                (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
-                   ? menuoption(
+
+                // menuoption(
+                //   ontab: () {
+                //     menuRedirect(routename: "/webview", currentmenu: 1);
+                //   },
+                //   selectedmenuvalue: 1,
+                //   menutitle: "Home",
+                // ),
+
+                if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
+                    menuoption(
                         ontab: () {
                           menuRedirect(
                               routename: "/attendance", currentmenu: 2);
                         },
                         selectedmenuvalue: 2,
                         menutitle: "Attendance",
-                      )
-                    : SizedBox(),
+                      ),
+                    
+
                 menuoption(
                   ontab: () {
                     menuRedirect(routename: "/profile", currentmenu: 3);
@@ -339,16 +357,22 @@ class _DashboardState extends State<Dashboard>
                                   Strings.username);
                             },
                             child: CircleAvatar(
-                              backgroundImage: (
-                                  Strings.profilePic !=
-                                      "")
-                              ? NetworkImage(Strings.baseImageUrl +
-                                  (Strings.profilePic ??
-                                      ""))
-                              :  AssetImage("assets/icons/account.png",)
-                                      as ImageProvider,
-                          backgroundColor: Colors.grey.withOpacity(0.3),
-                            )
+                              backgroundColor: Colors.grey.withOpacity(0.3),
+                              radius: 20,
+                              child: CircleAvatar(
+                                radius: 16,
+                                  backgroundImage: (
+                                      Strings.profilePic !=
+                                          "")
+                                  ? NetworkImage(Strings.baseImageUrl +
+                                      (Strings.profilePic ??
+                                          ""))
+                                  :  AssetImage("assets/icons/account.png")
+                                           as ImageProvider ,
+                                  backgroundColor: Colors.grey.withOpacity(0.3),
+                                ),
+                            ),
+                            
                             // Strings.profilePic == null
                             //     ? Image.asset(
                             //         "assets/images/user.png",
@@ -366,7 +390,7 @@ class _DashboardState extends State<Dashboard>
                             //     40.0),
                           ))
                     ],
-                    bottom: PreferredSize(
+                    bottom: Strings.roleId != 7 ? PreferredSize(
                         preferredSize: Size.fromHeight(kToolbarHeight),
                         child: Padding(
                           padding: EdgeInsets.all(15),
@@ -425,7 +449,9 @@ class _DashboardState extends State<Dashboard>
                               ),
                             ),
                           ),
-                        )),
+                        )):PreferredSize(
+                        preferredSize: Size.zero,
+                        child: SizedBox()),
                     leading: SizedBox(
                       height: 25.0,
                       width: 25.0,
@@ -444,7 +470,9 @@ class _DashboardState extends State<Dashboard>
                   ),
                   body: Builder(builder: (BuildContext newContext) {
                     ctx = newContext;
-                    return _projectLists.length > 0
+                    return 
+                    Strings.roleId != 7 ?
+                    _projectLists.length > 0
                         ? Padding(
                             padding: EdgeInsets.all(20),
                             child: _searchLists.length != 0
@@ -763,7 +791,14 @@ class _DashboardState extends State<Dashboard>
                                 ],
                               ),
                               padding: EdgeInsets.all(20),
-                            ));
+                            )):Container(
+        child: WebView(
+      initialUrl: 'https://www.mtaarch.com/',
+      javascriptMode: JavascriptMode.unrestricted,
+      onPageFinished: (finish) {
+        AppUtils.dismissprogress();
+            },
+    ));
                   }))),
         ),
       ),

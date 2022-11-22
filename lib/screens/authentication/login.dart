@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:dio/adapter.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
+import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -47,6 +49,8 @@ final mobileField = TextEditingController();
   final editName = TextEditingController();
   final editState = TextEditingController();
   final editCity = TextEditingController();
+  final editEmail = TextEditingController();
+
 
 final forgotPassEmailID = TextEditingController();
 
@@ -221,6 +225,10 @@ class _LoginContentState extends State<LoginContent>
         else if(response.data?.role == "CLIENT")
         {
             Strings.roleId = 6;
+        }
+        else if (response.data?.role == "PUBLICUSER")
+        {
+            Strings.roleId = 7;
         }
       }
       if (response.status!) {
@@ -425,7 +433,8 @@ class _LoginContentState extends State<LoginContent>
                             child: Container(
                               margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
                               child: GestureDetector(
-                                onTap: () {
+                                onTap: () 
+                                {
                                   _signUp();
                                 },
                                 child: Text(    
@@ -1269,71 +1278,75 @@ class _LoginContentState extends State<LoginContent>
                               fontWeight: FontWeight.bold),
                         ),
                         TextField(
+                           keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
+          textInputAction: TextInputAction.done,  
+          maxLength: 10,        
                           controller: editNumber,
                           decoration: InputDecoration(
                               prefixIcon: Icon(Icons.call,
                                   size: 14, color: Color(0xFF0061b0))),
                         ),
-                        SizedBox(
-                          height: 20,
+                         SizedBox(
+                          height: 10,
                         ),
                         Text(
-                          "State",
+                          "Email",
                           style: TextStyle(
                               color: Color(0xFF0061b0),
                               fontSize: 14,
                               fontWeight: FontWeight.bold),
                         ),
                         TextField(
-                          controller: editState,
+                          controller: editEmail,
                           decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.home,
+                              prefixIcon: Icon(Icons.mail,
                                   size: 14, color: Color(0xFF0061b0))),
                         ),
                         SizedBox(
                           height: 20,
                         ),
-                        Text(
-                          "City",
-                          style: TextStyle(
-                              color: Color(0xFF0061b0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        TextField(
-                          controller: editCity,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.location_city,
-                                  size: 14, color: Color(0xFF0061b0))),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Address",
-                          style: TextStyle(
-                              color: Color(0xFF0061b0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        TextField(
-                          controller: editAddress,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.location_pin,
-                                  size: 14, color: Color(0xFF0061b0))),
-                        ),
-                    SizedBox(
-                      height: 20,
-                    ),
+                    //     Text(
+                    //       "State",
+                    //       style: TextStyle(
+                    //           color: Color(0xFF0061b0),
+                    //           fontSize: 14,
+                    //           fontWeight: FontWeight.bold),
+                    //     ),
+                    //     TextField(
+                    //       controller: editState,
+                    //       decoration: InputDecoration(
+                    //           prefixIcon: Icon(Icons.home,
+                    //               size: 14, color: Color(0xFF0061b0))),
+                    //     ),
+                    //     SizedBox(
+                    //       height: 20,
+                    //     ),
+                    //     Text(
+                    //       "City",
+                    //       style: TextStyle(
+                    //           color: Color(0xFF0061b0),
+                    //           fontSize: 14,
+                    //           fontWeight: FontWeight.bold),
+                    //     ),
+                    //     TextField(
+                    //       controller: editCity,
+                    //       decoration: InputDecoration(
+                    //           prefixIcon: Icon(Icons.location_city,
+                    //               size: 14, color: Color(0xFF0061b0))),
+                    //     ),
+                       
+                    // SizedBox(
+                    //   height: 20,
+                    // ),
 
                     InkWell(
                       onTap: () {
-                        _generateOtp(context);
+                        _signupRequest(context);
                       },
                       child: Container(
                         child: Center(
                             child: Text(
-                          "SUBMIT",
+                          "SIGNUP",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -1373,6 +1386,73 @@ class _LoginContentState extends State<LoginContent>
           emailIdforVerification = forgotPassEmailID.text;
           forgotPassEmailID.text = '';
           _otpVerify();
+        } else {
+          AppUtils.showToastError(response.message!);
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        print(onError.toString());
+      });
+    }
+  }
+
+   _signupRequest(ctx) {
+    final bool emailValid = 
+    RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+      .hasMatch(editEmail.text);
+    if (editName.text == "" || editName.text.isEmpty) 
+    {
+      AppUtils.showToastErrorTop("Please enter your Name");
+    }
+    else if (editNumber.text == "" || editNumber.text.isEmpty || editNumber.text.length != 10) 
+    {
+      AppUtils.showToastErrorTop("Please enter valid Phone number");
+    }
+    else if (editEmail.text == "" || editEmail.text.isEmpty) 
+    {
+      print("editmaIL ${editEmail.text}");
+      AppUtils.showToastErrorTop("Please enter your Email Id");
+    }
+    else if(!emailValid)
+    {
+      AppUtils.showToastErrorTop("Please enter valid Email Id");
+    }
+     else {
+      AppUtils.showprogress();
+      final api = Provider.of<ApiService>(context, listen: false);
+      SignUpReq request = new SignUpReq();
+      request.email = editEmail.text;
+      request.name = editName.text;
+      request.mobileNo = editNumber.text;
+      request.state = "";
+      request.city = "";
+      request.area = "";
+      request.publicUser = 1;
+      request.roleId = 7;
+      print("check ${jsonEncode(request)}");
+
+      api.signUp(request).then((response) 
+      {
+        AppUtils.dismissprogress();
+        print('Response status ${response.toJson()}');
+        if (response.status!) 
+        {
+          Navigator.of(ctx).pop();
+          showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: Text("Success",style: TextStyle(color: Colors.green),),
+                  content: Text("User created successfully. Please login."),
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Text("OK"),
+                    ),
+                  ],
+                ),
+              );
         } else {
           AppUtils.showToastError(response.message!);
         }

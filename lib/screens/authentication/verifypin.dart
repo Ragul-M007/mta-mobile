@@ -139,6 +139,10 @@ class _VerifypinState extends State<Verifypin> {
         {
             Strings.roleId = 6;
         }
+         else if (response.data?.role == "PUBLICUSER")
+        {
+            Strings.roleId = 7;
+        }
       }
 
           if (response.status!) {

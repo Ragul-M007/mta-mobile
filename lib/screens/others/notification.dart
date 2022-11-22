@@ -100,17 +100,16 @@ class _NotificationContentState extends State<NotificationContent>
               menuRedirect(routename: "/dashboard", currentmenu: 1);
             },
             selectedmenuvalue: 1,
-            menutitle: "Projects",
+            menutitle: Strings.roleId == 7 ? "Home":"Projects",
           ),
-          (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
-              ? menuoption(
+         if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
+               menuoption(
                   ontab: () {
                     menuRedirect(routename: "/attendance", currentmenu: 2);
                   },
                   selectedmenuvalue: 2,
                   menutitle: "Attendance",
-                )
-              : SizedBox(),
+                ),
           menuoption(
             ontab: () {
               menuRedirect(routename: "/profile", currentmenu: 3);

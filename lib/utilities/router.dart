@@ -1,3 +1,4 @@
+import 'package:mta/screens/Webview/webview.dart';
 import 'package:mta/screens/attendance/attendance.dart';
 import 'package:mta/screens/authentication/otpverification.dart';
 import 'package:mta/screens/authentication/setpin.dart';
@@ -31,6 +32,9 @@ class RoutesGenerator {
         return MaterialPageRoute(builder: (_) => Login());
       case '/dashboard':
         return MaterialPageRoute(builder: (_) => Dashboard());
+        break;
+      case '/webview':
+        return MaterialPageRoute(builder: (_) => WebpageView());
         break;
       case '/otpverification':
         return MaterialPageRoute(builder: (_) => Otpverification());

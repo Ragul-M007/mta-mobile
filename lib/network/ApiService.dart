@@ -46,7 +46,7 @@ part 'ApiService.g.dart';
  // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
-   // @RestApi(baseUrl: "http://192.168.1.132:5777/mta")
+   // @RestApi(baseUrl: "http://192.168.0.125:5777/mta")
 
 
 abstract class ApiService 
@@ -62,7 +62,7 @@ abstract class ApiService
   Future<LoginRes> login(@Body() LoginReq body);
 
   @POST("/users/publicusersignup")
-  Future<ChangePassRes>signUplogin(@Body() SignUpReq body);
+  Future<ChangePassRes>signUp(@Body() SignUpReq body);
 
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);

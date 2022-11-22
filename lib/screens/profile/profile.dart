@@ -96,19 +96,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                   menuRedirect(routename: "/dashboard", currentmenu: 1);
                 },
                 selectedmenuvalue: 1,
-                menutitle: "Projects",
+                menutitle: Strings.roleId == 7 ? "Home" : "Projects",
               ),
-              (Strings.roleId == 1 ||
-                      Strings.roleId == 2 ||
-                      Strings.roleId == 5)
-                  ? menuoption(
-                      ontab: () {
-                        menuRedirect(routename: "/attendance", currentmenu: 2);
-                      },
-                      selectedmenuvalue: 2,
-                      menutitle: "Attendance",
-                    )
-                  : SizedBox(),
+              if (Strings.roleId == 1 ||
+                  Strings.roleId == 2 ||
+                  Strings.roleId == 5)
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/attendance", currentmenu: 2);
+                  },
+                  selectedmenuvalue: 2,
+                  menutitle: "Attendance",
+                ),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/profile", currentmenu: 3);
@@ -153,51 +152,51 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               // ),
               menuoption(
                 ontab: () {
-showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.removeDeviceId(context);
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );                },
+                  showDialog(
+                    context: context,
+                    builder: (context) => new AlertDialog(
+                      title: Text(
+                        "Are you sure ?",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600),
+                      ),
+                      content: Text(
+                        'Do you want to logout from the App',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: new Text(
+                            'No',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            menuRedirect(routename: "/login", currentmenu: 9);
+                            AppUtils.removeDeviceId(context);
+                          },
+                          child: new Text(
+                            'Yes',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 selectedmenuvalue: 9,
                 menutitle: "Logout",
               ),
@@ -404,6 +403,7 @@ class _ProfileContentState extends State<ProfileContent> {
                         ),
                       ),
                     ),
+                    (_profileData[0].city! != "" && _profileData[0].state! != "")?
                     Container(
                       margin: EdgeInsets.fromLTRB(
                           20, MediaQuery.of(context).size.height * .25, 20, 10),
@@ -427,7 +427,7 @@ class _ProfileContentState extends State<ProfileContent> {
                               )
                             ],
                           )),
-                    ),
+                    ):SizedBox(),
                     Container(
                         width: double.infinity,
                         margin: EdgeInsets.fromLTRB(10,
@@ -561,11 +561,19 @@ class _ProfileContentState extends State<ProfileContent> {
         _profileData = response.data!;
         mobileField.text = _profileData[0].mobileNo!;
         userType.text = _profileData[0].role!;
-        address = _profileData[0].area! +
-            " , " +
-            _profileData[0].city! +
-            " , " +
-            _profileData[0].state!;
+        if (Strings.roleId == 7) 
+        {
+          address = _profileData[0].city! + " , " + _profileData[0].state!;
+        } 
+        else 
+        {
+          address = _profileData[0].area! +
+              " , " +
+              _profileData[0].city! +
+              " , " +
+              _profileData[0].state!;
+        }
+
         editNumber.text = _profileData[0].mobileNo!;
         editName.text = _profileData[0].name!;
         editAddress.text = _profileData[0].area!;
@@ -718,7 +726,8 @@ class _ProfileContentState extends State<ProfileContent> {
     );
   }
 
-  Future<void> _changePin() async {
+  Future<void> _changePin() async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -751,37 +760,41 @@ class _ProfileContentState extends State<ProfileContent> {
                       SizedBox(
                         height: 3.0,
                       ),
-                      PinFieldAutoFill(
-                          cursor: Cursor(
-                            width: 2,
-                            height: 40,
-                            color: Colors.blue,
-                            radius: Radius.circular(1),
-                            enabled: true,
-                          ),
-                          decoration: UnderlineDecoration(
-                            textStyle:
-                                TextStyle(fontSize: 20, color: Colors.black),
-                            colorBuilder: FixedColorBuilder(
-                                Colors.black.withOpacity(0.3)),
-                          ),
-                          autoFocus: true,
-                          onCodeSubmitted: (String code) {
-                            if (codeVerifyField!.length < 4) {
-                            AppUtils.showToastError("Please enter 4 digit Pin");
-                          } else {
-                            resetPin(contextResetPin);
-                          }
-                          }, //code submitted callback
-                          onCodeChanged: (String? code) {
-                            codeVerifyField = code;
-                          }, //code changed callback
-                          codeLength: 4),
+                      _boxBuilder(context),
+                      // PinFieldAutoFill(
+                      //     cursor: Cursor(
+                      //       width: 2,
+                      //       height: 40,
+                      //       color: Colors.blue,
+                      //       radius: Radius.circular(1),
+                      //       enabled: true,
+                      //     ),
+                      //     decoration: UnderlineDecoration(
+                      //       textStyle:
+                      //           TextStyle(fontSize: 20, color: Colors.black),
+                      //       colorBuilder: FixedColorBuilder(
+                      //           Colors.black.withOpacity(0.3)),
+                      //     ),
+                      //     autoFocus: true,
+                      //     onCodeSubmitted: (String code) {
+                      //       if (codeVerifyField!.length < 4) {
+                      //         AppUtils.showToastError(
+                      //             "Please enter 4 digit Pin");
+                      //       } else {
+                      //         resetPin(contextResetPin);
+                      //       }
+                      //     }, //code submitted callback
+                      //     onCodeChanged: (String? code) {
+                      //       codeVerifyField = code;
+                      //     }, //code changed callback
+                      //     codeLength: 4),
                       SizedBox(
                         height: 20,
                       ),
                       InkWell(
                         onTap: () {
+                          codeVerifyField =
+                            oneT.text + twoT.text + threeT.text + fourT.text;
                           print(codeVerifyField);
                           if (codeVerifyField!.length < 4) {
                             AppUtils.showToastError("Please enter 4 digit Pin");
