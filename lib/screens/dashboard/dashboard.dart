@@ -57,7 +57,11 @@ class _DashboardState extends State<Dashboard>
       });
     super.initState();
     getPermission();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+
+    if(Strings.roleId != 7)
+    {
+        WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+    }
   }
 
   @override
