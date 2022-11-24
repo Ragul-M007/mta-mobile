@@ -1442,7 +1442,7 @@ class _LoginContentState extends State<LoginContent>
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: Text("Success",style: TextStyle(color: Colors.green),),
-                  content: Text("User created successfully. Please login."),
+                  content: Text("User created successfully! Please check your email for the credentials."),
                   actions: <Widget>[
                     FlatButton(
                       onPressed: () {
