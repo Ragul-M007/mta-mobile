@@ -16,7 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
 
 class Dashboard extends StatefulWidget {
@@ -1030,7 +1030,7 @@ class _DashboardState extends State<Dashboard>
 
   Future<void> openFile(filePath) async {
     print(filePath);
-    final _result = await OpenFile.open(filePath);
+    final _result = await OpenFilex.open(filePath);
   }
 
   Future<String> downloadFile(String url, String fileName, String dir) async {

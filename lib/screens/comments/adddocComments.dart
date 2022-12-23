@@ -17,7 +17,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as Io;
 
