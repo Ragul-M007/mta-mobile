@@ -1611,7 +1611,8 @@ Future<void> _showMyDialog(context, imgurl) async {
   );
 }
 
-void getPermission() async {
+void getPermission() async 
+{
   var status = await Permission.microphone.status;
   if (status.isDenied) {
     await Permission.microphone.request();
