@@ -13,7 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:ext_storage/ext_storage.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
@@ -132,7 +132,7 @@ class _ViewDocContentState extends State<ViewDocContent>
   }
 
   Future<void> openFile(filePath) async {
-    await OpenFile.open(filePath);
+    await OpenFilex.open(filePath);
   }
 
   Future<String> downloadFile(String url, String fileName, String dir) async {

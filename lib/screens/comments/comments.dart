@@ -18,7 +18,7 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -313,7 +313,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   Future<void> openFile(filePath) async {
-    await OpenFile.open(filePath);
+    await OpenFilex.open(filePath);
   }
 
   Future<String> downloadFile(String url, String fileName, String dir) async {
