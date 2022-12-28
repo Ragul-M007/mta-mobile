@@ -1447,6 +1447,9 @@ class _LoginContentState extends State<LoginContent>
                     FlatButton(
                       onPressed: () {
                         Navigator.of(ctx).pop();
+                        editEmail.text = "";
+                        editName.text = "";
+                        editNumber.text = "";
                       },
                       child: Text("OK"),
                     ),
