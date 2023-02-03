@@ -27,43 +27,36 @@ class AttendanceData {
   AttendanceData({
     required this.checkType,
     required this.checkTime,
-    required this.latLng,
     required this.locationName,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.id,
-    required this.userId,
+   
+    
   });
   late final String checkType;
   late final String checkTime;
-  late final String latLng;
   late final String locationName;
-  late final String createdAt;
-  late final String updatedAt;
-  late final int id;
-  late final int userId;
+  
   
   AttendanceData.fromJson(Map<String, dynamic> json){
     checkType = json['checkType'];
     checkTime = json['checkTime'];
-    latLng = json['latLng'];
+  //  latLng = json['latLng'];
     locationName = json['location_name'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    id = json['id'];
-    userId = json['user_id'];
+  //  createdAt = json['created_at'];
+  //  updatedAt = json['updated_at'];
+  //  id = json['id'];
+   // userId = json['user_id'];
   }
 
   Map<String, dynamic> toJson() {
     final _data = <String, dynamic>{};
     _data['checkType'] = checkType;
     _data['checkTime'] = checkTime;
-    _data['latLng'] = latLng;
+  //  _data['latLng'] = latLng;
     _data['location_name'] = locationName;
-    _data['created_at'] = createdAt;
-    _data['updated_at'] = updatedAt;
-    _data['id'] = id;
-    _data['user_id'] = userId;
+  //  _data['created_at'] = createdAt;
+  //  _data['updated_at'] = updatedAt;
+  //  _data['id'] = id;
+  //  _data['user_id'] = userId;
     return _data;
   }
 }

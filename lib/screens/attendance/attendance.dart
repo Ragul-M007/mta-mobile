@@ -1102,7 +1102,7 @@ showDialog(
             print("i ${i}");
             test.checkInLocation = _attendancemain[i].locationName;
             test.checkInTime = _attendancemain[i].checkTime;
-            test.userId = _attendancemain[i].userId;
+          //  test.userId = _attendancemain[i].userId;
             DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
             String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
             test.date = formattedDate;
