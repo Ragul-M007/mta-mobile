@@ -1172,7 +1172,7 @@ class _LoginContentState extends State<LoginContent>
                       height: 30,
                     ),
                     Text(
-                      "Regitered Email Id",
+                      "Registered Email Id",
                       style: TextStyle(
                           color: Color(0xFF0061b0),
                           fontSize: 14,
