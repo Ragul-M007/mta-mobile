@@ -154,7 +154,7 @@ class _NotificationContentState extends State<NotificationContent>
           // ),
           menuoption(
             ontab: () {
-showDialog(
+          showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             title: Text(

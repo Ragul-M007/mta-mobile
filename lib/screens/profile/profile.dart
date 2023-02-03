@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -21,6 +22,7 @@ import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:io' as Io;
 
@@ -534,6 +536,82 @@ class _ProfileContentState extends State<ProfileContent> {
                                 ],
                               ),
                             ),
+                            SizedBox(height:40),
+                            GestureDetector(
+                              onTap: () {
+                                showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure want to delete the account?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Deleting the account will remove all your data.',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  removeUser(context);
+                }
+,
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Delete Account",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: new BoxDecoration(
+                                      color: Color(0xFF0061b0),
+                                      borderRadius: new BorderRadius.all(
+                                          new Radius.circular(50.0)),
+                                    ),
+                                    child: Icon(
+                                      Icons.delete_forever,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         )),
                   ],
@@ -546,6 +624,28 @@ class _ProfileContentState extends State<ProfileContent> {
     twoT.text = " ";
     threeT.text = " ";
     fourT.text = " ";
+  }
+  static void removeUser(ctx) 
+  {
+    final api = Provider.of<ApiService>(ctx!, listen: false);
+    AppUtils.getIntPreferences('userId').then((value) {
+      if (value != null) {
+        api.deleteUser(value).then((response) 
+        {
+            if (response.status!) {
+          AppUtils.showToastSuccess(response.message!);
+          AppUtils.clearAllPreferences();
+          Strings.isLogin = false;
+          Navigator.popAndPushNamed(ctx!, "/login");
+        } else {
+          AppUtils.showToastError(response.message!);
+        }
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      }
+    });
   }
 
   getProfile() {
@@ -830,6 +930,8 @@ class _ProfileContentState extends State<ProfileContent> {
     );
   }
 
+  
+
   Widget _boxBuilder(contextResetPin) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -938,6 +1040,8 @@ class _ProfileContentState extends State<ProfileContent> {
     }
   }
 
+  
+
   Future<void> _editProfile() async {
     return showDialog<void>(
       context: context,
@@ -1035,7 +1139,8 @@ class _ProfileContentState extends State<ProfileContent> {
                                 GestureDetector(
                                   onTap: () {
                                     //changeProPic();
-                                    takePhoto(ImageSource.gallery);
+                                   // takePhoto(ImageSource.gallery);
+                                   pickImage(ImageSource.gallery);
                                   },
                                   child: Container(
                                     child: Row(
@@ -1294,7 +1399,46 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   void takePhoto(ImageSource source) async {
-    final pickedFile = await _picker.getImage(source: source);
+        
+    if(Platform.isIOS)
+    {
+    var status = await Permission.camera.status;
+    if (!status.isGranted) {
+      getPermission();
+    } else 
+    { 
+      final pickedFile = await _picker.pickImage(source: source);
+    final bytes = await Io.File(pickedFile!.path).readAsBytes();
+    setState(() {
+      editProfilePictureBase64 =
+          "data:image/jpeg;base64," + base64Encode(bytes);
+      editProfilePicture = base64.decode(base64Encode(bytes));
+      editPicTap = true;
+      _imageAsyncWidget = new MemoryImage(editProfilePicture!);
+      name.requestFocus();
+    });
+    }
+    }
+    else
+    {
+      final pickedFile = await _picker.pickImage(source: source);
+    final bytes = await Io.File(pickedFile!.path).readAsBytes();
+    setState(() {
+      editProfilePictureBase64 =
+          "data:image/jpeg;base64," + base64Encode(bytes);
+      editProfilePicture = base64.decode(base64Encode(bytes));
+      editPicTap = true;
+      _imageAsyncWidget = new MemoryImage(editProfilePicture!);
+      name.requestFocus();
+    });
+    }
+    
+    
+  }
+
+  void pickImage(ImageSource source) async 
+  {
+    final pickedFile = await _picker.pickImage(source: source);
     final bytes = await Io.File(pickedFile!.path).readAsBytes();
     setState(() {
       editProfilePictureBase64 =
@@ -1305,6 +1449,24 @@ class _ProfileContentState extends State<ProfileContent> {
       name.requestFocus();
     });
   }
+  void getPermission() async 
+{
+  var status = await Permission.camera.status;
+  if (status.isDenied) {
+    await Permission.camera.request();
+    var updatedStatus = await Permission.camera.status;
+    if(updatedStatus.isGranted)
+    {
+      takePhoto(ImageSource.camera);
+    }
+
+  } else if (status.isPermanentlyDenied) {
+    AppUtils.showToastError(
+        "Please enable Camera from App permission Settings");
+  } else {
+    await Permission.camera.request();
+  }
+}
 
   resetPin(contextpin) {
     AppUtils.showprogress();

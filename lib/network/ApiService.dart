@@ -134,6 +134,10 @@ abstract class ApiService
   @DELETE("/users/removeImage/{user_id}")
   Future<ChangePassRes> removeProPic(
       @Path("user_id") int id);
+     
+  @DELETE("/users/{user_id}")
+  Future<ChangePassRes> deleteUser(
+      @Path("user_id") int id);
 
   @DELETE("/users/deleteDeviceId/{user_id}")
   Future<CommentsRes> removeDeviceId(
