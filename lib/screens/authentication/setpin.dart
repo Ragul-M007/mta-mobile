@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
@@ -6,6 +8,8 @@ import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mta/screens/attendance/attendance.dart';
+
+import '../../models/LoginReq.dart';
 
 
 class Setpin extends StatefulWidget {
@@ -48,8 +52,96 @@ class _SetpinState extends State<Setpin> {
           if (response.status!) {
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
+            signinafterpin();
+            // if(Strings.FromNotification)
+            // {
+            //     Strings.FromNotification = false;
+            //     Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
+            // }
+            // else
+            // {
+            //     Navigator.pushNamed(ctx!, "/dashboard");
+            // }
+          } else {
+            AppUtils.showToastError(response.message!);
+          }
+        }).catchError((onError) {
+          AppUtils.dismissprogress();
+          print(onError.toString());
+        });
+      }
+    });
+  }
+  signinafterpin() 
+  {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(ctx!, listen: false);
+    LoginReq loginreq = LoginReq();
 
+    AppUtils.getStringPreferences('emailId').then((value) {
+      if (value != null) {
+        loginreq.email = value;
+        loginreq.loginpin = codeVerifyField;
+        loginreq.token = Strings.fcmToken;
+        // print(loginreq.email);
+        // print(loginreq.loginpin);
+        //Navigator.pushNamed(ctx, "/dashboard");
 
+        var dat = jsonEncode(loginreq);
+
+        print(dat);
+        
+        api.login(loginreq).then((response) 
+        {
+          AppUtils.dismissprogress();
+          print('verifyPinResponse status ${response.toJson()}');
+          assignroles()
+      {
+        if (response.data?.role == "ADMIN")
+        {
+            Strings.roleId = 1;
+        }
+        else if(response.data?.role == "STAFF")
+        {
+            Strings.roleId = 2;
+        }
+        else if(response.data?.role == "VENDOR")
+        {
+            Strings.roleId = 3;
+        }else if(response.data?.role == "CONSULTANTS")
+        {
+            Strings.roleId = 4;
+        }
+        else if(response.data?.role == "CONTRACTORS")
+        {
+            Strings.roleId = 5;
+        }
+        else if(response.data?.role == "CLIENT")
+        {
+            Strings.roleId = 6;
+        }
+         else if (response.data?.role == "PUBLICUSER")
+        {
+            Strings.roleId = 7;
+        }
+      }
+
+          if (response.status!) {
+            AppUtils.savePreferences("emailId", response.data!.emailId);
+            AppUtils.savePreferences("userId", response.data!.userId);
+            if (response.data!.userImg != null) {
+              AppUtils.savePreferences("profilePic", response.data!.userImg);
+              Strings.profilePic = response.data!.userImg!;
+            } else {
+              AppUtils.savePreferences("profilePic", "");
+              Strings.profilePic = "";
+            }
+            Strings.userID = response.data!.userId;
+            Strings.authToken = response.token!;
+            Strings.username = response.data!.name;
+            assignroles();
+            AppUtils.savePreferences("easyAccess", "Y");
+            Strings.isLogin = true;
             if(Strings.FromNotification)
             {
                 Strings.FromNotification = false;
@@ -59,6 +151,7 @@ class _SetpinState extends State<Setpin> {
             {
                 Navigator.pushNamed(ctx!, "/dashboard");
             }
+
           } else {
             AppUtils.showToastError(response.message!);
           }

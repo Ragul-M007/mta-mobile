@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
 import 'package:mta/models/SetPinReq.dart';
+// import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
@@ -13,6 +15,8 @@ import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mta/screens/attendance/attendance.dart';
+
+import '../../models/validateOTPReq.dart';
 
 class Verifypin extends StatefulWidget {
   static const String routeName = "/verifypin";
@@ -25,6 +29,8 @@ class _VerifypinState extends State<Verifypin> {
   final mobileField = TextEditingController();
   String? codeVerifyField;
   String? verificationCode;
+  String emailIdforVerification = '';
+
 
   bool _isLoading = false;
 
@@ -33,11 +39,26 @@ class _VerifypinState extends State<Verifypin> {
   FocusNode three = new FocusNode();
   FocusNode four = new FocusNode();
 
+  FocusNode Resetone = new FocusNode();
+  FocusNode Resettwo = new FocusNode();
+  FocusNode Resetthree = new FocusNode();
+  FocusNode Resetfour = new FocusNode();
+  FocusNode Resetfive = new FocusNode();
+
+
   final oneT = TextEditingController();
   final twoT = TextEditingController();
   final threeT = TextEditingController();
   final fourT = TextEditingController();
- 
+
+  final ResetfiveT = TextEditingController();
+  final ResetoneT = TextEditingController();
+  final ResettwoT = TextEditingController();
+  final ResetthreeT = TextEditingController();
+  final ResetfourT = TextEditingController();
+
+  final forgotPassEmailID = TextEditingController();
+
  
  @override
   void initState() {
@@ -48,7 +69,8 @@ class _VerifypinState extends State<Verifypin> {
   
 
   BuildContext? ctx;
-  Future<bool> _onWillPop() async {
+  Future<bool> _onWillPop() async 
+  {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -92,8 +114,232 @@ class _VerifypinState extends State<Verifypin> {
         )) ??
         false;
   }
+   _generateOtp(ctx) 
+  {
+    if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
+      AppUtils.showToastErrorTop("Please enter your registered Email Id");
+    } else {
+      AppUtils.showprogress();
+      final api = Provider.of<ApiService>(context, listen: false);
+      ForgotPassReq request = ForgotPassReq();
+      request.emailId = forgotPassEmailID.text;
 
-  signin() {
+      api.forgotPass(request).then((response) {
+        AppUtils.dismissprogress();
+        print('Response status ${response.toJson()}');
+        if (response.status!) {
+          Navigator.of(ctx).pop();
+          emailIdforVerification = forgotPassEmailID.text;
+          forgotPassEmailID.text = '';
+          _otpVerify();
+        } else {
+          AppUtils.showToastError(response.message!);
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        print(onError.toString());
+      });
+    }
+  }
+  Future<void> _otpVerify() async 
+  {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext contextResetPin) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(contextResetPin).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(contextResetPin).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "OTP verification",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Enter 5 digit verification code that has been sent to your registered Email",
+                      style: TextStyle(color: const Color(0xFF9e9e9e)),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    _boxBuilder1(contextResetPin),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        codeVerifyField = ResetoneT.text +
+                            ResettwoT.text +
+                            ResetthreeT.text +
+                            ResetfourT.text +
+                            ResetfiveT.text;
+
+                        if (codeVerifyField!.length < 5) {
+                          AppUtils.showToastError("Please Enter code");
+                        } else {
+                          otpVerifyCall(contextResetPin);
+                        }
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "VERIFY",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(contextResetPin).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+   otpVerifyCall(ctx) {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    ValidateOTPReq request = ValidateOTPReq();
+    request.emailId = emailIdforVerification;
+    request.otp = codeVerifyField;
+
+    print("data ${request.emailId}");
+    print("data ${request.otp}");
+
+
+    api.otpVerify(request).then((response) {
+      AppUtils.dismissprogress();
+      print('Response status ${response.toJson()}');
+      if (response.status!) {
+        Navigator.of(ctx).pop();
+        ResetoneT.text = '';
+        ResettwoT.text = '';
+        ResetthreeT.text = '';
+        ResetfourT.text = '';
+        ResetfiveT.text = '';
+        Navigator.pushNamed(context, "/setpin");
+       // _changePass();
+      } else {
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+   Future<void> _forgotPass() async 
+  {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext ctxd) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.of(ctxd).pop();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(ctxd).size.width * 0.75,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "Forgot Password",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      "Registered Email Id",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: forgotPassEmailID,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        _generateOtp(context);
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "SUBMIT",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(ctxd).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    )
+                  ],
+                )),
+          ),
+        );
+      },
+    );
+  }
+
+  signin() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
     LoginReq loginreq = LoginReq();
@@ -111,7 +357,8 @@ class _VerifypinState extends State<Verifypin> {
 
         print(dat);
         
-        api.login(loginreq).then((response) {
+        api.login(loginreq).then((response) 
+        {
           AppUtils.dismissprogress();
           print('verifyPinResponse status ${response.toJson()}');
           assignroles()
@@ -268,8 +515,9 @@ class _VerifypinState extends State<Verifypin> {
               ),
               GestureDetector(
                 onTap: () {
+                  _forgotPass();
                   //AppUtils.clearAllPreferences();
-                  Navigator.popAndPushNamed(context, '/login');
+                //  Navigator.popAndPushNamed(context, '/login');
                 },
                 child: Container(
                     width: double.infinity,
@@ -330,6 +578,86 @@ class _VerifypinState extends State<Verifypin> {
         _box(3),
         _box(4),
       ],
+    );
+  }
+
+   Widget _boxBuilder1(contextResetPin) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _box1(1, contextResetPin),
+        _box1(2, contextResetPin),
+        _box1(3, contextResetPin),
+        _box1(4, contextResetPin),
+        _box1(5, contextResetPin),
+      ],
+    );
+  }
+   Widget _box1(val, contextResetPin) {
+    return Padding(
+      padding: EdgeInsets.all(1),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 3),
+        alignment: Alignment.center,
+        height: 50,
+        width: 40,
+        child: TextField(
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          autofocus: true,
+          controller: val == 1
+              ? ResetoneT
+              : val == 2
+                  ? ResettwoT
+                  : val == 3
+                      ? ResetthreeT
+                      : val == 4
+                          ? ResetfourT
+                          : ResetfiveT,
+          focusNode: val == 1
+              ? Resetone
+              : val == 2
+                  ? Resettwo
+                  : val == 3
+                      ? Resetthree
+                      : val == 4
+                          ? Resetfour
+                          : Resetfive,
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.all(10), counterText: ''),
+          textAlign: TextAlign.center,
+          onChanged: (value) {
+            print(value);
+
+            if (value == '') {
+              FocusScope.of(contextResetPin).requestFocus(
+                val == 5
+                    ? Resetfour
+                    : val == 4
+                        ? Resetthree
+                        : val == 3
+                            ? Resettwo
+                            : val == 2
+                                ? Resetone
+                                : null,
+              );
+            } else {
+              FocusScope.of(contextResetPin).requestFocus(
+                val == 1
+                    ? Resettwo
+                    : val == 2
+                        ? Resetthree
+                        : val == 3
+                            ? Resetfour
+                            : val == 4
+                                ? Resetfive
+                                : null,
+              );
+              print("not null");
+            }
+          },
+        ),
+      ),
     );
   }
 

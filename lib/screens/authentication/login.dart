@@ -867,7 +867,8 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  Future<void> _otpVerify() async {
+  Future<void> _otpVerify() async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1052,10 +1053,8 @@ class _LoginContentState extends State<LoginContent>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-
                           new Icon(Icons.close,
-                              size: 22.0, color: Colors.black),
-                              
+                              size: 22.0, color: Colors.black),       
                         ],
                       ),
                     ),
@@ -1369,7 +1368,8 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  _generateOtp(ctx) {
+  _generateOtp(ctx) 
+  {
     if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
       AppUtils.showToastErrorTop("Please enter your registered Email Id");
     } else {
