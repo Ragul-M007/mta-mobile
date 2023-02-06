@@ -283,7 +283,7 @@ class _VerifypinState extends State<Verifypin> {
                       ),
                     ),
                     Text(
-                      "Forgot Password",
+                      "Forgot Pin",
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 16,
