@@ -8,6 +8,7 @@ import 'package:mta/screens/categories/categoriesinfo.dart';
 import 'package:mta/screens/comments/adddocComments.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
+import 'package:mta/screens/dashboard/teamsDashboard.dart';
 import 'package:mta/screens/others/contactus.dart';
 import 'package:mta/screens/dashboard/dashboard.dart';
 import 'package:mta/screens/doucument/adddoc.dart';
@@ -32,6 +33,9 @@ class RoutesGenerator {
         return MaterialPageRoute(builder: (_) => Login());
       case '/dashboard':
         return MaterialPageRoute(builder: (_) => Dashboard());
+        break;
+      case '/teamsDashboard':
+        return MaterialPageRoute(builder: (_) => TeamsDashboard());
         break;
       case '/webview':
         return MaterialPageRoute(builder: (_) => WebpageView());

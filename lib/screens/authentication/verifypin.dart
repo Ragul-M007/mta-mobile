@@ -428,7 +428,7 @@ class _VerifypinState extends State<Verifypin> {
             }
             else
             {
-                Navigator.pushNamed(ctx!, "/dashboard");
+                Navigator.pushNamed(ctx!, "/teamsDashboard");
             }
 
           } else {
