@@ -106,7 +106,7 @@ class _DashboardState extends State<Dashboard>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
 
-    api.projects(Strings.userID!).then((response) {
+    api.fetchProjectByTeams(Strings.selectedTeamId!).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
@@ -189,8 +189,8 @@ class _DashboardState extends State<Dashboard>
   {
     return WillPopScope(
       onWillPop: () async {
-        _onWillPop();
-        return false;
+       Navigator.pushNamed(context, "/teamsDashboard");
+        throw 'Screen Change';
       },
       child: Provider<ApiService>(
         create: (context) => ApiService.create(),
@@ -349,51 +349,7 @@ class _DashboardState extends State<Dashboard>
                   backgroundColor: const Color(0xFFececed),
                   appBar: AppBar(
                     backgroundColor: Colors.white,
-                    actions: [
-                      Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
-                          child: GestureDetector(
-                            onTap: () {
-                              print(Strings.baseImageUrl + Strings.profilePic!);
-                              _showMyDialog(
-                                  context,
-                                  Strings.baseImageUrl + Strings.profilePic!,
-                                  Strings.username);
-                            },
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey.withOpacity(0.3),
-                              radius: 20,
-                              child: CircleAvatar(
-                                radius: 16,
-                                  backgroundImage: (
-                                      Strings.profilePic !=
-                                          "")
-                                  ? NetworkImage(Strings.baseImageUrl +
-                                      (Strings.profilePic ??
-                                          ""))
-                                  :  AssetImage("assets/icons/account.png")
-                                           as ImageProvider ,
-                                  backgroundColor: Colors.grey.withOpacity(0.3),
-                                ),
-                            ),
-                            
-                            // Strings.profilePic == null
-                            //     ? Image.asset(
-                            //         "assets/images/user.png",
-                            //         height: 40,
-                            //         width: 40,
-                            //       )
-                            //     : Image.network(
-                            //         Strings.baseImageUrl + Strings.profilePic!,
-                            //         height: 40,
-                            //         width: 40,
-                            //       ),
-                            // image.(
-                            //     Strings.baseImageUrl + Strings.profilePic!,
-                            //     40.0,
-                            //     40.0),
-                          ))
-                    ],
+                    
                     bottom: Strings.roleId != 7 ? PreferredSize(
                         preferredSize: Size.fromHeight(kToolbarHeight),
                         child: Padding(
@@ -461,13 +417,12 @@ class _DashboardState extends State<Dashboard>
                       width: 25.0,
                       child: IconButton(
                         icon: Icon(
-                          Icons.menu,
+                          Icons.arrow_back,
                           size: 25.0,
                           color: const Color(0xFF979797),
                         ),
                         onPressed: () {
-                          searchField.unfocus();
-                          _controller?.toggle();
+                                Navigator.pushNamed(ctx!, "/teamsDashboard");
                         },
                       ),
                     ),

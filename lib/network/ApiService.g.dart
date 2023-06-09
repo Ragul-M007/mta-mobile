@@ -265,6 +265,38 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<TeamsModel> fetchTeams(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<TeamsModel>(
+            Options(method: 'GET', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/teams',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = TeamsModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<DashboardRes> fetchProjectByTeams(id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<DashboardRes>(
+            Options(method: 'GET', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/projects/getProjectsByTeam/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = DashboardRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<ProjectDetailsRes> getProjectName(id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};

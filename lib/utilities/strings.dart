@@ -66,6 +66,8 @@ mixin Strings
   static String? dateofbirth;
   static String? preferedcourse;
   static String? pdfDoc;
+  static int? selectedTeamId;
+
   static List<ProjectDocData> selectedNotifyDocument = [];
   static bool selectedNotifyDocumentFlag = false;
 
