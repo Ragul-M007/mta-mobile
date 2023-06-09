@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen>
             child: Row(
               children: [
                 Icon(Icons.ac_unit, color: Colors.white),
-                Text("MTA Connect")
+                Text("MTA Konnect")
               ],
             ),
           ),

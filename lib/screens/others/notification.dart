@@ -86,7 +86,7 @@ class _NotificationContentState extends State<NotificationContent>
                   width: 10,
                 ),
                 Text(
-                  "MTA Connect",
+                  "MTA Konnect",
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

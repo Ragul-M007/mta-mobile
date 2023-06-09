@@ -66,7 +66,7 @@ class _ContactusState extends State<Contactus>
                       width: 10,
                     ),
                     Text(
-                      "MTA Connect",
+                      "MTA Konnect",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -277,7 +277,7 @@ class _ContactusContentState extends State<ContactusContent>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "MTA Connect",
+                                  "MTA Konnect",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,

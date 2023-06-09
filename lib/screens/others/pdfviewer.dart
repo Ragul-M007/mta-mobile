@@ -34,7 +34,7 @@ class _PdfviewerState extends State<Pdfviewer> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF0061b0),
-        title: Text('MTA Connect'),
+        title: Text('MTA Konnect'),
       ),
       body: Center(
           child: _isLoading

@@ -119,7 +119,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                       width: 10,
                     ),
                     Text(
-                      "MTA Connect",
+                      "MTA Konnect",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
