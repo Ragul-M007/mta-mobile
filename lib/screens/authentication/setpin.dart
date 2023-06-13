@@ -38,7 +38,8 @@ class _SetpinState extends State<Setpin> {
 
   BuildContext? ctx;
 
-  signin() {
+  signin() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
     SetPinReq setpinreq = SetPinReq();
@@ -149,7 +150,7 @@ class _SetpinState extends State<Setpin> {
             }
             else
             {
-                Navigator.pushNamed(ctx!, "/dashboard");
+                Navigator.pushNamed(ctx!, "/teamsDashboard");
             }
 
           } else {
@@ -336,7 +337,12 @@ class _SetpinState extends State<Setpin> {
                             ? four
                             : null,
               );
-              print("not null");
+              codeVerifyField = oneT.text + twoT.text + threeT.text + fourT.text;
+            if (codeVerifyField!.length == 4) 
+            {
+              FocusManager.instance.primaryFocus?.unfocus();
+             // signin();
+            }
             }
           },
         ),

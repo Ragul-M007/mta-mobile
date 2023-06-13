@@ -31,7 +31,6 @@ class _VerifypinState extends State<Verifypin> {
   String? verificationCode;
   String emailIdforVerification = '';
 
-
   bool _isLoading = false;
 
   FocusNode one = new FocusNode();
@@ -44,7 +43,6 @@ class _VerifypinState extends State<Verifypin> {
   FocusNode Resetthree = new FocusNode();
   FocusNode Resetfour = new FocusNode();
   FocusNode Resetfive = new FocusNode();
-
 
   final oneT = TextEditingController();
   final twoT = TextEditingController();
@@ -59,18 +57,15 @@ class _VerifypinState extends State<Verifypin> {
 
   final forgotPassEmailID = TextEditingController();
 
- 
- @override
+  @override
   void initState() {
     super.initState();
     print("Testing message--> ${Strings.testing}");
     print("Testing bool--> ${Strings.fromNotificationComments}");
   }
-  
 
   BuildContext? ctx;
-  Future<bool> _onWillPop() async 
-  {
+  Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -114,8 +109,8 @@ class _VerifypinState extends State<Verifypin> {
         )) ??
         false;
   }
-   _generateOtp(ctx) 
-  {
+
+  _generateOtp(ctx) {
     if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
       AppUtils.showToastErrorTop("Please enter your registered Email Id");
     } else {
@@ -141,8 +136,8 @@ class _VerifypinState extends State<Verifypin> {
       });
     }
   }
-  Future<void> _otpVerify() async 
-  {
+
+  Future<void> _otpVerify() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -225,7 +220,8 @@ class _VerifypinState extends State<Verifypin> {
       },
     );
   }
-   otpVerifyCall(ctx) {
+
+  otpVerifyCall(ctx) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     ValidateOTPReq request = ValidateOTPReq();
@@ -234,7 +230,6 @@ class _VerifypinState extends State<Verifypin> {
 
     print("data ${request.emailId}");
     print("data ${request.otp}");
-
 
     api.otpVerify(request).then((response) {
       AppUtils.dismissprogress();
@@ -247,7 +242,7 @@ class _VerifypinState extends State<Verifypin> {
         ResetfourT.text = '';
         ResetfiveT.text = '';
         Navigator.pushNamed(context, "/setpin");
-       // _changePass();
+        // _changePass();
       } else {
         AppUtils.showToastError(response.message!);
       }
@@ -256,8 +251,8 @@ class _VerifypinState extends State<Verifypin> {
       print(onError.toString());
     });
   }
-   Future<void> _forgotPass() async 
-  {
+
+  Future<void> _forgotPass() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -338,8 +333,7 @@ class _VerifypinState extends State<Verifypin> {
     );
   }
 
-  signin() 
-  {
+  signin() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
     LoginReq loginreq = LoginReq();
@@ -356,45 +350,32 @@ class _VerifypinState extends State<Verifypin> {
         var dat = jsonEncode(loginreq);
 
         print(dat);
-        
-        api.login(loginreq).then((response) 
-        {
+
+        api.login(loginreq).then((response) {
           AppUtils.dismissprogress();
           print('verifyPinResponse status ${response.toJson()}');
-          assignroles()
-      {
-        if (response.data?.role == "ADMIN")
-        {
-            Strings.roleId = 1;
-        }
-        else if(response.data?.role == "STAFF")
-        {
-            Strings.roleId = 2;
-        }
-        else if(response.data?.role == "VENDOR")
-        {
-            Strings.roleId = 3;
-        }else if(response.data?.role == "CONSULTANTS")
-        {
-            Strings.roleId = 4;
-        }
-        else if(response.data?.role == "CONTRACTORS")
-        {
-            Strings.roleId = 5;
-        }
-        else if(response.data?.role == "CLIENT")
-        {
-            Strings.roleId = 6;
-        }
-         else if (response.data?.role == "PUBLICUSER")
-        {
-            Strings.roleId = 7;
-        }
-      }
+          assignroles() {
+            if (response.data?.role == "ADMIN") {
+              Strings.roleId = 1;
+            } else if (response.data?.role == "STAFF") {
+              Strings.roleId = 2;
+            } else if (response.data?.role == "VENDOR") {
+              Strings.roleId = 3;
+            } else if (response.data?.role == "CONSULTANTS") {
+              Strings.roleId = 4;
+            } else if (response.data?.role == "CONTRACTORS") {
+              Strings.roleId = 5;
+            } else if (response.data?.role == "CLIENT") {
+              Strings.roleId = 6;
+            } else if (response.data?.role == "PUBLICUSER") {
+              Strings.roleId = 7;
+            }
+          }
 
           if (response.status!) {
             AppUtils.savePreferences("emailId", response.data!.emailId);
             AppUtils.savePreferences("userId", response.data!.userId);
+            AppUtils.savePreferences("username", response.data!.name);
             if (response.data!.userImg != null) {
               AppUtils.savePreferences("profilePic", response.data!.userImg);
               Strings.profilePic = response.data!.userImg!;
@@ -408,31 +389,24 @@ class _VerifypinState extends State<Verifypin> {
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
-            if(Strings.FromNotification)
-            {
-                Strings.FromNotification = false;
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
+            if (Strings.FromNotification) {
+              Strings.FromNotification = false;
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => Attendance()));
+            } else if (Strings.fromNotificationComments) {
+              if (Strings.selectedProDocument[0].commentId == null) {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Comments()));
+              } else {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Replies()));
+              }
+            } else {
+              Navigator.pushNamed(ctx!, "/teamsDashboard");
             }
-            else if(Strings.fromNotificationComments)
-            {
-                if(Strings.selectedProDocument[0].commentId == null)
-                {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Comments()));
-
-                }
-                else
-                {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Replies()));
-                }
-
-            }
-            else
-            {
-                Navigator.pushNamed(ctx!, "/teamsDashboard");
-            }
-
           } else {
-            AppUtils.showToastError(response.message!);
+            print("fffggf ${response.message!}");
+            AppUtils.showToastError("uiuiui");
           }
         }).catchError((onError) {
           AppUtils.dismissprogress();
@@ -445,8 +419,7 @@ class _VerifypinState extends State<Verifypin> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async 
-      {
+      onWillPop: () async {
         _onWillPop();
         return false;
       },
@@ -517,7 +490,7 @@ class _VerifypinState extends State<Verifypin> {
                 onTap: () {
                   _forgotPass();
                   //AppUtils.clearAllPreferences();
-                //  Navigator.popAndPushNamed(context, '/login');
+                  //  Navigator.popAndPushNamed(context, '/login');
                 },
                 child: Container(
                     width: double.infinity,
@@ -562,6 +535,29 @@ class _VerifypinState extends State<Verifypin> {
                       color: Color(0xFF0061b0)),
                 ),
               ),
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Not ${Strings.username}?",
+                        style: TextStyle(color: const Color(0xFF9e9e9e)),
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.popAndPushNamed(context, "/login");
+                          },
+                          child: Text(
+                            "Logout",
+                            style: TextStyle(color: Colors.red),
+                          ))
+                    ],
+                  ),
+                ),
+              )
             ],
           ));
         })),
@@ -581,7 +577,7 @@ class _VerifypinState extends State<Verifypin> {
     );
   }
 
-   Widget _boxBuilder1(contextResetPin) {
+  Widget _boxBuilder1(contextResetPin) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -593,7 +589,8 @@ class _VerifypinState extends State<Verifypin> {
       ],
     );
   }
-   Widget _box1(val, contextResetPin) {
+
+  Widget _box1(val, contextResetPin) {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Container(
@@ -661,8 +658,7 @@ class _VerifypinState extends State<Verifypin> {
     );
   }
 
-  Widget _box(val) 
-  {
+  Widget _box(val) {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Container(
@@ -671,9 +667,12 @@ class _VerifypinState extends State<Verifypin> {
         height: 50,
         width: 40,
         child: TextField(
-          keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
-          textInputAction: TextInputAction.done,          
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}'))],
+          keyboardType:
+              TextInputType.numberWithOptions(signed: true, decimal: true),
+          textInputAction: TextInputAction.done,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}'))
+          ],
           maxLength: 1,
           autofocus: true,
           controller: val == 1
@@ -716,6 +715,12 @@ class _VerifypinState extends State<Verifypin> {
                             : null,
               );
               print("not null");
+            }
+            codeVerifyField = oneT.text + twoT.text + threeT.text + fourT.text;
+            print("qwe  ${codeVerifyField?.length}");
+            if (codeVerifyField!.length == 4) {
+              FocusManager.instance.primaryFocus?.unfocus();
+              signin();
             }
           },
         ),

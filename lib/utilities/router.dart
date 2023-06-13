@@ -18,6 +18,7 @@ import 'package:mta/screens/others/newshighlights.dart';
 import 'package:mta/screens/others/notification.dart';
 import 'package:mta/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/screens/projects/projects.dart';
 import 'package:mta/screens/splashscreen.dart';
 
 import '../screens/authentication/login.dart';
@@ -25,7 +26,8 @@ import '../screens/authentication/login.dart';
 class RoutesGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final arg = settings.arguments;
-    switch (settings.name) {
+    switch (settings.name) 
+    {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
         break;
@@ -36,6 +38,9 @@ class RoutesGenerator {
         break;
       case '/teamsDashboard':
         return MaterialPageRoute(builder: (_) => TeamsDashboard());
+        break;
+      case '/projects':
+        return MaterialPageRoute(builder: (_) => Projects());
         break;
       case '/webview':
         return MaterialPageRoute(builder: (_) => WebpageView());

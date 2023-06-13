@@ -91,38 +91,46 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/dashboard", currentmenu: 1);
+                  menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
             },
             selectedmenuvalue: 1,
-            menutitle: Strings.roleId == 7 ? "Home":"Projects",
+            menutitle: Strings.roleId == 7 ? "Home":"Teams",
           ),
+          if(Strings.roleId != 7)
+              menuoption(
+                ontab: () {
+                    menuRedirect(routename: "/projects", currentmenu: 2);
+                },
+                selectedmenuvalue: 2,
+                menutitle: "Projects",
+              ),
           if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
                menuoption(
                   ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 2);
+                    menuRedirect(routename: "/attendance", currentmenu: 3);
                   },
-                  selectedmenuvalue: 2,
+                  selectedmenuvalue: 3,
                   menutitle: "Attendance",
                 ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/profile", currentmenu: 3);
+              menuRedirect(routename: "/profile", currentmenu: 4);
             },
-            selectedmenuvalue: 3,
+            selectedmenuvalue: 4,
             menutitle: "Profile",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/notification", currentmenu: 4);
+              menuRedirect(routename: "/notification", currentmenu: 5);
             },
-            selectedmenuvalue: 4,
+            selectedmenuvalue: 5,
             menutitle: "Notification",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/contactus", currentmenu: 5);
+              menuRedirect(routename: "/contactus", currentmenu: 6);
             },
-            selectedmenuvalue: 5,
+            selectedmenuvalue: 6,
             menutitle: "Contact Us",
           ),
           // menuoption(

@@ -231,10 +231,12 @@ class _LoginContentState extends State<LoginContent>
             Strings.roleId = 7;
         }
       }
-      if (response.status!) {
+      if (response.status!) 
+      {
         print("inside status");
         AppUtils.savePreferences("emailId", response.data?.emailId);
         AppUtils.savePreferences("userId", response.data?.userId);
+        AppUtils.savePreferences("username", response.data?.name);
         if (response.data?.userImg != null) {
           print("inside if img");
           AppUtils.savePreferences("profilePic", response.data?.userImg);

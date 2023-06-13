@@ -65,26 +65,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     _firebaseMessaging.getToken().then((value) {
       print(value);
     });
-    //  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    //   print("message recieved");
-    //   print(event.notification!.body);
-    //   print(event.data.values);
-    //  });
-    // FirebaseMessaging.onMessageOpenedApp.listen((message) {
-    //   print('Message clicked!');
-    // });
+    
     getToken();
     getFCMToken();
-    // WidgetsBinding.instance?.addPostFrameCallback((_) => getFCMToken());
-    //getToken();
-    //  AppUtils.getStringPreferences('token').then((value) {
-    //   if (value != "null") {
-    //     Strings.authToken = "Bearer " + value;
-    //     Navigator.pushNamed(context, "/login");
-    //   } else {
-    //     Navigator.pushNamed(context, "/login");
-    //   }
-    // });
+    getusername();
   }
 
   @override
@@ -520,7 +504,9 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   void getusername() {
+    print("checkk");
     AppUtils.getStringPreferences('username').then((value) {
+      print("username $value");
       if (value != "null") {
         Strings.username = value;
         print('username >>$value');
