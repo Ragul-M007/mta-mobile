@@ -38,10 +38,10 @@ class _DashboardState extends State<Dashboard>
   String? filepath;
   var dio = Dio();
 
-  String _errText = "";
-  void initState() {
+  String _errText = "No Projects Found";
+  void initState() 
+  {
     super.initState();
-
     if(Strings.roleId == 7)
     {
         AppUtils.showprogress();
@@ -57,10 +57,9 @@ class _DashboardState extends State<Dashboard>
       });
     super.initState();
     getPermission();
-
     if(Strings.roleId != 7)
     {
-        WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+      WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
     }
   }
 
@@ -110,6 +109,7 @@ class _DashboardState extends State<Dashboard>
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
+          print("messagee from api ${response.message}");
           _projectLists = response.data!;
         });
         if (Strings.isPushAvailable == true) {
@@ -117,7 +117,8 @@ class _DashboardState extends State<Dashboard>
           getUserCats(Strings.selectedProject[0].projectId);
         }
       } else {
-        setState(() {
+        setState(() 
+        {
           // _errText = "No Projects found !";
           _errText = response.message!;
         });
@@ -427,7 +428,9 @@ class _DashboardState extends State<Dashboard>
                       ),
                     ),
                   ),
-                  body: Builder(builder: (BuildContext newContext) {
+                  body: Builder(builder: (BuildContext newContext) 
+                  {
+                    print("check length ${_searchLists.length}");
                     ctx = newContext;
                     return 
                     Strings.roleId != 7 ?
