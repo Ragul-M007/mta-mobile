@@ -75,6 +75,8 @@ class NotificationData {
 
 class DocDetail {
   String? file;
+  String? projectName;
+  String? categoryName;
   int? categoryId;
   String? updatedAt;
   int? projectId;
@@ -87,6 +89,8 @@ class DocDetail {
 
   DocDetail(
       {this.file,
+      this.projectName,
+      this.categoryName,
       this.categoryId,
       this.updatedAt,
       this.projectId,
@@ -99,6 +103,8 @@ class DocDetail {
 
   DocDetail.fromJson(Map<String, dynamic> json) {
     file = json['file'];
+    categoryName = json['category_name'];
+    projectName = json['project_name'];
     categoryId = json['category_id'];
     updatedAt = json['updated_at'];
     projectId = json['project_id'];
@@ -113,6 +119,8 @@ class DocDetail {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['file'] = this.file;
+    data['category_name'] = this.categoryName;
+    data['project_name'] = this.projectName;
     data['category_id'] = this.categoryId;
     data['updated_at'] = this.updatedAt;
     data['project_id'] = this.projectId;

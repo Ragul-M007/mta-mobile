@@ -23,7 +23,16 @@ class Categories extends StatelessWidget {
         body: WillPopScope(
           child: CategoriesContent(),
           onWillPop: () {
-            Navigator.pushNamed(context, '/dashboard');
+
+
+            if(Strings.fromProjects == true)
+            {
+                Navigator.pushNamed(context, '/projects');
+            }
+            else
+            {
+                Navigator.pushNamed(context, '/dashboard');
+            }
             throw 'Screen Change';
           },
         ),
@@ -47,9 +56,6 @@ class _CategoriesContentState extends State<CategoriesContent> {
     super.initState();
     getUserCats();
     WidgetsBinding.instance!.addPostFrameCallback((_) => getCategories());
-
-    print("image url");
-    print(Strings.baseImageUrl + Strings.selectedProject[0].projectImg!);
   }
 
   getUserCats() {
@@ -309,6 +315,7 @@ class _CategoriesContentState extends State<CategoriesContent> {
                       padding: EdgeInsets.all(10),
                       child: GestureDetector(
                         onTap: () {
+                          print("category check ${_catsList[index]}");
                           Strings.selectedCategory = [];
                           Strings.selectedCategory.add(_catsList[index]);
                           Strings.category = true;

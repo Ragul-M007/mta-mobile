@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +15,9 @@ import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
+import '../../models/FetchCatsRes.dart';
 import '../comments/comments.dart';
+import '../doucument/viewdoclist.dart';
 
 FancyDrawerController? _controller;
 List<NotificationData> _msgList = [];
@@ -95,29 +96,32 @@ class _NotificationContentState extends State<NotificationContent>
               ],
             ),
           ),
-          menuoption(
-            ontab: () {
-                  menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-            },
-            selectedmenuvalue: 1,
-            menutitle: Strings.roleId == 7 ? "Home":"Teams",
-          ),
-          if(Strings.roleId != 7)
-              menuoption(
-                ontab: () {
-                    menuRedirect(routename: "/projects", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Projects",
-              ),
-         if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
-               menuoption(
-                  ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 3);
-                  },
-                  selectedmenuvalue: 3,
-                  menutitle: "Attendance",
-                ),
+          if (Strings.roleId != 6)
+            menuoption(
+              ontab: () {
+                Strings.fromProjects = false;
+                menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
+              },
+              selectedmenuvalue: 1,
+              menutitle: Strings.roleId == 7 ? "Home" : "Teams",
+            ),
+          if (Strings.roleId != 7)
+            menuoption(
+              ontab: () {
+                Strings.fromProjects = true;
+                menuRedirect(routename: "/projects", currentmenu: 2);
+              },
+              selectedmenuvalue: 2,
+              menutitle: "Projects",
+            ),
+          if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
+            menuoption(
+              ontab: () {
+                menuRedirect(routename: "/attendance", currentmenu: 3);
+              },
+              selectedmenuvalue: 3,
+              menutitle: "Attendance",
+            ),
           menuoption(
             ontab: () {
               menuRedirect(routename: "/profile", currentmenu: 4);
@@ -162,51 +166,51 @@ class _NotificationContentState extends State<NotificationContent>
           // ),
           menuoption(
             ontab: () {
-          showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
+              showDialog(
+                context: context,
+                builder: (context) => new AlertDialog(
+                  title: Text(
+                    "Are you sure ?",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF0061b0),
+                        fontWeight: FontWeight.w600),
+                  ),
+                  content: Text(
+                    'Do you want to logout from the App',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: new Text(
+                        'No',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        menuRedirect(routename: "/login", currentmenu: 9);
+                        AppUtils.removeDeviceId(context);
+                      },
+                      child: new Text(
+                        'Yes',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                 menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.removeDeviceId(context);
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );            },
+              );
+            },
             selectedmenuvalue: 9,
             menutitle: "Logout",
           ),
@@ -266,23 +270,72 @@ class _NotificationContentState extends State<NotificationContent>
                                 );
                               }
 
-                              Strings.selectedProDocument.clear();
-                              var dat = jsonEncode(_msgList[index].docDetail);
-                              var decoded = jsonDecode(dat);
-                              ProjectDocData peo =
-                                  ProjectDocData.fromJson(decoded);
-                              print(jsonEncode(peo));
-                              Strings.selectedProDocument.add(peo);
                               Strings.fromNotificationScren = true;
                               if (_msgList[index]
                                   .title!
-                                  .contains("Commented")) 
-                                  {
+                                  .contains("Commented")) {
+                                Strings.selectedProDocument.clear();
+                                var dat = jsonEncode(_msgList[index].docDetail);
+                                var decoded = jsonDecode(dat);
+                                ProjectDocData peo =
+                                    ProjectDocData.fromJson(decoded);
+                                print(jsonEncode(peo));
+                                Strings.selectedProDocument.add(peo);
                                 updateNotification(
-                                    _msgList[index].notiId, true);
-                              } else {
+                                    _msgList[index].notiId, "comments");
+                              } else if (_msgList[index]
+                                  .title!
+                                  .contains("Replied")) {
+                                Strings.selectedProDocument.clear();
+                                var dat = jsonEncode(_msgList[index].docDetail);
+                                var decoded = jsonDecode(dat);
+                                ProjectDocData peo =
+                                    ProjectDocData.fromJson(decoded);
+                                print(jsonEncode(peo));
+                                Strings.selectedProDocument.add(peo);
                                 updateNotification(
-                                    _msgList[index].notiId, false);
+                                    _msgList[index].notiId, "replies");
+                              } else 
+                              {
+                                var dat = jsonEncode(_msgList[index].docDetail);
+                                var decoded = jsonDecode(dat);
+                                ProjectDocData peo =
+                                    ProjectDocData.fromJson(decoded);
+
+                                Strings.selectedProject.add(Data.fromJson({
+                                  "project_img": "",
+                                  "project_name": peo.projectName,
+                                  "project_id": (peo.projectId != "null" &&
+                                          peo.projectId != null)
+                                      ? int.parse(peo.projectId ?? "0")
+                                      : null
+                                }));
+
+                                print("peoo ${jsonEncode(peo)}");
+                                Strings.selectedCategory.clear();
+                                Strings.selectedCategory
+                                    .add(FectchCatsData.fromJson(
+                                      {
+                                  "category_id": (peo.categoryId != "null" &&
+                                          peo.categoryId != null)
+                                      ? peo.categoryId
+                                      : null,
+                                  "category_name": peo.categoryName,
+                                  "project_id": (peo.projectId != "null" &&
+                                          peo.projectId != null)
+                                      ? int.parse(peo.projectId ?? "0")
+                                      : null
+                                }));
+
+                                if (peo.categoryId != "null" &&
+                                    peo.categoryId != null) {
+                                  Strings.category = true;
+                                } else {
+                                  Strings.category = false;
+                                }
+                                Strings.fromNotificationDocuments = true;
+                                updateNotification(
+                                    _msgList[index].notiId, "docs");
                               }
 
                               // var data = {
@@ -345,15 +398,24 @@ class _NotificationContentState extends State<NotificationContent>
                                             SizedBox(
                                               height: 5,
                                             ),
-                                            
-                                            Text(DateFormat.jm().format(DateTime.parse(_msgList[index].createdAt!)),
+                                            Text(
+                                                DateFormat.jm().format(
+                                                    DateTime.parse(
+                                                        _msgList[index]
+                                                            .createdAt!)),
                                                 style: Drawables
                                                     .adddoccontentstyle(
                                                         Colors.grey,
                                                         14.0,
                                                         FontWeight.w500)),
-                                                        SizedBox(height: 2,),
-                                                        Text(DateFormat.MMMMEEEEd().format(DateTime.parse(_msgList[index].createdAt!)),
+                                            SizedBox(
+                                              height: 2,
+                                            ),
+                                            Text(
+                                                DateFormat.MMMMEEEEd().format(
+                                                    DateTime.parse(
+                                                        _msgList[index]
+                                                            .createdAt!)),
                                                 style: Drawables
                                                     .adddoccontentstyle(
                                                         Colors.grey,
@@ -363,7 +425,12 @@ class _NotificationContentState extends State<NotificationContent>
                                         ),
                                       ),
                                       _msgList[index].imgUrl != null
-                                          ? Image.asset(getFileExt(_msgList[index].imgUrl!),width: 30,height: 30,)
+                                          ? Image.asset(
+                                              getFileExt(
+                                                  _msgList[index].imgUrl!),
+                                              width: 30,
+                                              height: 30,
+                                            )
                                           : SizedBox(),
                                     ],
                                   ),
@@ -422,12 +489,9 @@ class _NotificationContentState extends State<NotificationContent>
       return "assets/icons/ppt.png";
     } else if (fileExt == "mpeg" || fileExt == "mpg") {
       return "assets/icons/mpg.png";
-    } 
-     else if (fileExt == "wav" || fileExt == "mp3") {
+    } else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
-    } 
-    
-     else if (fileExt == "xls" ||
+    } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
         fileExt == "xlsb" ||
@@ -460,23 +524,23 @@ class _NotificationContentState extends State<NotificationContent>
     });
   }
 
-  updateNotification(notificationId, bool toComments) {
+  updateNotification(notificationId, toComments) 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.updateNotificationStatus(notificationId).then((response) {
       if (response.status!) {
         AppUtils.dismissprogress();
 
-        if(toComments)
-        {
-        Navigator.of(context).pushReplacementNamed('/comments');
-
-        }
-        else
-        {
+        if (toComments == "comments") {
+          Navigator.of(context).pushReplacementNamed('/comments');
+        } else if (toComments == "replies") {
           Strings.fromNotificationReply = true;
           Navigator.of(context).pushReplacementNamed('/replies');
-
+        } else {
+          Strings.fromNotificationDocuments = true;
+          Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
         }
       } else {
         AppUtils.dismissprogress();

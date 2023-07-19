@@ -67,7 +67,7 @@ class _LoginState extends State<Login> {
     // return Container(child: LoginContent());
 
     return Scaffold(
-        appBar: EmptyAppBar(),
+        
         body: GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -280,211 +280,207 @@ class _LoginContentState extends State<LoginContent>
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SafeArea(
-          key: scaffoldKey,
-          child: Stack(
-            children: <Widget>[
-              Container(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * .25,
-                decoration: new BoxDecoration(
-                  color: Colors.white,
-                  image: new DecorationImage(
-                    image: new AssetImage("assets/images/logo.jpg"),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-              Container(
-                  height: MediaQuery.of(context).size.height * 0.44,
-                  margin: EdgeInsets.fromLTRB(
-                      20, MediaQuery.of(context).size.height * 12 / 100, 20, 0),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFcccccc),
-                          offset: const Offset(
-                            -2.0,
-                            6.0,
-                          ),
-                          blurRadius: 20.0,
-                          spreadRadius: 10.0,
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(20)),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "Login",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                              child: Text(
-                                "Email Id",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                            child: TextField(
-                              controller: _emailIdController,
-                              decoration: InputDecoration(
-                                  hintText: "Email ID",
-                                  contentPadding: EdgeInsets.all(10),
-                                  hintStyle: TextStyle(
-                                      fontSize: 14.0, color: Colors.black),
-                                  // border: OutlineInputBorder(),
-                                  border: InputBorder.none),
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFf2f3f4),
-                                border:
-                                    Border.all(color: const Color(0xFFf2f3f4)),
-                                borderRadius: BorderRadius.circular(25)),
-                          ),
-                          SizedBox(height: 5.0),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                              child: Text(
-                                "Password",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                            child: TextField(
-                                controller: _passwordController,
-                                decoration: InputDecoration(
-                                    hintText: "Password",
-                                    contentPadding: EdgeInsets.all(10),
-                                    hintStyle: TextStyle(
-                                        fontSize: 14.0, color: Colors.black),
-                                    // border: OutlineInputBorder(),
-                                    border: InputBorder.none),
-                                keyboardType: TextInputType.visiblePassword,
-                                obscureText: true),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFFf2f3f4),
-                                border:
-                                    Border.all(color: const Color(0xFFf2f3f4)),
-                                borderRadius: BorderRadius.circular(25)),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _login();
-                            },
-                            child: Container(
-                              child: Center(
-                                  child: Text(
-                                "LOGIN",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: Colors.white),
-                                textAlign: TextAlign.center,
-                              )),
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              height: 40,
-                              margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
-                              decoration: BoxDecoration(
-                                  color: Color(0xFF0061b0),
-                                  borderRadius: BorderRadius.circular(25)),
-                            ),
-                          ),
-                          SizedBox(height: 10.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              
-                              Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Container(
-                              margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                              child: GestureDetector(
-                                onTap: () 
-                                {
-                                  _signUp();
-                                },
-                                child: Text(    
-                                  "SignUp",
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Align(
-                                alignment: Alignment.bottomRight,
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _forgotPass();
-                                    },
-                                    child: Text(
-                                      "Forgot Password ?",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                           
-                        ],
+    return Stack(
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * .30,
+          decoration: new BoxDecoration(
+            color: Colors.white,
+            image: new DecorationImage(
+              image: new AssetImage("assets/images/logo.jpg"),
+              fit: BoxFit.fill,
+            ),
+          ),
+        ),
+        Container(
+            height: MediaQuery.of(context).size.height * 0.44,
+            margin: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).size.height * 12 / 100, 20, 0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFcccccc),
+                    offset: const Offset(
+                      -2.0,
+                      6.0,
+                    ),
+                    blurRadius: 20.0,
+                    spreadRadius: 10.0,
+                  )
+                ],
+                borderRadius: BorderRadius.circular(20)),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Login",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 20),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                        child: Text(
+                          "Email Id",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
-                  )),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                margin: EdgeInsets.fromLTRB(
-                    0, MediaQuery.of(context).size.height * 0.6, 0, 0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Container(
+                      child: TextField(
+                        controller: _emailIdController,
+                        decoration: InputDecoration(
+                            hintText: "Email ID",
+                            contentPadding: EdgeInsets.all(10),
+                            hintStyle: TextStyle(
+                                fontSize: 14.0, color: Colors.black),
+                            // border: OutlineInputBorder(),
+                            border: InputBorder.none),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFf2f3f4),
+                          border:
+                              Border.all(color: const Color(0xFFf2f3f4)),
+                          borderRadius: BorderRadius.circular(25)),
+                    ),
+                    SizedBox(height: 5.0),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                        child: Text(
+                          "Password",
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Container(
+                      child: TextField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                              hintText: "Password",
+                              contentPadding: EdgeInsets.all(10),
+                              hintStyle: TextStyle(
+                                  fontSize: 14.0, color: Colors.black),
+                              // border: OutlineInputBorder(),
+                              border: InputBorder.none),
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFf2f3f4),
+                          border:
+                              Border.all(color: const Color(0xFFf2f3f4)),
+                          borderRadius: BorderRadius.circular(25)),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        _login();
+                      },
+                      child: Container(
+                        child: Center(
+                            child: Text(
+                          "LOGIN",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white),
+                          textAlign: TextAlign.center,
+                        )),
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: 40,
+                        margin: EdgeInsets.fromLTRB(10, 25, 20, 2),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF0061b0),
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        
+                        Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                        child: GestureDetector(
+                          onTap: () 
+                          {
+                            _signUp();
+                          },
+                          child: Text(    
+                            "SignUp",
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                            child: GestureDetector(
+                              onTap: () {
+                                _forgotPass();
+                              },
+                              child: Text(
+                                "Forgot Password ?",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                     
+                  ],
                 ),
-                child: tabbarwidget(),
-              )
-            ],
-          )),
+              ),
+            )),
+        Container(
+          height: MediaQuery.of(context).size.height * 0.4,
+          margin: EdgeInsets.fromLTRB(
+              0, MediaQuery.of(context).size.height * 0.6, 0, 0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
+          child: tabbarwidget(),
+        )
+      ],
     );
   }
 
@@ -1419,7 +1415,9 @@ class _LoginContentState extends State<LoginContent>
     {
       AppUtils.showToastErrorTop("Please enter valid Email Id");
     }
-     else {
+     else 
+     {
+      
       AppUtils.showprogress();
       final api = Provider.of<ApiService>(context, listen: false);
       SignUpReq request = new SignUpReq();
@@ -1447,7 +1445,8 @@ class _LoginContentState extends State<LoginContent>
                   content: Text("User created successfully! Please check your email for the credentials."),
                   actions: <Widget>[
                     FlatButton(
-                      onPressed: () {
+                      onPressed: () 
+                      {
                         Navigator.of(ctx).pop();
                         editEmail.text = "";
                         editName.text = "";
@@ -1458,10 +1457,12 @@ class _LoginContentState extends State<LoginContent>
                   ],
                 ),
               );
-        } else {
+        } else 
+        {
           AppUtils.showToastError(response.message!);
         }
-      }).catchError((onError) {
+      }).catchError((onError) 
+      {
         AppUtils.dismissprogress();
         print(onError.toString());
       });

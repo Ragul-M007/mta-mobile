@@ -28,7 +28,8 @@ class DashboardRes {
   }
 }
 
-class Data {
+class Data 
+{
   int? projectId;
   int? categoryId;
   String? projectName;
@@ -81,6 +82,87 @@ class Data {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['project_id'] = this.projectId;
+    data['category_id'] = this.categoryId;
+    data['project_name'] = this.projectName;
+    data['category_name'] = this.categoryName;
+    data['project_img'] = this.projectImg;
+    data['city'] = this.city;
+    data['state'] = this.state;
+    data['address'] = this.address;
+    data['status'] = this.status;
+    data['start_date'] = this.startDate;
+    data['end_date'] = this.endDate;
+    data['description'] = this.description;
+    if (this.documents != null) {
+      data['documents'] = this.documents?.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class DocumentData 
+{
+  String? notiId;
+  String? projectId;
+  String? categoryId;
+  String? projectName;
+  String? categoryName;
+  String? projectImg;
+  String? city;
+  String? state;
+  String? address;
+  String? status;
+  String? startDate;
+  String? endDate;
+  String? description;
+  List<Documents>? documents;
+
+  DocumentData(
+      {
+      this.notiId,
+      this.projectId,
+      this.categoryId,
+      this.projectName,
+      this.categoryName,
+      this.projectImg,
+      this.city,
+      this.state,
+      this.address,
+      this.status,
+      this.startDate,
+      this.endDate,
+      this.description,
+      this.documents});
+
+  DocumentData.fromJson(Map<String, dynamic> json) 
+  {
+    notiId = json['notiId'];
+    projectId = json['project_id'];
+    categoryId = json['category_id'];
+    projectName = json['project_name'];
+    categoryName = json['category_name'];
+    projectImg = json['project_img'];
+    city = json['city'];
+    state = json['state'];
+    address = json['address'];
+    status = json['status'];
+    startDate = json['start_date'];
+    endDate = json['end_date'];
+    description = json['description'];
+    if (json['documents'] != null) 
+    {
+      documents = <Documents>[];
+      json['documents'].forEach((v) {
+        documents?.add(new Documents.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() 
+  {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['notiId'] = this.notiId;
     data['project_id'] = this.projectId;
     data['category_id'] = this.categoryId;
     data['project_name'] = this.projectName;

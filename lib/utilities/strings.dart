@@ -11,8 +11,10 @@ mixin Strings
 {
   static String testing = 'novalue';
   static bool fromNotificationComments = false;
+  static bool fromNotificationDocuments = false;
   static String authToken = '';
   static bool fromReplies = false;
+  static bool fromProjects = true;
  // static String baseImageUrl = "https://demo.emeetify.com:81/";
  // static String socketUrl = 'https://demo.emeetify.com:5012/';
   //static String socketUrl = 'https://demo.emeetify.com:6253/';

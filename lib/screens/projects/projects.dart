@@ -214,9 +214,10 @@ class _ProjectsState extends State<Projects>
                     ],
                   ),
                 ),
-                Strings.roleId != 7? 
+                Strings.roleId != 6? 
                 menuoption(
                   ontab: () {
+                    Strings.fromProjects = false;
                     menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
                   },
                   selectedmenuvalue: 1,
@@ -224,22 +225,22 @@ class _ProjectsState extends State<Projects>
                 ):SizedBox(),
                 menuoption(
                   ontab: () {
+                    Strings.fromProjects = true;
                     menuRedirect(routename: "/projects", currentmenu: 2);
                   },
                   selectedmenuvalue: 2,
                   menutitle: "Projects",
                 ),
 
-                (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
-                   ? menuoption(
+               if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
+                    menuoption(
                         ontab: () {
                           menuRedirect(
                               routename: "/attendance", currentmenu: 3);
                         },
                         selectedmenuvalue: 3,
                         menutitle: "Attendance",
-                      )
-                    : SizedBox(),
+                      ),
                 menuoption(
                   ontab: () {
                     menuRedirect(routename: "/profile", currentmenu: 4);
@@ -540,6 +541,7 @@ class _ProjectsState extends State<Projects>
                                                         child: Text(
                                                           _searchLists[index]
                                                               .projectName!,
+                                                              overflow: TextOverflow.ellipsis,
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.black,
@@ -690,6 +692,7 @@ class _ProjectsState extends State<Projects>
                                                               _projectLists[
                                                                       index]
                                                                   .projectName!,
+                                                                  overflow: TextOverflow.ellipsis,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .black,

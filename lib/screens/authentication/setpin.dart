@@ -150,13 +150,21 @@ class _SetpinState extends State<Setpin> {
             }
             else
             {
+              if(Strings.roleId == 6)
+              {
+                Navigator.pushNamed(context, "/projects");
+              }
+              else
+              {
                 Navigator.pushNamed(ctx!, "/teamsDashboard");
+              }
             }
 
           } else {
             AppUtils.showToastError(response.message!);
           }
-        }).catchError((onError) {
+        }).catchError((onError) 
+        {
           AppUtils.dismissprogress();
           print(onError.toString());
         });
@@ -165,110 +173,110 @@ class _SetpinState extends State<Setpin> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
       child: Scaffold(body: Builder(builder: (BuildContext newContext) {
         ctx = newContext;
-        return SafeArea(
-            child: Stack(
+        return Stack(
           children: <Widget>[
-            Container(
-              height: MediaQuery.of(context).size.height * .35,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                image: new DecorationImage(
-                  image: new AssetImage("assets/images/logo.jpg"),
-                  fit: BoxFit.fill,
+        Container(
+          height: MediaQuery.of(context).size.height * .35,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            image: new DecorationImage(
+              image: new AssetImage("assets/images/logo.jpg"),
+              fit: BoxFit.fill,
+            ),
+          ),
+          padding: EdgeInsets.all(10),
+          width: double.infinity,
+        ),
+        Container(
+          margin: EdgeInsets.fromLTRB(
+              0, MediaQuery.of(context).size.height * .35, 0, 0),
+          padding: EdgeInsets.all(5),
+          width: double.infinity,
+          decoration: BoxDecoration(color: Colors.grey[200]),
+        ),
+        Container(
+          margin: EdgeInsets.fromLTRB(
+              20, MediaQuery.of(context).size.height * .22, 20, 10),
+          width: double.infinity,
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(15)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 54,
                 ),
-              ),
-              padding: EdgeInsets.all(10),
-              width: double.infinity,
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(
-                  0, MediaQuery.of(context).size.height * .35, 0, 0),
-              padding: EdgeInsets.all(5),
-              width: double.infinity,
-              decoration: BoxDecoration(color: Colors.grey[200]),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(
-                  20, MediaQuery.of(context).size.height * .22, 20, 10),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(15)),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 54,
-                    ),
-                    Text(
-                      "Set Pin",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Text(
-                      "Set 4 digit secret pin to your application",
-                      style: TextStyle(color: const Color(0xFF9e9e9e)),
-                    ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    _boxBuilder(),
-                    SizedBox(
-                      height: 40,
-                    ),
-                  ],
+                Text(
+                  "Set Pin",
+                  style:
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-              ),
+                SizedBox(
+                  height: 50,
+                ),
+                Text(
+                  "Set 4 digit secret pin to your application",
+                  style: TextStyle(color: const Color(0xFF9e9e9e)),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                _boxBuilder(),
+                SizedBox(
+                  height: 40,
+                ),
+              ],
             ),
-            // Container(
-            //     width: double.infinity,
-            //     margin: EdgeInsets.fromLTRB(
-            //         10, MediaQuery.of(context).size.height * .68, 10, 20),
-            //     child: Text("Reset pin",
-            //         textAlign: TextAlign.center,
-            //         style: TextStyle(decoration: TextDecoration.underline))),
-            Container(
-              margin: EdgeInsets.fromLTRB(
-                  10, MediaQuery.of(context).size.height * .75, 10, 20),
-              child: ButtonTheme(
-                minWidth: double.infinity,
-                child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    textColor: Colors.white,
-                    padding: EdgeInsets.all(15),
-                    onPressed: () {
-                      print(
-                          "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
-                      codeVerifyField =
-                          oneT.text + twoT.text + threeT.text + fourT.text;
-                      print(codeVerifyField);
-                      print("${codeVerifyField!.length}");
-                      if (codeVerifyField!.length < 4) {
-                        AppUtils.showToastError("Please Enter Pin");
-                      } else {
-                        signin();
-                      }
-                    },
-                    child: Text("SUBMIT",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.white)),
-                    color: Color(0xFF0061b0)),
-              ),
-            ),
+          ),
+        ),
+        // Container(
+        //     width: double.infinity,
+        //     margin: EdgeInsets.fromLTRB(
+        //         10, MediaQuery.of(context).size.height * .68, 10, 20),
+        //     child: Text("Reset pin",
+        //         textAlign: TextAlign.center,
+        //         style: TextStyle(decoration: TextDecoration.underline))),
+        Container(
+          margin: EdgeInsets.fromLTRB(
+              10, MediaQuery.of(context).size.height * .75, 10, 20),
+          child: ButtonTheme(
+            minWidth: double.infinity,
+            child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                textColor: Colors.white,
+                padding: EdgeInsets.all(15),
+                onPressed: () 
+                {
+                  codeVerifyField =
+                      oneT.text + twoT.text + threeT.text + fourT.text;
+                  print(codeVerifyField);
+                  if (codeVerifyField!.length < 4) 
+                  {
+                    AppUtils.showToastError("Please Enter Pin");
+                  } else 
+                  {
+                    signin();
+                  }
+                },
+                child: Text("SUBMIT",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.white)),
+                color: Color(0xFF0061b0)),
+          ),
+        ),
           ],
-        ));
+        );
       })),
     );
   }

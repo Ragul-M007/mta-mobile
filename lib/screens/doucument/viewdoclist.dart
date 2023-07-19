@@ -28,23 +28,38 @@ class ViewDocScreen extends StatelessWidget {
         child: Scaffold(
           appBar: appbar("Documents"),
           backgroundColor: Colors.grey[300],
-          body: WillPopScope(child: ViewDocContent(),onWillPop:(){
-          Navigator.pushNamed(context, '/categories');
-            throw 'Screen Change';
-          }),
+          body: WillPopScope(
+              child: ViewDocContent(),
+              onWillPop: () {
+                Strings.category = false;
+
+                if (Strings.fromNotificationScren) {
+                  Strings.fromNotificationScren = false;
+                  Navigator.of(context).pushReplacementNamed('/notification');
+                } else {
+                  if (Strings.fromNotificationDocuments) {
+                    Strings.fromNotificationDocuments = false;
+                    Navigator.pushNamed(context, '/projects');
+                  } else {
+                    Navigator.pushNamed(context, '/categories');
+                  }
+                }
+
+                throw 'Screen Change';
+              }),
         ));
   }
 }
 
-class ViewDocContent extends StatefulWidget {
+class ViewDocContent extends StatefulWidget 
+{
   ViewDocContent({Key? key}) : super(key: key);
 
   @override
   _ViewDocContentState createState() => _ViewDocContentState();
 }
 
-class _ViewDocContentState extends State<ViewDocContent> 
-{
+class _ViewDocContentState extends State<ViewDocContent> {
   List<ProjectDocData> _docsList = [];
   List<FetchCategoryDoc> _categorydocsList = [];
 
@@ -95,7 +110,7 @@ class _ViewDocContentState extends State<ViewDocContent>
     );
   }
 
-  void _downloadfile(serverURL,filename) async {
+  void _downloadfile(serverURL, filename) async {
     String? path;
     if (Platform.isAndroid) {
       path = await ExtStorage.getExternalStoragePublicDirectory(
@@ -104,8 +119,7 @@ class _ViewDocContentState extends State<ViewDocContent>
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) 
-      {
+      if (pathStr != null && pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -120,7 +134,7 @@ class _ViewDocContentState extends State<ViewDocContent>
     //var fileName = filename;//filenames[1];
     var extn = getFileExtension(serverURL);
     var nospace = filename.replaceAll(' ', '');
-    var fileName = nospace+extn;
+    var fileName = nospace + extn;
     print("url--> $fileName");
     String fullPath = "$path/$fileName";
     setState(() {
@@ -183,19 +197,22 @@ class _ViewDocContentState extends State<ViewDocContent>
           //       Colors.black, 20.0, FontWeight.w600),
           // ),
           Container(
-            padding: EdgeInsets.only(top: 30.0, bottom: 10.0,right: 20,left: 20),
+            padding:
+                EdgeInsets.only(top: 30.0, bottom: 10.0, right: 20, left: 20),
             child: Center(
               child: Text(
-                
                 Strings.category == true
                     ? Strings.selectedProject[0].projectName! +
                         " >> " +
-                        Strings.selectedCategory[0].categoryName!
+                        (Strings.selectedCategory[0].categoryName ?? "")
                     : Strings.selectedProject[0].projectName!,
                 style: Drawables.adddoccontentstyle(
-                    Colors.black, 25.0, FontWeight.bold,),
-                    maxLines: 3,
-                    textAlign: TextAlign.center,
+                  Colors.black,
+                  25.0,
+                  FontWeight.bold,
+                ),
+                maxLines: 3,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -262,7 +279,7 @@ class _ViewDocContentState extends State<ViewDocContent>
                         ),
                         onTap: () {
                           print("search");
-                         // webcheck();
+                          // webcheck();
                         },
                       )
                     ],
@@ -295,7 +312,8 @@ class _ViewDocContentState extends State<ViewDocContent>
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                        _downloadfile(_searchList[index].file,_searchList[index].fileName);
+                                        _downloadfile(_searchList[index].file,
+                                            _searchList[index].fileName);
                                       },
                                       child: Stack(
                                         children: <Widget>[
@@ -345,20 +363,24 @@ class _ViewDocContentState extends State<ViewDocContent>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                 
                                   Padding(
                                     padding: EdgeInsets.only(left: 10),
                                     child: Text(
                                       _searchList[index].fileName,
+                                      overflow: TextOverflow.ellipsis,
                                       style: Drawables.adddoccontentstyle(
                                           Colors.black87,
                                           14.0,
                                           FontWeight.w500),
                                     ),
                                   ),
-                                   Padding(
+                                  Padding(
                                     padding: const EdgeInsets.only(left: 10),
-                                    child: Text("Created on: ${getForamtDate(_searchList[index].createdAt)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
+                                    child: Text(
+                                      "Created on: ${getForamtDate(_searchList[index].createdAt)}",
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
                                   ),
                                   SizedBox(height: 7.0),
                                   GestureDetector(
@@ -445,7 +467,9 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                   onTap: () {
                                                     _downloadfile(
                                                         _categorydocsList[index]
-                                                            .file,_categorydocsList[index].fileName);
+                                                            .file,
+                                                        _categorydocsList[index]
+                                                            .fileName);
                                                   },
                                                   child: Stack(
                                                     children: <Widget>[
@@ -517,15 +541,21 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                           Colors.black87,
                                                           14.0,
                                                           FontWeight.w500),
-                                                          overflow: TextOverflow.ellipsis,
-                                                          maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
                                                 ),
                                               ),
                                               Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text("Created on: ${getForamtDate(_categorydocsList[index]
-                                                            .createdAt!)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
-                                  ),
+                                                padding: const EdgeInsets.only(
+                                                    left: 10),
+                                                child: Text(
+                                                  "Created on: ${getForamtDate(_categorydocsList[index].createdAt!)}",
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
                                               SizedBox(height: 7.0),
                                               GestureDetector(
                                                 onTap: () {
@@ -538,7 +568,7 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                       .add(_categorydocsList[
                                                           index]);
 
-                                                   getUserCats();
+                                                  getUserCats();
                                                 },
                                                 child: Row(
                                                   crossAxisAlignment:
@@ -624,7 +654,9 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                 GestureDetector(
                                                   onTap: () {
                                                     _downloadfile(
-                                                        _docsList[index].file,_docsList[index].fileName);
+                                                        _docsList[index].file,
+                                                        _docsList[index]
+                                                            .fileName);
                                                   },
                                                   child: Stack(
                                                     children: <Widget>[
@@ -684,24 +716,29 @@ class _ViewDocContentState extends State<ViewDocContent>
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Padding(
-                                                padding:
-                                                    EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                                padding: EdgeInsets.fromLTRB(
+                                                    10, 0, 10, 0),
                                                 child: Text(
-                                                  _docsList[index].fileName!,
-                                                  style: Drawables
-                                                      .adddoccontentstyle(
-                                                          Colors.black87,
-                                                          14.0,
-                                                          FontWeight.w500),
-                                                           overflow: TextOverflow.ellipsis,
-                                                          maxLines: 2
-                                                ),
+                                                    _docsList[index].fileName!,
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.black87,
+                                                            14.0,
+                                                            FontWeight.w500),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1),
                                               ),
                                               Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text("Created on: ${getForamtDate(_docsList[index]
-                                                            .createdAt!)}",style: TextStyle(fontSize: 12,color: Colors.grey),),
-                                  ),
+                                                padding: const EdgeInsets.only(
+                                                    left: 10),
+                                                child: Text(
+                                                  "Created on: ${getForamtDate(_docsList[index].createdAt!)}",
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
                                               SizedBox(height: 5.0),
                                               GestureDetector(
                                                 onTap: () {
@@ -772,8 +809,7 @@ class _ViewDocContentState extends State<ViewDocContent>
     );
   }
 
-  getDocs() 
-  {
+  getDocs() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
@@ -832,8 +868,7 @@ class _ViewDocContentState extends State<ViewDocContent>
             //   AppUtils.showToastError("No Documents found !");
             // }
           }
-        }).catchError((onError) 
-        {
+        }).catchError((onError) {
           AppUtils.dismissprogress();
           print(onError.toString());
         });
@@ -861,12 +896,9 @@ class _ViewDocContentState extends State<ViewDocContent>
       return "assets/icons/ppt.png";
     } else if (fileExt == "mpeg" || fileExt == "mpg") {
       return "assets/icons/mpg.png";
-    } 
-     else if (fileExt == "wav" || fileExt == "mp3") {
+    } else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
-    } 
-    
-     else if (fileExt == "xls" ||
+    } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
         fileExt == "xlsb" ||
@@ -982,18 +1014,15 @@ class _ViewDocContentState extends State<ViewDocContent>
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
-      if (response.status!) 
-      {
+      if (response.status!) {
         setState(() {
           Strings.users = response.data!;
         });
         final api = Provider.of<ApiService>(context, listen: false);
         print("PRo id ${Strings.selectedProject[0].projectId!}");
-        api.fetchCats(Strings.selectedProject[0].projectId!).then((response) 
-        {
+        api.fetchCats(Strings.selectedProject[0].projectId!).then((response) {
           AppUtils.dismissprogress();
-          if (response.status!) 
-          {
+          if (response.status!) {
             setState(() {
               Strings.categories = response.data!;
               Navigator.pushNamed(context, '/comments');
@@ -1006,8 +1035,7 @@ class _ViewDocContentState extends State<ViewDocContent>
           AppUtils.dismissprogress();
           print("Catched $onError");
         });
-      } else 
-      {
+      } else {
         Navigator.pushNamed(context, '/comments');
         AppUtils.dismissprogress();
         print('error');

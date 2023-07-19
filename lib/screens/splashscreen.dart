@@ -15,6 +15,8 @@ import 'package:mta/utilities/router.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
+import '../models/FetchCatsRes.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 class SplashScreen extends StatelessWidget {
@@ -92,8 +94,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      setState(() 
-      {
+      
         print("message recieved inside get");
         print("data received ---  ${message.notification!.body}");
         //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
@@ -110,17 +111,18 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         if (Strings.pushNotify == true) {
           print("inside if listen message-----> $message");
         }
-      });
     });
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) 
         {
+          print("initial message called");
       if (message?.notification?.title != null) {
         if (message!.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
         } else if (message.notification!.title!.contains("Commented") ||
-            message.notification!.title!.contains("Replied")) {
+            message.notification!.title!.contains("Replied")) 
+        {
           print("inside");
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
           Strings.selectedProDocument.add(peo);
@@ -128,6 +130,35 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           print(jsonEncode(peo));
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+        }
+        else if (message.notification!.title!.contains("Documents"))
+        {
+            DocumentData peo = DocumentData.fromJson(message.data);
+            Strings.selectedProject.clear();
+
+            Strings.selectedProject.add(Data.fromJson({
+              "project_img":"",
+              "project_name":peo.projectName,
+              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
+            }));
+            Strings.selectedCategory.clear();
+            Strings.selectedCategory.add
+            (FectchCatsData.fromJson({
+              "category_id":(peo.categoryId != "null" && peo.categoryId != null)? int.parse(peo.categoryId ?? "0"):null,
+              "category_name":peo.categoryName,
+              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
+            }));
+
+            if (peo.categoryId != "null" && peo.categoryId != null)
+            {
+              Strings.category = true;
+            }
+            else
+            {
+              Strings.category = false;
+            }
+            Strings.fromNotificationDocuments = true;
+            checkLogin();
         }
       }
     });
@@ -139,7 +170,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.FromNotification = true;
           await checkLogin();
         } else if (message.notification!.title!.contains("Commented") ||
-            message.notification!.title!.contains("Replied")) {
+            message.notification!.title!.contains("Replied")) 
+        {
           print("test inside");
           print(message.data);
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
@@ -150,6 +182,35 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           await checkLogin();
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+        }
+        else if (message.notification!.title!.contains("Documents"))
+        {
+            DocumentData peo = DocumentData.fromJson(message.data);
+            Strings.selectedProject.clear();
+
+            Strings.selectedProject.add(Data.fromJson({
+              "project_img":"",
+              "project_name":peo.projectName,
+              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
+            }));
+            Strings.selectedCategory.clear();
+            Strings.selectedCategory.add
+            (FectchCatsData.fromJson({
+              "category_id":(peo.categoryId != "null" && peo.categoryId != null)? int.parse(peo.categoryId ?? "0"):null,
+              "category_name":peo.categoryName,
+              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
+            }));
+
+            if (peo.categoryId != "null" && peo.categoryId != null)
+            {
+              Strings.category = true;
+            }
+            else
+            {
+              Strings.category = false;
+            }
+            Strings.fromNotificationDocuments = true;
+            checkLogin();
         }
       }
     });

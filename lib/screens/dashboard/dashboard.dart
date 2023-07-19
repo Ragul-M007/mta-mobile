@@ -519,6 +519,7 @@ class _DashboardState extends State<Dashboard>
                                                         child: Text(
                                                           _searchLists[index]
                                                               .projectName!,
+                                                              overflow: TextOverflow.ellipsis,
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.black,
@@ -597,9 +598,7 @@ class _DashboardState extends State<Dashboard>
                                               ),
                                               child: new GridTile(
                                                 child: Container(
-                                                  //color: Colors.green,
-                                                  height: 50,
-                                                  width: 50,
+                                                 // color: Colors.green,
                                                   child: Padding(
                                                       padding:
                                                           EdgeInsets.fromLTRB(
@@ -666,9 +665,11 @@ class _DashboardState extends State<Dashboard>
                                                                 EdgeInsets.only(
                                                                     left: 5),
                                                             child: Text(
+                                                            
                                                               _projectLists[
                                                                       index]
                                                                   .projectName!,
+                                                                  overflow: TextOverflow.ellipsis,
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .black,

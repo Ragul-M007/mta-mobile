@@ -1066,7 +1066,8 @@ class _CommentsContentState extends State<CommentsContent>
     _socket?.on("document-comments", (_data) {
       print('fromServer');
 
-      if (initialCommentCheck) {
+      if (initialCommentCheck) 
+      {
         log('fromServer comments $_data');
         setState(() {
           print("Dta chacek--> $initialCommentCheck");

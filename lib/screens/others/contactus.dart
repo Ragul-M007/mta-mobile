@@ -75,8 +75,10 @@ class _ContactusState extends State<Contactus>
                   ],
                 ),
               ),
+          if (Strings.roleId != 6)               
               menuoption(
                 ontab: () {
+                    Strings.fromProjects = false;
                     menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
                 },
                 selectedmenuvalue: 1,
@@ -85,6 +87,7 @@ class _ContactusState extends State<Contactus>
               if(Strings.roleId != 7)
               menuoption(
                 ontab: () {
+                    Strings.fromProjects = true;
                     menuRedirect(routename: "/projects", currentmenu: 2);
                 },
                 selectedmenuvalue: 2,
