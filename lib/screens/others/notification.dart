@@ -540,7 +540,7 @@ class _NotificationContentState extends State<NotificationContent>
         } else {
           Strings.fromNotificationDocuments = true;
           Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
+                    .pushReplacementNamed('/viewdoclist');
         }
       } else {
         AppUtils.dismissprogress();

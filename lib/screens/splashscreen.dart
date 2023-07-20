@@ -95,18 +95,18 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       
-        print("message recieved inside get");
-        print("data received ---  ${message.notification!.body}");
-        //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
-        print(message.data);
-        print("Direct data data -->${jsonEncode(message.data)}");
-        ProjectDocData peo = ProjectDocData.fromJson(message.data);
-        var check = jsonEncode(peo);
+        // print("message recieved inside get");
+        // print("data received ---  ${message.notification!.body}");
+        // //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
+        // print(message.data);
+        // print("Direct data data -->${jsonEncode(message.data)}");
+        // ProjectDocData peo = ProjectDocData.fromJson(message.data);
+        // var check = jsonEncode(peo);
 
-        print("Check--> $check");
-        Strings.selectedProDocument.add(peo);
-        print("dataaa ${Strings.selectedProDocument[0].documentId}");
-        print(message.notification?.body);
+        // print("Check--> $check");
+        // Strings.selectedProDocument.add(peo);
+        // print("dataaa ${Strings.selectedProDocument[0].documentId}");
+        // print(message.notification?.body);
         AppUtils.showToastErrorTop("You have a new notification!");
         if (Strings.pushNotify == true) {
           print("inside if listen message-----> $message");
@@ -158,7 +158,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
               Strings.category = false;
             }
             Strings.fromNotificationDocuments = true;
-            checkLogin();
         }
       }
     });
@@ -166,7 +165,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       if (message.notification?.body != null) 
       {
         print(message.notification?.body);
-        if (message.notification!.title!.contains("logout")) {
+        if (message.notification!.title!.contains("logout")) 
+        {
           Strings.FromNotification = true;
           await checkLogin();
         } else if (message.notification!.title!.contains("Commented") ||
