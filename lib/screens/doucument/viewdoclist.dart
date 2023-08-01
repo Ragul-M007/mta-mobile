@@ -18,6 +18,8 @@ import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 
+import '../../utilities/checkResponsive.dart';
+
 class ViewDocScreen extends StatelessWidget {
   const ViewDocScreen({Key? key}) : super(key: key);
 
@@ -76,6 +78,9 @@ class _ViewDocContentState extends State<ViewDocContent> {
   void initState() {
     super.initState();
     getPermission();
+    if (Strings.fromNotificationDocuments) {
+      updateNotification(Strings.notificationID);
+    }
     WidgetsBinding.instance!.addPostFrameCallback((_) => getDocs());
   }
 
@@ -85,6 +90,22 @@ class _ViewDocContentState extends State<ViewDocContent> {
     if (!status.isGranted) {
       await Permission.storage.request();
     }
+  }
+
+  updateNotification(notificationId) {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateNotificationStatus(notificationId).then((response) {
+      if (response.status!) {
+        // AppUtils.showToastError("Unable to update status");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
+    });
   }
 
   webcheck() {
@@ -126,8 +147,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
         path = path.substring(0, path.length - 1);
       }
     }
-    AppUtils.showprogress();
-    AppUtils.showToast('Downloading');
+    // AppUtils.showprogress();
+    // AppUtils.showToast('Downloading');
 
     var filenames = serverURL.split("/");
     print("serverURL--> $serverURL");
@@ -140,7 +161,9 @@ class _ViewDocContentState extends State<ViewDocContent> {
     setState(() {
       filepath = fullPath;
     });
-    var downloadedFile = await downloadFile(serverURL, fileName, path!);
+        var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
+
+   // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     print("downloaded file $downloadedFile");
     openFile(downloadedFile);
   }
@@ -149,22 +172,64 @@ class _ViewDocContentState extends State<ViewDocContent> {
     await OpenFilex.open(filePath);
   }
 
-  Future<String> downloadFile(String url, String fileName, String dir) async {
-    HttpClient httpClient = new HttpClient();
-    File file;
-    String filePath = '';
-    String myUrl = '';
+  // Future<String> downloadFile(String url, String fileName, String dir) async 
+  // {
+  //   HttpClient httpClient = new HttpClient();
+  //   File file;
+  //   String filePath = '';
+  //   String myUrl = '';
 
+  //   try {
+  //     myUrl = Strings.baseImageUrl + url;
+  //     var request = await httpClient.getUrl(Uri.parse(myUrl));
+  //     var response = await request.close();
+  //     print(myUrl);
+  //     if (response.statusCode == 200) {
+  //       var bytes = await consolidateHttpClientResponseBytes(response);
+  //       filePath = '$dir/$fileName';
+  //       file = File(filePath);
+  //       await file.writeAsBytes(bytes);
+  //     } else if (response.statusCode == 404) {
+  //       AppUtils.dismissprogress();
+  //       AppUtils.showToastError("Sorry, File  not Found !");
+  //     } else {
+  //       AppUtils.dismissprogress();
+  //       filePath = 'Error code: ' + response.statusCode.toString();
+  //     }
+  //   } catch (ex) {
+  //     AppUtils.dismissprogress();
+  //     filePath = 'Can not fetch url';
+  //   }
+  //   AppUtils.dismissprogress();
+  //   return filePath;
+  // }
+  Future download2(Dio dio, String url, String savePath) async 
+  {
     try {
-      myUrl = Strings.baseImageUrl + url;
-      var request = await httpClient.getUrl(Uri.parse(myUrl));
-      var response = await request.close();
-      print(myUrl);
+          var  myUrl = Strings.baseImageUrl + url;
+      Response response = await dio.get(
+      myUrl,
+        onReceiveProgress: showDownloadProgress,
+        //Received data with List<int>
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            }),
+      );
+      
+      print(response.headers);
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      // response.data is List<int> type
+      raf.writeFromSync(response.data);
+      await raf.close();
+      var filePath;
       if (response.statusCode == 200) {
-        var bytes = await consolidateHttpClientResponseBytes(response);
-        filePath = '$dir/$fileName';
+        AppUtils.dismissprogress();
+        filePath = savePath;
         file = File(filePath);
-        await file.writeAsBytes(bytes);
       } else if (response.statusCode == 404) {
         AppUtils.dismissprogress();
         AppUtils.showToastError("Sorry, File  not Found !");
@@ -172,12 +237,19 @@ class _ViewDocContentState extends State<ViewDocContent> {
         AppUtils.dismissprogress();
         filePath = 'Error code: ' + response.statusCode.toString();
       }
-    } catch (ex) {
+      return filePath;
+    } catch (e) {
       AppUtils.dismissprogress();
-      filePath = 'Can not fetch url';
+        var filePath = 'Error $e';
+        print(e);
+        return filePath;
     }
-    AppUtils.dismissprogress();
-    return filePath;
+  }
+  void showDownloadProgress(received, total) {
+    if (total != -1) {
+     AppUtils.showprogresswithpercent(received / total);
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
   }
 
   @override
@@ -293,8 +365,11 @@ class _ViewDocContentState extends State<ViewDocContent> {
                   shrinkWrap: true,
                   itemCount: _searchList.length,
                   physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
+                  gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: const EdgeInsets.only(
@@ -308,6 +383,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                             child: Padding(
                                 padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     GestureDetector(
@@ -440,9 +516,11 @@ class _ViewDocContentState extends State<ViewDocContent> {
                               shrinkWrap: true,
                               itemCount: _categorydocsList.length,
                               physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2),
+                              gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
                               itemBuilder: (BuildContext context, int index) {
                                 return Padding(
                                   padding: const EdgeInsets.only(
@@ -460,6 +538,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             padding: EdgeInsets.fromLTRB(
                                                 10, 15, 10, 0),
                                             child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
@@ -498,9 +577,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                     ],
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  width: 45.0,
-                                                ),
+                                                
                                                 GestureDetector(
                                                   onTap: () {
                                                     _showMyDialogProject(
@@ -628,9 +705,11 @@ class _ViewDocContentState extends State<ViewDocContent> {
                               shrinkWrap: true,
                               itemCount: _docsList.length,
                               physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2),
+                              gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
                               itemBuilder: (BuildContext context, int index) {
                                 return Padding(
                                   padding: const EdgeInsets.only(
@@ -648,6 +727,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             padding: EdgeInsets.fromLTRB(
                                                 10, 15, 10, 0),
                                             child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [

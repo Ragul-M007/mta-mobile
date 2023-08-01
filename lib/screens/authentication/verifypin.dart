@@ -242,6 +242,8 @@ class _VerifypinState extends State<Verifypin> {
         ResetthreeT.text = '';
         ResetfourT.text = '';
         ResetfiveT.text = '';
+
+        Strings.fromForgotPassword = true;
         Navigator.pushNamed(context, "/setpin");
         // _changePass();
       } else {
@@ -390,6 +392,7 @@ class _VerifypinState extends State<Verifypin> {
             Strings.userID = response.data!.userId;
             Strings.authToken = response.token!;
             Strings.username = response.data!.name;
+            Strings.userID = response.data!.userId;
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
@@ -568,6 +571,8 @@ class _VerifypinState extends State<Verifypin> {
                   ),
                   TextButton(
                       onPressed: () {
+                        AppUtils.savePreferences("easyAccess", "N");
+                        AppUtils.removeDeviceId(context);
                         Navigator.popAndPushNamed(context, "/login");
                       },
                       child: Text(

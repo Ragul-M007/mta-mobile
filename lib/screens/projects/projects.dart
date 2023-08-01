@@ -18,6 +18,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
 
+import '../../utilities/checkResponsive.dart';
+
 class Projects extends StatefulWidget {
   static const String routeName = "/projects";
   @override
@@ -462,9 +464,11 @@ class _ProjectsState extends State<Projects>
                             child: _searchLists.length != 0
                                 ? GridView.builder(
                                     itemCount: _searchLists.length,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2),
+                                     gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       return GestureDetector(
@@ -603,9 +607,11 @@ class _ProjectsState extends State<Projects>
                                       )
                                     : GridView.builder(
                                         itemCount: _projectLists.length,
-                                        gridDelegate:
+                                         gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
                                             SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2),
+                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           return GestureDetector(

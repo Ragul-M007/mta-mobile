@@ -11,7 +11,6 @@ import 'package:mta/screens/attendance/attendance.dart';
 
 import '../../models/LoginReq.dart';
 
-
 class Setpin extends StatefulWidget {
   static const String routeName = "/setpin";
 
@@ -38,8 +37,7 @@ class _SetpinState extends State<Setpin> {
 
   BuildContext? ctx;
 
-  signin() 
-  {
+  signin() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
     SetPinReq setpinreq = SetPinReq();
@@ -73,8 +71,41 @@ class _SetpinState extends State<Setpin> {
       }
     });
   }
-  signinafterpin() 
-  {
+
+  forgotPin() {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(ctx!, listen: false);
+    AppUtils.getStringPreferences('emailId').then((value) {
+      if (value != null) {
+        SetPinReq setpinreq = SetPinReq();
+        setpinreq.loginpin = codeVerifyField;
+        setpinreq.emailId = value;
+
+        print("data ${jsonEncode(setpinreq)}");
+        AppUtils.getIntPreferences('userId').then((value) {
+          if (value != null) {
+            api.setForgotPin(value, setpinreq).then((response) {
+              AppUtils.dismissprogress();
+              print('setPinResponse status ${response.toJson()}');
+
+              if (response.status!) {
+                AppUtils.savePreferences("easyAccess", "Y");
+                Strings.isLogin = true;
+                signinafterpin();
+              } else {
+                AppUtils.showToastError(response.message!);
+              }
+            }).catchError((onError) {
+              AppUtils.dismissprogress();
+              print(onError.toString());
+            });
+          }
+        });
+      }
+    });
+  }
+
+  signinafterpin() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
     LoginReq loginreq = LoginReq();
@@ -91,41 +122,27 @@ class _SetpinState extends State<Setpin> {
         var dat = jsonEncode(loginreq);
 
         print(dat);
-        
-        api.login(loginreq).then((response) 
-        {
+
+        api.login(loginreq).then((response) {
           AppUtils.dismissprogress();
           print('verifyPinResponse status ${response.toJson()}');
-          assignroles()
-      {
-        if (response.data?.role == "ADMIN")
-        {
-            Strings.roleId = 1;
-        }
-        else if(response.data?.role == "STAFF")
-        {
-            Strings.roleId = 2;
-        }
-        else if(response.data?.role == "VENDOR")
-        {
-            Strings.roleId = 3;
-        }else if(response.data?.role == "CONSULTANTS")
-        {
-            Strings.roleId = 4;
-        }
-        else if(response.data?.role == "CONTRACTORS")
-        {
-            Strings.roleId = 5;
-        }
-        else if(response.data?.role == "CLIENT")
-        {
-            Strings.roleId = 6;
-        }
-         else if (response.data?.role == "PUBLICUSER")
-        {
-            Strings.roleId = 7;
-        }
-      }
+          assignroles() {
+            if (response.data?.role == "ADMIN") {
+              Strings.roleId = 1;
+            } else if (response.data?.role == "STAFF") {
+              Strings.roleId = 2;
+            } else if (response.data?.role == "VENDOR") {
+              Strings.roleId = 3;
+            } else if (response.data?.role == "CONSULTANTS") {
+              Strings.roleId = 4;
+            } else if (response.data?.role == "CONTRACTORS") {
+              Strings.roleId = 5;
+            } else if (response.data?.role == "CLIENT") {
+              Strings.roleId = 6;
+            } else if (response.data?.role == "PUBLICUSER") {
+              Strings.roleId = 7;
+            }
+          }
 
           if (response.status!) {
             AppUtils.savePreferences("emailId", response.data!.emailId);
@@ -143,28 +160,21 @@ class _SetpinState extends State<Setpin> {
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
-            if(Strings.FromNotification)
-            {
-                Strings.FromNotification = false;
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => Attendance()));
-            }
-            else
-            {
-              if(Strings.roleId == 6)
-              {
+            if (Strings.FromNotification) {
+              Strings.FromNotification = false;
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => Attendance()));
+            } else {
+              if (Strings.roleId == 6) {
                 Navigator.pushNamed(context, "/projects");
-              }
-              else
-              {
+              } else {
                 Navigator.pushNamed(ctx!, "/teamsDashboard");
               }
             }
-
           } else {
             AppUtils.showToastError(response.message!);
           }
-        }).catchError((onError) 
-        {
+        }).catchError((onError) {
           AppUtils.dismissprogress();
           print(onError.toString());
         });
@@ -173,108 +183,108 @@ class _SetpinState extends State<Setpin> {
   }
 
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
       child: Scaffold(body: Builder(builder: (BuildContext newContext) {
         ctx = newContext;
         return Stack(
           children: <Widget>[
-        Container(
-          height: MediaQuery.of(context).size.height * .35,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            image: new DecorationImage(
-              image: new AssetImage("assets/images/logo.jpg"),
-              fit: BoxFit.fill,
+            Container(
+              height: MediaQuery.of(context).size.height * .35,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                image: new DecorationImage(
+                  image: new AssetImage("assets/images/logo.jpg"),
+                  fit: BoxFit.fill,
+                ),
+              ),
+              padding: EdgeInsets.all(10),
+              width: double.infinity,
             ),
-          ),
-          padding: EdgeInsets.all(10),
-          width: double.infinity,
-        ),
-        Container(
-          margin: EdgeInsets.fromLTRB(
-              0, MediaQuery.of(context).size.height * .35, 0, 0),
-          padding: EdgeInsets.all(5),
-          width: double.infinity,
-          decoration: BoxDecoration(color: Colors.grey[200]),
-        ),
-        Container(
-          margin: EdgeInsets.fromLTRB(
-              20, MediaQuery.of(context).size.height * .22, 20, 10),
-          width: double.infinity,
-          decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(15)),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: 54,
-                ),
-                Text(
-                  "Set Pin",
-                  style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 50,
-                ),
-                Text(
-                  "Set 4 digit secret pin to your application",
-                  style: TextStyle(color: const Color(0xFF9e9e9e)),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                _boxBuilder(),
-                SizedBox(
-                  height: 40,
-                ),
-              ],
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                  0, MediaQuery.of(context).size.height * .35, 0, 0),
+              padding: EdgeInsets.all(5),
+              width: double.infinity,
+              decoration: BoxDecoration(color: Colors.grey[200]),
             ),
-          ),
-        ),
-        // Container(
-        //     width: double.infinity,
-        //     margin: EdgeInsets.fromLTRB(
-        //         10, MediaQuery.of(context).size.height * .68, 10, 20),
-        //     child: Text("Reset pin",
-        //         textAlign: TextAlign.center,
-        //         style: TextStyle(decoration: TextDecoration.underline))),
-        Container(
-          margin: EdgeInsets.fromLTRB(
-              10, MediaQuery.of(context).size.height * .75, 10, 20),
-          child: ButtonTheme(
-            minWidth: double.infinity,
-            child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                  20, MediaQuery.of(context).size.height * .22, 20, 10),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(15)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 54,
+                    ),
+                    Text(
+                      "Set Pin",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    Text(
+                      "Set 4 digit secret pin to your application",
+                      style: TextStyle(color: const Color(0xFF9e9e9e)),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    _boxBuilder(),
+                    SizedBox(
+                      height: 40,
+                    ),
+                  ],
                 ),
-                textColor: Colors.white,
-                padding: EdgeInsets.all(15),
-                onPressed: () 
-                {
-                  codeVerifyField =
-                      oneT.text + twoT.text + threeT.text + fourT.text;
-                  print(codeVerifyField);
-                  if (codeVerifyField!.length < 4) 
-                  {
-                    AppUtils.showToastError("Please Enter Pin");
-                  } else 
-                  {
-                    signin();
-                  }
-                },
-                child: Text("SUBMIT",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Colors.white)),
-                color: Color(0xFF0061b0)),
-          ),
-        ),
+              ),
+            ),
+            // Container(
+            //     width: double.infinity,
+            //     margin: EdgeInsets.fromLTRB(
+            //         10, MediaQuery.of(context).size.height * .68, 10, 20),
+            //     child: Text("Reset pin",
+            //         textAlign: TextAlign.center,
+            //         style: TextStyle(decoration: TextDecoration.underline))),
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                  10, MediaQuery.of(context).size.height * .75, 10, 20),
+              child: ButtonTheme(
+                minWidth: double.infinity,
+                child: RaisedButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    textColor: Colors.white,
+                    padding: EdgeInsets.all(15),
+                    onPressed: () {
+                      codeVerifyField =
+                          oneT.text + twoT.text + threeT.text + fourT.text;
+                      print(codeVerifyField);
+                      if (codeVerifyField!.length < 4) {
+                        AppUtils.showToastError("Please Enter Pin");
+                      } else {
+                        if (Strings.fromForgotPassword == true) {
+                          forgotPin();
+                        } else {
+                          signin();
+                        }
+                      }
+                    },
+                    child: Text("SUBMIT",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.white)),
+                    color: Color(0xFF0061b0)),
+              ),
+            ),
           ],
         );
       })),
@@ -302,7 +312,8 @@ class _SetpinState extends State<Setpin> {
         height: 50,
         width: 40,
         child: TextField(
-          keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
+          keyboardType:
+              TextInputType.numberWithOptions(signed: true, decimal: true),
           textInputAction: TextInputAction.done,
           maxLength: 1,
           autofocus: true,
@@ -345,12 +356,12 @@ class _SetpinState extends State<Setpin> {
                             ? four
                             : null,
               );
-              codeVerifyField = oneT.text + twoT.text + threeT.text + fourT.text;
-            if (codeVerifyField!.length == 4) 
-            {
-              FocusManager.instance.primaryFocus?.unfocus();
-             // signin();
-            }
+              codeVerifyField =
+                  oneT.text + twoT.text + threeT.text + fourT.text;
+              if (codeVerifyField!.length == 4) {
+                FocusManager.instance.primaryFocus?.unfocus();
+                // signin();
+              }
             }
           },
         ),

@@ -122,12 +122,21 @@ class AppUtils {
     EasyLoading.show();
   }
 
+  static void showprogresswithpercent(double percent) {
+    // showProgressDialog(
+    //     backgroundColor: Colors.white.withOpacity(0),
+    //     textStyle: TextStyle(color: Colors.black));
+    print('showProgress');
+    EasyLoading.showProgress(percent,status: "Downloading ${(percent * 100).toStringAsFixed(0) + "%"}");
+  }
+
   static void dismissprogress() {
     //dismissProgressDialog();
     print('dismiss');
 
     EasyLoading.dismiss();
   }
+  
 
   static void removeDeviceId(ctx) {
     final api = Provider.of<ApiService>(ctx!, listen: false);

@@ -13,7 +13,9 @@ import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:notification_permissions/notification_permissions.dart';
 
 import '../models/FetchCatsRes.dart';
 
@@ -67,10 +69,119 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     _firebaseMessaging.getToken().then((value) {
       print(value);
     });
-    
-    getToken();
+
     getFCMToken();
     getusername();
+    getuserid();
+    requestNotificationPermissions();
+  }
+
+  Future<void> requestNotificationPermissions() async {
+    print("inside request");
+    final status = await Permission.notification.request();
+
+    AppUtils.getStringPreferences('showNotificationAlert').then((res) {
+      if (res == "null") 
+      {
+        AppUtils.savePreferences('showNotificationAlert', "true");
+        if (status.isGranted) {
+          getToken();
+          print("Notification permissions granted");
+        } else if (status.isDenied) {
+          permissionDialog();
+          print("Notification permissions denied");
+        } else if (status.isPermanentlyDenied) {
+// //print(
+//     "Notification permissions permanently denied, open app settings");
+          permissionDialog();
+          // await openAppSettings();
+        }
+      }
+      else
+      {
+        getToken();
+      }
+    });
+  }
+
+  permissionDialog() {
+    return showDialog(
+      context: context,
+      builder: (ctx) => WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          title: Icon(
+            Icons.notifications_outlined,
+            size: 35,
+            color: Colors.grey,
+          ),
+          content: Text(
+            "Allow Notifications from notification settings",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 33,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          getToken();
+                          Navigator.of(ctx).pop();
+                        },
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      //   style: ElevatedButton.styleFrom(
+                      //   primary: Colors.white,
+                      // ),
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Color.fromARGB(255, 243, 229, 104)),
+                            textStyle: MaterialStateProperty.all(
+                                TextStyle(color: Colors.white)))
+                                ),
+                  ),
+                  //SizedBox(width: 15),
+                  SizedBox(
+                    width: 120,
+                    height: 33,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        NotificationPermissions.requestNotificationPermissions(
+                                iosSettings: const NotificationSettingsIos(
+                                    sound: true, badge: true, alert: true))
+                            .whenComplete(() {
+                          Navigator.of(ctx).pop();
+                          getToken();
+                        });
+                      },
+                      child: Text(
+                        "Open Settings",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -94,35 +205,35 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      
-        // print("message recieved inside get");
-        // print("data received ---  ${message.notification!.body}");
-        // //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
-        // print(message.data);
-        // print("Direct data data -->${jsonEncode(message.data)}");
-        // ProjectDocData peo = ProjectDocData.fromJson(message.data);
-        // var check = jsonEncode(peo);
+      // print("message recieved inside get");
+      // print("data received ---  ${message.notification!.body}");
+      // //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
+      // print(message.data);
+      // print("Direct data data -->${jsonEncode(message.data)}");
+      // ProjectDocData peo = ProjectDocData.fromJson(message.data);
+      // var check = jsonEncode(peo);
 
-        // print("Check--> $check");
-        // Strings.selectedProDocument.add(peo);
-        // print("dataaa ${Strings.selectedProDocument[0].documentId}");
-        // print(message.notification?.body);
-        AppUtils.showToastErrorTop("You have a new notification!");
-        if (Strings.pushNotify == true) {
-          print("inside if listen message-----> $message");
-        }
+      // print("Check--> $check");
+      // Strings.selectedProDocument.add(peo);
+      // print("dataaa ${Strings.selectedProDocument[0].documentId}");
+      // print(message.notification?.body);
+      AppUtils.showToastErrorTop("You have a new notification!");
+      DocumentData peo = DocumentData.fromJson(message.data);
+
+      print("inside if listen message-----> ${jsonEncode(peo)}");
+      if (Strings.pushNotify == true) {
+        print("inside if listen message-----> $message");
+      }
     });
     FirebaseMessaging.instance
         .getInitialMessage()
-        .then((RemoteMessage? message) 
-        {
-          print("initial message called");
+        .then((RemoteMessage? message) {
+      print("initial message called");
       if (message?.notification?.title != null) {
         if (message!.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
         } else if (message.notification!.title!.contains("Commented") ||
-            message.notification!.title!.contains("Replied")) 
-        {
+            message.notification!.title!.contains("Replied")) {
           print("inside");
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
           Strings.selectedProDocument.add(peo);
@@ -130,48 +241,47 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           print(jsonEncode(peo));
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
-        }
-        else if (message.notification!.title!.contains("Documents"))
-        {
-            DocumentData peo = DocumentData.fromJson(message.data);
-            Strings.selectedProject.clear();
+        } else if (message.notification!.title!.contains("Documents")) {
+          DocumentData peo = DocumentData.fromJson(message.data);
+          Strings.selectedProject.clear();
 
-            Strings.selectedProject.add(Data.fromJson({
-              "project_img":"",
-              "project_name":peo.projectName,
-              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
-            }));
-            Strings.selectedCategory.clear();
-            Strings.selectedCategory.add
-            (FectchCatsData.fromJson({
-              "category_id":(peo.categoryId != "null" && peo.categoryId != null)? int.parse(peo.categoryId ?? "0"):null,
-              "category_name":peo.categoryName,
-              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
-            }));
+          Strings.selectedProject.add(Data.fromJson({
+            "project_img": "",
+            "project_name": peo.projectName,
+            "project_id": (peo.projectId != "null" && peo.projectId != null)
+                ? int.parse(peo.projectId ?? "0")
+                : null
+          }));
+          Strings.selectedCategory.clear();
+          Strings.selectedCategory.add(FectchCatsData.fromJson({
+            "category_id": (peo.categoryId != "null" && peo.categoryId != null)
+                ? int.parse(peo.categoryId ?? "0")
+                : null,
+            "category_name": peo.categoryName,
+            "project_id": (peo.projectId != "null" && peo.projectId != null)
+                ? int.parse(peo.projectId ?? "0")
+                : null
+          }));
 
-            if (peo.categoryId != "null" && peo.categoryId != null)
-            {
-              Strings.category = true;
-            }
-            else
-            {
-              Strings.category = false;
-            }
-            Strings.fromNotificationDocuments = true;
+          if (peo.categoryId != "null" && peo.categoryId != null) {
+            Strings.category = true;
+          } else {
+            Strings.category = false;
+          }
+          Strings.fromNotificationDocuments = true;
+          int id = int.parse(peo.notiId!);
+          Strings.notificationID = id;
         }
       }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-      if (message.notification?.body != null) 
-      {
+      if (message.notification?.body != null) {
         print(message.notification?.body);
-        if (message.notification!.title!.contains("logout")) 
-        {
+        if (message.notification!.title!.contains("logout")) {
           Strings.FromNotification = true;
           await checkLogin();
         } else if (message.notification!.title!.contains("Commented") ||
-            message.notification!.title!.contains("Replied")) 
-        {
+            message.notification!.title!.contains("Replied")) {
           print("test inside");
           print(message.data);
           ProjectDocData peo = ProjectDocData.fromJson(message.data);
@@ -182,35 +292,37 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           await checkLogin();
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
-        }
-        else if (message.notification!.title!.contains("Documents"))
-        {
-            DocumentData peo = DocumentData.fromJson(message.data);
-            Strings.selectedProject.clear();
+        } else if (message.notification!.title!.contains("Documents")) {
+          DocumentData peo = DocumentData.fromJson(message.data);
+          Strings.selectedProject.clear();
 
-            Strings.selectedProject.add(Data.fromJson({
-              "project_img":"",
-              "project_name":peo.projectName,
-              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
-            }));
-            Strings.selectedCategory.clear();
-            Strings.selectedCategory.add
-            (FectchCatsData.fromJson({
-              "category_id":(peo.categoryId != "null" && peo.categoryId != null)? int.parse(peo.categoryId ?? "0"):null,
-              "category_name":peo.categoryName,
-              "project_id":(peo.projectId != "null" && peo.projectId != null)?int.parse(peo.projectId ?? "0"):null
-            }));
+          Strings.selectedProject.add(Data.fromJson({
+            "project_img": "",
+            "project_name": peo.projectName,
+            "project_id": (peo.projectId != "null" && peo.projectId != null)
+                ? int.parse(peo.projectId ?? "0")
+                : null
+          }));
+          Strings.selectedCategory.clear();
+          Strings.selectedCategory.add(FectchCatsData.fromJson({
+            "category_id": (peo.categoryId != "null" && peo.categoryId != null)
+                ? int.parse(peo.categoryId ?? "0")
+                : null,
+            "category_name": peo.categoryName,
+            "project_id": (peo.projectId != "null" && peo.projectId != null)
+                ? int.parse(peo.projectId ?? "0")
+                : null
+          }));
 
-            if (peo.categoryId != "null" && peo.categoryId != null)
-            {
-              Strings.category = true;
-            }
-            else
-            {
-              Strings.category = false;
-            }
-            Strings.fromNotificationDocuments = true;
-            checkLogin();
+          if (peo.categoryId != "null" && peo.categoryId != null) {
+            Strings.category = true;
+          } else {
+            Strings.category = false;
+          }
+          Strings.fromNotificationDocuments = true;
+          checkLogin();
+          int id = int.parse(peo.notiId!);
+          Strings.notificationID = id;
         }
       }
     });
@@ -481,22 +593,21 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   void getToken() {
-    timer = new Timer(const Duration(milliseconds: 4000), () {
+    timer = new Timer(const Duration(milliseconds: 500), () 
+    {
       AppUtils.getStringPreferences('easyAccess').then((value) {
-
-                  print("value outside--> $value");
-
-        if (value != null) {
+        if (value != null) 
+        {
           print("value inside--> $value");
-
-          if (value == "Y") {
+          if (value == "Y") 
+          {
             print("test");
             Navigator.popAndPushNamed(context, "/verifypin");
             // Navigator.popAndPushNamed(context, "/comments");
-          } else {
+          } else 
+          {
             Navigator.popAndPushNamed(context, "/login");
             //Navigator.popAndPushNamed(context, "/comments");
-
           }
         }
       }).catchError((onError) {
@@ -514,13 +625,12 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         print(value);
 
         if (value == "Y") {
-         // Navigator.pushNamed(context, "/verifypin",);
-            navigatorKey.currentState?.pushNamed('/verifypin');
-
+          // Navigator.pushNamed(context, "/verifypin",);
+          navigatorKey.currentState?.pushNamed('/verifypin');
 
           // Navigator.popAndPushNamed(context, "/comments");
         } else {
-            navigatorKey.currentState?.pushNamed('/login');
+          navigatorKey.currentState?.pushNamed('/login');
           //Navigator.popAndPushNamed(context, "/comments");
 
         }

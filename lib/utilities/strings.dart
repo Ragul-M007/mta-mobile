@@ -12,6 +12,7 @@ mixin Strings
   static String testing = 'novalue';
   static bool fromNotificationComments = false;
   static bool fromNotificationDocuments = false;
+  static bool fromForgotPassword = false;
   static String authToken = '';
   static bool fromReplies = false;
   static bool fromProjects = true;

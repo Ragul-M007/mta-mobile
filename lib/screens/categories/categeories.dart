@@ -323,23 +323,41 @@ class _CategoriesContentState extends State<CategoriesContent> {
                         },
                         child: Container(
                           child: Padding(
-                              padding: EdgeInsets.all(20),
+                              padding: EdgeInsets.fromLTRB(20,0,20,0),
                               child: Row(
                                 children: [
                                   Expanded(
-                                      child: Text(
-                                          _catsList[index].categoryName!,
-                                          style: Drawables.adddoccontentstyle(
-                                              Colors.black87,
-                                              14.0,
-                                              FontWeight.w500))),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              _catsList[index].categoryName!,
+                                              style: Drawables.adddoccontentstyle(
+                                                  Colors.black87,
+                                                  14.0,
+                                                  FontWeight.w500)),
+                                                  Text("0 Documents",
+                                                  style: Drawables.adddoccontentstyle(
+                                  Colors.grey, 13.0, FontWeight.normal),)
+                                        ],
+                                      )
+                                              
+                                              ),
+                                              IconButton(onPressed: (){
+                                                print("staff cliked");
+                                              }, icon: Icon(
+                            Icons.people,
+                            color: Color(0xFF0061b0),
+                            size: 20,
+                          ),),
                                   Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.grey,
                                     size: 14.0,
                                   )
                                 ],
-                              )),
+                              ),
+                              ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.white,

@@ -8,7 +8,7 @@ part of 'ApiService.dart';
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    baseUrl ??= 'http://192.168.0.133:5777//mta';
   }
 
   final Dio _dio;
@@ -60,6 +60,23 @@ class _ApiService implements ApiService {
         _setStreamType<LoginRes>(
             Options(method: 'PUT', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/users/${id}',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<LoginRes> setForgotPin(id, body) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<LoginRes>(
+            Options(method: 'POST', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/users/changePin',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = LoginRes.fromJson(_result.data!);

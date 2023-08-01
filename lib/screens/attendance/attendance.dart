@@ -227,6 +227,7 @@ showDialog(
               ),
               TextButton(
                 onPressed: () {
+                  AppUtils.savePreferences("easyAccess", "N");
                   menuRedirect(routename: "/login", currentmenu: 9);
                   AppUtils.removeDeviceId(context);
                 }

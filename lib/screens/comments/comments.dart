@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
+import 'package:dio/dio.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
+var dio = Dio();
 
 AnimationController? _animationController;
 AudioPlayer audioPlayer = AudioPlayer();
@@ -293,8 +295,8 @@ class _CommentsContentState extends State<CommentsContent>
         path = path.substring(0, path.length - 1);
       }
     }
-    AppUtils.showprogress();
-    AppUtils.showToast('Downloading');
+   // AppUtils.showprogress();
+   // AppUtils.showToast('Downloading');
 
     var filenames = serverURL.split("/");
     print("serverURL--> $serverURL");
@@ -307,7 +309,8 @@ class _CommentsContentState extends State<CommentsContent>
     setState(() {
       filepath = fullPath;
     });
-    var downloadedFile = await downloadFile(serverURL, fileName, path!);
+            var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
+   // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     print("downloaded file $downloadedFile");
     openFile(downloadedFile);
   }
@@ -345,6 +348,55 @@ class _CommentsContentState extends State<CommentsContent>
     }
     AppUtils.dismissprogress();
     return filePath;
+  }
+
+  Future download2(Dio dio, String url, String savePath) async 
+  {
+    try {
+          var  myUrl = Strings.baseImageUrl + url;
+      Response response = await dio.get(
+      myUrl,
+        onReceiveProgress: showDownloadProgress,
+        //Received data with List<int>
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            }),
+      );
+      
+      print(response.headers);
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      // response.data is List<int> type
+      raf.writeFromSync(response.data);
+      await raf.close();
+      var filePath;
+      if (response.statusCode == 200) {
+        AppUtils.dismissprogress();
+        filePath = savePath;
+        file = File(filePath);
+      } else if (response.statusCode == 404) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+        filePath = 'Error code: ' + response.statusCode.toString();
+      }
+      return filePath;
+    } catch (e) {
+      AppUtils.dismissprogress();
+        var filePath = 'Error $e';
+        print(e);
+        return filePath;
+    }
+  }
+  void showDownloadProgress(received, total) {
+    if (total != -1) {
+     AppUtils.showprogresswithpercent(received / total);
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
   }
 
   String getFileExtension(String fileName) {

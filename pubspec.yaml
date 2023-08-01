@@ -50,6 +50,8 @@ dependencies:
   flutter_easyloading: ^3.0.3
   table_calendar: ^3.0.3
   file_picker: ^4.3.0
+  notification_permissions: ^0.6.1
+
   #file downloading
   
   flutter_downloader: ^1.7.1
