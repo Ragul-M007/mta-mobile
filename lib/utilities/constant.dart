@@ -9,8 +9,6 @@ Widget menuoption({
   @required selectedmenuvalue,
   @required String? menutitle,
 }) {
-
-  print("selected menu ${selectedmenuvalue} or ${Strings.currentmenuvalue}");
   return GestureDetector(
     onTap: ontab,
     child: Container(

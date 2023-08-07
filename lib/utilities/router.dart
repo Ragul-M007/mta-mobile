@@ -18,6 +18,8 @@ import 'package:mta/screens/others/newshighlights.dart';
 import 'package:mta/screens/others/notification.dart';
 import 'package:mta/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/screens/projectcomments.dart/projectComments.dart';
+import 'package:mta/screens/projectcomments.dart/projectCommentsReplies.dart';
 import 'package:mta/screens/projects/projects.dart';
 import 'package:mta/screens/splashscreen.dart';
 
@@ -92,6 +94,12 @@ class RoutesGenerator {
         break;
       case '/adddocComments':
         return MaterialPageRoute(builder: (_) => AddDocComments());
+        break;
+      case '/projectComments':
+        return MaterialPageRoute(builder: (_) => ProjectComments());
+        break;
+      case '/projectCommentReplies':
+        return MaterialPageRoute(builder: (_) => ProjectCommentsReplies());
         break;
       default:
         return _errorRoute();

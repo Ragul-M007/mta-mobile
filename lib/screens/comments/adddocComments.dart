@@ -428,9 +428,14 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
       req.categoryIdList = json.encode(tagedCatsId);
       req.categoryList = json.encode(tagedCats);
-      req.documentId = Strings.category == true
+
+     if(!Strings.documentUploadfromProject) 
+     {
+        req.documentId = Strings.category == true
           ? int.parse(Strings.selectedCatDocument[0].documentId!)
           : int.parse(Strings.selectedProDocument[0].documentId!);
+     } 
+      
       req.recipientId =
           json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
       req.recipient = json.encode(tagedUsersId);
@@ -463,11 +468,23 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
           // setState(() {});
           AppUtils.showToastSuccess("Document uploaded successfully");
 
-          if (fromReplies) {
+          if(Strings.documentUploadfromProject)
+          {
+            if (fromReplies) {
             Navigator.pushReplacementNamed(context, '/replies');
-          } else {
-            Navigator.pushReplacementNamed(context, '/comments');
+              } else {
+                Navigator.pushReplacementNamed(context, '/comments');
+              }
           }
+          else{
+            if (fromReplies) {
+            Navigator.pushReplacementNamed(context, '/projectCommentReplies');
+              } else {
+                Navigator.pushReplacementNamed(context, '/projectComments');
+              }
+          }
+
+          
         } else {
           AppUtils.showToastError(response.message!);
         }

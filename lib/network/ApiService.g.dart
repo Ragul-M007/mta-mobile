@@ -8,7 +8,7 @@ part of 'ApiService.dart';
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'http://192.168.0.133:5777//mta';
+    baseUrl ??= 'https://mta.multitechcorp.in/mta';
   }
 
   final Dio _dio;
@@ -261,6 +261,23 @@ class _ApiService implements ApiService {
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = FetchMapedCatRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<FetchCategoryUsersRes> getCatUsers(id, catid) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<FetchCategoryUsersRes>(Options(
+                method: 'GET', headers: _headers, extra: _extra)
+            .compose(_dio.options,
+                '/categories/getCatUsers?project_id=${id}&category_id=${catid}',
+                queryParameters: queryParameters, data: _data)
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = FetchCategoryUsersRes.fromJson(_result.data!);
     return value;
   }
 

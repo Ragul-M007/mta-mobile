@@ -32,15 +32,19 @@ class CatsData {
   String? categoryName;
   String? description;
   int? projectId;
+  int? userCount;
+  int? documentCounts;
 
   CatsData(
-      {this.categoryId, this.categoryName, this.description, this.projectId});
+      {this.categoryId, this.categoryName, this.description, this.projectId,this.userCount,this.documentCounts});
 
   CatsData.fromJson(Map<String, dynamic> json) {
     categoryId = json['category_id'];
     categoryName = json['category_name'];
     description = json['description'];
     projectId = json['project_id'];
+    userCount = json['user_count'];
+    documentCounts = json['document_counts'];
   }
 
   Map<String, dynamic> toJson() {
@@ -49,6 +53,8 @@ class CatsData {
     data['category_name'] = this.categoryName;
     data['description'] = this.description;
     data['project_id'] = this.projectId;
+    data['document_counts'] = this.documentCounts;
+    data['user_count'] = this.userCount;
     return data;
   }
 }

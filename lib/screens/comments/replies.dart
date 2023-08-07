@@ -1167,6 +1167,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                             onTap: () {
                               _socket?.disconnect();
                               Strings.fromReplies = true;
+                              Strings.documentUploadfromProject = false;
                               Navigator.pushNamed(context, '/adddocComments');
                             },
                             child: Icon(Icons.attach_file)),
@@ -1320,7 +1321,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
     } else {
       await _audioRecorder.start(
         path: dir! + "/MTARecordedAudio.wav",
-        encoder: AudioEncoder.AAC,
+        encoder: AudioEncoder.aacLc,
       );
     }
   }

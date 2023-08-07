@@ -399,7 +399,8 @@ class _CommentsContentState extends State<CommentsContent>
     }
   }
 
-  String getFileExtension(String fileName) {
+  String getFileExtension(String fileName) 
+  {
     var file = fileName.split(".");
     var fileExt = file[1];
     if (fileExt == "png" || fileExt == "PNG") {
@@ -1006,6 +1007,7 @@ class _CommentsContentState extends State<CommentsContent>
                       children: [
                         InkWell(
                             onTap: () {
+                              Strings.documentUploadfromProject = false;
                               Navigator.pushNamed(context, '/adddocComments');
                             },
                             child: Icon(Icons.attach_file)),
@@ -1136,7 +1138,8 @@ class _CommentsContentState extends State<CommentsContent>
           print("Comments fetched changing to false");
           // _socket?.dispose();
 
-          _timer = new Timer(const Duration(milliseconds: 100), () async {
+          _timer = new Timer(const Duration(milliseconds: 100), () async 
+          {
             //   _scrollController.animateTo(
             //   _scrollController.position.maxScrollExtent,
             //   curve: Curves.easeOut,
@@ -1171,7 +1174,7 @@ class _CommentsContentState extends State<CommentsContent>
     } else {
       await _audioRecorder.start(
         path: dir! + "/MTARecordedAudio.wav",
-        encoder: AudioEncoder.AAC,
+        encoder: AudioEncoder.aacLc,
       );
     }
     ;
@@ -1215,7 +1218,8 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  stopAudio() async {
+  stopAudio() async 
+  {
     await audioPlayer.stop();
     setState(() {
       audioLength = 0;
@@ -1559,7 +1563,8 @@ class MySeparator extends StatelessWidget {
   }
 }
 
-Future<void> _showMyDialog(context, imgurl) async {
+Future<void> _showMyDialog(context, imgurl) async 
+{
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!

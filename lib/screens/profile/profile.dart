@@ -197,6 +197,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         TextButton(
                           onPressed: () {
                             menuRedirect(routename: "/login", currentmenu: 9);
+                            AppUtils.savePreferences("easyAccess", "N");
                             AppUtils.removeDeviceId(context);
                           },
                           child: new Text(

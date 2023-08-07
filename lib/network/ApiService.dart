@@ -39,6 +39,8 @@ import 'package:mta/utilities/strings.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';    
 // 
 import 'package:retrofit/retrofit.dart';
+
+import '../models/FetchCategoryUsersRes.dart';
 part 'ApiService.g.dart';
 
 // Run this code in termial to generate ApiService.g.dart file
@@ -46,8 +48,8 @@ part 'ApiService.g.dart';
 
  // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
- // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
-   @RestApi(baseUrl: "http://192.168.0.133:5777//mta")
+  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+ //  @RestApi(baseUrl: "http://192.168.0.133:5777//mta")
 
 
 abstract class ApiService 
@@ -107,6 +109,9 @@ abstract class ApiService
 
   @GET("/categories?project_id={project_id}")
   Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
+
+  @GET("/categories/getCatUsers?project_id={project_id}&category_id={category_id}")
+  Future<FetchCategoryUsersRes> getCatUsers(@Path("project_id") int id,@Path("category_id") int catid);
 
   @GET("/projects/getmappedUser?project_id={project_id}")
   Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);

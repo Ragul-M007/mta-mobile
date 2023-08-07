@@ -177,6 +177,7 @@ showDialog(
                 onPressed: () {
                   print("yesy");
                  menuRedirect(routename: "/login", currentmenu: 9);
+                 AppUtils.savePreferences("easyAccess", "N");
                  AppUtils.removeDeviceId(context);
 
                 }

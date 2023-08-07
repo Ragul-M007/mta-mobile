@@ -329,6 +329,7 @@ class _DashboardState extends State<Dashboard>
               TextButton(
                 onPressed: (){
                   menuRedirect(routename: "/login", currentmenu: 9);
+                  AppUtils.savePreferences("easyAccess", "N");
                   AppUtils.removeDeviceId(ctx);
                 }                  
 ,

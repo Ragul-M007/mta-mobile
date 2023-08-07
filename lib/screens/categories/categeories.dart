@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -8,6 +10,7 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/FetchCategoryUsersRes.dart';
 import '../../models/FetchMapedUsersRes.dart';
 
 class Categories extends StatelessWidget {
@@ -22,9 +25,8 @@ class Categories extends StatelessWidget {
         appBar: appbar("Project Details"),
         body: WillPopScope(
           child: CategoriesContent(),
-          onWillPop: () {
-
-
+          onWillPop: () 
+          {
             if(Strings.fromProjects == true)
             {
                 Navigator.pushNamed(context, '/projects');
@@ -48,14 +50,38 @@ class CategoriesContent extends StatefulWidget {
   _CategoriesContentState createState() => _CategoriesContentState();
 }
 
-class _CategoriesContentState extends State<CategoriesContent> {
+class _CategoriesContentState extends State<CategoriesContent> 
+{
   List<FectchCatsData> _catsList = [];
+  List<CategoryUsersData> _catUsersList = [];
+
   List<FetchMapedUsersData>? users;
   String _errText = "";
   void initState() {
     super.initState();
     getUserCats();
     WidgetsBinding.instance!.addPostFrameCallback((_) => getCategories());
+  }
+  showLoading(BuildContext context) 
+  {
+   showDialog<void>(
+      barrierColor: Colors.white.withOpacity(0.4),
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+         return  SimpleDialog(
+            elevation: 0.0,
+            backgroundColor:
+                  Colors.white70, // can change this to your prefered color
+            children: <Widget>[
+               Center(
+                  child: CircularProgressIndicator(),
+               ),
+               Text("Please wait! While the team members details are being loading")     
+            ],
+         );
+      },
+   );
   }
 
   getUserCats() {
@@ -75,54 +101,144 @@ class _CategoriesContentState extends State<CategoriesContent> {
     });
   }
 
-  Future<void> _showMyDialogProject() async {
+  getAssignedUsers(catID)
+  {
+     _catUsersList = [];
+     final api = Provider.of<ApiService>(context, listen: false);
+    api.getCatUsers(Strings.selectedProject[0].projectId!,catID).then((response) {
+      if (response.status!) {
+        setState(() {
+         _catUsersList = response.data!;
+        });
+        Navigator.pop(context);
+        showCategoryUsersDialog();
+      } else {
+                    Navigator.pop(context);    
+        print('error');
+      }
+    }).catchError((onError) 
+    {
+      Navigator.pop(context);
+      AppUtils.showToastError(onError.toString());
+    });
+  }
+  
+
+  Future<void> _showMyDialogProject() async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          content: SingleChildScrollView(
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Column(
-                  children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      new Icon(Icons.close, size: 22.0, color: Colors.black)
-                    ]),
-                    Text(
-                      "Assigned Users",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      height: MediaQuery.of(context).size.width * 1,
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      child: ListView.builder(
-                        itemCount: users?.length,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              Card(
-                                color: Color.fromRGBO(230, 230, 230, 1),
-                                child: ListTile(
-                                  title: Text(
-                                    users?[index].name ?? "",
-                                  ),
-                                  subtitle: Text(users?[index].prof ?? ""),
-                                  onTap: () {},
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+          content: StatefulBuilder(
+            
+            builder: (BuildContext context, StateSetter setState)
+            {
+              return SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Column(
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        new Icon(Icons.close, size: 22.0, color: Colors.black)
+                      ]),
+                      Text(
+                        "Assigned Users",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ],
-                )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.width * 1,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: ListView.builder(
+                          itemCount: users?.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                Card(
+                                  color: Color.fromRGBO(230, 230, 230, 1),
+                                  child: ListTile(
+                                    title: Text(
+                                      users?[index].name ?? "",
+                                    ),
+                                    subtitle: Text(users?[index].prof ?? ""),
+                                    onTap: () {},
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  )),
+            );}
+          ),
+        );
+      },
+    );
+  }
+
+   Future<void> showCategoryUsersDialog() async 
+  {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: StatefulBuilder(
+            builder:(BuildContext context, StateSetter setState){
+              print("checkk ${              jsonEncode(_catUsersList)}");
+              return SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child:
+                  Column(
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        new Icon(Icons.close, size: 22.0, color: Colors.black)
+                      ]),
+                      Text(
+                        "Assigned Users",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.width * 1,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child:
+                         _catUsersList.length != 0? ListView.builder(
+                          itemCount: _catUsersList.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                Card(
+                                  color: Color.fromRGBO(230, 230, 230, 1),
+                                  child: ListTile(
+                                    title: Text(
+                                      _catUsersList[index].name ?? "",
+                                    ),
+                                    subtitle: Text(_catUsersList[index].prof ?? ""),
+                                    onTap: () {},
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ):Center(child: Text("No assigned users found",style:TextStyle(color: Colors.red))),
+                      ),
+                    ],
+                  )),
+            );}
           ),
         );
       },
@@ -130,13 +246,14 @@ class _CategoriesContentState extends State<CategoriesContent> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    print("role--> ${Strings.roleId}");
+  Widget build(BuildContext context) 
+  {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+          padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 width: MediaQuery.of(context).size.width * 0.12,
@@ -151,7 +268,6 @@ class _CategoriesContentState extends State<CategoriesContent> {
                   borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                 ),
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.05),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -160,39 +276,13 @@ class _CategoriesContentState extends State<CategoriesContent> {
                       Strings.category = false;
                       Navigator.pushNamed(context, '/viewdoclist');
                     },
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: Text(
-                            Strings.selectedProject[0].projectName!,
-                            style: Drawables.adddoccontentstyle(
-                                Colors.black, 18.0, FontWeight.w500),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Icon(
-                          Icons.info_outlined,
-                          color: Color(0xFF0061b0),
-                          size: 20,
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            child: Text(
-                              "View Project Docs",
-                              style: Drawables.adddoccontentstyle(
-                                  Colors.grey[600]!, 12.0, FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: Text(
+                        Strings.selectedProject[0].projectName!,
+                        style: Drawables.adddoccontentstyle(
+                            Colors.black, 18.0, FontWeight.w500),
+                      ),
                     ),
                   ),
 
@@ -229,87 +319,85 @@ class _CategoriesContentState extends State<CategoriesContent> {
                               style: Drawables.adddoccontentstyle(
                                   Colors.grey, 13.0, FontWeight.normal),
                             ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Icon(
-                            Icons.people,
-                            color: Color(0xFF0061b0),
-                            size: 20,
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.25,
-                              child: Text(
-                                "View Members",
-                                style: Drawables.adddoccontentstyle(
-                                    Colors.grey[600]!, 12.0, FontWeight.w600),
-                              ),
-                            ),
-                          ),
+                          ),  
                         ],
                       ),
                     ),
-                  // Row(
-                  //   crossAxisAlignment: CrossAxisAlignment.end,
-                  //   children: [
-                  // Container(
-                  //   width: 15.0,
-                  //   height: 15.0,
-                  //   decoration: new BoxDecoration(
-                  //     image: new DecorationImage(
-                  //       image: new AssetImage("assets/icons/pin.png"),
-                  //       fit: BoxFit.fill,
-                  //     ),
-                  //     borderRadius:
-                  //         new BorderRadius.all(new Radius.circular(50.0)),
-                  //   ),
-                  // ),
-                  //     SizedBox(
-                  //       width: 10,
-                  //     ),
-                  //     Text(
-                  //       Strings.selectedProject[0].address! +
-                  //           ' , ' +
-                  //           Strings.selectedProject[0].city!,
-                  //       style: Drawables.adddoccontentstyle(
-                  //           Colors.grey, 13.0, FontWeight.normal),
-                  //     ),
-                  //     SizedBox(width:20),
-                  //     Icon(
-                  //       Icons.info_outlined,
-                  //       color: Color(0xFF0061b0),
-                  //       size: 20,
-                  //     ),
-                  //     SizedBox(
-                  //       width: 5,
-                  //     ),
-                  //     Align(
-                  //       child: SizedBox(
-                  //         width: MediaQuery.of(context).size.width * 0.25,
-                  //         child: Text(
-                  //           "View Project Docs",
-                  //           style: Drawables.adddoccontentstyle(
-                  //               Colors.grey[600]!, 12.0, FontWeight.w600),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+
+
+                    TextButton(onPressed: ()
+                    {
+                      Strings.projectId = Strings.selectedProject[0].projectId!;
+                      Navigator.pushNamed(context, '/projectComments');
+                    }, child: Text("Comments"))
+                  
                 ],
-              )
+              ),
+            Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outlined,
+                        color: Color(0xFF0061b0),
+                        size: 20,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.25,
+                          child: Text(
+                            "View Project Docs",
+                            style: Drawables.adddoccontentstyle(
+                                Colors.grey[600]!, 12.0, FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(
+                    height: 7,
+                  ),
+                  if (Strings.roleId == 1 ||
+                      Strings.roleId == 2 ||
+                      Strings.roleId == 6)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.people,
+                          color: Color(0xFF0061b0),
+                          size: 20,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: Text(
+                              "View Members",
+                              style: Drawables.adddoccontentstyle(
+                                  Colors.grey[600]!, 12.0, FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ],
           ),
         ),
         Expanded(
           child: _catsList.length > 0
               ? ListView.builder(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.fromLTRB(20,0,20,20),
                   itemBuilder: (BuildContext ctx, int index) {
                     return Padding(
                       padding: EdgeInsets.all(10),
@@ -336,20 +424,29 @@ class _CategoriesContentState extends State<CategoriesContent> {
                                                   Colors.black87,
                                                   14.0,
                                                   FontWeight.w500)),
-                                                  Text("0 Documents",
+                                                  Text("${_catsList[index].documentCounts} Documents",
                                                   style: Drawables.adddoccontentstyle(
                                   Colors.grey, 13.0, FontWeight.normal),)
                                         ],
                                       )
                                               
                                               ),
-                                              IconButton(onPressed: (){
-                                                print("staff cliked");
-                                              }, icon: Icon(
+                                              
+                                              Row(
+                                                children: [
+                                                  IconButton(onPressed: (){
+                                                   // print("staff cliked");
+                                                   showLoading(context);
+                                                   getAssignedUsers(_catsList[index].categoryId!);
+                                                  }, icon: Icon(
                             Icons.people,
                             color: Color(0xFF0061b0),
                             size: 20,
                           ),),
+                                                                            Text("${_catsList[index].userCount}"),
+
+                                                ],
+                                              ),
                                   Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.grey,

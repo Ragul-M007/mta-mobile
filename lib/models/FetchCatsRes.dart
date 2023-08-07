@@ -32,15 +32,19 @@ class FectchCatsData {
   String? categoryName;
   String? description;
   int? projectId;
+  int? userCount;
+  int? documentCounts;
 
   FectchCatsData(
-      {this.categoryId, this.categoryName, this.description, this.projectId});
+      {this.categoryId, this.categoryName, this.description, this.projectId,this.documentCounts,this.userCount});
 
   FectchCatsData.fromJson(Map<String, dynamic> json) {
     categoryId = json['category_id'];
     categoryName = json['category_name'];
     description = json['description'];
     projectId = json['project_id'];
+    documentCounts = json['document_counts'];
+    userCount = json['user_count'];
   }
 
   Map<String, dynamic> toJson() {
@@ -49,6 +53,8 @@ class FectchCatsData {
     data['category_name'] = this.categoryName;
     data['description'] = this.description;
     data['project_id'] = this.projectId;
+    data['user_count'] = this.userCount;
+    data['document_counts'] = this.documentCounts;
     return data;
   }
 }
