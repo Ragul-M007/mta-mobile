@@ -61,13 +61,14 @@ PreferredSizeWidget appbar(String title) {
 }
 
 PreferredSizeWidget mainappbar(
-    {@required Function? ontab, @required String? title, @required controller}) {
+    {@required Function? ontab, @required String? title, @required controller}) 
+{
   return AppBar(
     iconTheme: IconThemeData(color: Colors.black),
     backgroundColor: Colors.white,
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-    elevation: 8,
+    elevation: 3,
     title: Text(
       title!,
       style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),

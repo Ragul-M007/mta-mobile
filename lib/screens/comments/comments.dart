@@ -130,16 +130,19 @@ class _CommentsContentState extends State<CommentsContent>
 
   String? projectname;
   @override
-  void initState() {
+  void initState() 
+  {
     super.initState();
-    if (Strings.fromNotificationComments) {
+    if (Strings.fromNotificationComments) 
+    {
       updateNotification(Strings.notificationID);
     }
     if (Strings.category) 
     {
       projectId = Strings.selectedProject[0].projectId!;
       Strings.categoriesforReply = true;
-    } else {
+    } else 
+    {
       projectId = int.parse(Strings.selectedProDocument[0].projectId ?? "0");
     }
     getUserCats();

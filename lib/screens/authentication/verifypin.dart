@@ -10,6 +10,8 @@ import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
+import 'package:mta/screens/projectcomments.dart/projectComments.dart';
+import 'package:mta/screens/projectcomments.dart/projectCommentsReplies.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -403,13 +405,32 @@ class _VerifypinState extends State<Verifypin> {
                   .push(MaterialPageRoute(builder: (context) => Attendance()));
             } else if (Strings.fromNotificationComments) 
             {
-              if (Strings.selectedProDocument[0].commentId == null) {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => Comments()));
-              } else {
-                // Navigator.of(context)
-                    // .push(MaterialPageRoute(builder: (context) => Replies()));
+
+              if(Strings.selectedProDocument[0].projectComments == "true")
+              {
+                  if (Strings.selectedProDocument[0].commentId == null) 
+                  {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => ProjectComments()));
+                  } else 
+                  {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => ProjectCommentsReplies()));
+                  }
               }
+              else
+              {
+                  if (Strings.selectedProDocument[0].commentId == null) 
+                  {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => Comments()));
+                  } else 
+                  {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => Replies()));
+                  }
+              }
+              
             } else if(Strings.fromNotificationDocuments)
             {
               Navigator.of(context)

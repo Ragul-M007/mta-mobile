@@ -72,10 +72,13 @@ class _CategoriesContentState extends State<CategoriesContent>
          return  SimpleDialog(
             elevation: 0.0,
             backgroundColor:
-                  Colors.white70, // can change this to your prefered color
+                  Colors.white, // can change this to your prefered color
             children: <Widget>[
-               Center(
-                  child: CircularProgressIndicator(),
+               Container(
+                height: 100,
+                 child: Center(
+                    child: CircularProgressIndicator(),
+                 ),
                ),
                Text("Please wait! While the team members details are being loading")     
             ],
@@ -113,7 +116,8 @@ class _CategoriesContentState extends State<CategoriesContent>
         Navigator.pop(context);
         showCategoryUsersDialog();
       } else {
-                    Navigator.pop(context);    
+        AppUtils.showToastError(response.message ?? "Unknown Error");
+        Navigator.pop(context);    
         print('error');
       }
     }).catchError((onError) 
@@ -248,248 +252,291 @@ class _CategoriesContentState extends State<CategoriesContent>
   @override
   Widget build(BuildContext context) 
   {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 0.12,
-                height: MediaQuery.of(context).size.width * 0.12,
-                decoration: new BoxDecoration(
-                  color: const Color(0xff7c94b6),
-                  image: new DecorationImage(
-                    image: new NetworkImage(Strings.baseImageUrl +
-                        Strings.selectedProject[0].projectImg!),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Container(
+              height: 100,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Strings.category = false;
-                      Navigator.pushNamed(context, '/viewdoclist');
-                    },
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      child: Text(
-                        Strings.selectedProject[0].projectName!,
-                        style: Drawables.adddoccontentstyle(
-                            Colors.black, 18.0, FontWeight.w500),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.12,
+                    height: MediaQuery.of(context).size.width * 0.12,
+                    decoration: new BoxDecoration(
+                      color: const Color(0xff7c94b6),
+                      image: new DecorationImage(
+                        image: new NetworkImage(Strings.baseImageUrl +
+                            Strings.selectedProject[0].projectImg!),
+                        fit: BoxFit.fill,
                       ),
+                      borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                     ),
                   ),
-
-                  SizedBox(
-                    height: 7,
-                  ),
-                  if (Strings.roleId == 1 ||
-                      Strings.roleId == 2 ||
-                      Strings.roleId == 6)
-                    GestureDetector(
-                      onTap: () {
-                        _showMyDialogProject();
-                      },
-                      child: Row(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.04,
-                            height: 15.0,
-                            decoration: new BoxDecoration(
-                              image: new DecorationImage(
-                                image: new AssetImage("assets/icons/pin.png"),
-                                fit: BoxFit.fill,
-                              ),
-                              borderRadius: new BorderRadius.all(
-                                  new Radius.circular(50.0)),
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.36,
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Strings.category = false;
+                            Navigator.pushNamed(context, '/viewdoclist');
+                          },
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
                             child: Text(
-                              Strings.selectedProject[0].address! +
-                                  ' , ' +
-                                  Strings.selectedProject[0].city!,
+                              Strings.selectedProject[0].projectName!,
                               style: Drawables.adddoccontentstyle(
-                                  Colors.grey, 13.0, FontWeight.normal),
+                                  Colors.black, 18.0, FontWeight.w500),
                             ),
-                          ),  
-                        ],
-                      ),
-                    ),
-
-
-                    TextButton(onPressed: ()
-                    {
-                      Strings.projectId = Strings.selectedProject[0].projectId!;
-                      Navigator.pushNamed(context, '/projectComments');
-                    }, child: Text("Comments"))
-                  
-                ],
-              ),
-            Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outlined,
-                        color: Color(0xFF0061b0),
-                        size: 20,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.25,
-                          child: Text(
-                            "View Project Docs",
-                            style: Drawables.adddoccontentstyle(
-                                Colors.grey[600]!, 12.0, FontWeight.w600),
                           ),
                         ),
+                        
+                          Row(
+                            
+                            children: [
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.04,
+                                height: 15.0,
+                                decoration: new BoxDecoration(
+                                  image: new DecorationImage(
+                                    image: new AssetImage("assets/icons/pin.png"),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  borderRadius: new BorderRadius.all(
+                                      new Radius.circular(50.0)),
+                                ),
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.36,
+                                child: Text(
+                                  Strings.selectedProject[0].address ?? "" +
+                                      ' , ' +
+                                      (Strings.selectedProject[0].city ?? ""),
+                                  style: Drawables.adddoccontentstyle(
+                                      Colors.grey, 13.0, FontWeight.normal),
+                                ),
+                              ),  
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0,6,0,0),
+                            child: GestureDetector(
+                                                  onTap: () {
+                                                    Strings.projectId = Strings.selectedProject[0].projectId!;
+                                                    Navigator.pushNamed(context, '/projectComments');
+                                                  },
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Image.asset(
+                                                          "assets/icons/Comments.png",
+                                                          width: 15.0,
+                                                          height: 15.0),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                            " Comments",
+                                                        overflow:
+                                                            TextOverflow.clip,
+                                                        style: TextStyle(
+                                                            decoration:
+                                                                TextDecoration
+                                                                    .underline,
+                                                            fontSize: 12,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color: Colors.grey),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                          )
+
+                          // TextButton(onPressed: ()
+                          // {
+                          //   Strings.projectId = Strings.selectedProject[0].projectId!;
+                          //   Navigator.pushNamed(context, '/projectComments');
+                          // }, child: Text("Comments"))
+                        
+                      ],
+                    ),
+                  ),
+                Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                           Strings.category = false;
+                          Navigator.pushNamed(context, '/viewdoclist');
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outlined,
+                              color: Color(0xFF0061b0),
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.25,
+                                child: Text(
+                                  "View Project Docs",
+                                  style: Drawables.adddoccontentstyle(
+                                      Colors.grey[600]!, 12.0, FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+
+                      SizedBox(
+                        height: 7,
+                      ),
+                      if (Strings.roleId == 1 ||
+                          Strings.roleId == 2 ||
+                          Strings.roleId == 6)
+                        GestureDetector(
+                          onTap:(){
+                             _showMyDialogProject();
+                          },
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.people,
+                                color: Color(0xFF0061b0),
+                                size: 20,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.25,
+                                  child: Text(
+                                    "View Members",
+                                    style: Drawables.adddoccontentstyle(
+                                        Colors.grey[600]!, 12.0, FontWeight.w600),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: _catsList.length > 0
+                ? ListView.builder(
+                    padding: EdgeInsets.fromLTRB(20,0,20,20),
+                    itemBuilder: (BuildContext ctx, int index) {
+                      return Padding(
+                        padding: EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            print("category check ${_catsList[index]}");
+                            Strings.selectedCategory = [];
+                            Strings.selectedCategory.add(_catsList[index]);
+                            Strings.category = true;
+                            Navigator.pushNamed(context, '/viewdoclist');
+                          },
+                          child: Container(
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(20,0,20,0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                                _catsList[index].categoryName!,
+                                                style: Drawables.adddoccontentstyle(
+                                                    Colors.black87,
+                                                    14.0,
+                                                    FontWeight.w500)),
+                                                    Text("${_catsList[index].documentCounts} Documents",
+                                                    style: Drawables.adddoccontentstyle(
+                                    Colors.grey, 13.0, FontWeight.normal),)
+                                          ],
+                                        )         
+                                                ),
+                                                
+                                                Row(
+                                                  children: [
+                                                  Text("${_catsList[index].userCount}"),
+                                                    IconButton(onPressed: ()
+                                                    {
+                                                     // print("staff cliked");
+                                                     showLoading(context);
+                                                     getAssignedUsers(_catsList[index].categoryId!);
+                                                    }, icon: Icon(
+                              Icons.people,
+                              color: Color(0xFF0061b0),
+                              size: 20,
+                            ),),
 
-                  SizedBox(
-                    height: 7,
-                  ),
-                  if (Strings.roleId == 1 ||
-                      Strings.roleId == 2 ||
-                      Strings.roleId == 6)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.people,
-                          color: Color(0xFF0061b0),
-                          size: 20,
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            child: Text(
-                              "View Members",
-                              style: Drawables.adddoccontentstyle(
-                                  Colors.grey[600]!, 12.0, FontWeight.w600),
+                                                  ],
+                                                ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.grey,
+                                      size: 14.0,
+                                    )
+                                  ],
+                                ),
+                                ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white,
                             ),
                           ),
+                        ),
+                      );
+
+                      // return Text("hi");
+                    },
+                    itemCount: _catsList.length,
+                  )
+                : Container(
+                    child: Padding(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _errText,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: _catsList.length > 0
-              ? ListView.builder(
-                  padding: EdgeInsets.fromLTRB(20,0,20,20),
-                  itemBuilder: (BuildContext ctx, int index) {
-                    return Padding(
-                      padding: EdgeInsets.all(10),
-                      child: GestureDetector(
-                        onTap: () {
-                          print("category check ${_catsList[index]}");
-                          Strings.selectedCategory = [];
-                          Strings.selectedCategory.add(_catsList[index]);
-                          Strings.category = true;
-                          Navigator.pushNamed(context, '/viewdoclist');
-                        },
-                        child: Container(
-                          child: Padding(
-                              padding: EdgeInsets.fromLTRB(20,0,20,0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                              _catsList[index].categoryName!,
-                                              style: Drawables.adddoccontentstyle(
-                                                  Colors.black87,
-                                                  14.0,
-                                                  FontWeight.w500)),
-                                                  Text("${_catsList[index].documentCounts} Documents",
-                                                  style: Drawables.adddoccontentstyle(
-                                  Colors.grey, 13.0, FontWeight.normal),)
-                                        ],
-                                      )
-                                              
-                                              ),
-                                              
-                                              Row(
-                                                children: [
-                                                  IconButton(onPressed: (){
-                                                   // print("staff cliked");
-                                                   showLoading(context);
-                                                   getAssignedUsers(_catsList[index].categoryId!);
-                                                  }, icon: Icon(
-                            Icons.people,
-                            color: Color(0xFF0061b0),
-                            size: 20,
-                          ),),
-                                                                            Text("${_catsList[index].userCount}"),
-
-                                                ],
-                                              ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.grey,
-                                    size: 14.0,
-                                  )
-                                ],
-                              ),
-                              ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-
-                    // return Text("hi");
-                  },
-                  itemCount: _catsList.length,
-                )
-              : Container(
-                  child: Padding(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _errText,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.all(20),
-                )),
-        )
-      ],
+                    padding: EdgeInsets.all(20),
+                  )),
+          )
+        ],
+      ),
     );
   }
 
-  getCategories() {
+  getCategories() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.getCats(Strings.selectedProject[0].projectId!).then((response) {

@@ -86,9 +86,12 @@ class DocDetail {
   String? description;
   int? documentId;
   String? commentId;
+  String? projectComments;
+  
 
   DocDetail(
       {this.file,
+      this.projectComments,
       this.projectName,
       this.categoryName,
       this.categoryId,
@@ -101,8 +104,10 @@ class DocDetail {
       this.description,
       this.documentId});
 
-  DocDetail.fromJson(Map<String, dynamic> json) {
+  DocDetail.fromJson(Map<String, dynamic> json) 
+  {
     file = json['file'];
+    projectComments = json['project_comments'].toString();
     categoryName = json['category_name'];
     projectName = json['project_name'];
     categoryId = json['category_id'];
@@ -116,9 +121,11 @@ class DocDetail {
     documentId = json['document_id'];
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() 
+  {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['file'] = this.file;
+    data['project_comments'] = this.projectComments;
     data['category_name'] = this.categoryName;
     data['project_name'] = this.projectName;
     data['category_id'] = this.categoryId;

@@ -39,7 +39,8 @@ class ViewDocScreen extends StatelessWidget {
                   Strings.fromNotificationScren = false;
                   Navigator.of(context).pushReplacementNamed('/notification');
                 } else {
-                  if (Strings.fromNotificationDocuments) {
+                  if (Strings.fromNotificationDocuments) 
+                  {
                     Strings.fromNotificationDocuments = false;
                     Navigator.pushNamed(context, '/projects');
                   } else {

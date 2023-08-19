@@ -49,12 +49,11 @@ part 'ApiService.g.dart';
  // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
- //  @RestApi(baseUrl: "http://192.168.0.133:5777//mta")
+  // @RestApi(baseUrl: "http://192.168.0.117:5777/mta")
 
 
 abstract class ApiService 
 {
-
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +157,11 @@ abstract class ApiService
   Future<CommentsRes> removeDeviceId(
       @Path("user_id") int id);
 
+  @DELETE("/utils/deletecomment/{comment_id}")
+  Future<CommentsRes> removeComment(
+      @Path("comment_id") int id);
+
+
      
 
   @POST("/utils/getAudioUrl")
@@ -180,6 +184,9 @@ abstract class ApiService
         options.headers["x-access-token"] = Strings.authToken;
         //options.headers["Host"] = "<calculated when request is sent>";
         options.followRedirects = false;
+        // options.data = (data){
+        //   print("dataa $data");
+        // };
         options.validateStatus = (status) {
           Strings.statusCode = status!;
           if (status == 401) {
@@ -189,6 +196,9 @@ abstract class ApiService
             navigatorKey.currentState?.popAndPushNamed('/verifypin');
             // return false;
           }
+          else if(status == 502){
+AppUtils.showToastError("Bad Gateway");          
+}
           return status < 500;
         };
         print("Printing api service");

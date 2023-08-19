@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
-import 'package:mta/models/PushRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/attendance/attendance.dart';
+import 'package:mta/utilities/InternetConnectivity.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';
@@ -23,7 +22,8 @@ final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 class SplashScreen extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     // return Container(child: SplashScreenContent());
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
@@ -74,6 +74,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     getusername();
     getuserid();
     requestNotificationPermissions();
+    getConnectivity();
   }
 
   Future<void> requestNotificationPermissions() async {
@@ -81,8 +82,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     final status = await Permission.notification.request();
 
     AppUtils.getStringPreferences('showNotificationAlert').then((res) {
-      if (res == "null") 
-      {
+      if (res == "null") {
         AppUtils.savePreferences('showNotificationAlert', "true");
         if (status.isGranted) {
           getToken();
@@ -96,9 +96,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           permissionDialog();
           // await openAppSettings();
         }
-      }
-      else
-      {
+      } else {
         getToken();
       }
     });
@@ -142,15 +140,14 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                           "Cancel",
                           style: TextStyle(color: Colors.white),
                         ),
-                      //   style: ElevatedButton.styleFrom(
-                      //   primary: Colors.white,
-                      // ),
+                        //   style: ElevatedButton.styleFrom(
+                        //   primary: Colors.white,
+                        // ),
                         style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(Color.fromARGB(255, 243, 229, 104)),
+                            backgroundColor: MaterialStateProperty.all(
+                                Color.fromARGB(255, 243, 229, 104)),
                             textStyle: MaterialStateProperty.all(
-                                TextStyle(color: Colors.white)))
-                                ),
+                                TextStyle(color: Colors.white)))),
                   ),
                   //SizedBox(width: 15),
                   SizedBox(
@@ -218,9 +215,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print("dataaa ${Strings.selectedProDocument[0].documentId}");
       // print(message.notification?.body);
       AppUtils.showToastErrorTop("You have a new notification!");
-      DocumentData peo = DocumentData.fromJson(message.data);
+      print("dataaa ${jsonEncode(message.data)}");
 
-      print("inside if listen message-----> ${jsonEncode(peo)}");
       if (Strings.pushNotify == true) {
         print("inside if listen message-----> $message");
       }
@@ -228,7 +224,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
-      print("initial message called");
       if (message?.notification?.title != null) {
         if (message!.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
@@ -241,10 +236,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           print(jsonEncode(peo));
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+          Strings.projectId = int.parse(peo.projectId ?? "000");
         } else if (message.notification!.title!.contains("Documents")) {
           DocumentData peo = DocumentData.fromJson(message.data);
           Strings.selectedProject.clear();
-
           Strings.selectedProject.add(Data.fromJson({
             "project_img": "",
             "project_name": peo.projectName,
@@ -291,6 +286,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           print(jsonEncode(peo));
           await checkLogin();
           int id = int.parse(peo.notiId!);
+          Strings.projectId = int.parse(peo.projectId ?? "000");
           Strings.notificationID = id;
         } else if (message.notification!.title!.contains("Documents")) {
           DocumentData peo = DocumentData.fromJson(message.data);
@@ -595,17 +591,16 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   void getToken() {
     timer = new Timer(const Duration(milliseconds: 500), () 
     {
-      AppUtils.getStringPreferences('easyAccess').then((value) {
+      AppUtils.getStringPreferences('easyAccess').then((value) 
+      {
         if (value != null) 
         {
           print("value inside--> $value");
-          if (value == "Y") 
-          {
+          if (value == "Y") {
             print("test");
             Navigator.popAndPushNamed(context, "/verifypin");
             // Navigator.popAndPushNamed(context, "/comments");
-          } else 
-          {
+          } else {
             Navigator.popAndPushNamed(context, "/login");
             //Navigator.popAndPushNamed(context, "/comments");
           }
@@ -618,7 +613,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
   }
 
-  checkLogin() {
+  checkLogin() 
+  {
     AppUtils.getStringPreferences('easyAccess').then((value) {
       print("Checking $value");
       if (value != null) {

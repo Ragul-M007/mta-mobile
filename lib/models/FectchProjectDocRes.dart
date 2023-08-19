@@ -32,7 +32,7 @@ class FectchProjectDocRes {
 
 class ProjectDocData {
   String? categoryName;
-  int? categoryId;
+  String? categoryId;
   String? notiId;
   String? projectId;
   String? documentId;
@@ -45,6 +45,7 @@ class ProjectDocData {
   String? description;
   String? commentsCount;
   String? commentId;
+  String? projectComments = "false";
 
   ProjectDocData(
       {
@@ -52,19 +53,22 @@ class ProjectDocData {
         this.categoryName,
         this.notiId,
         this.commentId,
-      this.projectId,
-      this.documentId,
-      this.projectName,
-      this.fileName,
-      this.file,
-      this.userId,
-      this.name,
-      this.createdAt,
-      this.description,
-      this.commentsCount});
+        this.projectComments,
+        this.projectId,
+        this.documentId,
+        this.projectName,
+        this.fileName,
+        this.file,
+        this.userId,
+        this.name,
+        this.createdAt,
+        this.description,
+        this.commentsCount
+        });
 
   ProjectDocData.fromJson(Map<String, dynamic> json) 
   {
+    projectComments = json['project_comments'];
     categoryId = json['category_id'];
     categoryName = json['category_name'];
     projectName = json['project_name'];
@@ -98,6 +102,7 @@ class ProjectDocData {
     data['created_at'] = this.createdAt;
     data['description'] = this.description;
     data['commentsCount'] = this.commentsCount;
+    data['project_comments'] = this.projectComments;
     return data;
   }
 }

@@ -42,7 +42,8 @@ class NotificationContent extends StatefulWidget {
 
 class _NotificationContentState extends State<NotificationContent>
     with TickerProviderStateMixin {
-  void initState() {
+  void initState() 
+  {
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
@@ -50,7 +51,7 @@ class _NotificationContentState extends State<NotificationContent>
           Strings.currentmenuvalue = 5;
         });
       });
-
+    _msgList.clear();
     super.initState();
 
     WidgetsBinding.instance?.addPostFrameCallback((_) => getNotification());
@@ -274,28 +275,51 @@ class _NotificationContentState extends State<NotificationContent>
                               Strings.fromNotificationScren = true;
                               if (_msgList[index]
                                   .title!
-                                  .contains("Commented")) {
+                                  .contains("Commented")) 
+                              {
                                 Strings.selectedProDocument.clear();
                                 var dat = jsonEncode(_msgList[index].docDetail);
+                                print("qwerty ${dat}");
                                 var decoded = jsonDecode(dat);
                                 ProjectDocData peo =
                                     ProjectDocData.fromJson(decoded);
                                 print(jsonEncode(peo));
                                 Strings.selectedProDocument.add(peo);
-                                updateNotification(
-                                    _msgList[index].notiId, "comments");
+
+                                if(_msgList[index].docDetail?.projectComments == true)
+                                {
+                                    Strings.projectId = _msgList[index].docDetail?.projectId!;
+                                    updateNotification(_msgList[index].notiId, "projectComments");
+                                }
+                                else
+                                {
+                                      updateNotification(_msgList[index].notiId, "comments");
+                                }
+                               
                               } else if (_msgList[index]
                                   .title!
-                                  .contains("Replied")) {
+                                  .contains("Replied")) 
+                              {
                                 Strings.selectedProDocument.clear();
                                 var dat = jsonEncode(_msgList[index].docDetail);
+                                print("uiiii");
                                 var decoded = jsonDecode(dat);
                                 ProjectDocData peo =
                                     ProjectDocData.fromJson(decoded);
                                 print(jsonEncode(peo));
                                 Strings.selectedProDocument.add(peo);
-                                updateNotification(
-                                    _msgList[index].notiId, "replies");
+
+
+                                if(_msgList[index].docDetail?.projectComments == "true")
+                                {
+                                    Strings.projectId = _msgList[index].docDetail?.projectId!;
+                                    updateNotification(_msgList[index].notiId, "projectReplies");
+                                }
+                                else
+                                {
+                                    updateNotification(_msgList[index].notiId, "replies");
+                                }
+                                
                               } else 
                               {
                                 var dat = jsonEncode(_msgList[index].docDetail);
@@ -329,12 +353,13 @@ class _NotificationContentState extends State<NotificationContent>
                                 }));
 
                                 if (peo.categoryId != "null" &&
-                                    peo.categoryId != null) {
+                                    peo.categoryId != null) 
+                                    {
                                   Strings.category = true;
                                 } else {
                                   Strings.category = false;
                                 }
-                                Strings.fromNotificationDocuments = true;
+                               // Strings.fromNotificationDocuments = true;
                                 updateNotification(
                                     _msgList[index].notiId, "docs");
                               }
@@ -538,8 +563,17 @@ class _NotificationContentState extends State<NotificationContent>
         } else if (toComments == "replies") {
           Strings.fromNotificationReply = true;
           Navigator.of(context).pushReplacementNamed('/replies');
-        } else {
-          Strings.fromNotificationDocuments = true;
+        }else if(toComments == "projectComments") 
+        {
+          Navigator.of(context).pushReplacementNamed('/projectComments');
+        }
+        else if(toComments == "projectReplies"){
+          Strings.fromNotificationReply = true;
+          Navigator.of(context).pushReplacementNamed('/projectCommentReplies');
+      }
+        
+        else {
+         // Strings.fromNotificationDocuments = true;
           Navigator.of(context)
                     .pushReplacementNamed('/viewdoclist');
         }

@@ -1,4 +1,6 @@
 class CommentsRes {
+  int? commentUserId;
+  bool? status;
   int? commentId;
   int? parentCommentId;
   String? comment;
@@ -13,7 +15,10 @@ class CommentsRes {
   List<Replies>? replies;
 
   CommentsRes(
-      {this.commentId,
+      {
+        this.commentUserId,
+        this.status,
+        this.commentId,
       this.parentCommentId,
       this.comment,
       this.audio,
@@ -27,6 +32,7 @@ class CommentsRes {
       this.replies});
 
   CommentsRes.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
     commentId = json['comment_id'];
     parentCommentId = json['parent_comment_id'];
     comment = json['comment'];
@@ -48,6 +54,7 @@ class CommentsRes {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
     data['comment_id'] = this.commentId;
     data['parent_comment_id'] = this.parentCommentId;
     data['comment'] = this.comment;

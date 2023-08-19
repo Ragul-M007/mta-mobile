@@ -14,6 +14,8 @@ Future<void> main() async {
   //_setupLogging();
   // runApp(SplashScreen());
   WidgetsFlutterBinding.ensureInitialized();
+  final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
+
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   SystemChrome.setPreferredOrientations(

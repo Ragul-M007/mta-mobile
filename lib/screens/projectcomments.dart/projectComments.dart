@@ -13,8 +13,6 @@ import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/comments/comments.dart';
-import 'package:mta/screens/others/notification.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -25,11 +23,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:uuid/uuid.dart';
 
 List<FetchMapedUsersData> users = Strings.users;
 List<CatsData> cats = Strings.categories;
@@ -55,20 +53,25 @@ var startRecording = false;
 var initialCommentCheck = true;
 List<String> docImg = [];
 
+var uniqueRecordId;
+
+
 var isPlaying = false;
 var playingIndex = null;
 int audioLength = 0;
 int audioCurrentlenth = 0;
 Timer? _timer;
 List<int> recordedData = [];
+List<CatsData?> CatData = [];
+List<FetchMapedUsersData?> UserData = [];
+
 final _audioRecorder = Record();
 
 String file64 = '';
 String? fileExt;
 IO.Socket? _socket;
 
-class ProjectComments extends StatefulWidget 
-{
+class ProjectComments extends StatefulWidget {
   static const String routeName = "/projectComments";
 
   const ProjectComments({Key? key}) : super(key: key);
@@ -77,11 +80,9 @@ class ProjectComments extends StatefulWidget
   _ProjectCommentsState createState() => _ProjectCommentsState();
 }
 
-class _ProjectCommentsState extends State<ProjectComments> 
-{
+class _ProjectCommentsState extends State<ProjectComments> {
   @override
   Widget build(BuildContext context) {
-   
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
         child: Scaffold(
@@ -108,8 +109,8 @@ class _ProjectCommentsState extends State<ProjectComments>
                   Strings.fromNotificationScren = false;
                   Navigator.of(context).pushReplacementNamed('/notification');
                 } else {
-                  if (Strings.fromNotificationDocuments) {
-                    Strings.fromNotificationDocuments = false;
+                  if (Strings.fromNotificationComments) {
+                    Strings.fromNotificationComments = false;
                     Navigator.pushNamed(context, '/projects');
                   } else {
                     Navigator.pushNamed(context, '/categories');
@@ -152,14 +153,15 @@ class _CommentsContentState extends State<CommentsContent>
 
     projectId = Strings.projectId;
 
-    // if (Strings.category) 
+    // if (Strings.category)
     // {
     //   projectId = Strings.selectedProject[0].projectId!;
     //   Strings.categoriesforReply = true;
-    // } else 
+    // } else
     // {
     //   projectId = int.parse(Strings.selectedProDocument[0].projectId ?? "0");
     // }
+    uniqueRecordId = Uuid().v1();
     getUserCats();
     getuserCatgories();
     getProjectDetails();
@@ -186,9 +188,8 @@ class _CommentsContentState extends State<CommentsContent>
     //   _currDoc = Strings.selectedProDocument[0];
     // }
     // getUserCats();
-        print("connection established $projectId ${Strings.socketUrl}");
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>
-    {
+    print("connection established $projectId ${Strings.socketUrl}");
+    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'query': {
@@ -198,13 +199,11 @@ class _CommentsContentState extends State<CommentsContent>
       }
     });
     _socket?.connect();
-    _socket?.onConnect((_) 
-    {
-    print('connect');
+    _socket?.onConnect((_) {
+      print('connect');
     });
     AppUtils.showprogress();
-    _socket?.on("connect", (_) 
-    {
+    _socket?.on("connect", (_) {
       print('Connected');
       print("Calling function");
       getComments();
@@ -303,8 +302,7 @@ class _CommentsContentState extends State<CommentsContent>
     if (Platform.isAndroid) {
       path = await ExtStorage.getExternalStoragePublicDirectory(
           ExtStorage.DIRECTORY_DOWNLOADS);
-    } else if (Platform.isIOS) 
-    {
+    } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
@@ -315,8 +313,8 @@ class _CommentsContentState extends State<CommentsContent>
         path = path.substring(0, path.length - 1);
       }
     }
-   // AppUtils.showprogress();
-   // AppUtils.showToast('Downloading');
+    // AppUtils.showprogress();
+    // AppUtils.showToast('Downloading');
 
     var filenames = serverURL.split("/");
     print("serverURL--> $serverURL");
@@ -329,8 +327,8 @@ class _CommentsContentState extends State<CommentsContent>
     setState(() {
       filepath = fullPath;
     });
-            var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
-   // var downloadedFile = await downloadFile(serverURL, fileName, path!);
+    var downloadedFile = await download2(dio, serverURL, '$path/$fileName');
+    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     print("downloaded file $downloadedFile");
     openFile(downloadedFile);
   }
@@ -370,12 +368,11 @@ class _CommentsContentState extends State<CommentsContent>
     return filePath;
   }
 
-  Future download2(Dio dio, String url, String savePath) async 
-  {
+  Future download2(Dio dio, String url, String savePath) async {
     try {
-          var  myUrl = Strings.baseImageUrl + url;
+      var myUrl = Strings.baseImageUrl + url;
       Response response = await dio.get(
-      myUrl,
+        myUrl,
         onReceiveProgress: showDownloadProgress,
         //Received data with List<int>
         options: Options(
@@ -385,7 +382,7 @@ class _CommentsContentState extends State<CommentsContent>
               return status! < 500;
             }),
       );
-      
+
       print(response.headers);
       File file = File(savePath);
       var raf = file.openSync(mode: FileMode.write);
@@ -407,20 +404,20 @@ class _CommentsContentState extends State<CommentsContent>
       return filePath;
     } catch (e) {
       AppUtils.dismissprogress();
-        var filePath = 'Error $e';
-        print(e);
-        return filePath;
+      var filePath = 'Error $e';
+      print(e);
+      return filePath;
     }
   }
+
   void showDownloadProgress(received, total) {
     if (total != -1) {
-     AppUtils.showprogresswithpercent(received / total);
+      AppUtils.showprogresswithpercent(received / total);
       print((received / total * 100).toStringAsFixed(0) + "%");
     }
   }
 
-  String getFileExtension(String fileName) 
-  {
+  String getFileExtension(String fileName) {
     var file = fileName.split(".");
     var fileExt = file[1];
     if (fileExt == "png" || fileExt == "PNG") {
@@ -478,403 +475,441 @@ class _CommentsContentState extends State<CommentsContent>
                 alignment: Alignment.centerLeft,
                 child: Text("Project: ${projectname ?? ""}",
                     style: TextStyle(
-                      fontSize: 16,
-                              color: Colors.black, fontWeight: FontWeight.w800)),
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w800)),
               )),
           Divider(),
           Strings.comments.length > 0
               ? Expanded(
-                child: ScrollablePositionedList.builder(
-                     shrinkWrap: true,
-                    //reverse: true,
-                    itemScrollController: itemScrollController,
-                    itemPositionsListener: itemPositionsListener,
-                    itemCount: Strings.comments.length,
-                    padding: EdgeInsets.all(20),
-                    itemBuilder: (BuildContext ctx, int index) {
-                      return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showMyDialog(
-                                          context,
-                                          Strings.baseImageUrl +
-                                              Strings
-                                                  .comments[index].userImg!);
-                                    },
-                                    child: CircleAvatar(
-                                      radius: 12,
-                                      backgroundImage: Strings
-                                                  .comments[index].userImg !=
-                                              null
-                                          ? NetworkImage(
-                                              Strings.baseImageUrl +
-                                                  (Strings.comments[index]
-                                                      .userImg!))
-                                          : AssetImage(
-                                                  "assets/icons/account.png")
-                                              as ImageProvider,
-                                      backgroundColor:
-                                          Colors.grey.withOpacity(0.3),
+                  child: ScrollablePositionedList.builder(
+                      shrinkWrap: true,
+                      //reverse: true,
+                      itemScrollController: itemScrollController,
+                      itemPositionsListener: itemPositionsListener,
+                      itemCount: Strings.comments.length,
+                      padding: EdgeInsets.all(5),
+                      itemBuilder: (BuildContext ctx, int index) {
+                        return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showMyDialog(
+                                            context,
+                                            Strings.baseImageUrl +
+                                                Strings
+                                                    .comments[index].userImg!);
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 12,
+                                        backgroundImage: Strings
+                                                    .comments[index].userImg !=
+                                                null
+                                            ? NetworkImage(
+                                                Strings.baseImageUrl +
+                                                    (Strings.comments[index]
+                                                        .userImg!))
+                                            : AssetImage(
+                                                    "assets/icons/account.png")
+                                                as ImageProvider,
+                                        backgroundColor:
+                                            Colors.grey.withOpacity(0.3),
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                              Strings.comments[index].name! +
-                                                  " . ",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight:
-                                                      FontWeight.w600)),
-                                          Container(
-                                            width: 18.0,
-                                            height: 18.0,
-                                            child: IconButton(
-                                              padding:
-                                                  new EdgeInsets.all(0.0),
-                                              color: Colors.grey,
-                                              icon: new Icon(Icons.update,
-                                                  size: 18.0),
-                                              onPressed: () {},
+                                    SizedBox(
+                                      width: 2,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                                Strings.comments[index].name! +
+                                                    " . ",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        FontWeight.w600)),
+                                            Container(
+                                              width: 18.0,
+                                              height: 18.0,
+                                              child: IconButton(
+                                                padding:
+                                                    new EdgeInsets.all(0.0),
+                                                color: Colors.grey,
+                                                icon: new Icon(Icons.update,
+                                                    size: 18.0),
+                                                onPressed: () {},
+                                              ),
                                             ),
+                                            SizedBox(
+                                              width: 1,
+                                            ),
+                                            Text(
+                                                calculateTimeDifferenceBetween(
+                                                    serverDate: Strings
+                                                        .comments[index].date),
+                                                style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontWeight:
+                                                        FontWeight.w500))
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 12,
+                                        ),
+
+                                        Container(
+                                          width: MediaQuery.of(context).size.width * 0.9,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text(Strings
+                                                        .comments[index].recipient
+                                                        ?.replaceAll('"', '') == "[]"?"":Strings
+                                                        .comments[index].recipient
+                                                        ?.replaceAll('"', '').replaceAll(',', ', ') ?? "",maxLines: 3),
+                                              ),
+                                              Text(Strings
+                                                              .comments[index].categoryList
+                                                              ?.replaceAll('"', '') == "[]"?"":Strings
+                                                              .comments[index].categoryList
+                                                              ?.replaceAll('"', '') ?? ""
+                                  ,maxLines: 3,overflow: TextOverflow.ellipsis,),
+                                            ],
                                           ),
-                                          SizedBox(
-                                            width: 1,
-                                          ),
-                                          Text(
-                                              calculateTimeDifferenceBetween(
-                                                  serverDate: Strings
-                                                      .comments[index].date),
-                                              style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontWeight:
-                                                      FontWeight.w500))
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 12,
-                                      ),
-                                      Container(
-                                        child: Text(Strings
-                                                .comments[index].recipient
-                                                ?.replaceAll('"', '') ??
-                                            ""),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Container(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(10),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                (Strings.comments[index]
-                                                                .audio ==
-                                                            "" ||
-                                                        Strings
-                                                                .comments[
-                                                                    index]
-                                                                .audio ==
-                                                            null)
-                                                    ? Text(
-                                                        Strings
-                                                            .comments[index]
-                                                            .comment
-                                                            .toString(),
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors
-                                                                    .black45,
-                                                                14.0,
-                                                                FontWeight
-                                                                    .w400))
-                                                    : (Strings.comments[index]
-                                                            .audio!
-                                                            .contains(".wav"))
-                                                        ? Row(
-                                                            children: [
-                                                              isPlaying ==
-                                                                      false
-                                                                  ? GestureDetector(
-                                                                      onTap:
-                                                                          () {
-                                                                        setState(
-                                                                            () {
-                                                                          if (isPlaying ==
-                                                                              true) {
-                                                                            stopAudio();
-                                                                            _timer = new Timer(const Duration(milliseconds: 500), () {
-                                                                              setState(() {
-                                                                                isPlaying = true;
-                                                                                playingIndex = index;
-                                                                                playAudio(Strings.comments[index].audio);
-                                                                              });
-                                                                            });
-                                                                          } else {
-                                                                            isPlaying = true;
-                                                                            playingIndex = index;
-                                                                            playAudio(Strings.comments[index].audio);
-                                                                          }
-                                                                        });
-                                                                      },
-                                                                      child: new Icon(
-                                                                          Icons
-                                                                              .play_arrow,
-                                                                          size:
-                                                                              28.0),
-                                                                    )
-                                                                  : playingIndex ==
-                                                                          index
-                                                                      ? GestureDetector(
-                                                                          onTap:
-                                                                              () {
-                                                                            setState(() {
-                                                                              isPlaying = false;
-                                                                            });
-              
-                                                                            stopAudio();
-                                                                          },
-                                                                          child:
-                                                                              new Icon(Icons.stop, size: 28.0),
-                                                                        )
-                                                                      : GestureDetector(
-                                                                          onTap:
-                                                                              () {
-                                                                            setState(() {
-                                                                              if (isPlaying == true) {
-                                                                                stopAudio();
-                                                                                _timer = new Timer(const Duration(milliseconds: 500), () {
-                                                                                  setState(() {
+                                        ),
+                                        SizedBox(height: 10),
+                                        Container(
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(10),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment.start,
+                                                      children: [
+                                                        (Strings.comments[index]
+                                                                        .audio ==
+                                                                    "" ||
+                                                                Strings
+                                                                        .comments[
+                                                                            index]
+                                                                        .audio ==
+                                                                    null)
+                                                            ? Text(
+                                                                Strings
+                                                                    .comments[index]
+                                                                    .comment
+                                                                    .toString(),
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        Colors
+                                                                            .black45,
+                                                                        14.0,
+                                                                        FontWeight
+                                                                            .w400))
+                                                            : (Strings.comments[index]
+                                                                    .audio!
+                                                                    .contains(".wav"))
+                                                                ? Row(
+                                                                    children: [
+                                                                      isPlaying ==
+                                                                              false
+                                                                          ? GestureDetector(
+                                                                              onTap:
+                                                                                  () {
+                                                                                setState(
+                                                                                    () {
+                                                                                  if (isPlaying ==
+                                                                                      true) {
+                                                                                    stopAudio();
+                                                                                    _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                      setState(() {
+                                                                                        isPlaying = true;
+                                                                                        playingIndex = index;
+                                                                                        playAudio(Strings.comments[index].audio);
+                                                                                      });
+                                                                                    });
+                                                                                  } else {
                                                                                     isPlaying = true;
                                                                                     playingIndex = index;
                                                                                     playAudio(Strings.comments[index].audio);
-                                                                                  });
+                                                                                  }
                                                                                 });
-                                                                              } else {
-                                                                                isPlaying = true;
-                                                                                playingIndex = index;
-                                                                                playAudio(Strings.comments[index].audio);
-                                                                              }
-                                                                            });
-                                                                          },
-                                                                          child:
-                                                                              new Icon(Icons.play_arrow, size: 28.0),
-                                                                        ),
-                                                              SizedBox(
-                                                                width: 10,
-                                                              ),
-                                                              Slider(
-                                                                value: playingIndex ==
-                                                                        index
-                                                                    ? audioCurrentlenth
-                                                                        .toDouble()
-                                                                    : 0,
-                                                                min: 0,
-                                                                max: playingIndex ==
-                                                                        index
-                                                                    ? audioLength
-                                                                        .toDouble()
-                                                                    : 0,
-                                                                onChanged:
-                                                                    (double
-                                                                        value) {
-                                                                  setState(
-                                                                      () {
-                                                                    playingIndex ==
-                                                                            index
-                                                                        ? audioCurrentlenth =
-                                                                            value.toInt()
-                                                                        : 0;
-                                                                    // _currentSliderValue = value;
-                                                                  });
-                                                                },
-                                                              ),
-                                                            ],
-                                                          )
-                                                        : InkWell(
-                                                            onTap: () {
-                                                              _downloadfile(
-                                                                  Strings
-                                                                      .comments[
-                                                                          index]
-                                                                      .audio,
-                                                                  Strings
-                                                                      .comments[
-                                                                          index]
-                                                                      .commentId
-                                                                      .toString());
-                                                            },
-                                                            child: Row(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Stack(
-                                                                    children: [
-                                                                      Container(
-                                                                        decoration:
-                                                                            BoxDecoration(
-                                                                          color:
-                                                                              Colors.grey.withOpacity(0.1),
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(10),
-                                                                        ),
-                                                                        padding:
-                                                                            EdgeInsets.all(10),
-                                                                        child:
-                                                                            Image.asset(
-                                                                          docImg[index],
-                                                                          width:
-                                                                              80,
-                                                                          height:
-                                                                              80,
-                                                                        ),
+                                                                              },
+                                                                              child: new Icon(
+                                                                                  Icons
+                                                                                      .play_arrow,
+                                                                                  size:
+                                                                                      28.0),
+                                                                            )
+                                                                          : playingIndex ==
+                                                                                  index
+                                                                              ? GestureDetector(
+                                                                                  onTap:
+                                                                                      () {
+                                                                                    setState(() {
+                                                                                      isPlaying = false;
+                                                                                    });
+
+                                                                                    stopAudio();
+                                                                                  },
+                                                                                  child:
+                                                                                      new Icon(Icons.stop, size: 28.0),
+                                                                                )
+                                                                              : GestureDetector(
+                                                                                  onTap:
+                                                                                      () {
+                                                                                    setState(() {
+                                                                                      if (isPlaying == true) {
+                                                                                        stopAudio();
+                                                                                        _timer = new Timer(const Duration(milliseconds: 500), () {
+                                                                                          setState(() {
+                                                                                            isPlaying = true;
+                                                                                            playingIndex = index;
+                                                                                            playAudio(Strings.comments[index].audio);
+                                                                                          });
+                                                                                        });
+                                                                                      } else {
+                                                                                        isPlaying = true;
+                                                                                        playingIndex = index;
+                                                                                        playAudio(Strings.comments[index].audio);
+                                                                                      }
+                                                                                    });
+                                                                                  },
+                                                                                  child:
+                                                                                      new Icon(Icons.play_arrow, size: 28.0),
+                                                                                ),
+                                                                      SizedBox(
+                                                                        width: 10,
                                                                       ),
-                                                                      Positioned(
-                                                                        top:
-                                                                            20,
-                                                                        left:
-                                                                            40,
-                                                                        child: Container(
-                                                                            child: Icon(
-                                                                          Icons.download_rounded,
-                                                                          size:
-                                                                              20.0,
-                                                                        )),
+                                                                      Slider(
+                                                                        value: playingIndex ==
+                                                                                index
+                                                                            ? audioCurrentlenth
+                                                                                .toDouble()
+                                                                            : 0,
+                                                                        min: 0,
+                                                                        max: playingIndex ==
+                                                                                index
+                                                                            ? audioLength
+                                                                                .toDouble()
+                                                                            : 0,
+                                                                        onChanged:
+                                                                            (double
+                                                                                value) {
+                                                                          setState(
+                                                                              () {
+                                                                            playingIndex ==
+                                                                                    index
+                                                                                ? audioCurrentlenth =
+                                                                                    value.toInt()
+                                                                                : 0;
+                                                                            // _currentSliderValue = value;
+                                                                          });
+                                                                        },
                                                                       ),
-                                                                    ]),
-                                                                SizedBox(
-                                                                  width: 10,
-                                                                ),
-                                                                Expanded(
-                                                                  child: Text(
-                                                                      Strings.comments[index].comment ==
-                                                                              "undefined"
-                                                                          ? ""
-                                                                          : Strings.comments[index].comment ??
-                                                                              "",
-                                                                      maxLines:
-                                                                          20,
-                                                                      style: Drawables.adddoccontentstyle(
-                                                                          Colors.black45,
-                                                                          14.0,
-                                                                          FontWeight.w400)),
-                                                                )
-                                                              ],
-                                                            ),
+                                                                    ],
+                                                                  )
+                                                                : InkWell(
+                                                                    onTap: () {
+                                                                      _downloadfile(
+                                                                          Strings
+                                                                              .comments[
+                                                                                  index]
+                                                                              .audio,
+                                                                          Strings
+                                                                              .comments[
+                                                                                  index]
+                                                                              .commentId
+                                                                              .toString());
+                                                                    },
+                                                                    child: Row(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Stack(
+                                                                            children: [
+                                                                              Container(
+                                                                                decoration:
+                                                                                    BoxDecoration(
+                                                                                  color:
+                                                                                      Colors.grey.withOpacity(0.1),
+                                                                                  borderRadius:
+                                                                                      BorderRadius.circular(10),
+                                                                                ),
+                                                                                padding:
+                                                                                    EdgeInsets.all(10),
+                                                                                child:
+                                                                                    Image.asset(
+                                                                                  docImg[index],
+                                                                                  width:
+                                                                                      80,
+                                                                                  height:
+                                                                                      80,
+                                                                                ),
+                                                                              ),
+                                                                              Positioned(
+                                                                                top:
+                                                                                    20,
+                                                                                left:
+                                                                                    40,
+                                                                                child: Container(
+                                                                                    child: Icon(
+                                                                                  Icons.download_rounded,
+                                                                                  size:
+                                                                                      20.0,
+                                                                                )),
+                                                                              ),
+                                                                            ]),
+                                                                        SizedBox(
+                                                                          width: 10,
+                                                                        ),
+                                                                        Expanded(
+                                                                          child: Text(
+                                                                              Strings.comments[index].comment ==
+                                                                                      "undefined"
+                                                                                  ? ""
+                                                                                  : Strings.comments[index].comment ??
+                                                                                      "",
+                                                                              maxLines:
+                                                                                  20,
+                                                                              style: Drawables.adddoccontentstyle(
+                                                                                  Colors.black45,
+                                                                                  14.0,
+                                                                                  FontWeight.w400)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                        SizedBox(
+                                                          height: 10,
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            Strings.category = false;
+                                                            Strings.selectedCommentsIndex =
+                                                                index;
+                                                            Navigator.pushNamed(
+                                                                context,
+                                                                '/projectCommentReplies');
+                                                          },
+                                                          child: Text(
+                                                            Strings.comments[index]
+                                                                    .replies!.length
+                                                                    .toString() +
+                                                                "  Replies",
+                                                            style: TextStyle(
+                                                                color:
+                                                                    Color(0xFF0061b0),
+                                                                fontWeight:
+                                                                    FontWeight.w600),
                                                           ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    Strings.category = false;
-                                                    Strings.selectedCommentsIndex =
-                                                        index;
-                                                    Navigator.pushNamed(
-                                                        context, '/projectCommentReplies');
-                                                  },
-                                                  child: Text(
-                                                    Strings.comments[index]
-                                                            .replies!.length
-                                                            .toString() +
-                                                        "  Replies",
-                                                    style: TextStyle(
-                                                        color:
-                                                            Color(0xFF0061b0),
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ),
-                                                )
-                                              ],
-                                            )),
-                                        width: MediaQuery.of(context)
-                                                .size
-                                                .width *
-                                            0.75,
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadiusDirectional
-                                                    .circular(10)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              MySeparator(
-                                color: Colors.grey[500]!,
-                              )
-                            ],
-                          ));
-                    }),
-              )
+                                                        )
+                                                      ],
+                                                    )),
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.75,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadiusDirectional
+                                                            .circular(10)),
+                                              ),
+                                              IconButton(onPressed: (){
+                                                  showDeleteDialog(context,Strings.comments[index].commentId);
+                                              }, icon: Icon(Icons.delete_rounded))
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                MySeparator(
+                                  color: Colors.grey[500]!,
+                                )
+                              ],
+                            ));
+                      }),
+                )
               : Spacer(),
           //Strings.comments.length > 0 ?Spacer():SizedBox(),
-          (tagedUsers.length > 0 || tagedCats.length > 0)?
-          Container(
-            color: Colors.white,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    tagedUsers.length > 0 ?
-                    Text("Tagged Users:",style: TextStyle(color: Colors.grey[800])):SizedBox(),
-                    Wrap(
-                      spacing: 2.0,
-                      children: List<Widget>.generate(
-                        tagedUsers.length,
-                        (int index) {
-                          return ChoiceChip(
-                            disabledColor: Colors.grey.withOpacity(0.2),
-                            label: Text(tagedUsers[index],style: TextStyle(color: Colors.black)),
-                            selected: false,
-                          );
-                        },
-                      ).toList(),
+          (tagedUsers.length > 0 || tagedCats.length > 0)
+              ? Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(18, 10, 0, 10),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            tagedUsers.length > 0
+                                ? Text("Tagged Users:",
+                                    style: TextStyle(color: Colors.grey[800]))
+                                : SizedBox(),
+                            Wrap(
+                              spacing: 2.0,
+                              children: List<Widget>.generate(
+                                tagedUsers.length,
+                                (int index) {
+                                  return ChoiceChip(
+                                    disabledColor: Colors.grey.withOpacity(0.2),
+                                    label: Text(tagedUsers[index],
+                                        style: TextStyle(color: Colors.black)),
+                                    selected: false,
+                                  );
+                                },
+                              ).toList(),
+                            ),
+                            tagedCats.length > 0
+                                ? Text("Tagged Categories:",
+                                    style: TextStyle(color: Colors.grey[800]))
+                                : SizedBox(),
+                            Wrap(
+                              spacing: 2.0,
+                              children: List<Widget>.generate(
+                                tagedCats.length,
+                                (int index) {
+                                  return ChoiceChip(
+                                    disabledColor: Colors.grey.withOpacity(0.2),
+                                    label: Text(
+                                      tagedCats[index],
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                    selected: false,
+                                  );
+                                },
+                              ).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    tagedCats.length > 0 ?
-                    Text("Tagged Categories:",style: TextStyle(color: Colors.grey[800])):SizedBox(),
-                    Wrap(
-                      spacing: 2.0,
-                      children: List<Widget>.generate(
-                        tagedCats.length,
-                        (int index) {
-                          return ChoiceChip(
-                            disabledColor: Colors.grey.withOpacity(0.2),
-                            label: Text(tagedCats[index],style: TextStyle(color: Colors.black),),
-                            selected: false,
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ):Container(),
+                  ),
+                )
+              : Container(),
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -911,179 +946,65 @@ class _CommentsContentState extends State<CommentsContent>
                 width: MediaQuery.of(context).size.width * 0.85,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
+                  child: 
+                  Container(
                     padding: EdgeInsets.only(left: 20),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(50)),
-                        color: Colors.white),
-                    child: Row(
-                      children: [
-                        InkWell(
-                            onTap: () {
-                              Strings.documentUploadfromProject = true;
-                              Navigator.pushNamed(context, '/adddocComments');
-                            },
-                            child: Icon(Icons.attach_file)),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.02,
+                        color: Colors.white
                         ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.56,
-                          child: TextField(
-                            controller: _msgcontroller,
-                            onChanged: (value) {
-                              if (value.length > 0) {
-                                setState(() {
-                                  typing = true;
-                                });
-                              } else {
-                                setState(() {
-                                  typing = false;
-                                });
-                              }
-                            },
-                            style: TextStyle(color: Colors.black),
-                            focusNode: msgField,
-                            decoration: InputDecoration(
-                                hintText: startRecording == true
-                                    ? elapsedTime
-                                    : "Type your comment..",
-                                hintStyle: TextStyle(color: Colors.grey[400]),
-                                border: InputBorder.none,
-                                prefixIcon: FadeTransition(
-                                  opacity: _animationController!,
-                                  child: startRecording == true
-                                      ? Icon(Icons.mic, color: Colors.red)
-                                      : SizedBox(
-                                          width: 0,
-                                        ),
-                                )),
-                          ),
-                        ),
-                        IconButton( onPressed:()
-                        {
-                           showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-
-            return  new ConstrainedBox(
-  constraints: new BoxConstraints(
-   
-  ),
-  child: Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(10,20,10,20),
-                        child: Expanded(
-                                          flex: 10,
-                                          child: MultiSelectDialogField<FetchMapedUsersData?>(
-                        items: _userIitems,
-                        title: Text("Tag Users"),
-                        selectedColor: Color(0xFF0061b0),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF0061b0).withOpacity(0.1),
-                          borderRadius: BorderRadius.all(Radius.circular(40)),
-                          border: Border.all(
-                            color: Color(0xFF0061b0),
-                            width: 2,
-                          ),
-                        ),
-                        buttonIcon: Icon(
-                          Icons.person,
-                          color: Color(0xFF0061b0),
-                        ),
-                        buttonText: Text(
-                          "Tag Users",
-                          style: TextStyle(
-                            color: Color(0xFF0061b0).withOpacity(0.5),
-                            fontSize: 16,
-                          ),
-                        ),
-                        onConfirm: (results) {
-                          if (results.length > 0) {
-                            setState(() {
-                              tagedUsers = [];
-                            tagedUsersId = [];
-                            results.forEach((element) {
-                              tagedUsers.add(element?.name);
-                              tagedUsersId.add(element?.userId);
-                            });
-                            });
-                            
-                          } else {
-                            tagedUsers = [];
-                            tagedUsersId = [];
-                          }
-                        },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      child: Row(
+                        children: [
+                          InkWell(
+                              onTap: () {
+                                Strings.documentUploadfromProject = true;
+                                Navigator.pushNamed(context, '/adddocComments');
+                              },
+                              child: Icon(Icons.attach_file)),
+                          new ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.5),
+                            child: TextField(
+                              controller: _msgcontroller,
+                              onChanged: (value) {
+                                if (value.length > 0) {
+                                  setState(() {
+                                    typing = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    typing = false;
+                                  });
+                                }
+                              },
+                              style: TextStyle(color: Colors.black),
+                              focusNode: msgField,
+                              decoration: InputDecoration(
+                                  hintText: startRecording == true
+                                      ? elapsedTime
+                                      : "Type your comment..",
+                                  hintStyle: TextStyle(color: Colors.grey[400]),
+                                  border: InputBorder.none,
+                                  prefixIcon: FadeTransition(
+                                    opacity: _animationController!,
+                                    child: startRecording == true
+                                        ? Icon(Icons.mic, color: Colors.red)
+                                        : SizedBox(
+                                            width: 0,
                                           ),
-                                        ),
-                      ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
-                    child: Expanded(
-                      flex: 10,
-                      child: MultiSelectDialogField<CatsData?>(
-                        items: _catsItems,
-                        title: Text("Tag Categories"),
-                        selectedColor: Color(0xFF0061b0),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF0061b0).withOpacity(0.1),
-                          borderRadius: BorderRadius.all(Radius.circular(40)),
-                          border: Border.all(
-                            color: Color(0xFF0061b0),
-                            width: 2,
+                                  )),
+                            ),
                           ),
-                        ),
-                        buttonIcon: Icon(
-                          Icons.category,
-                          color: Color(0xFF0061b0),
-                        ),
-                        buttonText: Text(
-                          "Tag Categories",
-                          style: TextStyle(
-                            color: Color(0xFF0061b0).withOpacity(0.5),
-                            fontSize: 16,
-                          ),
-                        ),
-                        onConfirm: (results) {
-                          if (results.length > 0) {
-                            setState(() {
-                              tagedCats = [];
-                            tagedCatsId = [];
-                            results.forEach((element) {
-                              tagedCats.add(element?.categoryName);
-                              tagedCatsId.add(element?.categoryId);
-                  
-                             
-                            });
-                            });
-                            results = [];
-                          } else {
-                            tagedCats = [];
-                            tagedCatsId = [];
-                          }
-                          //_selectedAnimals = results;
-                        },
+                          IconButton(
+                              onPressed: () {
+                                showTagBottomSheet();
+                              },
+                              icon: Icon(Icons.bookmarks_sharp))
+                        ],
                       ),
-                    ),
-                  ),
-                      ElevatedButton(
-                        child: const Text('Done'),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-);
-              
-            },
-          );
-        },icon: Icon(Icons.bookmarks_sharp))      
-                      ],
                     ),
                   ),
                 ),
@@ -1101,19 +1022,29 @@ class _CommentsContentState extends State<CommentsContent>
                         new BorderRadius.all(new Radius.circular(50.0))),
                 child: GestureDetector(
                   onLongPress: () {
-                    setState(() {
+                    setState(() async {
+                          var status = await Permission.microphone.status;
+                          if (status.isGranted) {
+
                       startRecording = true;
                       startOrStop();
                       recordComments();
+                          }else{
+                            AppUtils.showToastError("Please allow the Microphone Permission");
+                            getPermission();
+                          }
                     });
                   },
                   onLongPressEnd: (details) async {
                     // AppUtils.showToast(details.toString());
                     setState(() async {
+                          var status = await Permission.microphone.status;
+                          if (status.isGranted) {
                       startRecording = false;
                       startOrStop();
                       stopRecord();
                       sendAudio();
+                          }
                     });
                   },
                   onTap: () {
@@ -1151,11 +1082,11 @@ class _CommentsContentState extends State<CommentsContent>
     );
   }
 
-  getComments() async {
+  getComments() async 
+  {
     print("Getting comments");
-    _socket?.on("project-comments", (_data) {
-      print('fromServer');
-
+    _socket?.on("project-comments", (_data) 
+    {
       if (initialCommentCheck) 
       {
         log('fromServer comments $_data');
@@ -1174,9 +1105,7 @@ class _CommentsContentState extends State<CommentsContent>
           print("Comments fetched changing to false");
 
           _timer = new Timer(const Duration(milliseconds: 100), () async {
-         
-
-          itemScrollController.jumpTo(index: 0);
+            itemScrollController.jumpTo(index: 0);
 
             msgField.unfocus();
             // Strings.selectedProDocument[0].commentsCount =
@@ -1185,20 +1114,161 @@ class _CommentsContentState extends State<CommentsContent>
           //  });
         });
       }
-      setState(() 
-      {
+      setState(() {
         print(initialCommentCheck);
       });
     });
   }
 
-  recordComments() async {
+  showTagBottomSheet() 
+  {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) 
+      {
+        return new ConstrainedBox(
+          constraints: new BoxConstraints(),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                  child: MultiSelectDialogField<FetchMapedUsersData?>(
+                    initialValue: UserData,
+                    items: _userIitems,
+                    title: Text("Tag Users"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.person,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Users",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                   // onConfirm: (res) {},
+                    onConfirm: (results) {
+                      UserData = results;
+                      print("results ${jsonEncode(results) }");
+                      if (results.length > 0) 
+                      {
+                        setState(() {
+                          tagedUsers.clear();
+                          tagedUsersId.clear();
+                          results.forEach((element) {
+                            if(!tagedUsers.contains(element?.name))
+                            {
+                               tagedUsers.add(element?.name);
+                            }
+                            if(!tagedUsersId.contains(element?.userId))
+                            {
+                                tagedUsersId.add(element?.userId);
+                            }
+                          });
+                        });
+                      } else {
+                        tagedUsers = [];
+                        tagedUsersId = [];
+                      }
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                  child: MultiSelectDialogField<CatsData?>(
+                    initialValue: CatData,
+                    items: _catsItems,
+                    title: Text("Tag Categories"),
+                    selectedColor: Color(0xFF0061b0),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0061b0).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: Color(0xFF0061b0),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.category,
+                      color: Color(0xFF0061b0),
+                    ),
+                    buttonText: Text(
+                      "Tag Categories",
+                      style: TextStyle(
+                        color: Color(0xFF0061b0).withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                    ),
+                    // onConfirm: (res) {},
+                    onConfirm: (results) {
+                      if (results.length > 0) {
+                        setState(() {
+                          tagedCats = [];
+                          tagedCatsId = [];
+                          CatData = results;
+                          results.forEach((element) {
+
+                            if(!tagedCats.contains(element?.categoryName))
+                            {
+                                tagedCats.add(element?.categoryName);
+                            }
+                            if(!tagedCatsId.contains(element?.categoryId))
+                            {
+                                tagedCatsId.add(element?.categoryId);
+                            }
+                          });
+                        });
+                        results = [];
+                      } else {
+                        tagedCats = [];
+                        tagedCatsId = [];
+                      }
+                      //_selectedAnimals = results;
+                    },
+                  ),
+                ),
+                ElevatedButton(
+                  child: const Text('Done'),
+                  onPressed: () {
+                    Navigator.pop(context);
+
+                    setState(() {
+                      
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  recordComments() async 
+  {
     var path;
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid) 
+    {
+//       Directory tempDir = await getTemporaryDirectory();
+// path = tempDir.path;
       path = await ExtStorage.getExternalStoragePublicDirectory(
           ExtStorage.DIRECTORY_DOWNLOADS);
-    } else if (Platform.isIOS) 
-    {
+    } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
@@ -1213,9 +1283,14 @@ class _CommentsContentState extends State<CommentsContent>
     if (!status.isGranted) {
       getPermission();
     } else {
-      print("path ${path}");
+       String filePath = path +
+          '/' +
+          "${uniqueRecordId}_mta12" +
+          '.m4a';
+
+          print("tteyyyy $filePath");
       await _audioRecorder.start(
-        path: path! + "/MTARecordedAudio.m4a",
+        path: filePath,
         encoder: AudioEncoder.aacLc,
       );
     }
@@ -1259,8 +1334,7 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  stopAudio() async 
-  {
+  stopAudio() async {
     await audioPlayer.stop();
     setState(() {
       audioLength = 0;
@@ -1270,7 +1344,8 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  getDocuments() async {
+  getDocuments() async 
+  {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       PlatformFile file = result.files.first;
@@ -1297,11 +1372,12 @@ class _CommentsContentState extends State<CommentsContent>
     AppUtils.showprogress();
     var path;
 
-     if (Platform.isAndroid) {
+    if (Platform.isAndroid) {
+//       Directory tempDir = await getTemporaryDirectory();
+// path = tempDir.path;
       path = await ExtStorage.getExternalStoragePublicDirectory(
           ExtStorage.DIRECTORY_DOWNLOADS);
-    } else if (Platform.isIOS) 
-    {
+    } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
@@ -1312,9 +1388,12 @@ class _CommentsContentState extends State<CommentsContent>
         path = path.substring(0, path.length - 1);
       }
     }
-
+   String filePath = path+
+          '/' +
+          "${uniqueRecordId}_mta12" +
+          '.m4a';
     final bytesData =
-        await Io.File(path! + "/MTARecordedAudio.m4a").readAsBytes();
+        await Io.File(filePath).readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
     String base64Encode = base64Encodes(bytesData);
     final api = Provider.of<ApiService>(context, listen: false);
@@ -1325,7 +1404,7 @@ class _CommentsContentState extends State<CommentsContent>
 
     req.categoryIdList = json.encode(tagedCatsId);
     req.categoryList = json.encode(tagedCats);
-   
+
     req.documentId = projectId;
     req.recipientId =
         json.encode(tagedUsers).replaceAll("'", "\'").replaceAll('"', "\'");
@@ -1336,19 +1415,27 @@ class _CommentsContentState extends State<CommentsContent>
     var dat = jsonEncode(req);
     print("Printing data -- > $dat");
     log("data--> $dat");
-   
+
     api.uploadAudio(req).then((response) {
       AppUtils.dismissprogress();
-      if (response.status!) 
-      {
+      if (response.status!) {
         AppUtils.showToastSuccess("Audio sent successfully");
+         CatData.clear();
+        UserData.clear();
+        tagedCats.clear();
+        tagedCatsId.clear();
+        tagedUsers.clear();
+        tagedUsersId.clear();
         _socket?.disconnect();
         _socket?.connect();
-        _socket?.on("connect", (_) 
-        {
+        _socket?.on("connect", (_) {
           print('Connected');
           initialCommentCheck = true;
           getComments();
+
+          
+
+
           // if (Strings.category == true) {
           //   Strings.selectedCatDocument[0].commentsCount =
           //       Strings.selectedCatDocument[0].commentsCount! + "1";
@@ -1357,12 +1444,10 @@ class _CommentsContentState extends State<CommentsContent>
           //       Strings.selectedProDocument[0].commentsCount! + "1";
           // }
 
-         
           _msgcontroller.text = '';
           typing = false;
-         
+
           msgField.unfocus();
-         
         });
       } else {
         AppUtils.showToastErrorTop(response.message!);
@@ -1373,12 +1458,14 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  postComments() async {
+  postComments() async 
+  {
     // print(json.encode(tagedUsersId.toString()));
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
-    } else {
-      print("projectid $projectId");
+    } else 
+    {
+      print("catsssss ${tagedCats}");
       _socket?.emit(
           'create-project-comment',
           json.encode({
@@ -1408,6 +1495,12 @@ class _CommentsContentState extends State<CommentsContent>
       // tagedUsersId = [];
       // tagedCats = [];
       // tagedCatsId = [];
+     CatData.clear();
+        UserData.clear();
+        tagedCats.clear();
+        tagedCatsId.clear();
+        tagedUsers.clear();
+        tagedUsersId.clear();
       _msgcontroller.text = '';
       typing = false;
 
@@ -1559,6 +1652,72 @@ class _CommentsContentState extends State<CommentsContent>
       docImg.add(getFileExt(Strings.comments[i].audio ?? "test.mpg"));
     }
   }
+  Future<bool> showDeleteDialog(ctx,commentId) async 
+  {
+    return await showDialog(
+          context: ctx,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Delete ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Are you sure to delete the Comment?',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                   final api = Provider.of<ApiService>(context, listen: false);
+                   Navigator.of(context).pop(false);
+                   AppUtils.showprogress();
+    api.removeComment(commentId).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+        AppUtils.showToastSuccess("Comment deleted successfully");
+        _socket?.disconnect();
+        _socket?.connect();
+        _socket?.on("connect", (_) {
+          print('Connected');
+          initialCommentCheck = true;
+          getComments();
+        });
+      } else {
+        print("delete failed");
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+                },
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        );
+  }
 }
 
 class MySeparator extends StatelessWidget {
@@ -1593,8 +1752,7 @@ class MySeparator extends StatelessWidget {
   }
 }
 
-Future<void> _showMyDialog(context, imgurl) async 
-{
+Future<void> _showMyDialog(context, imgurl) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
@@ -1629,14 +1787,19 @@ Future<void> _showMyDialog(context, imgurl) async
   );
 }
 
+
 void getPermission() async {
   var status = await Permission.microphone.status;
-  if (status.isDenied) {
+  print("srtatus $status");
+  if (status.isDenied) 
+  {
     await Permission.microphone.request();
-  } else if (status.isPermanentlyDenied) {
+  } else if (status.isPermanentlyDenied) 
+  {
     AppUtils.showToastError(
         "Please enable Microphone from App permission Settings");
-  } else {
+  } else 
+  {
     await Permission.microphone.request();
   }
 }

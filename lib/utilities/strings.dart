@@ -21,11 +21,138 @@ mixin Strings
   //static String socketUrl = 'https://demo.emeetify.com:6253/';
 
   static String socketUrl = 'https://mta.multitechcorp.in:5022/';
- // static String socketUrl = 'http://192.168.0.133:5021/';
+ // static String socketUrl = 'http://192.168.0.117:5021/';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   //static String imageUrl = 'https://demo.emeetify.com:5016/';
   static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
 
   static bool documentUploadfromProject = false;
+  static bool internetDialog = false;
 
   static String? profilePic;
   static int? projectId;

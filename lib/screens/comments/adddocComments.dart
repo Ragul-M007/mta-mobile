@@ -396,7 +396,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
   void submit() {
     if (docTitle.text.trim() == "" ||
         docTitle.text == null ||
-        docTitle.text == "null") {
+        docTitle.text == "null" || file64 == '') {
       AppUtils.showToastError("Please select Document");
     } else {
       AppUtils.showprogress();
@@ -422,12 +422,12 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
       }
 
       AudioReq req = AudioReq();
-      print("taggedID--> ${tagedCatsId.length}");
+      print("taggedID--> ${json.encode(tagedCats)}");
 
       //req.audio = "data:audio/wav;base64," + base64Encode;
 
-      req.categoryIdList = json.encode(tagedCatsId);
-      req.categoryList = json.encode(tagedCats);
+     req.categoryIdList = json.encode(tagedCatsId);
+     req.categoryList = json.encode(tagedCats);
 
      if(!Strings.documentUploadfromProject) 
      {
@@ -468,7 +468,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
           // setState(() {});
           AppUtils.showToastSuccess("Document uploaded successfully");
 
-          if(Strings.documentUploadfromProject)
+          if(!Strings.documentUploadfromProject)
           {
             if (fromReplies) {
             Navigator.pushReplacementNamed(context, '/replies');
@@ -476,7 +476,8 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
                 Navigator.pushReplacementNamed(context, '/comments');
               }
           }
-          else{
+          else
+          {
             if (fromReplies) {
             Navigator.pushReplacementNamed(context, '/projectCommentReplies');
               } else {
