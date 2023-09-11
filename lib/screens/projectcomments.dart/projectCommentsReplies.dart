@@ -163,9 +163,12 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
     });
     _socket?.connect();
     _socket?.on("connect", (_) {
-      print('Connected');
+      print('Connected init');
       getReplies();
     });
+    
+      _socket?.onDisconnect((_) => print('Connected dis'));
+
   }
 
    updateNotification(notificationId) {
@@ -464,7 +467,6 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
         _socket?.disconnect();
         _socket?.connect();
         _socket?.on("connect", (_) {
-          print('Connected');
           initialCommentCheck = true;
           getReplies();
         });
@@ -734,9 +736,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                   )
                 ],
               )),
-          Strings.comments[Strings.selectedCommentsIndex].replies!.length > 0 &&
-                  Strings.comments[Strings.selectedCommentsIndex].replies !=
-                      null
+          Strings.comments[Strings.selectedCommentsIndex].replies!.length > 0 
               ? Expanded(
                   child: ScrollablePositionedList.builder(
                       //shrinkWrap: true,
@@ -1107,10 +1107,11 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                                                         BorderRadiusDirectional
                                                             .circular(10)),
                                               ),
+                                              Strings.userID == Strings.comments[Strings.selectedCommentsIndex].replies![index].commentUserId ?
                                               IconButton(onPressed: ()
                                               {
                                                 showDeleteDialog(context,Strings.comments[Strings.selectedCommentsIndex].replies![index].commentId);
-                                              }, icon: Icon(Icons.delete))
+                                              }, icon: Icon(Icons.delete)):SizedBox()
                                             ],
                                           ),
                                         ),
@@ -1483,33 +1484,34 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
     _socket?.on("project-comments", (_data) 
     {
       log('fromServer $_data');
+      print("initial check ${initialCommentCheck}");
       if (initialCommentCheck) 
       {
+        print("dataaa $_data");
         print("validation passed");
-        setState(()  {
           Strings.comments = [];
-          for (var item in _data) {
+          for (var item in _data) 
+          {
             Strings.comments.add(CommentsRes.fromJson(item));
           }
           if(Strings.fromNotificationComments || Strings.fromNotificationReply)
           {
               getIndex();
           }
+          print("chnaging initaial value to false");
           initialCommentCheck = false;
-          itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsIndex]
+
+          print("length  ${Strings.comments[Strings.selectedCommentsIndex]
+                          .replies?.length}");
+          if(Strings.comments[Strings.selectedCommentsIndex]
+                          .replies!.length > 1)
+                          {
+itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsIndex]
                           .replies!.length);
                       msgField.unfocus();
-
-  //         _timer = new Timer(const Duration(milliseconds: 100), () 
-  //         {
-  // //              itemScrollController.scrollTo(
-  // // index: Strings.comments[Strings.selectedCommentsIndex]
-  // //                         .replies!.length,
-  // // duration: Duration(seconds: 1),
-  // // curve: Curves.easeInOutCubic);
-  
-           
-  //         });
+                          }
+        setState(() {
+          print("val");
         });
       }
     });
@@ -1652,22 +1654,19 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
         tagedCatsId.clear();
         tagedUsers.clear();
         tagedUsersId.clear();
+                    initialCommentCheck = true;
          AppUtils.showToastSuccess("Audio sent successfully");
           CatData.clear();
           _socket?.on("connect", (_) {
-            print('Connected');
-            initialCommentCheck = true;
-                     
-       
             getReplies();
 
-          if (Strings.categoriesforReply == true) {
-            Strings.selectedCatDocument[0].commentsCount =
-                Strings.selectedCatDocument[0].commentsCount! + "1";
-          } else {
-            Strings.selectedProDocument[0].commentsCount =
-                Strings.selectedProDocument[0].commentsCount! + "1";
-          }
+          // if (Strings.categoriesforReply == true) {
+          //   Strings.selectedCatDocument[0].commentsCount =
+          //       Strings.selectedCatDocument[0].commentsCount! + "1";
+          // } else {
+          //   Strings.selectedProDocument[0].commentsCount =
+          //       Strings.selectedProDocument[0].commentsCount! + "1";
+          // }
           // tagedUsers = [];
           // tagedUsersId = [];
           // tagedCats = [];
@@ -1703,7 +1702,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
       AppUtils.showToastError("Please Enter Comments");
     } else 
     {
-      _socket?.emit(
+      _socket?.emitWithAck(
           'create-project-comment',
           json.encode(
             {
@@ -1719,8 +1718,17 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                 Strings.comments[Strings.selectedCommentsIndex].commentId,
             "user_id": Strings.userID
 
-          }));
+          }),ack: (datal)
+          {
+                print('ack $datal') ;
+            if (datal != null) {
+              print('from server $datal');
+            } else {
+              print("Null") ;
+            }
+          });  
           AppUtils.showToastSuccess("Comment sent successfully");
+          initialCommentCheck = true;
 
       // print(tagedUsers);
       // print(tagedCatsId);
@@ -1736,7 +1744,9 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
         // tagedUsersId = [];
         // tagedCats = [];
         // tagedCatsId = [];
-        _msgcontroller.text = '';
+
+        setState(() {
+         _msgcontroller.text = '';
         typing = false;
         // if (showscroll != true) {
         // _scrollController.animateTo(
@@ -1754,13 +1764,10 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
         tagedUsers.clear();
         tagedUsersId.clear();
 
-         _socket?.disconnect();
-        _socket?.connect();
-        _socket?.on("connect", (_) {
-          print('Connected');
-          initialCommentCheck = true;
-          getReplies();
+         
+         // getReplies();
         });
+       
 
         // } else {
         //   showscroll = false;

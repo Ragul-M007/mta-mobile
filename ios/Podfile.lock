@@ -6,9 +6,6 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
-  - connectivity_plus (0.0.1):
-    - Flutter
-    - ReachabilitySwift
   - DKImagePickerController/Core (4.3.4):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
@@ -133,7 +130,6 @@ PODS:
     - Flutter
   - PromisesObjC (2.1.1)
   - Reachability (3.2)
-  - ReachabilitySwift (5.0.0)
   - record (0.0.1):
     - Flutter
   - SDWebImage (5.13.4):
@@ -157,7 +153,6 @@ DEPENDENCIES:
   - advance_pdf_viewer_fork (from `.symlinks/plugins/advance_pdf_viewer_fork/ios`)
   - audioplayers (from `.symlinks/plugins/audioplayers/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - ext_storage (from `.symlinks/plugins/ext_storage/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -195,7 +190,6 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - Reachability
-    - ReachabilitySwift
     - SDWebImage
     - SwiftyGif
     - Toast
@@ -207,8 +201,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/audioplayers/ios"
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
-  connectivity_plus:
-    :path: ".symlinks/plugins/connectivity_plus/ios"
   ext_storage:
     :path: ".symlinks/plugins/ext_storage/ios"
   file_picker:
@@ -256,7 +248,6 @@ SPEC CHECKSUMS:
   advance_pdf_viewer_fork: 7364d9c1ea71ec070d35b78d4341eadbabe84549
   audioplayers: 455322b54050b30ea4b1af7cd9e9d105f74efa8c
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
-  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   ext_storage: 4eaf3a84d5594106e2ebcc2502248cfde53c8fa1
@@ -285,7 +276,6 @@ SPEC CHECKSUMS:
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   record: cae05d8dd3cdb1dea3511b20e5a5811a1ae00d0d
   SDWebImage: e5cc87bf736e60f49592f307bdf9e157189298a3
   shared_preferences_ios: aef470a42dc4675a1cdd50e3158b42e3d1232b32

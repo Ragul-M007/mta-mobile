@@ -49,7 +49,7 @@ part 'ApiService.g.dart';
  // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
   @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
-  // @RestApi(baseUrl: "http://192.168.0.117:5777/mta")
+ //  @RestApi(baseUrl: "http://192.168.0.134:5777/mta")
 
 
 abstract class ApiService 

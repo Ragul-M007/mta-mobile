@@ -832,9 +832,11 @@ class _CommentsContentState extends State<CommentsContent>
                                                         BorderRadiusDirectional
                                                             .circular(10)),
                                               ),
+
+                                              Strings.userID == Strings.comments[index].commentUserId ?
                                               IconButton(onPressed: (){
                                                   showDeleteDialog(context,Strings.comments[index].commentId);
-                                              }, icon: Icon(Icons.delete_rounded))
+                                              }, icon: Icon(Icons.delete_rounded)):SizedBox()
                                             ],
                                           ),
                                         ),
@@ -1090,7 +1092,8 @@ class _CommentsContentState extends State<CommentsContent>
       if (initialCommentCheck) 
       {
         log('fromServer comments $_data');
-        setState(() {
+        setState(() 
+        {
           print("Dta chacek--> $initialCommentCheck");
           print("getting inside");
           msgField.unfocus();

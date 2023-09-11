@@ -664,9 +664,7 @@ showDialog(
               else
               {
                   _onWillPop("IN");
-              }
-
-                
+              }  
               }
             },
             child: Container(
@@ -687,12 +685,76 @@ showDialog(
               child: GestureDetector(
             onTap: () {
               //checkInOut("OUT");
-              if (location == '' || location == null) {
+              if (location == '' || location == null) 
+              {
                 AppUtils.showToastErrorTop(
                     "Unable to find your location, Please tap refersh icon to get your location");
               } else 
-              {               
-                 _onWillPop("OUT");
+              { 
+
+                if(_attendance.length == 0)
+                {
+Widget okButton = TextButton(
+                      child: Text("OK"),
+                      onPressed: () { 
+                        Navigator.pop(context);
+                      },
+                      );
+
+                    AlertDialog alert = AlertDialog(
+                    title: Text("You haven't Checked In",style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600)),
+                    content: Text("You were not allowed to checked out, since you are not checkedin."),
+                    actions: [
+                      okButton,
+                    ],
+                    );
+
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                    return alert;
+                      },
+                    );
+                }
+                else
+                {
+var lastSignIn = _attendance.last;
+                print("last ${_attendance.last}");
+                if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
+                  {
+                 _onWillPop("OUT"); 
+                }
+                else
+                {
+                     Widget okButton = TextButton(
+                      child: Text("OK"),
+                      onPressed: () { 
+                        Navigator.pop(context);
+                      },
+                      );
+
+                    AlertDialog alert = AlertDialog(
+                    title: Text("You haven't Checked In",style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600)),
+                    content: Text("You were not allowed to checked out, since you are not checkedin."),
+                    actions: [
+                      okButton,
+                    ],
+                    );
+
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                    return alert;
+                      },
+                    );
+                }   
+                }               
               }
             },
             child: Container(

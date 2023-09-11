@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
@@ -60,10 +61,12 @@ class SplashScreenContent extends StatefulWidget {
 
 class _SplashScreenContentState extends State<SplashScreenContent> {
   Timer? timer;
+  
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   @override
   void initState() {
     super.initState();
+ 
 
     _firebaseMessaging.subscribeToTopic("messaging");
     _firebaseMessaging.getToken().then((value) {
@@ -74,7 +77,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     getusername();
     getuserid();
     requestNotificationPermissions();
-    getConnectivity();
+   // getConnectivity();
   }
 
   Future<void> requestNotificationPermissions() async {

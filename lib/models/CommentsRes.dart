@@ -32,6 +32,7 @@ class CommentsRes {
       this.replies});
 
   CommentsRes.fromJson(Map<String, dynamic> json) {
+    commentUserId = json['comment_user_id'];
     status = json['status'];
     commentId = json['comment_id'];
     parentCommentId = json['parent_comment_id'];
@@ -55,6 +56,7 @@ class CommentsRes {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
+    data['comment_user_id'] = this.commentUserId;
     data['comment_id'] = this.commentId;
     data['parent_comment_id'] = this.parentCommentId;
     data['comment'] = this.comment;
@@ -74,6 +76,7 @@ class CommentsRes {
 }
 
 class Replies {
+  int? commentUserId;
   String? date;
   String? comment;
   String? audio;
@@ -88,6 +91,7 @@ class Replies {
 
   Replies(
       {this.date,
+      this.commentUserId,
       this.comment,
       this.audio,
       this.userImg,
@@ -101,6 +105,7 @@ class Replies {
 
   Replies.fromJson(Map<String, dynamic> json) {
     date = json['date'];
+    commentUserId = json['comment_user_id'];
     comment = json['comment'];
     audio = json['audio'];
     userImg = json['user_img'];
@@ -115,6 +120,7 @@ class Replies {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['comment_user_id'] = this.commentUserId;
     data['date'] = this.date;
     data['comment'] = this.comment;
     data['audio'] = this.audio;
