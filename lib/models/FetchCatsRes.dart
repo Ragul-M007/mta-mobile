@@ -39,7 +39,7 @@ class FectchCatsData {
       {this.categoryId, this.categoryName, this.description, this.projectId,this.documentCounts,this.userCount});
 
   FectchCatsData.fromJson(Map<String, dynamic> json) {
-    categoryId = json['category_id'];
+    categoryId = json['category_id'].runtimeType == int?json['category_id']: int.parse(json['category_id']) ;
     categoryName = json['category_name'];
     description = json['description'];
     projectId = json['project_id'];

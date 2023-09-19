@@ -69,7 +69,7 @@ class ProjectDocData {
   ProjectDocData.fromJson(Map<String, dynamic> json) 
   {
     projectComments = json['project_comments'];
-    categoryId = json['category_id'];
+    categoryId = json['category_id'].toString();
     categoryName = json['category_name'];
     projectName = json['project_name'];
     commentId = json["parent_comment_id"];

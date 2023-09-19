@@ -510,12 +510,22 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                         child: Row(
                                           children: [
                                             Expanded(
-                                                child: Text(
-                                                    _searchLists[index].teamName!,
-                                                    style: Drawables.adddoccontentstyle(
-                                                        Colors.black87,
-                                                        14.0,
-                                                        FontWeight.w500))),
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                        _searchLists[index].teamName!,
+                                                        style: Drawables.adddoccontentstyle(
+                                                            Colors.black87,
+                                                            14.0,
+                                                            FontWeight.w500)),
+                                                            Text(
+                                                        _searchLists[index].description!,
+                                                        style: Drawables.adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w300))
+                                                  ],
+                                                )),
                                             Icon(
                                               Icons.arrow_forward_ios,
                                               color: Colors.grey,
@@ -558,16 +568,27 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                   },
                                   child: Container(
                                     child: Padding(
-                                        padding: EdgeInsets.all(20),
+                                        padding: EdgeInsets.all(14),
                                         child: Row(
                                           children: [
                                             Expanded(
-                                                child: Text(
-                                                    _teamLists[index].teamName!,
-                                                    style: Drawables.adddoccontentstyle(
-                                                        Colors.black87,
-                                                        14.0,
-                                                        FontWeight.w500))),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        _teamLists[index].teamName!,
+                                                        style: Drawables.adddoccontentstyle(
+                                                            Colors.black87,
+                                                            14.0,
+                                                            FontWeight.w500)),
+                                                            Text(
+                                                        _teamLists[index].description!,
+                                                        style: Drawables.adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w300))
+                                                  ],
+                                                )),
                                             Icon(
                                               Icons.arrow_forward_ios,
                                               color: Colors.grey,
