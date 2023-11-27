@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/EditProfileReq.dart';
-import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/network/ApiService.dart';
@@ -18,10 +17,6 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
-import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
-import 'package:pin_input_text_field/pin_input_text_field.dart';
-import 'package:sms_autofill/sms_autofill.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:io' as Io;

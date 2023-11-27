@@ -4,7 +4,6 @@ import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
-import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/others/pdfviewer.dart';
@@ -16,8 +15,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
 import '../../models/FetchCatsRes.dart';
-import '../comments/comments.dart';
-import '../doucument/viewdoclist.dart';
 
 FancyDrawerController? _controller;
 List<NotificationData> _msgList = [];
@@ -54,7 +51,7 @@ class _NotificationContentState extends State<NotificationContent>
     _msgList.clear();
     super.initState();
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) => getNotification());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getNotification());
   }
 
   menuopen() {}
@@ -279,7 +276,7 @@ class _NotificationContentState extends State<NotificationContent>
                               {
                                 Strings.selectedProDocument.clear();
                                 var dat = jsonEncode(_msgList[index].docDetail);
-                                print("qwerty ${dat}");
+                                print("qwerty $dat");
                                 var decoded = jsonDecode(dat);
                                 ProjectDocData peo =
                                     ProjectDocData.fromJson(decoded);

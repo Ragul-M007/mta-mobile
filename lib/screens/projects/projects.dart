@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:ext_storage/ext_storage.dart';
 import 'package:fancy_drawer/fancy_drawer.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -14,7 +11,6 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
 
@@ -54,7 +50,7 @@ class _ProjectsState extends State<Projects>
       });
     super.initState();
     getPermission();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
   }
 
   @override

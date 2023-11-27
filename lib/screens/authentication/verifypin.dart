@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/LoginReq.dart';
-import 'package:mta/models/SetPinReq.dart';
 // import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
@@ -15,7 +14,6 @@ import 'package:mta/screens/projectcomments.dart/projectCommentsReplies.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mta/screens/attendance/attendance.dart';
 
 import '../../models/validateOTPReq.dart';
@@ -547,36 +545,36 @@ class _VerifypinState extends State<Verifypin> {
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF9e9e9e)))),
           ),
-          Container(
-            margin: EdgeInsets.fromLTRB(
-                10, MediaQuery.of(context).size.height * .75, 10, 20),
-            child: ButtonTheme(
-              minWidth: double.infinity,
-              child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  textColor: Colors.white,
-                  padding: EdgeInsets.all(15),
-                  onPressed: () {
-                    print(
-                        "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
-                    codeVerifyField =
-                        oneT.text + twoT.text + threeT.text + fourT.text;
-                    print(codeVerifyField);
-                    print("${codeVerifyField!.length}");
-                    if (codeVerifyField!.length < 4) {
-                      AppUtils.showToastError("Please Enter Pin");
-                    } else {
-                      signin();
-                    }
-                  },
-                  child: Text("SUBMIT",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Colors.white)),
-                  color: Color(0xFF0061b0)),
+          Center(
+            child: Container(
+              margin: EdgeInsets.fromLTRB(
+                  10, MediaQuery.of(context).size.height * .75, 10, 20),
+              child: ButtonTheme(
+                minWidth: double.infinity,
+                child: ElevatedButton(
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Color(0xFF0061b0)),foregroundColor: MaterialStateProperty.all(Colors.white), shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0),),
+                                ),),
+                    onPressed: () {
+                      print(
+                          "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
+                      codeVerifyField =
+                          oneT.text + twoT.text + threeT.text + fourT.text;
+                      print(codeVerifyField);
+                      print("${codeVerifyField!.length}");
+                      if (codeVerifyField!.length < 4) {
+                        AppUtils.showToastError("Please Enter Pin");
+                      } else {
+                        signin();
+                      }
+                    },
+                    child: Text("SUBMIT",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.white)),
+                    ),
+              ),
             ),
           ),
           Align(

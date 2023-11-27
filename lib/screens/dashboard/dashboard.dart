@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:ext_storage/ext_storage.dart';
 import 'package:fancy_drawer/fancy_drawer.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -14,7 +11,6 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
@@ -37,6 +33,7 @@ class _DashboardState extends State<Dashboard>
   List<Data> _searchLists = [];
   FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
+  WebViewController controller = WebViewController();
   String? filepath;
   var dio = Dio();
 
@@ -48,7 +45,6 @@ class _DashboardState extends State<Dashboard>
     {
         AppUtils.showprogress();
     }
-    print("checkval--> ${Strings.roleId}");
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 100))
       ..addListener(() {
@@ -61,8 +57,30 @@ class _DashboardState extends State<Dashboard>
     getPermission();
     if(Strings.roleId != 7)
     {
-      WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+      WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
     }
+    configureWebview();
+    
+  }
+
+  configureWebview()
+  {
+controller = WebViewController()
+  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  ..setBackgroundColor(const Color(0x00000000))
+  ..setNavigationDelegate(
+    NavigationDelegate(
+      onProgress: (int progress) {
+        // Update loading bar.
+      },
+      onPageStarted: (String url) {},
+      onPageFinished: (String url) {
+        AppUtils.dismissprogress();
+      },
+      onWebResourceError: (WebResourceError error) {},
+    ),
+  )
+  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
   }
 
   @override
@@ -720,10 +738,12 @@ class _DashboardState extends State<Dashboard>
                                                                       _projectLists[
                                                                               index]
                                                                           .city!,
+                                                                          maxLines: 2,
                                                                   overflow:
                                                                       TextOverflow
-                                                                          .clip,
+                                                                          .ellipsis,
                                                                   style: TextStyle(
+                                                                    
                                                                       fontSize:
                                                                           12,
                                                                       fontWeight:
@@ -762,13 +782,8 @@ class _DashboardState extends State<Dashboard>
                               ),
                               padding: EdgeInsets.all(20),
                             )):Container(
-        child: WebView(
-      initialUrl: 'https://www.mtaarch.com/',
-      javascriptMode: JavascriptMode.unrestricted,
-      onPageFinished: (finish) {
-        AppUtils.dismissprogress();
-            },
-    ));
+        child: WebViewWidget(controller: controller)
+        );
                   }))),
         ),
       ),
@@ -837,8 +852,9 @@ class _DashboardState extends State<Dashboard>
     
   }
 
-  void getPermission() async {
-    // print("getPermission");
+  void getPermission() async 
+  {
+     print("getPermission");
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();

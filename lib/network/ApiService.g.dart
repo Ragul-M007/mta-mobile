@@ -6,9 +6,14 @@ part of 'ApiService.dart';
 // RetrofitGenerator
 // **************************************************************************
 
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers
+
 class _ApiService implements ApiService {
-  _ApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+  _ApiService(
+    this._dio, {
+    this.baseUrl,
+  }) {
+    baseUrl ??= 'https://demo.emeetify.com:81/mta';
   }
 
   final Dio _dio;
@@ -16,102 +21,177 @@ class _ApiService implements ApiService {
   String? baseUrl;
 
   @override
-  Future<LoginRes> login(body) async {
+  Future<LoginRes> login(LoginReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<LoginRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/login',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<LoginRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/login',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = LoginRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> signUp(body) async {
+  Future<ChangePassRes> signUp(SignUpReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/publicusersignup',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/publicusersignup',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<LoginRes> setPin(id, body) async {
+  Future<LoginRes> setPin(
+    int id,
+    SetPinReq body,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<LoginRes>(
-            Options(method: 'PUT', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<LoginRes>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = LoginRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<LoginRes> setForgotPin(id, body) async {
+  Future<LoginRes> setForgotPin(
+    int id,
+    SetPinReq body,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<LoginRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/changePin',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<LoginRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/changePin',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = LoginRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<LoginRes> userAccess(id, body) async {
+  Future<LoginRes> userAccess(
+    String id,
+    UserAccessReq body,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<LoginRes>(
-            Options(method: 'PUT', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/projects/putCategory/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<LoginRes>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/putCategory/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = LoginRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<DashboardRes> projects(id) async {
+  Future<DashboardRes> projects(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<DashboardRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/projects?user_id=${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<DashboardRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects?user_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = DashboardRes.fromJson(_result.data!);
     return value;
   }
@@ -121,227 +201,390 @@ class _ApiService implements ApiService {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<NewsRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/newsfeed',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<NewsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/newsfeed',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = NewsRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ProfileRes> profile(user_id) async {
+  Future<ProfileRes> profile(int userId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ProfileRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/profile/${user_id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ProfileRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/profile/${userId}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ProfileRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FetchCategoryDocRes> getCategoryDoc(id, pid, userid) async {
+  Future<FetchCategoryDocRes> getCategoryDoc(
+    int id,
+    int pid,
+    int userid,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(_setStreamType<
-        FetchCategoryDocRes>(Options(
-            method: 'GET', headers: _headers, extra: _extra)
-        .compose(_dio.options,
-            '/projects/getDocuments?category_id=${id}&project_id=${pid}&users_id=${userid}',
-            queryParameters: queryParameters, data: _data)
-        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<FetchCategoryDocRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/getDocuments?category_id=${id}&project_id=${pid}&users_id=${userid}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FetchCategoryDocRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FectchProjectDocRes> getProjectDoc(id, userid) async {
+  Future<FectchProjectDocRes> getProjectDoc(
+    int id,
+    int userid,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FectchProjectDocRes>(Options(
-                method: 'GET', headers: _headers, extra: _extra)
-            .compose(_dio.options,
-                '/projects/getDocuments?project_id=${id}&&users_id=${userid}',
-                queryParameters: queryParameters, data: _data)
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/getDocuments?project_id=${id}&&users_id=${userid}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FectchProjectDocRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FectchCatsRes> getCats(id) async {
+  Future<FectchCatsRes> getCats(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<FectchCatsRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/categories?project_id=${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FectchCatsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/categories?project_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FectchCatsRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<AddDocRes> addDoc(body) async {
+  Future<AddDocRes> addDoc(AddDocReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<AddDocRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/projects/addDocument',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AddDocRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/addDocument',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = AddDocRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<AddAttendanceRes> addAttendance(body) async {
+  Future<AddAttendanceRes> addAttendance(AddAttendanceReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<AddAttendanceRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/attendance',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AddAttendanceRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/attendance',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = AddAttendanceRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FetchAttendanceRes> getAttendance(id, date) async {
+  Future<FetchAttendanceRes> getAttendance(
+    int id,
+    String date,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<FetchAttendanceRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/attendance?user_id=${id}&date=${date}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FetchAttendanceRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/attendance?user_id=${id}&date=${date}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FetchAttendanceRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FetchMapedCatRes> fetchCats(id) async {
+  Future<FetchMapedCatRes> fetchCats(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<FetchMapedCatRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/categories?project_id=${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedCatRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/categories?project_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FetchMapedCatRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FetchCategoryUsersRes> getCatUsers(id, catid) async {
+  Future<FetchCategoryUsersRes> getCatUsers(
+    int id,
+    int catid,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FetchCategoryUsersRes>(Options(
-                method: 'GET', headers: _headers, extra: _extra)
-            .compose(_dio.options,
-                '/categories/getCatUsers?project_id=${id}&category_id=${catid}',
-                queryParameters: queryParameters, data: _data)
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/categories/getCatUsers?project_id=${id}&category_id=${catid}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FetchCategoryUsersRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<FetchMapedUsersRes> fetchUsers(id) async {
+  Future<FetchMapedUsersRes> fetchUsers(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<FetchMapedUsersRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(
-                    _dio.options, '/projects/getmappedUser?project_id=${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedUsersRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/getmappedUser?project_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = FetchMapedUsersRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<TeamsModel> fetchTeams(id) async {
+  Future<TeamsModel> fetchTeams(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<TeamsModel>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/teams',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<TeamsModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/teams',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = TeamsModel.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<DashboardRes> fetchProjectByTeams(id) async {
+  Future<DashboardRes> fetchProjectByTeams(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<DashboardRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/projects/getProjectsByTeam/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<DashboardRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/getProjectsByTeam/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = DashboardRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ProjectDetailsRes> getProjectName(id) async {
+  Future<ProjectDetailsRes> getProjectName(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ProjectDetailsRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/projects/getProject/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ProjectDetailsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/projects/getProject/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ProjectDetailsRes.fromJson(_result.data!);
     return value;
   }
@@ -351,178 +594,302 @@ class _ApiService implements ApiService {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<NotificationRes>(
-            Options(method: 'GET', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/utils/getNotification',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<NotificationRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/utils/getNotification',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = NotificationRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> changePass(body) async {
+  Future<ChangePassRes> changePass(ChangePassReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/changePassword',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/changePassword',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> forgotPass(body) async {
+  Future<ChangePassRes> forgotPass(ForgotPassReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/forgotPassword',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/forgotPassword',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> otpVerify(body) async {
+  Future<ChangePassRes> otpVerify(ValidateOTPReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/validate_otp',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/validate_otp',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> editProfile(id, body) async {
+  Future<ChangePassRes> editProfile(
+    int id,
+    EditProfileReq body,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'PUT', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> updateNotificationStatus(id) async {
+  Future<ChangePassRes> updateNotificationStatus(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'PUT', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/utils/updateNotification/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/utils/updateNotification/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> removeProPic(id) async {
+  Future<ChangePassRes> removeProPic(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'DELETE', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/removeImage/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/removeImage/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> deleteUser(id) async {
+  Future<ChangePassRes> deleteUser(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<ChangePassRes>(
-            Options(method: 'DELETE', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ChangePassRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<CommentsRes> removeDeviceId(id) async {
+  Future<CommentsRes> removeDeviceId(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<CommentsRes>(
-            Options(method: 'DELETE', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/users/deleteDeviceId/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<CommentsRes>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/deleteDeviceId/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = CommentsRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<CommentsRes> removeComment(id) async {
+  Future<CommentsRes> removeComment(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<CommentsRes>(
-            Options(method: 'DELETE', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/utils/deletecomment/${id}',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<CommentsRes>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/utils/deletecomment/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = CommentsRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<AudioRes> uploadAudio(body) async {
+  Future<AudioRes> uploadAudio(AudioReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<AudioRes>(
-            Options(method: 'POST', headers: _headers, extra: _extra)
-                .compose(_dio.options, '/utils/getAudioUrl',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<AudioRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/utils/getAudioUrl',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = AudioRes.fromJson(_result.data!);
     return value;
   }
@@ -538,5 +905,22 @@ class _ApiService implements ApiService {
       }
     }
     return requestOptions;
+  }
+
+  String _combineBaseUrls(
+    String dioBaseUrl,
+    String? baseUrl,
+  ) {
+    if (baseUrl == null || baseUrl.trim().isEmpty) {
+      return dioBaseUrl;
+    }
+
+    final url = Uri.parse(baseUrl);
+
+    if (url.isAbsolute) {
+      return url.toString();
+    }
+
+    return Uri.parse(dioBaseUrl).resolveUri(url).toString();
   }
 }

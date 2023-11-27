@@ -1,14 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-import 'package:ext_storage/ext_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
-import 'package:mta/models/UserAccessreq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
@@ -17,8 +12,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io' as Io;
 
 import 'package:provider/provider.dart';
@@ -395,7 +388,6 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
   void submit() {
     if (docTitle.text.trim() == "" ||
-        docTitle.text == null ||
         docTitle.text == "null" || file64 == '') {
       AppUtils.showToastError("Please select Document");
     } else {

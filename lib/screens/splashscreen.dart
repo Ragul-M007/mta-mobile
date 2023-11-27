@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/utilities/InternetConnectivity.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';

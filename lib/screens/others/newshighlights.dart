@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +45,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
 
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance?.addPostFrameCallback((_) => getNewsFeeds());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
   }
 
   menuopen() {}

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
@@ -12,7 +12,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
-import 'package:ext_storage/ext_storage.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
@@ -82,7 +81,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
     if (Strings.fromNotificationDocuments) {
       updateNotification(Strings.notificationID);
     }
-    WidgetsBinding.instance!.addPostFrameCallback((_) => getDocs());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getDocs());
   }
 
   //get storage permission
@@ -135,13 +134,13 @@ class _ViewDocContentState extends State<ViewDocContent> {
   void _downloadfile(serverURL, filename) async {
     String? path;
     if (Platform.isAndroid) {
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {

@@ -3,7 +3,6 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoriesInfo extends StatefulWidget {
   static const String routeName = "/categoriesinfo";

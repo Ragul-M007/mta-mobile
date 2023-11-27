@@ -5,7 +5,6 @@ import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
-import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +59,7 @@ class _CategoriesContentState extends State<CategoriesContent>
   void initState() {
     super.initState();
     getUserCats();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => getCategories());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getCategories());
   }
   showLoading(BuildContext context) 
   {

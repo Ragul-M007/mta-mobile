@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Otpverification extends StatefulWidget {
   static const String routeName = "/otpverification";
@@ -105,12 +104,11 @@ class _OtpverificationState extends State<Otpverification>
                         margin: EdgeInsets.fromLTRB(10, 20, 10, 20),
                         child: ButtonTheme(
                           minWidth: double.infinity,
-                          child: RaisedButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25.0),
-                              ),
-                              textColor: Colors.white,
-                              padding: EdgeInsets.all(15),
+                          child: ElevatedButton(
+
+                            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.blue),foregroundColor: MaterialStateProperty.all(Colors.white), shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))
+                              ),),
                               onPressed: () {
                                 print(
                                     "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text} ${fiveT.text} ${sixT.text}");
@@ -130,7 +128,7 @@ class _OtpverificationState extends State<Otpverification>
                               child: Text(
                                 "Submit",
                               ),
-                              color: Colors.blue),
+                              ),
                         ),
                       ),
               ],

@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
 import 'package:dio/dio.dart';
-import 'package:ext_storage/ext_storage.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
@@ -24,7 +23,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -59,12 +57,12 @@ var uniqueRecordId;
 
 
 var isPlaying = false;
-var playingIndex = null;
+var playingIndex;
 int audioLength = 0;
 int audioCurrentlenth = 0;
 Timer? _timer;
 List<int> recordedData = [];
-final _audioRecorder = Record();
+final _audioRecorder = AudioRecorder();
 String? filepath;
 IO.Socket? _socket;
 int? projectId;
@@ -308,13 +306,13 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
   void _downloadfile(serverURL, filename) async {
     String? path;
     if (Platform.isAndroid) {
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1484,7 +1482,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
     _socket?.on("project-comments", (_data) 
     {
       log('fromServer $_data');
-      print("initial check ${initialCommentCheck}");
+      print("initial check $initialCommentCheck");
       if (initialCommentCheck) 
       {
         print("dataaa $_data");
@@ -1524,13 +1522,13 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
     {
 //       Directory tempDir = await getTemporaryDirectory();
 // path = tempDir.path;
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1547,9 +1545,8 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
           '.m4a';
 
           print("tteyyyy $filePath");
-      await _audioRecorder.start(
+      await _audioRecorder.start(const RecordConfig(),
         path: filePath,
-        encoder: AudioEncoder.aacLc,
       );
     }
   }
@@ -1562,8 +1559,8 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
     // var dir = await ExtStorage.getExternalStoragePublicDirectory(
     //     ExtStorage.DIRECTORY_DOWNLOADS);
     // String url = dir + "/MTARecordedAudio.wav";
-    await audioPlayer.play(Strings.baseImageUrl + url,
-        volume: 5, stayAwake: false);
+    await audioPlayer.play(UrlSource(Strings.baseImageUrl + url) ,
+        volume: 5);
     audioPlayer.onDurationChanged.listen((Duration d) {
       int seconds = d.inSeconds;
       print('Max duration: $d');
@@ -1571,14 +1568,14 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
         audioLength = seconds;
       });
     });
-    audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    audioPlayer.onPositionChanged.listen((Duration p) {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerCompletion.listen((event) {
+    audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
         audioLength = 0;
         audioCurrentlenth = 0;
@@ -1586,9 +1583,7 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
         isPlaying = false;
       });
     });
-    audioPlayer.onPlayerError.listen((msg) {
-      print('audioPlayer error : $msg');
-    });
+    
   }
 
   stopAudio() async {
@@ -1608,13 +1603,13 @@ itemScrollController.jumpTo(index: Strings.comments[Strings.selectedCommentsInde
     if (Platform.isAndroid) {
 //       Directory tempDir = await getTemporaryDirectory();
 // path = tempDir.path;
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {

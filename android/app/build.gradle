@@ -48,13 +48,13 @@ android {
         applicationId "com.skein.mta"
         minSdkVersion 26
         compileSdkVersion = 33
-        targetSdkVersion 31
-        versionCode 11
+        targetSdkVersion 33
+        versionCode 17
         versionName flutterVersionName
         multiDexEnabled true
     }
-       signingConfigs 
-       {
+    signingConfigs 
+    {
        release 
        {
            keyAlias keystoreProperties['keyAlias']

@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ForgotPassReq.dart';
@@ -16,7 +15,6 @@ import 'package:mta/utilities/validators.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mta/models/NewsRes.dart';
-import '../splashscreen.dart';
 
 bool isVerifyScreen = false;
 String? codeVerifyField;
@@ -150,7 +148,7 @@ class _LoginContentState extends State<LoginContent>
     super.initState();
     certifcatecheck();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance?.addPostFrameCallback((_) => getNewsFeeds());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
     setState(() {
       _emailIdController.text = "";
       _passwordController.text = "";
@@ -196,7 +194,7 @@ class _LoginContentState extends State<LoginContent>
     loginreq.password = _passwordController.text;
     loginreq.token = Strings.fcmToken;
     Strings.authToken = '';
-    print("loqinrequest ---> ${loginreq}");
+    print("loqinrequest ---> $loginreq");
     api.login(loginreq).then((response) 
     {
       AppUtils.dismissprogress();
@@ -260,7 +258,7 @@ class _LoginContentState extends State<LoginContent>
                   title: Text("Login Failed",style: TextStyle(color: Colors.red),),
                   content: Text(response.message ?? "Unknown Error"),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       onPressed: () {
                         Navigator.of(ctx).pop();
                       },
@@ -1444,7 +1442,7 @@ class _LoginContentState extends State<LoginContent>
                   title: Text("Success",style: TextStyle(color: Colors.green),),
                   content: Text("User created successfully! Please check your email for the credentials."),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       onPressed: () 
                       {
                         Navigator.of(ctx).pop();

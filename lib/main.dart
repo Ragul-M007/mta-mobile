@@ -3,8 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:mta/firebase_options.dart';
 import 'package:mta/screens/splashscreen.dart';
-import 'package:mta/utilities/router.dart';
 
 
 Future<void> _messageHandler(RemoteMessage message) async {
@@ -15,8 +15,14 @@ Future<void> main() async {
   // runApp(SplashScreen());
   WidgetsFlutterBinding.ensureInitialized();
   final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
-
-  await Firebase.initializeApp();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("catch");
+  }
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {

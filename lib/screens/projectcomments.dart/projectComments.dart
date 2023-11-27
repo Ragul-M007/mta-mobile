@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
 import 'package:dio/dio.dart';
-import 'package:ext_storage/ext_storage.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
@@ -57,7 +57,7 @@ var uniqueRecordId;
 
 
 var isPlaying = false;
-var playingIndex = null;
+var playingIndex;
 int audioLength = 0;
 int audioCurrentlenth = 0;
 Timer? _timer;
@@ -65,7 +65,7 @@ List<int> recordedData = [];
 List<CatsData?> CatData = [];
 List<FetchMapedUsersData?> UserData = [];
 
-final _audioRecorder = Record();
+final _audioRecorder = AudioRecorder();
 
 String file64 = '';
 String? fileExt;
@@ -300,13 +300,13 @@ class _CommentsContentState extends State<CommentsContent>
   void _downloadfile(serverURL, filename) async {
     String? path;
     if (Platform.isAndroid) {
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1269,13 +1269,13 @@ class _CommentsContentState extends State<CommentsContent>
     {
 //       Directory tempDir = await getTemporaryDirectory();
 // path = tempDir.path;
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1293,8 +1293,8 @@ class _CommentsContentState extends State<CommentsContent>
 
           print("tteyyyy $filePath");
       await _audioRecorder.start(
+        const RecordConfig(),
         path: filePath,
-        encoder: AudioEncoder.aacLc,
       );
     }
   }
@@ -1308,8 +1308,8 @@ class _CommentsContentState extends State<CommentsContent>
     //     ExtStorage.DIRECTORY_DOWNLOADS);
     // String url = dir + "/MTARecordedAudio.wav";
     print(Strings.baseImageUrl + url);
-    await audioPlayer.play(Strings.baseImageUrl + url,
-        volume: 5, stayAwake: false);
+    await audioPlayer.play(UrlSource(Strings.baseImageUrl + url) ,
+        volume: 5);
     audioPlayer.onDurationChanged.listen((Duration d) {
       int seconds = d.inSeconds;
       print('Max duration: $d');
@@ -1317,23 +1317,20 @@ class _CommentsContentState extends State<CommentsContent>
         audioLength = seconds;
       });
     });
-    audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    audioPlayer.onPositionChanged.listen((Duration p) {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerCompletion.listen((event) {
+    audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
         audioLength = 0;
         audioCurrentlenth = 0;
         playingIndex = null;
         isPlaying = false;
       });
-    });
-    audioPlayer.onPlayerError.listen((msg) {
-      print('audioPlayer error : $msg');
     });
   }
 
@@ -1378,13 +1375,13 @@ class _CommentsContentState extends State<CommentsContent>
     if (Platform.isAndroid) {
 //       Directory tempDir = await getTemporaryDirectory();
 // path = tempDir.path;
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1468,7 +1465,7 @@ class _CommentsContentState extends State<CommentsContent>
       AppUtils.showToastError("Please Enter Comments");
     } else 
     {
-      print("catsssss ${tagedCats}");
+      print("catsssss $tagedCats");
       _socket?.emit(
           'create-project-comment',
           json.encode({

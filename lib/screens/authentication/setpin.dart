@@ -6,7 +6,6 @@ import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mta/screens/attendance/attendance.dart';
 
 import '../../models/LoginReq.dart';
@@ -252,37 +251,38 @@ class _SetpinState extends State<Setpin> {
             //     child: Text("Reset pin",
             //         textAlign: TextAlign.center,
             //         style: TextStyle(decoration: TextDecoration.underline))),
-            Container(
-              margin: EdgeInsets.fromLTRB(
-                  10, MediaQuery.of(context).size.height * .75, 10, 20),
-              child: ButtonTheme(
-                minWidth: double.infinity,
-                child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    textColor: Colors.white,
-                    padding: EdgeInsets.all(15),
-                    onPressed: () {
-                      codeVerifyField =
-                          oneT.text + twoT.text + threeT.text + fourT.text;
-                      print(codeVerifyField);
-                      if (codeVerifyField!.length < 4) {
-                        AppUtils.showToastError("Please Enter Pin");
-                      } else {
-                        if (Strings.fromForgotPassword == true) {
-                          forgotPin();
+            Center(
+              child: Container(
+                margin: EdgeInsets.fromLTRB(
+                    10, MediaQuery.of(context).size.height * .75, 10, 20),
+                child: ButtonTheme(
+                  minWidth: double.infinity,
+                  child: ElevatedButton(
+              
+                       style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Color(0xFF0061b0)),foregroundColor: MaterialStateProperty.all(Colors.white), shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0),),
+                                ),),
+                      onPressed: () {
+                        codeVerifyField =
+                            oneT.text + twoT.text + threeT.text + fourT.text;
+                        print(codeVerifyField);
+                        if (codeVerifyField!.length < 4) {
+                          AppUtils.showToastError("Please Enter Pin");
                         } else {
-                          signin();
+                          if (Strings.fromForgotPassword == true) {
+                            forgotPin();
+                          } else {
+                            signin();
+                          }
                         }
-                      }
-                    },
-                    child: Text("SUBMIT",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.white)),
-                    color: Color(0xFF0061b0)),
+                      },
+                      child: Text("SUBMIT",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white)),
+                      ),
+                ),
               ),
             ),
           ],

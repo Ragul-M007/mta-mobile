@@ -1,8 +1,5 @@
-import 'dart:io';
 
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
@@ -14,7 +11,6 @@ import 'package:mta/models/ChangePassRes.dart';
 import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/EditProfileReq.dart';
-import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
@@ -46,9 +42,9 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
- // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+  @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
-  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+ // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
   // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
 
 
@@ -82,7 +78,7 @@ abstract class ApiService
   Future<NewsRes> news();
 
   @GET("/users/profile/{user_id}")
-  Future<ProfileRes> profile(@Path("user_id") int user_id);
+  Future<ProfileRes> profile(@Path("user_id") int userId);
 
   @GET(
       "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
@@ -126,7 +122,6 @@ abstract class ApiService
 
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
-
 
   @POST("/users/changePassword")
   Future<ChangePassRes> changePass(@Body() ChangePassReq body);

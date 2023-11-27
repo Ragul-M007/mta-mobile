@@ -1,12 +1,9 @@
-import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -17,6 +14,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 FancyDrawerController? _controller;
 FocusNode name = new FocusNode();
 ImagePicker _picker = ImagePicker();
+WebViewController controller = WebViewController();
+
 
 class WebpageView extends StatefulWidget {
   static const String routeName = "/webview";
@@ -38,8 +37,28 @@ class _WebpageViewState extends State<WebpageView>
           Strings.currentmenuvalue = 3;
         });
       });
-  }
 
+      configureWebview();
+  }
+configureWebview()
+  {
+controller = WebViewController()
+  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  ..setBackgroundColor(const Color(0x00000000))
+  ..setNavigationDelegate(
+    NavigationDelegate(
+      onProgress: (int progress) {
+        // Update loading bar.
+      },
+      onPageStarted: (String url) {},
+      onPageFinished: (String url) {
+        AppUtils.dismissprogress();
+      },
+      onWebResourceError: (WebResourceError error) {},
+    ),
+  )
+  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
+  }
   @override
   void dispose() {
     _controller?.dispose(); // Dispose controller
@@ -365,12 +384,6 @@ class _ProfileContentState extends State<ProfileContent> {
   Widget build(BuildContext context) 
   {
     return Container(
-        child: WebView(
-      initialUrl: 'https://www.mtaarch.com/',
-      javascriptMode: JavascriptMode.unrestricted,
-      onPageFinished: (finish) {
-        AppUtils.dismissprogress();
-            },
-    ));
+        child: WebViewWidget(controller: controller));
   }
 }

@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:io' as Io;
 //import 'package:audioplayers/audio_cache.dart';
 import 'package:dio/dio.dart';
-import 'package:ext_storage/ext_storage.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AudioReq.dart';
@@ -14,7 +13,6 @@ import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/others/notification.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -25,7 +23,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
@@ -56,12 +53,12 @@ var initialCommentCheck = true;
 List<String> docImg = [];
 
 var isPlaying = false;
-var playingIndex = null;
+var playingIndex;
 int audioLength = 0;
 int audioCurrentlenth = 0;
 Timer? _timer;
 List<int> recordedData = [];
-final _audioRecorder = Record();
+final _audioRecorder = AudioRecorder();
 
 String file64 = '';
 String? fileExt;
@@ -285,13 +282,13 @@ class _CommentsContentState extends State<CommentsContent>
   void _downloadfile(serverURL, filename) async {
     String? path;
     if (Platform.isAndroid) {
-      path = await ExtStorage.getExternalStoragePublicDirectory(
-          ExtStorage.DIRECTORY_DOWNLOADS);
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
       print("ios");
       var vpath = await getApplicationDocumentsDirectory();
       String pathStr = vpath.toString();
-      if (pathStr != null && pathStr.length >= 5) {
+      if (pathStr.length >= 5) {
         path = pathStr.substring(12, pathStr.length);
       }
       if (path != null && path.length >= 1) {
@@ -1169,18 +1166,16 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   recordComments() async {
-    var dir = await ExtStorage.getExternalStoragePublicDirectory(
-        ExtStorage.DIRECTORY_DOWNLOADS);
+    var dir = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_DOWNLOADS);
     var status = await Permission.microphone.status;
     if (!status.isGranted) {
       getPermission();
     } else {
-      await _audioRecorder.start(
+      await _audioRecorder.start(const RecordConfig(),
         path: dir! + "/MTARecordedAudio.wav",
-        encoder: AudioEncoder.aacLc,
       );
     }
-    ;
   }
 
   Future<void> stopRecord() async {
@@ -1192,8 +1187,8 @@ class _CommentsContentState extends State<CommentsContent>
     //     ExtStorage.DIRECTORY_DOWNLOADS);
     // String url = dir + "/MTARecordedAudio.wav";
     print(Strings.baseImageUrl + url);
-    await audioPlayer.play(Strings.baseImageUrl + url,
-        volume: 5, stayAwake: false);
+    await audioPlayer.play(UrlSource(Strings.baseImageUrl + url) ,
+        volume: 5);
     audioPlayer.onDurationChanged.listen((Duration d) {
       int seconds = d.inSeconds;
       print('Max duration: $d');
@@ -1201,23 +1196,20 @@ class _CommentsContentState extends State<CommentsContent>
         audioLength = seconds;
       });
     });
-    audioPlayer.onAudioPositionChanged.listen((Duration p) {
+    audioPlayer.onPositionChanged.listen((Duration p) {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerCompletion.listen((event) {
+    audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
         audioLength = 0;
         audioCurrentlenth = 0;
         playingIndex = null;
         isPlaying = false;
       });
-    });
-    audioPlayer.onPlayerError.listen((msg) {
-      print('audioPlayer error : $msg');
     });
   }
 
@@ -1257,8 +1249,8 @@ class _CommentsContentState extends State<CommentsContent>
 
   sendAudio() async {
     AppUtils.showprogress();
-    var dir = await ExtStorage.getExternalStoragePublicDirectory(
-        ExtStorage.DIRECTORY_DOWNLOADS);
+    var dir = await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_DOWNLOADS);
     print("direct $dir");
     final bytesData =
         await Io.File(dir! + "/MTARecordedAudio.wav").readAsBytes();

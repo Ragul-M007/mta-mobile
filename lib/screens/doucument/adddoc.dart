@@ -251,7 +251,7 @@ class _AddDocContentState extends State<AddDocContent>
   UpdateRights()
   {
     String users = "";
-    if (selectedUser != null && selectedUser.length > 0) 
+    if (selectedUser.length > 0) 
     {
         users = selectedUser.substring(0, selectedUser.length - 1);
     }
@@ -333,7 +333,6 @@ class _AddDocContentState extends State<AddDocContent>
   void submit() 
   {
     if (docTitle.text.trim() == "" ||
-        docTitle.text == null ||
         docTitle.text == "null") 
         {
       AppUtils.showToastError("Please select Document");

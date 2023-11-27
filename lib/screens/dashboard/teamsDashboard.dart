@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:ext_storage/ext_storage.dart';
 import 'package:fancy_drawer/fancy_drawer.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -15,7 +12,6 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
@@ -29,6 +25,7 @@ class TeamsDashboard extends StatefulWidget {
 class _TeamsDashboardState extends State<TeamsDashboard>
     with SingleTickerProviderStateMixin {
   FancyDrawerController? _controller;
+  WebViewController controller = WebViewController();
 
   BuildContext? ctx;
 
@@ -62,8 +59,28 @@ class _TeamsDashboardState extends State<TeamsDashboard>
 
     if(Strings.roleId != 7)
     {
-        WidgetsBinding.instance!.addPostFrameCallback((_) => getProjects());
+        WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
     }
+    configureWebview();
+  }
+  configureWebview()
+  {
+controller = WebViewController()
+  ..setJavaScriptMode(JavaScriptMode.unrestricted)
+  ..setBackgroundColor(const Color(0x00000000))
+  ..setNavigationDelegate(
+    NavigationDelegate(
+      onProgress: (int progress) {
+        // Update loading bar.
+      },
+      onPageStarted: (String url) {},
+      onPageFinished: (String url) {
+        AppUtils.dismissprogress();
+      },
+      onWebResourceError: (WebResourceError error) {},
+    ),
+  )
+  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
   }
 
   @override
@@ -625,13 +642,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                             ),
                             padding: EdgeInsets.all(20),
                           )):Container(
-        child: WebView(
-      initialUrl: 'https://www.mtaarch.com/',
-      javascriptMode: JavascriptMode.unrestricted,
-      onPageFinished: (finish) {
-        AppUtils.dismissprogress();
-            },
-    ));
+        child: WebViewWidget(controller: controller));
                   }))),
         ),
       ),

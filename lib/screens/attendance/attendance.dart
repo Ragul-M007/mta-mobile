@@ -1,5 +1,3 @@
-import 'dart:ffi';
-import 'dart:ui';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +14,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
-import 'package:geocoder/services/base.dart';
 import 'package:mta/models/FetchAttendenceChangedRes.dart';
 
 FancyDrawerController? _controller;
@@ -82,7 +79,7 @@ class _AttendanceContentState extends State<AttendanceContent>
       });
     //_calendarController = CalendarController();
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
         (_) => getAttendance(day + "-" + month + "-" + year));
   }
 
@@ -617,7 +614,7 @@ showDialog(
             {
               print("inside check");
               // checkInOut("IN");
-              if (location == '' || location == null) 
+              if (location == '') 
               {
                 AppUtils.showToastErrorTop(
                     "Unable to find your location, Please tap refersh icon to get your location");
@@ -685,7 +682,7 @@ showDialog(
               child: GestureDetector(
             onTap: () {
               //checkInOut("OUT");
-              if (location == '' || location == null) 
+              if (location == '') 
               {
                 AppUtils.showToastErrorTop(
                     "Unable to find your location, Please tap refersh icon to get your location");
@@ -1173,7 +1170,7 @@ var lastSignIn = _attendance.last;
         {
             AttendanceDataNew test = new AttendanceDataNew();
             print("inside Inn");
-            print("i ${i}");
+            print("i $i");
             test.checkInLocation = _attendancemain[i].locationName;
             test.checkInTime = _attendancemain[i].checkTime;
           //  test.userId = _attendancemain[i].userId;
@@ -1225,7 +1222,7 @@ var lastSignIn = _attendance.last;
   {
           for (var i = 0; i < _attendance.length; i++) 
           {
-            print("value of i--> ${i}");
+            print("value of i--> $i");
                print("---------------Didplaying Details--------------------");
              print("checkinloc -- ${_attendance[i].checkInLocation}");
             print("checkintime -- ${_attendance[i].checkInTime}");
@@ -1321,7 +1318,7 @@ var lastSignIn = _attendance.last;
   }
 
   String getDateFormat(String date, int condition) {
-    if (date != "" && date != "null" && date != null) {
+    if (date != "" && date != "null") {
       DateTime dateNow = DateTime.parse(date);
       var formatedDate = DateFormat.MMMEd().format(dateNow);
       var splitDate = formatedDate.split(",");
@@ -1340,8 +1337,8 @@ var lastSignIn = _attendance.last;
   }
 
   String getTimeFormat(String date) {
-    print("date--> ${date}");
-    if (date != "" && date != "null" && date != null) {
+    print("date--> $date");
+    if (date != "" && date != "null") {
       return DateFormat().add_jm().format(DateTime.parse(date)).toString();
     } else {
       return "";
@@ -1354,9 +1351,7 @@ var lastSignIn = _attendance.last;
     if (checkInTime != "" &&
         checkOutTime != "" &&
         checkInTime != "null" &&
-        checkInTime != null &&
-        checkOutTime != "null" &&
-        checkOutTime != null) {
+        checkOutTime != "null") {
       DateTime startDate = DateTime.parse(checkInTime);
       DateTime endDate = DateTime.parse(checkOutTime);
 
