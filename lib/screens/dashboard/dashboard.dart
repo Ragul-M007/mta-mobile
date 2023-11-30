@@ -121,11 +121,13 @@ controller = WebViewController()
     });
   }
 
-  getProjects() {
+  getProjects() 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
 
-    api.fetchProjectByTeams(Strings.selectedTeamId!).then((response) {
+    api.fetchProjectByTeams(Strings.selectedTeamId!).then((response) 
+    {
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {

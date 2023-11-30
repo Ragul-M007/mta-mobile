@@ -9,6 +9,7 @@ import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
 import 'package:mta/models/CommentsRes.dart';
+import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/EditProfileReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
@@ -67,6 +68,10 @@ abstract class ApiService
 
   @POST("/users/changePin")
   Future<LoginRes> setForgotPin(@Path("user_id") int id, @Body() SetPinReq body);
+
+  @POST("/projects/currentProject")
+  Future<LoginRes> setCurrentProject(@Body() CurrentProjectReq body);
+  
   
   @PUT("/projects/putCategory/{user_id}")
   Future<LoginRes> userAccess(@Path("user_id") String id, @Body() UserAccessReq body);

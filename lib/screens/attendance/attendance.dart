@@ -2,6 +2,7 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
+import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -16,6 +17,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:mta/models/FetchAttendenceChangedRes.dart';
 
+import '../../models/DashboardRes.dart';
+
+
 FancyDrawerController? _controller;
 
 double lat = 0.00;
@@ -27,6 +31,8 @@ var day = now.day.toString().padLeft(2, '0');
 var year = now.year.toString();
 DateTime _focusedDay = DateTime.now();
 DateTime? _selectedDay;
+DashboardRes? _projectLists;
+
 var monthMatch = [
   "Jan",
   "Feb",
@@ -81,6 +87,57 @@ class _AttendanceContentState extends State<AttendanceContent>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => getAttendance(day + "-" + month + "-" + year));
+          getProjects();
+
+  }
+
+  getProjects() 
+  {
+    print("qw");
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    print("qw11");
+
+    api.projects(Strings.userID!).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+        setState(() {
+          print("messagee from api ${response.message}");
+          _projectLists = response;
+        });
+      } else {
+        AppUtils.showToastError(response.message ?? "Error");
+       
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print("caddd");
+      print(onError.toString());
+    });
+  }
+
+  updateCurrentProject(int projectId) 
+  {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    print("qw11");
+
+    CurrentProjectReq req = CurrentProjectReq();
+    req.userId = Strings.userID;
+    req.projectId = projectId;
+
+    api.setCurrentProject(req).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+       getProjects();
+      } else {
+        AppUtils.showToastError(response.message ?? "Error");
+       
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
   }
 
   menuopen() {
@@ -270,14 +327,13 @@ showDialog(
                                   size: 26.0,
                                 ),
                                 SizedBox(width: 5.0),
-                                Expanded(
-                                    child: Container(
+                                Container(
                                   child: Text(location,
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87)),
-                                )),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87)),
+                                                                ),
                                 GestureDetector(
                                   onTap: () {
                                     getUserLocation();
@@ -787,30 +843,44 @@ var lastSignIn = _attendance.last;
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.pin_drop,
-                      color: Colors.grey,
-                      size: 26.0,
-                    ),
-                    SizedBox(width: 5.0),
-                    Expanded(
-                        child: Container(
-                      child: Text(location,
-                          style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white)),
-                    )),
-                    GestureDetector(
-                      onTap: () {
-                        getUserLocation();
+                    InkWell(
+                      onTap: (){
+                          showUserProjectsDialog();
                       },
-                      child: Icon(
-                        Icons.refresh,
-                        color: Colors.grey,
-                        size: 26.0,
+                      child: Container(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.pin_drop,
+                              color: Colors.grey,
+                              size: 26.0,
+                            ),
+                            SizedBox(width: 5.0),
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.6,
+                                                  child: Text(_projectLists?.token?.projectName ?? "Select Project",
+                                                  maxLines: 3,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white)),
+                                                ),
+                          ],
+                        ),
                       ),
                     ),
+                   
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     getUserLocation();
+                    //   },
+                    //   child: Icon(
+                    //     Icons.refresh,
+                    //     color: Colors.grey,
+                    //     size: 26.0,
+                    //   ),
+                    // ),
+                    Spacer(),
                     SizedBox(
                       width: 15,
                     ),
@@ -855,23 +925,29 @@ var lastSignIn = _attendance.last;
                    // centerHeaderTitle: true,
                     titleTextStyle: TextStyle(color: Colors.white),
                   ),
+                  
                   daysOfWeekStyle: DaysOfWeekStyle(
+                  
                       weekdayStyle: TextStyle(color: Colors.white),
                       weekendStyle: TextStyle(color: Colors.red)),
                   calendarStyle: CalendarStyle(
-                   // weekendStyle: TextStyle(color: Colors.white),
+                    disabledTextStyle: TextStyle(color: Colors.grey),
                     //outsideWeekendStyle: TextStyle(color: Colors.white),
                     holidayTextStyle: TextStyle(color: Colors.white),
                     withinRangeTextStyle: TextStyle(color: Colors.white),
+                    selectedDecoration: BoxDecoration(color: Colors.red,shape: BoxShape.circle),
+                    todayDecoration: BoxDecoration(color: Colors.blue,shape: BoxShape.circle),
                     todayTextStyle: TextStyle(
-                      color: Colors.white,backgroundColor: Colors.red
+                      color: Colors.white,
                     ),
                    // todayColor: Colors.red,
-                    selectedTextStyle: TextStyle(color: Colors.black,backgroundColor: Colors.white),
+                    selectedTextStyle: TextStyle(color: Colors.white),
                     //selectedStyle: TextStyle(color: Colors.black),
                    // weekdayStyle: TextStyle(color: Colors.white),
                     outsideDaysVisible: false,
                    // outsideStyle: TextStyle(color: Colors.grey),
+                   defaultTextStyle: TextStyle(color: Colors.white),
+                   weekendTextStyle: TextStyle(color: Colors.red.withOpacity(0.7))
                   ),
                   selectedDayPredicate: (day) {
                       return isSameDay(_selectedDay, day);
@@ -892,7 +968,7 @@ var lastSignIn = _attendance.last;
                     } else {
                       isShowCheckInOut = false;
                     }
-                  }, firstDay: DateTime.utc(2010, 10, 16), focusedDay: _focusedDay, lastDay: DateTime.utc(2030, 3, 14),
+                  }, firstDay: DateTime.utc(2010, 10, 16), focusedDay: _focusedDay, lastDay: DateTime.now(),
                 ),
               ),
             ],
@@ -1127,7 +1203,7 @@ var lastSignIn = _attendance.last;
     api.getAttendance(Strings.userID!, date).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
-      
+
       if (response.status) 
       {
         setState(() {
@@ -1379,7 +1455,8 @@ var lastSignIn = _attendance.last;
   }
 
   getUserLocation() async {
-    await Geolocator.checkPermission().then((value) async => {
+    await Geolocator.checkPermission().then((value) async => 
+    {
           if (value == LocationPermission.denied)
             {
               {await Geolocator.requestPermission().then((value) => {})}
@@ -1391,13 +1468,16 @@ var lastSignIn = _attendance.last;
             }
           else
             {
-              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation).then((value) => {
+              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best).then((value) => {
                     setState(
                       () {
-                        AppUtils.showprogress();
+                       // AppUtils.showprogress();
                         lat = value.latitude;
                         long = value.longitude;
-                        getGeocode(lat, long);
+
+                        double distanceInMeters = Geolocator.distanceBetween(lat, long, double.parse(_projectLists!.token!.latitude!),double.parse(_projectLists!.token!.longitude!));
+                        print("User distance $distanceInMeters");
+                        //getGeocode(lat, long);
                       },
                     )
                   })
@@ -1405,7 +1485,8 @@ var lastSignIn = _attendance.last;
         });
   }
 
-  Future<void> getGeocode(double latt, double longg) async {
+  Future<void> getGeocode(double latt, double longg) async 
+  {
     var results = await Geocoder.local
         .findAddressesFromCoordinates(new Coordinates(latt, longg));
     setState(() {
@@ -1417,5 +1498,68 @@ var lastSignIn = _attendance.last;
     });
     print("loc det");
     AppUtils.dismissprogress();
+  }
+
+  Future<void> showUserProjectsDialog() async 
+  {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: StatefulBuilder(
+            builder:(BuildContext context, StateSetter setState){
+              return SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child:
+                  Column(
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        new Icon(Icons.close, size: 22.0, color: Colors.black)
+                      ]),
+                      Text(
+                        "Select Project",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.width * 1,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child:
+                         _projectLists?.data?.length != 0? ListView.builder(
+                          itemCount: _projectLists?.data?.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                Card(
+                                  color: Color.fromRGBO(108, 91, 91, 1),
+                                  child: ListTile(
+                                    title: Text(
+                                      _projectLists?.data?[index].projectName ?? "",maxLines: 3,
+                                    ),
+                                    subtitle: Text(_projectLists?.data?[index].description ?? "",maxLines: 3,),
+                                    onTap: () {
+                                      location = _projectLists?.data?[index].projectName ?? "";
+                                      updateCurrentProject(_projectLists!.data![index].projectId!);
+                                      Navigator.of(context).pop();                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ):Center(child: Text("No assigned users found",style:TextStyle(color: Colors.red))),
+                      ),
+                    ],
+                  )),
+            );}
+          ),
+        );
+      },
+    );
   }
 }

@@ -1,13 +1,16 @@
 class DashboardRes {
   bool? status;
   String? message;
+  Data? token;
   List<Data>? data;
 
   DashboardRes({this.status, this.message, this.data});
 
-  DashboardRes.fromJson(Map<String, dynamic> json) {
+  DashboardRes.fromJson(Map<String, dynamic> json) 
+  {
     status = json['status'];
     message = json['message'];
+    token = json['token'] != null ? new Data.fromJson(json['token']) : null;
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
@@ -20,6 +23,9 @@ class DashboardRes {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
     data['message'] = this.message;
+    if (this.token != null) {
+      data['token'] = this.token!.toJson();
+    }
     if (this.data != null) 
     {
       data['data'] = this.data?.map((v) => v.toJson()).toList();
@@ -27,6 +33,25 @@ class DashboardRes {
     return data;
   }
 }
+
+// class Token {
+//   int? projectId;
+//   String? projectName;
+
+//   Token({this.projectId, this.projectName});
+
+//   Token.fromJson(Map<String, dynamic> json) {
+//     projectId = json['project_id'];
+//     projectName = json['project_name'];
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['project_id'] = this.projectId;
+//     data['project_name'] = this.projectName;
+//     return data;
+//   }
+// }
 
 class Data 
 {
@@ -42,6 +67,9 @@ class Data
   String? startDate;
   String? endDate;
   String? description;
+  String? latitude;
+  String? longitude;
+
   List<Documents>? documents;
 
   Data(
@@ -57,9 +85,13 @@ class Data
       this.startDate,
       this.endDate,
       this.description,
-      this.documents});
+      this.documents,
+      this.latitude,
+      this.longitude});
 
   Data.fromJson(Map<String, dynamic> json) {
+    latitude = json['latitude'];
+    longitude = json['longitude'];
     projectId = json['project_id'];
     categoryId = json['category_id'];
     projectName = json['project_name'];
@@ -82,6 +114,8 @@ class Data
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['latitude'] = this.latitude;
+    data['longitude'] = this.longitude;
     data['project_id'] = this.projectId;
     data['category_id'] = this.categoryId;
     data['project_name'] = this.projectName;
