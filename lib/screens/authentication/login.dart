@@ -484,13 +484,11 @@ class _LoginContentState extends State<LoginContent>
 
   Widget tabbarwidget() {
     return Container(
-
         // padding: EdgeInsets.all(5),
-        width: MediaQuery.of(context).size.width * 1.0,
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        width: MediaQuery.of(context).size.width * 1,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               height: 60,
@@ -498,6 +496,8 @@ class _LoginContentState extends State<LoginContent>
                 tabs: [
                   Container(
                     width: MediaQuery.of(context).size.width * 0.45,
+                    height: 36,
+                    // width: MediaQuery.of(context).size.width * 0.45,
                     child: Text('News Feeds',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -505,6 +505,7 @@ class _LoginContentState extends State<LoginContent>
                             color: const Color(0xFF272626))),
                   ),
                   Container(
+                    height: 36,
                     width: MediaQuery.of(context).size.width * 0.45,
                     child: Text('Highlights',
                         textAlign: TextAlign.center,
@@ -519,7 +520,7 @@ class _LoginContentState extends State<LoginContent>
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorWeight: 3.0,
                 indicatorPadding: EdgeInsets.all(10),
-                isScrollable: true,
+                isScrollable: false,
                 controller: _tabController,
               ),
             ),

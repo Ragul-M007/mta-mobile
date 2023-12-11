@@ -3,15 +3,17 @@ class AddAttendanceReq {
   String? checkTime;
   String? latLng;
   String? locationName;
+  int? projectId;
 
   AddAttendanceReq(
-      {this.checkType, this.checkTime, this.latLng, this.locationName});
+      {this.checkType, this.checkTime, this.latLng, this.locationName, this.projectId});
 
   AddAttendanceReq.fromJson(Map<String, dynamic> json) {
     checkType = json['checkType'];
     checkTime = json['checkTime'];
     latLng = json['latLng'];
     locationName = json['location_name'];
+    projectId = json['project_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class AddAttendanceReq {
     data['checkTime'] = this.checkTime;
     data['latLng'] = this.latLng;
     data['location_name'] = this.locationName;
+    data['project_id'] = this.projectId;
     return data;
   }
 }

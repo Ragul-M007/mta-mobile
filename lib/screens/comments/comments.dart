@@ -181,7 +181,7 @@ class _CommentsContentState extends State<CommentsContent>
     _socket?.connect();
     _socket?.onConnect((_) {
     print('connect');
-});
+      });
     print("connection established");
     AppUtils.showprogress();
     _socket?.on("connect", (_) {

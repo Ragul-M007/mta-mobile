@@ -8,6 +8,8 @@ import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
+import 'package:mta/models/Chat/GroupCreationReq.dart';
+import 'package:mta/models/Chat/GroupCreationRes.dart';
 import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -130,6 +132,9 @@ abstract class ApiService
 
   @POST("/users/changePassword")
   Future<ChangePassRes> changePass(@Body() ChangePassReq body);
+
+  @POST("/chat/createGroup")
+  Future<GroupCreationRes> createGroup(@Body() GroupCreationReq body);
 
   @POST("/users/forgotPassword")
   Future<ChangePassRes> forgotPass(@Body() ForgotPassReq body);

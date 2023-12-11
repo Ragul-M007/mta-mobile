@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/chat/ChatGroups.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -592,12 +593,35 @@ controller = WebViewController()
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
-                                                        _teamLists[index].teamName!,
-                                                        style: Drawables.adddoccontentstyle(
-                                                            Colors.black87,
-                                                            14.0,
-                                                            FontWeight.w500)),
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                            _teamLists[index].teamName!,
+                                                            style: Drawables.adddoccontentstyle(
+                                                                Colors.black87,
+                                                                14.0,
+                                                                FontWeight.w500)),
+                                                                SizedBox(width: 2,),
+                                                                InkWell(
+                                                                  onTap: (){
+
+                                                                    Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ChatGroups(teamId: _teamLists[index].teamId!,),
+  ),
+);
+
+                                                                                  // Navigator.pushNamed(context, '/chatGroups',arguments: {'teamId': _teamLists[index].teamId});
+                                                                  },
+                                                                  child: Container(
+                                                                    margin: EdgeInsets.only(top: 2),
+                                                                    width: 30,
+                                                                    height: 20,
+                                                                    child: Icon(Icons.chat_rounded,size: 20,)),
+                                                                ),
+                                                      ],
+                                                    ),
                                                             Text(
                                                         _teamLists[index].description!,
                                                         style: Drawables.adddoccontentstyle(

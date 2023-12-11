@@ -15,144 +15,20 @@ mixin Strings
   static String authToken = '';
   static bool fromReplies = false;
   static bool fromProjects = true;
+  
  // static String baseImageUrl = "https://demo.emeetify.com:81/";
- // static String socketUrl = 'https://demo.emeetify.com:5012/';
+  static String socketUrl = 'https://demo.emeetify.com:5015/';
   //static String socketUrl = 'https://demo.emeetify.com:6253/';
 
-  static String socketUrl = 'https://mta.multitechcorp.in:5022/';
+ // static String socketUrl = 'https://mta.multitechcorp.in:5022/';
  // static String socketUrl = 'http://192.168.0.134:5021/';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   //static String imageUrl = 'https://demo.emeetify.com:5016/';
+
   static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
 
   static bool documentUploadfromProject = false;
   static bool internetDialog = false;
-
   static String? profilePic;
   static int? projectId;
   static int currentmenuvalue = 1;

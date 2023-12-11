@@ -5,6 +5,7 @@ import 'package:mta/screens/authentication/setpin.dart';
 import 'package:mta/screens/authentication/verifypin.dart';
 import 'package:mta/screens/categories/categeories.dart';
 import 'package:mta/screens/categories/categoriesinfo.dart';
+import 'package:mta/screens/chat/ChatGroups.dart';
 import 'package:mta/screens/comments/adddocComments.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
@@ -101,6 +102,9 @@ class RoutesGenerator {
       case '/projectCommentReplies':
         return MaterialPageRoute(builder: (_) => ProjectCommentsReplies());
         break;
+      // case '/chatGroups':
+      //   return MaterialPageRoute(builder: (_) => ChatGroups());
+      //   break;
       default:
         return _errorRoute();
         break;

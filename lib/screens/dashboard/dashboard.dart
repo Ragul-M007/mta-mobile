@@ -368,6 +368,9 @@ controller = WebViewController()
                   selectedmenuvalue: 9,
                   menutitle: "Logout",
                 ),
+
+                
+                Text("version name")
               ],
               child: Scaffold(
                   backgroundColor: const Color(0xFFececed),

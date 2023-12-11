@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
@@ -25,13 +27,14 @@ FancyDrawerController? _controller;
 double lat = 0.00;
 double long = 0.00;
 String location = '';
+double? distance;
 var now = DateTime.now();
 var month = now.month.toString().padLeft(2, '0');
 var day = now.day.toString().padLeft(2, '0');
 var year = now.year.toString();
 DateTime _focusedDay = DateTime.now();
 DateTime? _selectedDay;
-DashboardRes? _projectLists;
+DashboardRes? _projectLists = DashboardRes();
 
 var monthMatch = [
   "Jan",
@@ -93,10 +96,8 @@ class _AttendanceContentState extends State<AttendanceContent>
 
   getProjects() 
   {
-    print("qw");
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-    print("qw11");
 
     api.projects(Strings.userID!).then((response) {
       AppUtils.dismissprogress();
@@ -104,6 +105,8 @@ class _AttendanceContentState extends State<AttendanceContent>
         setState(() {
           print("messagee from api ${response.message}");
           _projectLists = response;
+          location = response.token?.projectName ?? "";
+
         });
       } else {
         AppUtils.showToastError(response.message ?? "Error");
@@ -151,6 +154,7 @@ class _AttendanceContentState extends State<AttendanceContent>
   }
 
   Widget build(BuildContext context) {
+    print(" data ${_projectLists?.data?.length}");
     return Material(
       child: Container(
         decoration:
@@ -318,40 +322,41 @@ showDialog(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Icon(
-                                  Icons.pin_drop,
-                                  color: Color(0xFF0061b0),
-                                  size: 26.0,
-                                ),
-                                SizedBox(width: 5.0),
-                                Container(
-                                  child: Text(location,
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87)),
-                                                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    getUserLocation();
-                                  },
-                                  child: Icon(
-                                    Icons.refresh,
-                                    color: Color(0xFF0061b0),
-                                    size: 26.0,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 15,
-                                ),
+                                // Icon(
+                                //   Icons.pin_drop,
+                                //   color: Color(0xFF0061b0),
+                                //   size: 26.0,
+                                // ),
+                                // SizedBox(width: 5.0),
+                                // Container(
+                                //   child: Text(location,
+                                //   style: TextStyle(
+                                //       fontSize: 12,
+                                //       fontWeight: FontWeight.w600,
+                                //       color: Colors.black87)),
+                                //                                 ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     getUserLocation();
+                                //   },
+                                //   child: Icon(
+                                //     Icons.refresh,
+                                //     color: Color(0xFF0061b0),
+                                //     size: 26.0,
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   width: 15,
+                                // ),
                                 InkWell(
                                   child: Row(
                                     children: [
                                       SizedBox(
-                                        height: 80,
+                                        height: 50,
                                       ),
                                       Text("Grid View",
                                           style: Drawables.adddoccontentstyle(
@@ -378,7 +383,7 @@ showDialog(
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 0, 0, 20),
+                            padding: const EdgeInsets.fromLTRB(30, 0, 0, 10),
                             child: DropdownButton<String>(
                               value: dropdownValue,
                               style: const TextStyle(
@@ -406,7 +411,8 @@ showDialog(
                                   selecetedMonth.toString();
                                 }
                                 getAttendance(editedMonth + "-" + year);
-                                setState(() {
+                                setState(() 
+                                {
                                   if(newValue != null)
                                   dropdownValue = newValue;
                                 });
@@ -667,17 +673,18 @@ showDialog(
           Expanded(
               child: GestureDetector(
             onTap: () 
-            {
+            async {
+              AppUtils.showprogress();
+              await getUserLocation();
               print("inside check");
               // checkInOut("IN");
               if (location == '') 
               {
                 AppUtils.showToastErrorTop(
-                    "Unable to find your location, Please tap refersh icon to get your location");
+                    "Please Select a Project.");
               } 
               else 
               {
-
                 if(_attendance.length != 0)
                 {
                       var lastSignIn = _attendance.last;
@@ -710,13 +717,28 @@ showDialog(
                     );
                 }
                 else
-                {
-                _onWillPop("IN");
+                {  
+                  if(distance != null && distance! < 50)
+                  {
+                    _onWillPop("IN");
+                  }
+                  else if(distance != null)
+                  {
+                      _outOfLocationPopUp();
+                  }
                 }
               }
               else
               {
-                  _onWillPop("IN");
+                  print("dis $distance");
+                  if(distance != null && distance! < 50)
+                  {
+                    _onWillPop("IN");
+                  }
+                  else if(distance != null)
+                  {
+                      _outOfLocationPopUp();
+                  }
               }  
               }
             },
@@ -736,12 +758,14 @@ showDialog(
           )),
           Expanded(
               child: GestureDetector(
-            onTap: () {
+            onTap: () async {
+              AppUtils.showprogress();
+              await getUserLocation();
               //checkInOut("OUT");
               if (location == '') 
               {
                 AppUtils.showToastErrorTop(
-                    "Unable to find your location, Please tap refersh icon to get your location");
+                    "Please Select a Project.");
               } else 
               { 
 
@@ -759,7 +783,7 @@ Widget okButton = TextButton(
                   fontSize: 18,
                   color: Color(0xFF0061b0),
                   fontWeight: FontWeight.w600)),
-                    content: Text("You were not allowed to checked out, since you are not checkedin."),
+                    content: Text("You were not allowed to check out, since you were not checkedin."),
                     actions: [
                       okButton,
                     ],
@@ -777,8 +801,15 @@ Widget okButton = TextButton(
 var lastSignIn = _attendance.last;
                 print("last ${_attendance.last}");
                 if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
+                {
+                    if(distance != null && distance! < 50)
                   {
-                 _onWillPop("OUT"); 
+                      _onWillPop("OUT"); 
+                  }
+                  else if(distance != null)
+                  {
+                      _outOfLocationPopUp();
+                  }
                 }
                 else
                 {
@@ -1128,6 +1159,7 @@ var lastSignIn = _attendance.last;
                                                   color: Color(0xFF0061b0),
                                                   size: 16.0,
                                                 ),
+                                                SizedBox(width: 5.0),
                                                 Expanded(
                                                   child: Text(
                                                     _attendance[index]
@@ -1273,15 +1305,7 @@ var lastSignIn = _attendance.last;
           print("testing ${test.checkInLocation}");
            setState(() 
            {
-                print("data while addinf");
-            print("testing ${test.checkInLocation}");
-            print("testing ${test.checkInTime}");
-            print("testing ${test.date}");
-           print("testing ${test.userId}");
-
                 _attendance.add(test);
-                print(_attendance.length);              
-                printfn();
            });
        
 
@@ -1289,26 +1313,7 @@ var lastSignIn = _attendance.last;
         }
          
 
-      }
-     
-      printfn();
-      
-  }
-  printfn()
-  {
-          for (var i = 0; i < _attendance.length; i++) 
-          {
-            print("value of i--> $i");
-               print("---------------Didplaying Details--------------------");
-             print("checkinloc -- ${_attendance[i].checkInLocation}");
-            print("checkintime -- ${_attendance[i].checkInTime}");
-             print("checkinuser -- ${_attendance[i].userId}");
-             print("checkoutloc -- ${_attendance[i].checkOutLocation}");
-             print("checkouttime -- ${_attendance[i].checkOutTime}"); 
-            print("date -- ${_attendance[i].date}"); 
-            print("Length -->${_attendance.length}");
-          }
-
+      }      
   }
 
   
@@ -1361,6 +1366,42 @@ var lastSignIn = _attendance.last;
         false;
   }
 
+  Future<bool> _outOfLocationPopUp() async 
+  {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Not Inside the Premise",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              "You were not inside the selected project location. Please move closer to the Project location and try again.",
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'Okay',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   checkInOut(action) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
@@ -1370,6 +1411,10 @@ var lastSignIn = _attendance.last;
     req.checkType = action;
     req.latLng = lat.toString() + "," + long.toString();
     req.locationName = location;
+    req.projectId = _projectLists?.token?.projectId;
+
+    print("payload ${jsonEncode(req)}");
+  
     api.addAttendance(req).then((response) {
       print("checking out");
       AppUtils.dismissprogress();
@@ -1454,34 +1499,42 @@ var lastSignIn = _attendance.last;
     }
   }
 
-  getUserLocation() async {
-    await Geolocator.checkPermission().then((value) async => 
+  getUserLocation() async 
+  {
+    await Geolocator.checkPermission().then((value) async
     {
           if (value == LocationPermission.denied)
             {
-              {await Geolocator.requestPermission().then((value) => {})}
+              AppUtils.dismissprogress();
+              {await Geolocator.requestPermission().then((value) => {});}
             }
           else if (value == LocationPermission.deniedForever)
             {
+                            AppUtils.dismissprogress();
               AppUtils.showToastError(
-                  "Please enable loaction from App permission Settings")
+                  "Please enable loaction from App permission Settings");
             }
           else
             {
-              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best).then((value) => {
+              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best).then((value) => 
+              {
                     setState(
                       () {
+                        AppUtils.dismissprogress();
                        // AppUtils.showprogress();
                         lat = value.latitude;
                         long = value.longitude;
 
-                        double distanceInMeters = Geolocator.distanceBetween(lat, long, double.parse(_projectLists!.token!.latitude!),double.parse(_projectLists!.token!.longitude!));
-                        print("User distance $distanceInMeters");
+                        distance = Geolocator.distanceBetween(lat, long, double.parse(_projectLists!.token!.latitude ?? "0.0"),double.parse(_projectLists!.token!.longitude ?? "0.0"));
+                        print("User distance $distance");
                         //getGeocode(lat, long);
                       },
                     )
-                  })
+              });
             }
+        }).onError((error, stackTrace){
+          AppUtils.dismissprogress();
+          AppUtils.showToastError("Kindly Enable location");
         });
   }
 
@@ -1531,20 +1584,19 @@ var lastSignIn = _attendance.last;
                         height: MediaQuery.of(context).size.width * 1,
                         width: MediaQuery.of(context).size.width * 0.9,
                         child:
-                         _projectLists?.data?.length != 0? ListView.builder(
+                         (_projectLists?.data?.length != 0 && _projectLists?.data?.length != null)? ListView.builder(
                           itemCount: _projectLists?.data?.length,
                           itemBuilder: (context, index) {
                             return Column(
                               children: [
                                 Card(
-                                  color: Color.fromRGBO(108, 91, 91, 1),
+                                  color: const Color.fromARGB(255, 226, 223, 223).withOpacity(0.1),
                                   child: ListTile(
                                     title: Text(
                                       _projectLists?.data?[index].projectName ?? "",maxLines: 3,
                                     ),
                                     subtitle: Text(_projectLists?.data?[index].description ?? "",maxLines: 3,),
                                     onTap: () {
-                                      location = _projectLists?.data?[index].projectName ?? "";
                                       updateCurrentProject(_projectLists!.data![index].projectId!);
                                       Navigator.of(context).pop();                                    },
                                   ),
@@ -1552,7 +1604,7 @@ var lastSignIn = _attendance.last;
                               ],
                             );
                           },
-                        ):Center(child: Text("No assigned users found",style:TextStyle(color: Colors.red))),
+                        ):Center(child: Text("No assigned projects found",style:TextStyle(color: Colors.red))),
                       ),
                     ],
                   )),
