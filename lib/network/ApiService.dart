@@ -10,6 +10,7 @@ import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/models/Chat/GroupCreationRes.dart';
+import 'package:mta/models/Chat/MediaDetailsRes.dart';
 import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -127,6 +128,11 @@ abstract class ApiService
   @GET("/projects/getProject/{project_id}")
   Future<ProjectDetailsRes> getProjectName(@Path("project_id") int id);
 
+  @GET("/chat/getGroupFiles?group_id={group_id}&file_type={file_type}")
+  Future<MediaDetailsRes> getMediaDetails(@Path("group_id") int id, @Path("file_type") String type);
+
+  
+
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
 
@@ -149,6 +155,9 @@ abstract class ApiService
   @PUT("/utils/updateNotification/{noti_id}")
   Future<ChangePassRes> updateNotificationStatus(
       @Path("noti_id") int id);
+  @PUT("/chat/updateFileDownloadStatus?message_id={msg_id}&status={status}")
+  Future<ChangePassRes> updateDownloadStatus(
+      @Path("msg_id") int id, @Path("status") int status);
 
   @DELETE("/users/removeImage/{user_id}")
   Future<ChangePassRes> removeProPic(

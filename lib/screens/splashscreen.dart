@@ -682,7 +682,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
   }
 
-  getUserCats(proId) {
+  getUserCats(proId) 
+  {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(proId).then((response) {

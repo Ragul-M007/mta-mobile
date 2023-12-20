@@ -23,8 +23,7 @@ mixin Strings
  // static String socketUrl = 'https://mta.multitechcorp.in:5022/';
  // static String socketUrl = 'http://192.168.0.134:5021/';
 
-  //static String imageUrl = 'https://demo.emeetify.com:5016/';
-
+  static String uatImageUrl = 'https://demo.emeetify.com:5032/';
   static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
 
   static bool documentUploadfromProject = false;

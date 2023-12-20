@@ -534,6 +534,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  flutter_parsed_text:
+    dependency: "direct main"
+    description:
+      name: flutter_parsed_text
+      sha256: "529cf5793b7acdf16ee0f97b158d0d4ba0bf06e7121ef180abe1a5b59e32c1e2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -661,10 +669,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "759d1a329847dd0f39226c688d3e06a6b8679668e350e2891a6474f8b4bb8525"
+      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "0.13.6"
   http_multi_server:
     dependency: transitive
     description:
@@ -1502,6 +1510,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.1"
+  v_chat_mention_controller:
+    dependency: "direct main"
+    description:
+      name: v_chat_mention_controller
+      sha256: "953ff4e4744b91ec09f8a667b860a52e86a8df819ecef938498ed6e11c4fa7f1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   vector_math:
     dependency: transitive
     description:
@@ -1510,6 +1526,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  video_thumbnail_imageview:
+    dependency: "direct main"
+    description:
+      name: video_thumbnail_imageview
+      sha256: "4ff3fdd497a0a9b84fa09526a7a33b922414e26dafcb347635d609ec06349de7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.5"
   watcher:
     dependency: transitive
     description:

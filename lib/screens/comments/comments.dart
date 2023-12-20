@@ -73,7 +73,8 @@ class Comments extends StatefulWidget {
   _CommentsState createState() => _CommentsState();
 }
 
-class _CommentsState extends State<Comments> {
+class _CommentsState extends State<Comments> 
+{
   @override
   Widget build(BuildContext context) {
     return Provider<ApiService>(
@@ -89,6 +90,7 @@ class _CommentsState extends State<Comments> {
                 initialCommentCheck = true;
                 _socket?.disconnect();
                 _socket?.dispose();
+                
                 if (Strings.fromNotificationComments == true) {
                   Strings.fromNotificationComments = false;
                   Navigator.pushNamed(context, '/dashboard');
@@ -309,7 +311,7 @@ class _CommentsContentState extends State<CommentsContent>
     setState(() {
       filepath = fullPath;
     });
-            var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
+    var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     print("downloaded file $downloadedFile");
     openFile(downloadedFile);
@@ -736,7 +738,8 @@ class _CommentsContentState extends State<CommentsContent>
                                                             ],
                                                           )
                                                         : InkWell(
-                                                            onTap: () {
+                                                            onTap: () 
+                                                            {
                                                               _downloadfile(
                                                                   Strings
                                                                       .comments[
@@ -1408,7 +1411,8 @@ class _CommentsContentState extends State<CommentsContent>
     });
   }
 
-  String getFileExt(String? fileName) {
+  String getFileExt(String? fileName) 
+  {
     print("Filename--> $fileName");
     var file = fileName?.split(".");
     var fileExt = file?[1];

@@ -150,7 +150,6 @@ class _ViewDocContentState extends State<ViewDocContent> {
     // AppUtils.showprogress();
     // AppUtils.showToast('Downloading');
 
-    var filenames = serverURL.split("/");
     print("serverURL--> $serverURL");
     //var fileName = filename;//filenames[1];
     var extn = getFileExtension(serverURL);
@@ -162,6 +161,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
       filepath = fullPath;
     });
         var downloadedFile = await download2(dio,serverURL,'$path/$fileName');
+        print("filepath");
 
    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     print("downloaded file $downloadedFile");
@@ -205,7 +205,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
   // }
   Future download2(Dio dio, String url, String savePath) async 
   {
-    try {
+    try 
+    {
           var  myUrl = Strings.baseImageUrl + url;
       Response response = await dio.get(
       myUrl,
@@ -543,12 +544,12 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 GestureDetector(
-                                                  onTap: () {
-                                                    _downloadfile(
+                                                  onTap: () {                     
+                                                      _downloadfile(
                                                         _categorydocsList[index]
                                                             .file,
                                                         _categorydocsList[index]
-                                                            .fileName);
+                                                            .fileName);  
                                                   },
                                                   child: Stack(
                                                     children: <Widget>[

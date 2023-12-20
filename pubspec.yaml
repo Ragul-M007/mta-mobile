@@ -85,6 +85,10 @@ dependencies:
   scrollable_positioned_list: ^0.3.8
   webview_flutter: ^4.4.2
   external_path: ^1.0.3
+  video_thumbnail_imageview: ^0.0.5
+  v_chat_mention_controller: ^1.0.0
+  flutter_parsed_text: ^2.2.1
+  
   # flutter_progress_dialog: ^0.1.0
   # flutter_spinkit: ^4.1.2
   # ext_storage:

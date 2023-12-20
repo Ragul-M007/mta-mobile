@@ -5,7 +5,7 @@ class GroupCreationReq {
   String? groupType;
   int? projectId;
   int? teamId;
-  Null? groupImage;
+  String? groupImage;
 
   GroupCreationReq(
       {this.groupName,

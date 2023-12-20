@@ -2,18 +2,23 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/GroupChatListRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:dio/dio.dart';
+
+import 'package:path/path.dart' as path;
+import 'package:mime/mime.dart';
 
 import '../../utilities/apputilities.dart';
 
@@ -41,6 +46,8 @@ class _ChatGroupsState extends State<ChatGroups>
   FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
   TextEditingController _groupNameFieldController = TextEditingController();
+  TextEditingController _groupDescriptionFieldController = TextEditingController();
+
 
   List<GroupListRes> groupList = [];
 
@@ -62,6 +69,7 @@ class _ChatGroupsState extends State<ChatGroups>
   }
   connectSocket()
   {
+    print("teamid ${widget.teamId}");
     print("trying to connect socket");
      _socket = IO.io(Strings.socketUrl, <String, dynamic>
     {
@@ -83,15 +91,19 @@ class _ChatGroupsState extends State<ChatGroups>
       print('Connected');
       print("Calling function");
       getChats();
+
+    
       //_socket?.disconnect();
     });
   }
+
+  
   
 getChats()
 {
-
-      _socket?.on("all-groups", (_data) {
+  _socket?.on("all-groups", (_data) {
         setState(() {
+          groupList.clear();
            for (var item in _data) {
             groupList.add(GroupListRes.fromJson(item));
             print("set state");
@@ -99,9 +111,54 @@ getChats()
 
         });
        
-        print("dataaa ${groupList}");
+        print("dataaa ${ jsonEncode(groupList)}");
       });
 
+}
+
+upload() async {
+
+
+
+FilePickerResult? result = await FilePicker.platform.pickFiles(
+  allowMultiple: true,
+  type: FileType.custom,
+  allowedExtensions: ['jpg', 'pdf', 'doc'],
+);
+if(result != null) 
+{
+    List files = result.paths.map((path) => 
+        MultipartFile.fromFileSync(
+            path!, 
+            filename: getFileName(path),
+            // contentType: MediaType(
+            //     lookupMimeType(getFileName(path))?.split('/')[0],
+            //     lookupMimeType(getFileName(path))?.split('/')[1],
+            // ),
+      )
+    ).toList();  
+      var dio = Dio();
+      var formData = FormData.fromMap({
+        'user_id': Strings.userID, // other parameter may you need to send
+        'group_id': 52, // other parameter may you need to send
+        'groupImage': files,
+      });
+
+
+  var response = await dio.post('https://demo.emeetify.com:81/mta/chat/createMessage', data: formData); 
+  // check response status code
+ 
+  print("response ${response}");
+  if(response.statusCode == 200){
+
+     // it's uploaded
+  }
+} else {
+   // User canceled the picker
+}
+}
+String getFileName(String _path){
+    return path.basename(_path); 
 }
   createGroup() 
   {
@@ -114,7 +171,7 @@ getChats()
     req.groupCreatedBy = Strings.userID;
     req.groupImage = null;
     req.groupName = _groupNameFieldController.text;
-    req.groupDescription = " ";
+    req.groupDescription = _groupDescriptionFieldController.text;
     req.teamId = widget.teamId;
     req.groupType = "team";
 
@@ -126,7 +183,9 @@ getChats()
       if(response.status!)
       {
           AppUtils.showToastSuccess(response.message ?? "Error");
+          connectSocket();
           _groupNameFieldController.clear();
+          _groupDescriptionFieldController.clear();
           Navigator.of(context).pop();
       }
       else
@@ -149,7 +208,8 @@ getChats()
       child: Scaffold(
         floatingActionButton: InkWell(
           onTap: (){
-              _showMyDialog(context);
+            // upload();
+               _showMyDialog(context);
           },
           child: CircleAvatar(
             radius: 20,
@@ -310,7 +370,12 @@ getChats()
                         child: GestureDetector(
                           onTap: () {
                           
-
+                                Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ChatScreen(groupId: groupList[index].groupId!,),
+  ),
+);
                           },
                           child: Container(
                             child: Padding(
@@ -451,12 +516,16 @@ getChats()
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(5.0),
-                      child: TextField(
-                        controller: _groupNameFieldController,
-                          decoration: InputDecoration.collapsed(
-                            hintText: ' Enter description',
-                          ),  
-                        ),
+                      child: SizedBox(
+                        height: 100,
+                        child: TextField(
+                          maxLines: 5,
+                          controller: _groupDescriptionFieldController,
+                            decoration: InputDecoration.collapsed(
+                              hintText: ' Enter description',
+                            ),  
+                          ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 20,),

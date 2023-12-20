@@ -618,6 +618,36 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<MediaDetailsRes> getMediaDetails(
+    int id,
+    String type,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<MediaDetailsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/getGroupFiles?group_id=${id}&file_type=${type}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = MediaDetailsRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<NotificationRes> notification() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -802,6 +832,36 @@ class _ApiService implements ApiService {
             .compose(
               _dio.options,
               '/utils/updateNotification/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = ChangePassRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> updateDownloadStatus(
+    int id,
+    int status,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/updateFileDownloadStatus?message_id=${id}&status=${status}',
               queryParameters: queryParameters,
               data: _data,
             )
