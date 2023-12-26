@@ -116,6 +116,9 @@ static  String getFileExtension(String fileName) {
     } else if (fileExt == "wav" || fileExt == "mp3") {
       return ".wav"; 
     }
+    else if (fileExt == "m4a" || fileExt == "m4a") {
+      return ".m4a"; 
+    }
     else if (fileExt == "ppt" || fileExt == "PPT") {
       return ".ppt";
     } else if (fileExt == "xls" ||

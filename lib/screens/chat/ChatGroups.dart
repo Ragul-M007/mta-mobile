@@ -407,7 +407,7 @@ String getFileName(String _path){
                                     Container(
                     width: 24,
                     height: 24,
-                    child: Center(child: Text("4",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),)),
+                    child: Center(child: Text("${groupList[index].unreadMessageCount ?? 0}",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),)),
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Color.fromARGB(255, 60, 237, 80)),

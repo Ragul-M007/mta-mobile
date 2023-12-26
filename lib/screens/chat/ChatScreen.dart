@@ -1,23 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:mta/models/Chat/ChatMessageRes.dart';
+import 'package:mta/models/Chat/GroupUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/Webview/webview.dart';
 import 'package:mta/screens/chat/ChatMedia.dart';
-import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_parsed_text/flutter_parsed_text.dart';
+import 'package:record/record.dart';
+import 'package:uuid/uuid.dart';
 import 'package:v_chat_mention_controller/v_chat_mention_controller.dart';
-
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -25,79 +28,161 @@ import 'package:path/path.dart' as path;
 
 import '../../utilities/apputilities.dart';
 import '../../utilities/drawables.dart';
-
-
+import '../MentionFiles/flutter_mentions.dart';
 
 var dio = Dio();
-
-
-
 
 String? filepath;
 IO.Socket? _socket;
 
 class ChatScreen extends StatefulWidget {
   static const String routeName = "/chatScreen";
-final int groupId;
+  final int groupId;
 
-    ChatScreen({required this.groupId});
+  ChatScreen({required this.groupId});
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-
 class _ChatScreenState extends State<ChatScreen>
-    with SingleTickerProviderStateMixin 
-    {
-  var _currDoc;
+    with SingleTickerProviderStateMixin {
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
+  FocusNode msgField = new FocusNode();
+  List<ChatMessageRes> chatList = [];
+  List<Map<String, dynamic>> userList = [];
+  var typing = false;
+  var showtoastinfo = false;
+  var startRecording = false;
+  var isPlaying = false;
+  var playingIndex;
+  int audioLength = 0;
+  int audioCurrentlenth = 0;
+  AudioPlayer audioPlayer = AudioPlayer();
+  AudioCache audioCache = AudioCache();
+  Timer? _timer;
+final ScrollController _controller = ScrollController();
 
-  TextEditingController _msgcontroller = TextEditingController();
- final ItemScrollController itemScrollController = ItemScrollController();
-final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();  FocusNode msgField = new FocusNode();
-List<ChatMessageRes> chatList = [];
   String? basePath;
 
-  String temp  = "";
+  String temp = "";
+  String recordingPath = "";
 
-
-  //mention users
-final controller = VChatTextMentionController(
-    debounce: 500,
-    ///set custom style
-    mentionStyle: const TextStyle(
-      color: Colors.deepPurple,
-      fontWeight: FontWeight.w800,
-    ),
-  );
+  
   String parsedText = "";
   final logs = <String>[];
   final _fakeUsersDataServer = List.generate(100, (index) => "user$index");
   final users = <String>[];
   bool _isSearchCanView = false;
+  List<GroupChatUsersData> chatUsers = [];
+  final _audioRecorder = AudioRecorder();
 
+  List<InlineSpan> customizeText(String text) {
+    // final regex = RegExp('\'.+\'');
+    // final target = regex.stringMatch(testString)!;
+    List<InlineSpan> spans = [];
 
-  List<InlineSpan> customizeText(String text)
-  {
-        // final regex = RegExp('\'.+\'');
-        // final target = regex.stringMatch(testString)!;
-      List<InlineSpan> spans;
+    final regex = RegExp(r'##&&%(.*?)##&&%');
+    const placeholder = '{@}';
 
-        final regex = RegExp(r'\$\$(.*?)\$\$');
-        const placeholder = '{@}';
-        final target = regex.stringMatch(text) ?? "";
-        final updatedString = text.replaceAll(regex, placeholder);
-        final tokens = updatedString.split(RegExp(' '));
+    Iterable<Match> matches = regex.allMatches(text);
+    List<String> target = [];
 
-        print("tokenssss $tokens");
-        spans = tokens
-        .map((e) => e == placeholder
-        ? TextSpan(text: target + ' ', style: const TextStyle(color: Colors.blue))
-        : TextSpan(text: e + ' '))
-        .toList();
+    for (Match match in matches) {
+      // match.group(1) contains the content inside the ##&&% sequence
+      print('Content: ${match.group(1)}');
+      target.add(match.group(1) ?? "");
+    }
 
-        return spans;
+    // final target = regex.allMatches(text);
+    final updatedString = text.replaceAll(regex, placeholder);
+    final tokens = updatedString.split(RegExp(' '));
+
+    print("tokenssss $tokens");
+
+    var placeHolderindex = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == placeholder) {
+        print("iiu $placeHolderindex klklkl ${target[placeHolderindex]}");
+        spans.add(TextSpan(
+            text: target[placeHolderindex] + ' ',
+            style: const TextStyle(color: Colors.blue)));
+        placeHolderindex = placeHolderindex + 1;
+      } else {
+        print("adding ${tokens[i]}");
+        spans.add(TextSpan(text: tokens[i] + ' '));
+      }
+    }
+
+    // spans = tokens.map((e) => e == placeholder
+    // ? TextSpan(text: target[target.indexOf(e)+1] + ' ', style: const TextStyle(color: Colors.blue))
+    // : TextSpan(text: e + ' '))
+    // .toList();
+
+    return spans;
   }
 
+  void _scrollDown() {
+  _controller.animateTo(
+    _controller.position.maxScrollExtent - 30,
+    duration: Duration(seconds: 2),
+    curve: Curves.fastOutSlowIn,
+  );
+}
+
+  playAudio(url) async {
+    // var dir = await ExtStorage.getExternalStoragePublicDirectory(
+    //     ExtStorage.DIRECTORY_DOWNLOADS);
+    // String url = dir + "/MTARecordedAudio.wav";
+    print(Strings.uatImageUrl + url);
+    await audioPlayer.play(UrlSource(Strings.uatImageUrl + url), volume: 5);
+    audioPlayer.onDurationChanged.listen((Duration d) {
+      int seconds = d.inSeconds;
+      print('Max duration: $d');
+      setState(() {
+        audioLength = seconds;
+      });
+    });
+    audioPlayer.onPositionChanged.listen((Duration p) {
+      int seconds = p.inSeconds;
+      print('curr duration: $p');
+      setState(() {
+        audioCurrentlenth = seconds;
+      });
+    });
+    audioPlayer.onPlayerComplete.listen((event) {
+      setState(() {
+        audioLength = 0;
+        audioCurrentlenth = 0;
+        playingIndex = null;
+        isPlaying = false;
+      });
+    });
+  }
+
+  stopAudio() async {
+    await audioPlayer.stop();
+    setState(() {
+      audioLength = 0;
+      audioCurrentlenth = 0;
+      playingIndex = null;
+      isPlaying = false;
+    });
+  }
+
+  addMentionUsers() {
+    userList.clear();
+    for (int i = 0; i < chatUsers.length; i++) {
+      var user = {
+        "id": chatUsers[i].userId.toString(),
+        "display": chatUsers[i].userName,
+        "full_name": chatUsers[i].userEmail,
+        "photo": Strings.uatImageUrl + (chatUsers[i].userImage ?? "")
+      };
+      userList.add(user);
+    }
+  }
 
   @override
   void initState() {
@@ -108,78 +193,117 @@ final controller = VChatTextMentionController(
       'transports': ['websocket'],
       'autoConnect': false,
       'forceNew': false,
-      'query': {
-            'token': Strings.authToken,
-            'group_id' : widget.groupId
-      }
+      'query': {'token': Strings.authToken, 'group_id': widget.groupId}
     });
     _socket?.connect();
     _socket?.on("connect", (_) {
       print('Connected');
       joinGroup();
+      getUsersByGroupId();
     });
-
-    
-    controller.onSearch = (str) async 
-    {
-      users.clear();
-      if (str != null) 
-      {
-        //  print("search by $str");
-        _isSearchCanView = true;
-        if (str.isEmpty) {
-          users.addAll(_fakeUsersDataServer);
-        }
-        //send request
-        for (var element in _fakeUsersDataServer) {
-          if (element.startsWith(str)) {
-            users.add(element);
-          }
-        }
-      } else {
-        //stop request
-        _isSearchCanView = false;
-      }
-      setState(() {});
-    };
   }
 
-
-  findPath() async
-  {
+  findPath() async {
     basePath = await AppUtils.findFilePath();
   }
 
-  joinGroup()
-  {
+  joinGroup() {
     _socket?.emit(
-          'join-group',
-          json.encode({
-            "group_id": widget.groupId,
-          } 
-          ));
+        'join-group',
+        json.encode({
+          "group_id": widget.groupId,
+        }));
 
-          getMessages();
+    getMessages();
   }
 
-  getMessages()
-  {
+  getMessages() {
     print("getting messages");
-      _socket?.on("group-messages", (_data) {
-        print("data $_data");
-        chatList.clear();
-        setState(() 
-        {
-           for (var item in _data) {
-            chatList.add(ChatMessageRes.fromJson(item));
-          }
-          print("qwweertt $chatList");
-        });
+    _socket?.on("group-messages", (_data) {
+      log("data $_data");
+      chatList.clear();
+      setState(() {
+        for (var item in _data) {
+          chatList.add(ChatMessageRes.fromJson(item));
+        }
+        print("qwweertt $chatList");
+        _scrollDown();
+      });
     });
   }
 
-  String getFileExt(String? fileName) 
-  {
+  Future<void> stopRecord() async {
+    await _audioRecorder.stop();
+    sendRecordedAudio();
+  }
+
+  sendRecordedAudio() {
+    print("path $recordingPath");
+
+    List<MultipartFile> audioFile = [
+      MultipartFile.fromFileSync(
+        "$recordingPath",
+        filename: getFileName("$recordingPath"),
+      )
+    ];
+    var formData = FormData.fromMap({
+      'user_id': Strings.userID,
+      'group_id': widget.groupId,
+      'groupFile': audioFile,
+    });
+
+    uploadFile(formData);
+  }
+
+  startOrStop() {
+    if (startStop) {
+      startWatch();
+    } else {
+      stopWatch();
+    }
+  }
+
+  reset() {
+    watch.reset();
+  }
+
+  startWatch() {
+    setState(() {
+      startStop = false;
+      watch.start();
+    });
+  }
+
+  stopWatch() {
+    setState(() {
+      startStop = true;
+      watch.stop();
+      setTime();
+      reset();
+    });
+  }
+
+  setTime() {
+    var timeSoFar = watch.elapsedMilliseconds;
+    setState(() {
+      elapsedTime = transformMilliSeconds(timeSoFar);
+    });
+  }
+
+  transformMilliSeconds(int milliseconds) {
+    int hundreds = (milliseconds / 10).truncate();
+    int seconds = (hundreds / 100).truncate();
+    int minutes = (seconds / 60).truncate();
+    int hours = (minutes / 60).truncate();
+
+    String hoursStr = (hours % 60).toString().padLeft(2, '0');
+    String minutesStr = (minutes % 60).toString().padLeft(2, '0');
+    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
+
+    return "$hoursStr:$minutesStr:$secondsStr";
+  }
+
+  String getFileExt(String? fileName) {
     print("Filename--> $fileName");
     var file = fileName?.split("/");
     var fileExttemp = file?[file.length - 1];
@@ -220,11 +344,13 @@ final controller = VChatTextMentionController(
     }
   }
 
+  var uniqueRecordId = Uuid().v1();
+
   updateDownloadStatus(msgId) {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.updateDownloadStatus(msgId,1).then((response) {
+    api.updateDownloadStatus(msgId, 1).then((response) {
       if (response.status!) {
-       // AppUtils.showToastError("update status successfully");
+        // AppUtils.showToastError("update status successfully");
       } else {
         AppUtils.dismissprogress();
         AppUtils.showToastError(response.message!);
@@ -236,79 +362,160 @@ final controller = VChatTextMentionController(
     });
   }
 
+  getUsersByGroupId() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.getChatUsers(widget.groupId).then((response) {
+      if (response.status!) {
+        setState(() {
+          chatUsers = response.data!;
+          addMentionUsers();
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
 
-  updateChat()
-  {
-     _socket?.emitWithAck(
-          'create-message',
-          json.encode({
-            "message": controller.text,
-            "group_id": widget.groupId,
-            "user_id": Strings.userID,
-            "parent_message_id":""
-          }),ack: (_data){
-            print("dataaa ${_data}");
-          });
-         
-          FocusManager.instance.primaryFocus?.unfocus();
-          controller.clear();
+  Stopwatch watch = Stopwatch();
+  bool startStop = true;
+  String elapsedTime = '';
+
+  updateTime(Timer _timer) {
+    if (watch.isRunning) {
+      setState(() {
+        print("startstop Inside=$startStop");
+        elapsedTime = transformMilliSeconds(watch.elapsedMilliseconds);
+      });
+    }
+  }
+
+  recordComments() async {
+    var path;
+    if (Platform.isAndroid) {
+      path = await ExternalPath.getExternalStoragePublicDirectory(
+          ExternalPath.DIRECTORY_DOWNLOADS);
+    } else if (Platform.isIOS) {
+      print("ios");
+      var vpath = await getApplicationDocumentsDirectory();
+      String pathStr = vpath.toString();
+      if (pathStr.length >= 5) {
+        path = pathStr.substring(12, pathStr.length);
+      }
+      if (path != null && path.length >= 1) {
+        path = path.substring(0, path.length - 1);
+      }
+    }
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      getPermission();
+    } else {
+      recordingPath = path + '/' + "${uniqueRecordId}_mta12" + '.mp3';
+
+      print("record bfre $recordingPath");
+      _audioRecorder.start(
+        const RecordConfig(),
+        path: recordingPath,
+      );
+
+      // Replace 'your_file.txt' with the actual file name you want to access
+    }
+  }
+
+  void getPermission() async {
+    var status = await Permission.microphone.status;
+    print("srtatus $status");
+    if (status.isDenied) {
+      await Permission.microphone.request();
+    } else if (status.isPermanentlyDenied) {
+      AppUtils.showToastError(
+          "Please enable Microphone from App permission Settings");
+    } else {
+      await Permission.microphone.request();
+    }
+  }
+
+  updateChat() {
+    _socket?.emitWithAck(
+        'create-message',
+        json.encode({
+          "message": key.currentState!.controller!.markupText,
+          "group_id": widget.groupId,
+          "user_id": Strings.userID,
+          "parent_message_id": ""
+        }), ack: (_data) {
+      print("dataaa ${_data}");
+    });
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    key.currentState!.controller!.clear();
   }
 
   @override
   void dispose() {
-      super.dispose();
+    super.dispose();
     _socket?.disconnect();
     _socket?.dispose();
   }
 
+  upload(grpId) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3'],
+    );
+    if (result != null) {
+      List<MultipartFile> files = result.paths
+          .map((path) => MultipartFile.fromFileSync(
+                path!,
+                filename: getFileName(path),
+                // contentType: MediaType(
+                //     lookupMimeType(getFileName(path))?.split('/')[0],
+                //     lookupMimeType(getFileName(path))?.split('/')[1],
+                // ),
+              ))
+          .toList();
 
-upload(grpId) async {
-
-
-
-FilePickerResult? result = await FilePicker.platform.pickFiles(
-  allowMultiple: true,
-  type: FileType.custom,
-  allowedExtensions: ['jpg', 'pdf', 'doc'],
-);
-if(result != null) 
-{
-    List<MultipartFile> files = result.paths.map((path) => 
-        MultipartFile.fromFileSync(
-            path!, 
-            filename: getFileName(path),
-            // contentType: MediaType(
-            //     lookupMimeType(getFileName(path))?.split('/')[0],
-            //     lookupMimeType(getFileName(path))?.split('/')[1],
-            // ),
-      )
-    ).toList();  
-      var dio = Dio();
       var formData = FormData.fromMap({
-        'user_id': Strings.userID, 
-        'group_id': grpId, 
+        'user_id': Strings.userID,
+        'group_id': grpId,
         'groupFile': files,
       });
       int totalLength = 0;
-  for (MultipartFile file in files) {
-    int content = await file.length;
-    totalLength += content;
+      for (MultipartFile file in files) {
+        int content = await file.length;
+        totalLength += content;
+      }
+
+      print("print totla ${(totalLength / 1024)}");
+
+      var totalSize = totalLength / 1024;
+
+      //var response = await dio.post('https://demo.emeetify.com:81/mta/chat/createMessage', data: formData);
+      // check response status code
+      if (totalSize <= 25600) {
+        print("insideeee");
+        uploadFile(formData);
+      } else {
+        _showFileSizeWarning();
+      }
+    } else {
+      // User canceled the picker
+    }
   }
 
-  print("print totla ${(totalLength/1024)}");
+  String getFileName(String _path) {
+    return path.basename(_path);
+  }
 
-      var totalSize = totalLength/1024;
-
-  //var response = await dio.post('https://demo.emeetify.com:81/mta/chat/createMessage', data: formData); 
-  // check response status code
- if(totalSize <= 25600)
- {
-print("insideeee");
-try{
-   var  myUrl = 'https://demo.emeetify.com:81/mta/chat/createMessage';
+  uploadFile(formData) async {
+    try {
+      var myUrl = 'https://demo.emeetify.com:81/mta/chat/createMessage';
       var response = await dio.post(
-      myUrl,
-      data: formData,
+        myUrl,
+        data: formData,
         onSendProgress: showUploadProgress,
         //Received data with List<int>
         options: Options(
@@ -321,52 +528,22 @@ try{
       print("response ${response.statusMessage}");
 
       print("status code ${response.statusCode}");
-      if (response.statusCode == 200) 
-      {
-
-            print("checkkk inside");
-            // _socket?.disconnect();
-            // _socket?.dispose();
-            // _socket?.destroy();
-
-            
-                joinGroup();
-
-            AppUtils.dismissprogress();
-          
+      if (response.statusCode == 200) {
+        joinGroup();
+        AppUtils.dismissprogress();
       } else if (response.statusCode == 404) {
-            AppUtils.dismissprogress();
-            AppUtils.showToastError("Sorry, File  not Found !");
-          } else {
-            AppUtils.dismissprogress();
-          }
-}
-catch (e) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+      }
+    } catch (e) {
       AppUtils.dismissprogress();
-        print(e);
+      print(e);
     }
-
- }
- else
- {
-  _showFileSizeWarning();
- }
-
-
- 
-} else {
-   // User canceled the picker
-}
-}
-String getFileName(String _path){
-    return path.basename(_path); 
-}
-
-
-
+  }
 
   void _downloadfile(serverURL, filename) async {
-    
     // AppUtils.showprogress();
     // AppUtils.showToast('Downloading');
 
@@ -377,30 +554,25 @@ String getFileName(String _path){
     var fileName = nospace + extn;
     print("url--> $fileName");
     String fullPath = "$basePath/$fileName";
-            print("filepath $fullPath");
+    print("filepath $fullPath");
 
     setState(() {
       filepath = fullPath;
     });
-        var downloadedFile = await download2(dio,serverURL,'$basePath/$fileName');
+    var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
 
-   // var downloadedFile = await downloadFile(serverURL, fileName, path!);
+    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
 
-                    joinGroup();
+    joinGroup();
 
-    
     AppUtils.openFile(downloadedFile);
   }
 
-  
-
-
-Future download2(Dio dio, String url, String savePath) async 
-  {
+  Future download2(Dio dio, String url, String savePath) async {
     try {
-          var  myUrl = Strings.uatImageUrl + url;
+      var myUrl = Strings.uatImageUrl + url;
       Response response = await dio.get(
-      myUrl,
+        myUrl,
         onReceiveProgress: showDownloadProgress,
         //Received data with List<int>
         options: Options(
@@ -410,7 +582,7 @@ Future download2(Dio dio, String url, String savePath) async
               return status! < 500;
             }),
       );
-      
+
       print(response.headers);
       File file = File(savePath);
       var raf = file.openSync(mode: FileMode.write);
@@ -432,320 +604,393 @@ Future download2(Dio dio, String url, String savePath) async
       return filePath;
     } catch (e) {
       AppUtils.dismissprogress();
-        var filePath = 'Error $e';
-        print(e);
-        return filePath;
+      var filePath = 'Error $e';
+      print(e);
+      return filePath;
     }
   }
+
   void showDownloadProgress(received, total) {
     if (total != -1) {
-     AppUtils.showprogresswithpercent(received / total);
-      print((received / total * 100).toStringAsFixed(0) + "%");
-    }
-  }
-  void showUploadProgress(received, total) {
-    if (total != -1) {
-     AppUtils.showUploadProgressWithPercent(received / total);
+      AppUtils.showprogresswithpercent(received / total);
       print((received / total * 100).toStringAsFixed(0) + "%");
     }
   }
 
+  void showUploadProgress(received, total) {
+    if (total != -1) {
+      AppUtils.showUploadProgressWithPercent(received / total);
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
+  }
+
+  GlobalKey<FlutterMentionsState> key = GlobalKey<FlutterMentionsState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-          appBar: AppBar(
-    iconTheme: IconThemeData(color: Colors.black),
-    backgroundColor: Colors.white,
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-    elevation: 8,
-    title: InkWell(
-      onTap: (){
-        Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => ChatMedia(groupId: widget.groupId,),
-  ),
-);
-      },
-      child: Container(
-        width: double.infinity,
-        height: 30,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            "Chat Screen",
-            style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
-          ),
-        ),
-      ),
-    ),
-  ),
-          backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            
-            Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Column(
-                  children: [
-                    
-      
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.75,
-                      child:    ListView.builder(
-            itemCount: chatList.length,
-            itemBuilder: (context, index) {
-              return Card(
-              child: 
-              ListTile(title: (chatList[index].files == null)? Text.rich(TextSpan(children: customizeText(chatList[index].message ?? ""))):InkWell(
-                onTap: ()
-                {
-                  updateDownloadStatus(chatList[index].messageId);
-
-                  if(chatList[index].isDownloaded == 0)
-                  {
-                      _downloadfile(chatList[index].files!,chatList[index].fileName);
-                  }
-                  else
-                  {
-                   AppUtils.openFile(basePath!+"/"+ chatList[index].fileName!+AppUtils.getFileExtension(chatList[index].files!));
-                  }
-                },
-                child: 
-                //Image.asset(getFileExt(chatList[index].files!),height: 100,),
-                SizedBox(
-                  width: 200,
-                  height: 200,
-                  child:                   
-Stack(children: [Center(child: Image.asset(getFileExt(chatList[index].files!),height: 100,fit: BoxFit.cover,)),
-                if(chatList[index].isDownloaded == 0)Center(child: Icon(Icons.download,size: 50,color: Colors.black,),)]))
-                  
-                  
-                  ),
-              subtitle: Text(chatList[index].userName ?? "qwerr",style: TextStyle(color: Colors.grey,fontSize: 12),),),
-              );
-            }
-            ),
-        
-                      
-                      )
-        
-                  ],
-                )),
-            SizedBox(height: 10),
-            
-            // Stack(children: [
-            //   Align(
-            //     alignment: Alignment.topLeft,
-            //     child: Container(
-            //       width: MediaQuery.of(context).size.width * 0.85,
-            //       child: Padding(
-            //         padding: const EdgeInsets.all(8.0),
-            //         child: Container(
-            //           padding: EdgeInsets.only(left: 20),
-            //           decoration: BoxDecoration(
-            //               borderRadius: BorderRadius.all(Radius.circular(50)),
-            //               color: Colors.white),
-            //           child: Row(
-            //             children: [
-            //               InkWell(
-            //                   onTap: () 
-            //                   {
-            //                   //  _socket?.disconnect();
-            //                     upload(widget.groupId);
-            //                    // Navigator.pop(context);
-            //                   },
-            //                   child: Icon(Icons.attach_file)),
-            //               SizedBox(
-            //                 width: MediaQuery.of(context).size.width * 0.02,
-            //               ),
-            //               Container(
-            //                 width: MediaQuery.of(context).size.width * 0.6,
-            //                 child: TextField(
-            //                   controller: _msgcontroller,
-            //                   onChanged: (value) {
-                                
-            //                   },
-            //                   style: TextStyle(color: Colors.black),
-            //                   focusNode: msgField,
-                            
-            //                 ),
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            //   Positioned(
-            //     right: 15,
-            //     bottom: 12,
-            //     child: Container(
-            //       width: 40,
-            //       height: 40,
-            //       decoration: BoxDecoration(
-            //           color: Color(0xFF0061b0),
-            //           borderRadius:
-            //               new BorderRadius.all(new Radius.circular(50.0))),
-            //       child: GestureDetector(
-            //         onLongPress: () {
-            //           setState(() {
-                      
-            //           });
-            //         },
-            //         onLongPressEnd: (details) async {
-            //           // AppUtils.showToast(details.toString());
-            //           setState(() async {
-                      
-            //           });
-            //         },
-            //         onTap: () {
-            //           updateChat();
-            //         },
-            //         child: Icon(
-            //                 Icons.send,
-            //                 color: Colors.white,
-            //                 size: 18,
-            //               ),
-            //       ),
-            //     ),
-            //   ),
-            // ]),
-
-            Container(
-              height: 0,
-              color: Colors.white,
-                  child: 
-                  ListView.builder(
-                    itemBuilder: (context, index) => ListTile(
-                      title: ParsedText(
-                        text: logs[index],
-                        style: const TextStyle(color: Colors.black87),
-                        parse: <MatchText>[
-                          MatchText(
-                            pattern: r"\[(@[^:]+):([^\]]+)\]",
-                            style: const TextStyle(
-                              color: Colors.indigo,
-                            ),
-                            renderWidget: ({required pattern, required text}) {
-                              return Text(text);
-                            },
-                            // you must return a map with two keys
-                            // [display] - the text you want to show to the user
-                            // [value] - the value underneath it
-                            renderText: (
-                                {required String str, required String pattern}) {
-                              final map = <String, String>{};
-                              final RegExp customRegExp =
-                                  RegExp(r"\[(@[^:]+):([^\]]+)\]");
-                              final match = customRegExp.firstMatch(str);
-                              map['display'] = match!.group(1)!;
-                              return map;
-                            },
-                            onTap: (url) 
-                            {
-                              final customRegExp = RegExp(r"\[(@[^:]+):([^\]]+)\]");
-                              final match = customRegExp.firstMatch(url)!;
-
-                              print("ontapped $url");
-                              final snackBar = SnackBar(
-                                content: Text(
-                                    'id is ${match.group(2)} name is ${match.group(1)}'),
-                                duration: const Duration(seconds: 7),
-                              );
-        
-                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    itemCount: logs.length,
+    return MaterialApp(
+      builder: (_, child) => Portal(child: child!),
+      home: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.black),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+          elevation: 8,
+          title: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatMedia(
+                    groupId: widget.groupId,
                   ),
                 ),
-                
-                Column(
-                  children: [
-                    Visibility(
-                      visible: _isSearchCanView,
-                      child: Container(
-                        color: Colors.white,
-                        height: 200,
-                        child: ListView(
-                          shrinkWrap: true,
-                          children: users
-                              .map(
-                                (e) => ListTile(
-                                  onTap: () {
-                                    controller.addMention(
-                                      MentionData(
-                                        id: "id-$e",
-                                        display: "##$e##",
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: 30,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Chat Screen",
+                  style: Drawables.adddoccontentstyle(
+                      Colors.black, 16.0, FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+        ),
+        backgroundColor: Colors.grey[300],
+        body: Column(children: [
+          Container(
+          //  height: MediaQuery.of(context).size.height * 0.75,
+            child: Expanded(
+              child: ListView.builder(
+                controller: _controller,
+                shrinkWrap: false,
+                  itemCount: chatList.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      child: ListTile(
+                        title: (chatList[index].files == null)
+                            ? Text.rich(TextSpan(
+                                children: customizeText(
+                                    chatList[index].message ?? "")))
+                            : chatList[index].files!.contains(".mp3")
+                                ? Row(
+                                    children: [
+                                      isPlaying == false
+                                          ? GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  if (isPlaying ==
+                                                      true) {
+                                                    stopAudio();
+                                                    _timer = new Timer(
+                                                        const Duration(
+                                                            milliseconds:
+                                                                500),
+                                                        () {
+                                                      setState(() {
+                                                        isPlaying =
+                                                            true;
+                                                        playingIndex =
+                                                            index;
+                                                        playAudio(
+                                                            chatList[
+                                                                    index]
+                                                                .files);
+                                                      });
+                                                    });
+                                                  } else {
+                                                    isPlaying = true;
+                                                    playingIndex =
+                                                        index;
+                                                    playAudio(
+                                                        chatList[index]
+                                                            .files);
+                                                  }
+                                                });
+                                              },
+                                              child: new Icon(
+                                                  Icons.play_arrow,
+                                                  size: 28.0),
+                                            )
+                                          : playingIndex == index
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      isPlaying = false;
+                                                    });
+              
+                                                    stopAudio();
+                                                  },
+                                                  child: new Icon(
+                                                      Icons.stop,
+                                                      size: 28.0),
+                                                )
+                                              : GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      if (isPlaying ==
+                                                          true) {
+                                                        stopAudio();
+                                                        _timer = new Timer(
+                                                            const Duration(
+                                                                milliseconds:
+                                                                    500),
+                                                            () {
+                                                          setState(() {
+                                                            isPlaying =
+                                                                true;
+                                                            playingIndex =
+                                                                index;
+                                                            playAudio(chatList[
+                                                                    index]
+                                                                .files);
+                                                          });
+                                                        });
+                                                      } else {
+                                                        isPlaying =
+                                                            true;
+                                                        playingIndex =
+                                                            index;
+                                                        playAudio(
+                                                            chatList[
+                                                                    index]
+                                                                .files);
+                                                      }
+                                                    });
+                                                  },
+                                                  child: new Icon(
+                                                      Icons.play_arrow,
+                                                      size: 28.0),
+                                                ),
+                                      SizedBox(
+                                        width: 10,
                                       ),
-                                    );
-                                  },
-                                  title: Text(e),
-                                ),
-                              )
-                              .toList(),
+                                      Slider(
+                                        value: playingIndex == index
+                                            ? audioCurrentlenth
+                                                .toDouble()
+                                            : 0,
+                                        min: 0,
+                                        max: playingIndex == index
+                                            ? audioLength.toDouble()
+                                            : 0,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            playingIndex == index
+                                                ? audioCurrentlenth =
+                                                    value.toInt()
+                                                : 0;
+                                            // _currentSliderValue = value;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : InkWell(
+                                    onTap: () {
+                                      updateDownloadStatus(
+                                          chatList[index].messageId);
+              
+                                      if (chatList[index]
+                                              .isDownloaded ==
+                                          0) {
+                                        _downloadfile(
+                                            chatList[index].files!,
+                                            chatList[index].fileName);
+                                      } else {
+                                        AppUtils.openFile(basePath! +
+                                            "/" +
+                                            chatList[index].fileName! +
+                                            AppUtils.getFileExtension(
+                                                chatList[index]
+                                                    .files!));
+                                      }
+                                    },
+                                    child:
+                                        //Image.asset(getFileExt(chatList[index].files!),height: 100,),
+                                        SizedBox(
+                                            width: 200,
+                                            height: 200,
+                                            child: Stack(children: [
+                                              Center(
+                                                  child: Image.asset(
+                                                getFileExt(
+                                                    chatList[index]
+                                                        .files!),
+                                                height: 100,
+                                                fit: BoxFit.cover,
+                                              )),
+                                              if (chatList[index]
+                                                      .isDownloaded ==
+                                                  0)
+                                                Center(
+                                                  child: Icon(
+                                                    Icons.download,
+                                                    size: 50,
+                                                    color: Colors.black,
+                                                  ),
+                                                )
+                                            ]))),
+                        subtitle: Text(
+                          chatList[index].userName ?? "qwerr",
+                          style: TextStyle(
+                              color: Colors.grey, fontSize: 12),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 36,),
-                    Container(
-                      height: 50,
-                      padding: EdgeInsets.all(8),
-                      color: Colors.white,
-                      child: Row(
-                        children: [
-                            InkWell(
-                              onTap: () 
-                              {
-                              //  _socket?.disconnect();
-                                upload(widget.groupId);
-                               // Navigator.pop(context);
-                              },
-                              child: Icon(Icons.attach_file)),
-                              SizedBox(width: 8,),
-                          Expanded(
-                            child: TextField(
-                              controller: controller,
-                              onChanged: (val){
-                                temp = val;
-                              },
-
-                            
+                    );
+                  }),
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            padding: EdgeInsets.all(8),
+            color: Colors.white,
+            child: Row(
+              children: [
+                InkWell(
+                    onTap: () {
+                      //  _socket?.disconnect();
+                      upload(widget.groupId);
+                      // Navigator.pop(context);
+                    },
+                    child: Icon(Icons.attach_file)),
+                SizedBox(
+                  width: 8,
+                ),
+                Expanded(
+                  child: Container(
+                    child: FlutterMentions(
+                      key: key,
+                      suggestionPosition: SuggestionPosition.Top,
+                      maxLines: 5,
+                      minLines: 1,
+                      decoration: InputDecoration(hintText: 'hello'),
+                      onMarkupChanged: (kll) {
+                        print("mark changeddd $kll");
+                      },
+                      mentions: [
+                        Mention(
+                            trigger: '@',
+                            style: TextStyle(
+                              color: Colors.amber,
                             ),
-                          ),
-                          SizedBox(width: 8,),
-                          FloatingActionButton(
-                            backgroundColor: Colors.blue,
-                            onPressed: () {
-
-                              updateChat();
-                              print("klll ${controller.text}");
-                            },
-                            child: const Text("Send",style: TextStyle(color: Colors.white),),
-                          )
-                        ],
-                      ),
-                    ),      
-                    ])
-          ],
-        ),
+                            data: userList,
+                            matchAll: false,
+                            suggestionBuilder: (data) {
+                              return Container(
+                                padding: EdgeInsets.all(10.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        data['photo'],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 20.0,
+                                    ),
+                                    Column(
+                                      children: <Widget>[
+                                        Text(data['full_name']),
+                                        Text('@${data['display']}'),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              );
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 8,
+                ),
+                FloatingActionButton(
+                  backgroundColor: Colors.blue,
+                  onPressed: () {
+                    print(key.currentState!.controller!.markupText);
+        
+                    updateChat();
+                    // print("klll ${controller.text}");
+                  },
+                  child: const Text(
+                    "Send",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                Positioned(
+                  right: startRecording == true ? 10 : 15,
+                  bottom: startRecording == true ? 0 : 12,
+                  child: Container(
+                    width: startRecording == true ? 60 : 40,
+                    height: startRecording == true ? 60 : 40,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF0061b0),
+                        borderRadius:
+                            new BorderRadius.all(new Radius.circular(50.0))),
+                    child: GestureDetector(
+                      onLongPress: () async {
+                        var status = await Permission.microphone.status;
+                        if (status.isGranted) {
+                          startRecording = true;
+                          startOrStop();
+                          recordComments();
+                        } else {
+                          AppUtils.showToastError(
+                              "Please allow the Microphone Permission");
+                          getPermission();
+                        }
+                      },
+                      onLongPressEnd: (details) async {
+                        // AppUtils.showToast(details.toString());
+                        var status = await Permission.microphone.status;
+                        if (status.isGranted) {
+                          startRecording = false;
+                          startOrStop();
+                          stopRecord();
+                          // sendAudio();
+                        }
+                      },
+                      onTap: () {
+                        if (typing == true) {
+                        } else {
+                          setState(() {
+                            showtoastinfo = true;
+                          });
+                        }
+                      },
+                      child: typing == false
+                          ? Icon(
+                              Icons.mic,
+                              color: Colors.white,
+                              size: 22,
+                            )
+                          : Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]),
       ),
     );
-
-
-    
   }
 
-Future<bool> _showFileSizeWarning() async 
-  {
+  Future<bool> _showFileSizeWarning() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -778,19 +1023,6 @@ Future<bool> _showFileSizeWarning() async
           ),
         )) ??
         false;
-  }
-
-  transformMilliSeconds(int milliseconds) {
-    int hundreds = (milliseconds / 10).truncate();
-    int seconds = (hundreds / 100).truncate();
-    int minutes = (seconds / 60).truncate();
-    int hours = (minutes / 60).truncate();
-
-    String hoursStr = (hours % 60).toString().padLeft(2, '0');
-    String minutesStr = (minutes % 60).toString().padLeft(2, '0');
-    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
-
-    return "$hoursStr:$minutesStr:$secondsStr";
   }
 }
 
@@ -826,8 +1058,6 @@ class MySeparator extends StatelessWidget {
   }
 }
 
-
-
 Future<void> _showMyDialog(context, imgurl) async {
   return showDialog<void>(
     context: context,
@@ -862,16 +1092,3 @@ Future<void> _showMyDialog(context, imgurl) async {
     },
   );
 }
-
-// void getPermission() async 
-// {
-//   var status = await Permission.microphone.status;
-//   if (status.isDenied) {
-//     await Permission.microphone.request();
-//   } else if (status.isPermanentlyDenied) {
-//     AppUtils.showToastError(
-//         "Please enable Microphone from App permission Settings");
-//   } else {
-//     await Permission.microphone.request();
-//   }
-// }

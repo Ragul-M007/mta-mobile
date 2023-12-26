@@ -40,6 +40,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 // 
 import 'package:retrofit/retrofit.dart';
 
+import '../models/Chat/GroupUsersRes.dart';
 import '../models/FetchCategoryUsersRes.dart';
 part 'ApiService.g.dart';
 
@@ -87,6 +88,9 @@ abstract class ApiService
 
   @GET("/users/profile/{user_id}")
   Future<ProfileRes> profile(@Path("user_id") int userId);
+
+  @GET("/chat/getUsersByGroupId?group_id={group_id}")
+  Future<GroupUsersRes> getChatUsers(@Path("group_id") int groupid);
 
   @GET(
       "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")

@@ -9,6 +9,7 @@ class GroupListRes {
   String? createdAt;
   String? updatedAt;
   int? teamId;
+  int? unreadMessageCount;
 
   GroupListRes(
       {this.groupId,
@@ -20,9 +21,11 @@ class GroupListRes {
       this.groupCreatedBy,
       this.createdAt,
       this.updatedAt,
-      this.teamId});
+      this.teamId,
+      this.unreadMessageCount});
 
   GroupListRes.fromJson(Map<String, dynamic> json) {
+    unreadMessageCount = json['unread_message_count'];
     groupId = json['group_id'];
     groupName = json['group_name'];
     groupDescription = json['group_description'];
@@ -37,6 +40,7 @@ class GroupListRes {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['unread_message_count'] = this.unreadMessageCount;
     data['group_id'] = this.groupId;
     data['group_name'] = this.groupName;
     data['group_description'] = this.groupDescription;

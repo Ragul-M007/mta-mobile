@@ -95,6 +95,7 @@ dependencies:
   #   git: https://github.com/pranavskeintech/skein_ext_storage.git
   geocoder:
     git: https://github.com/pranavskeintech/skein_geocoder
+  flutter_portal: ^0.4.0
 
 dev_dependencies:
   flutter_test:
