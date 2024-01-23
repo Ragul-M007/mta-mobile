@@ -128,7 +128,8 @@ class _ProjectsState extends State<Projects>
     });
   }
 
-  Future<bool> _onWillPop() async {
+  Future<bool> _onWillPop() async 
+  {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(

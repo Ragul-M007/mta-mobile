@@ -194,7 +194,7 @@ class _LoginContentState extends State<LoginContent>
     loginreq.password = _passwordController.text;
     loginreq.token = Strings.fcmToken;
     Strings.authToken = '';
-    print("loqinrequest ---> $loginreq");
+    print("loqinrequest ---> ${jsonEncode(loginreq)}");
     api.login(loginreq).then((response) 
     {
       AppUtils.dismissprogress();

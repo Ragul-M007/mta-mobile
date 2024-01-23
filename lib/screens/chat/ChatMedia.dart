@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
 import 'package:provider/provider.dart';
-import 'package:video_thumbnail_imageview/video_thumbnail_imageview.dart';
 
 import '../../network/ApiService.dart';
 import '../../utilities/apputilities.dart';
@@ -42,7 +41,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin{
 
 findPath() async
   {
-    basePath = await AppUtils.findFilePath();
+    basePath = Strings.basePath;
   }
   getDocumentDetails(type) 
   {
@@ -225,23 +224,23 @@ findPath() async
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(100.0),
-                                          child: 
-                                          VTImageView(
-          videoUrl:
-              Strings.uatImageUrl + _videoList[index].files!,
-          width: 200.0,
-          height: 200.0,
-          errorBuilder: (context, error, stack) {
-            return Container(
-              width: 200.0,
-              height: 200.0,
-              color: Colors.blue,
-              child: Center(
-                child: Text("Image Loading Error"),
-              ),
-            );
-          }, assetPlaceHolder: 'No Image',
-        ),
+                                          child: Text("video")
+        //                                   VTImageView(
+        //   videoUrl:
+        //       Strings.uatImageUrl + _videoList[index].files!,
+        //   width: 200.0,
+        //   height: 200.0,
+        //   errorBuilder: (context, error, stack) {
+        //     return Container(
+        //       width: 200.0,
+        //       height: 200.0,
+        //       color: Colors.blue,
+        //       child: Center(
+        //         child: Text("Image Loading Error"),
+        //       ),
+        //     );
+        //   }, assetPlaceHolder: 'No Image',
+        // ),
                                         //  Image.file(File(basePath!+"/"+ _videoList[index].filesName!+AppUtils.getFileExtension(_videoList[index].files!))),
 
                                     ))),

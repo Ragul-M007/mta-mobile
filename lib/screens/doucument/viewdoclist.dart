@@ -155,7 +155,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
     var extn = getFileExtension(serverURL);
     var nospace = filename.replaceAll(' ', '');
     var fileName = nospace + extn;
-    print("url--> $fileName");
+    print("filename--> $fileName");
     String fullPath = "$path/$fileName";
     setState(() {
       filepath = fullPath;

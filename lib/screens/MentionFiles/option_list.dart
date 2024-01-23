@@ -20,11 +20,12 @@ class OptionList extends StatelessWidget {
   final BoxDecoration? suggestionListDecoration;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return data.isNotEmpty
         ? Container(
             decoration:
-                suggestionListDecoration ?? BoxDecoration(color: Colors.blueGrey),
+                suggestionListDecoration ?? BoxDecoration(color: Colors.white),
             constraints: BoxConstraints(
               maxHeight: suggestionListHeight,
               minHeight: 0,
@@ -32,7 +33,8 @@ class OptionList extends StatelessWidget {
             child: ListView.builder(
               itemCount: data.length,
               shrinkWrap: true,
-              itemBuilder: (context, index) {
+              itemBuilder: (context, index) 
+              {
                 return GestureDetector(
                   onTap: () {
                     onTap(data[index]);

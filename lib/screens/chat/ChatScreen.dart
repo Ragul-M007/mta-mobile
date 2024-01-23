@@ -11,7 +11,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:mta/models/Chat/ChatMessageRes.dart';
 import 'package:mta/models/Chat/GroupUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/Webview/webview.dart';
 import 'package:mta/screens/chat/ChatMedia.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,7 +19,6 @@ import 'package:provider/provider.dart';
 
 import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
-import 'package:v_chat_mention_controller/v_chat_mention_controller.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -38,14 +36,16 @@ IO.Socket? _socket;
 class ChatScreen extends StatefulWidget {
   static const String routeName = "/chatScreen";
   final int groupId;
+    final int teamId;
 
-  ChatScreen({required this.groupId});
+
+  ChatScreen({required this.groupId,required this.teamId});
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin,WidgetsBindingObserver {
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
@@ -131,27 +131,44 @@ final ScrollController _controller = ScrollController();
   );
 }
 
+ @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print("App Lifecycle State: $state");
+    if(AppLifecycleState.inactive == state)
+    {
+      stopAudio();
+    }
+    // Handle lifecycle state changes here
+  }
+
   playAudio(url) async {
     // var dir = await ExtStorage.getExternalStoragePublicDirectory(
     //     ExtStorage.DIRECTORY_DOWNLOADS);
     // String url = dir + "/MTARecordedAudio.wav";
     print(Strings.uatImageUrl + url);
-    await audioPlayer.play(UrlSource(Strings.uatImageUrl + url), volume: 5);
-    audioPlayer.onDurationChanged.listen((Duration d) {
+    audioPlayer.onDurationChanged.listen((Duration d) 
+    {
       int seconds = d.inSeconds;
       print('Max duration: $d');
       setState(() {
         audioLength = seconds;
       });
     });
-    audioPlayer.onPositionChanged.listen((Duration p) {
+      //  await audioPlayer.play(UrlSource("/data/user/0/com.skein.mta/cache/16-01-24-07-07-358508816020182323942.m4a"), volume: 5);
+
+   await audioPlayer.play(UrlSource(Strings.uatImageUrl + url), volume: 5);
+    audioPlayer.onPositionChanged.listen((Duration p) 
+    {
       int seconds = p.inSeconds;
       print('curr duration: $p');
       setState(() {
         audioCurrentlenth = seconds;
       });
     });
-    audioPlayer.onPlayerComplete.listen((event) {
+
+
+    audioPlayer.onPlayerComplete.listen((event) 
+    {
       setState(() {
         audioLength = 0;
         audioCurrentlenth = 0;
@@ -176,8 +193,8 @@ final ScrollController _controller = ScrollController();
     for (int i = 0; i < chatUsers.length; i++) {
       var user = {
         "id": chatUsers[i].userId.toString(),
-        "display": chatUsers[i].userName,
-        "full_name": chatUsers[i].userEmail,
+        "display": chatUsers[i].userName?.split(' ')[0],
+        "full_name": chatUsers[i].userName,
         "photo": Strings.uatImageUrl + (chatUsers[i].userImage ?? "")
       };
       userList.add(user);
@@ -188,12 +205,18 @@ final ScrollController _controller = ScrollController();
   void initState() {
     super.initState();
     findPath();
-    print("groupId _> ${widget.groupId}");
+    print("groupId _> ${widget.groupId}  ${widget.teamId}");
+        WidgetsBinding.instance.addObserver(this);
     _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'forceNew': false,
-      'query': {'token': Strings.authToken, 'group_id': widget.groupId}
+      'query': {'token': Strings.authToken, 
+      'group_id': widget.groupId,
+      "group_type":"team",
+      "project_id":null,
+      "team_id":widget.teamId
+      }
     });
     _socket?.connect();
     _socket?.on("connect", (_) {
@@ -201,6 +224,20 @@ final ScrollController _controller = ScrollController();
       joinGroup();
       getUsersByGroupId();
     });
+
+
+     _controller.addListener(() {
+    if (_controller.position.atEdge) {
+      bool isTop = _controller.position.pixels == 0;
+      if (isTop) {
+        getMessagesWithPageCount();
+        print('At the top');
+      } else {
+        print('At the bottom');
+      }
+    }
+  });
+  
   }
 
   findPath() async {
@@ -217,7 +254,8 @@ final ScrollController _controller = ScrollController();
     getMessages();
   }
 
-  getMessages() {
+  getMessages()
+  {
     print("getting messages");
     _socket?.on("group-messages", (_data) {
       log("data $_data");
@@ -232,14 +270,16 @@ final ScrollController _controller = ScrollController();
     });
   }
 
+  
+
   Future<void> stopRecord() async {
     await _audioRecorder.stop();
     sendRecordedAudio();
   }
 
-  sendRecordedAudio() {
+  sendRecordedAudio() 
+  {
     print("path $recordingPath");
-
     List<MultipartFile> audioFile = [
       MultipartFile.fromFileSync(
         "$recordingPath",
@@ -247,11 +287,11 @@ final ScrollController _controller = ScrollController();
       )
     ];
     var formData = FormData.fromMap({
+      'parent_message_id':"",
       'user_id': Strings.userID,
       'group_id': widget.groupId,
       'groupFile': audioFile,
     });
-
     uploadFile(formData);
   }
 
@@ -303,7 +343,8 @@ final ScrollController _controller = ScrollController();
     return "$hoursStr:$minutesStr:$secondsStr";
   }
 
-  String getFileExt(String? fileName) {
+  String getFileExt(String? fileName) 
+  {
     print("Filename--> $fileName");
     var file = fileName?.split("/");
     var fileExttemp = file?[file.length - 1];
@@ -346,7 +387,8 @@ final ScrollController _controller = ScrollController();
 
   var uniqueRecordId = Uuid().v1();
 
-  updateDownloadStatus(msgId) {
+  updateDownloadStatus(msgId) 
+  {
     final api = Provider.of<ApiService>(context, listen: false);
     api.updateDownloadStatus(msgId, 1).then((response) {
       if (response.status!) {
@@ -412,7 +454,7 @@ final ScrollController _controller = ScrollController();
     if (!status.isGranted) {
       getPermission();
     } else {
-      recordingPath = path + '/' + "${uniqueRecordId}_mta12" + '.mp3';
+      recordingPath = path + '/' + "${uniqueRecordId}_mta12" + '.m4a';
 
       print("record bfre $recordingPath");
       _audioRecorder.start(
@@ -437,7 +479,8 @@ final ScrollController _controller = ScrollController();
     }
   }
 
-  updateChat() {
+  updateChat() 
+  {
     _socket?.emitWithAck(
         'create-message',
         json.encode({
@@ -453,9 +496,28 @@ final ScrollController _controller = ScrollController();
     key.currentState!.controller!.clear();
   }
 
+  getMessagesWithPageCount() 
+  {
+    _socket?.emitWithAck(
+        'get-message-with-pagecount',
+        json.encode({
+          "page_no": 2,
+          "group_id": widget.groupId,
+          
+        }), ack: (_data) {
+      print("dataaa ${_data}");
+    });
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    key.currentState!.controller!.clear();
+  }
+
   @override
   void dispose() {
     super.dispose();
+    print("dispose called");
+    stopAudio();
+    WidgetsBinding.instance.removeObserver(this);
     _socket?.disconnect();
     _socket?.dispose();
   }
@@ -479,6 +541,7 @@ final ScrollController _controller = ScrollController();
           .toList();
 
       var formData = FormData.fromMap({
+        'parent_message_id':"",
         'user_id': Strings.userID,
         'group_id': grpId,
         'groupFile': files,
@@ -543,7 +606,8 @@ final ScrollController _controller = ScrollController();
     }
   }
 
-  void _downloadfile(serverURL, filename) async {
+  void _downloadfile(serverURL, filename) async 
+  {
     // AppUtils.showprogress();
     // AppUtils.showToast('Downloading');
 
@@ -680,7 +744,7 @@ final ScrollController _controller = ScrollController();
                             ? Text.rich(TextSpan(
                                 children: customizeText(
                                     chatList[index].message ?? "")))
-                            : chatList[index].files!.contains(".mp3")
+                            : chatList[index].files!.contains(".m4a")
                                 ? Row(
                                     children: [
                                       isPlaying == false
@@ -688,7 +752,8 @@ final ScrollController _controller = ScrollController();
                                               onTap: () {
                                                 setState(() {
                                                   if (isPlaying ==
-                                                      true) {
+                                                      true) 
+                                                      {
                                                     stopAudio();
                                                     _timer = new Timer(
                                                         const Duration(
@@ -706,7 +771,9 @@ final ScrollController _controller = ScrollController();
                                                                 .files);
                                                       });
                                                     });
-                                                  } else {
+                                                  } 
+                                                  else 
+                                                  {
                                                     isPlaying = true;
                                                     playingIndex =
                                                         index;
@@ -771,7 +838,7 @@ final ScrollController _controller = ScrollController();
                                                       size: 28.0),
                                                 ),
                                       SizedBox(
-                                        width: 10,
+                                        width: 4,
                                       ),
                                       Slider(
                                         value: playingIndex == index
@@ -782,7 +849,8 @@ final ScrollController _controller = ScrollController();
                                         max: playingIndex == index
                                             ? audioLength.toDouble()
                                             : 0,
-                                        onChanged: (double value) {
+                                        onChanged: (double value) 
+                                        {
                                           setState(() {
                                             playingIndex == index
                                                 ? audioCurrentlenth =
@@ -806,7 +874,8 @@ final ScrollController _controller = ScrollController();
                                             chatList[index].files!,
                                             chatList[index].fileName);
                                       } else {
-                                        AppUtils.openFile(basePath! +
+                                        AppUtils.openFile(
+                                          basePath! +
                                             "/" +
                                             chatList[index].fileName! +
                                             AppUtils.getFileExtension(
@@ -840,7 +909,7 @@ final ScrollController _controller = ScrollController();
                                                 )
                                             ]))),
                         subtitle: Text(
-                          chatList[index].userName ?? "qwerr",
+                          chatList[index].userName ?? "",
                           style: TextStyle(
                               color: Colors.grey, fontSize: 12),
                         ),
@@ -865,9 +934,22 @@ final ScrollController _controller = ScrollController();
                 SizedBox(
                   width: 8,
                 ),
-                Expanded(
+                Container(
+                                        height: 100,
+                                        width: 100,
                   child: Container(
                     child: FlutterMentions(
+                      onChanged: (value){
+                        if (value.length > 0) {
+                                setState(() {
+                                  typing = true;
+                                });
+                              } else {
+                                setState(() {
+                                  typing = false;
+                                });
+                              }
+                      },
                       key: key,
                       suggestionPosition: SuggestionPosition.Top,
                       maxLines: 5,
@@ -914,72 +996,59 @@ final ScrollController _controller = ScrollController();
                 SizedBox(
                   width: 8,
                 ),
-                FloatingActionButton(
-                  backgroundColor: Colors.blue,
-                  onPressed: () {
-                    print(key.currentState!.controller!.markupText);
-        
-                    updateChat();
-                    // print("klll ${controller.text}");
-                  },
-                  child: const Text(
-                    "Send",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                Positioned(
-                  right: startRecording == true ? 10 : 15,
-                  bottom: startRecording == true ? 0 : 12,
-                  child: Container(
-                    width: startRecording == true ? 60 : 40,
-                    height: startRecording == true ? 60 : 40,
-                    decoration: BoxDecoration(
-                        color: Color(0xFF0061b0),
-                        borderRadius:
-                            new BorderRadius.all(new Radius.circular(50.0))),
-                    child: GestureDetector(
-                      onLongPress: () async {
-                        var status = await Permission.microphone.status;
-                        if (status.isGranted) {
-                          startRecording = true;
-                          startOrStop();
-                          recordComments();
-                        } else {
-                          AppUtils.showToastError(
-                              "Please allow the Microphone Permission");
-                          getPermission();
-                        }
-                      },
-                      onLongPressEnd: (details) async {
-                        // AppUtils.showToast(details.toString());
-                        var status = await Permission.microphone.status;
-                        if (status.isGranted) {
-                          startRecording = false;
-                          startOrStop();
-                          stopRecord();
-                          // sendAudio();
-                        }
-                      },
-                      onTap: () {
-                        if (typing == true) {
-                        } else {
-                          setState(() {
-                            showtoastinfo = true;
-                          });
-                        }
-                      },
-                      child: typing == false
-                          ? Icon(
-                              Icons.mic,
-                              color: Colors.white,
-                              size: 22,
-                            )
-                          : Icon(
-                              Icons.send,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                    ),
+                
+                Container(
+                  width: startRecording == true ? 60 : 40,
+                  height: startRecording == true ? 60 : 40,
+                  decoration: BoxDecoration(
+                      color: Color(0xFF0061b0),
+                      borderRadius:
+                          new BorderRadius.all(new Radius.circular(50.0))),
+                  child: GestureDetector(
+                    onLongPress: () async {
+                      var status = await Permission.microphone.status;
+                      if (status.isGranted) {
+                        startRecording = true;
+                        startOrStop();
+                        recordComments();
+                      } else {
+                        AppUtils.showToastError(
+                            "Please allow the Microphone Permission");
+                        getPermission();
+                      }
+                    },
+                    onLongPressEnd: (details) async {
+                      // AppUtils.showToast(details.toString());
+                      var status = await Permission.microphone.status;
+                      if (status.isGranted) {
+                        startRecording = false;
+                        startOrStop();
+                        stopRecord();
+                        // sendAudio();
+                      }
+                    },
+                    onTap: () {
+                      if (typing == true) {
+  getMessagesWithPageCount() ;
+
+                       // updateChat();
+                      } else {
+                        setState(() {
+                          showtoastinfo = true;
+                        });
+                      }
+                    },
+                    child: typing == false
+                        ? Icon(
+                            Icons.mic,
+                            color: Colors.white,
+                            size: 22,
+                          )
+                        : Icon(
+                            Icons.send,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                   ),
                 ),
               ],

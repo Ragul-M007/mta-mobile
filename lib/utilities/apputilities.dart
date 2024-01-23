@@ -178,6 +178,48 @@ static Future<void> openFile(filePath) async {
     await OpenFilex.open(filePath);
   }
 
+static String getFileExt(String? fileName) 
+  {
+    print("Filename--> $fileName");
+    var file = fileName?.split("/");
+    var fileExttemp = file?[file.length - 1];
+
+    var finalSplit = fileExttemp?.split(".");
+    var fileExt = finalSplit?[finalSplit.length - 1];
+
+    print("exttt $fileExt");
+    if (fileExt == "png" || fileExt == "PNG") {
+      return "assets/icons/png.png";
+    } else if (fileExt == "jpg" ||
+        fileExt == "jepg" ||
+        fileExt == "jpeg" ||
+        fileExt == "JPG" ||
+        fileExt == "JEPG" ||
+        fileExt == "JPEG") {
+      return "assets/icons/jpg.png";
+    } else if (fileExt == "pdf" || fileExt == "PDF") {
+      return "assets/icons/pdf.png";
+    } else if (fileExt == "txt" || fileExt == "TXT") {
+      return "assets/icons/txt.png";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
+      return "assets/icons/ppt.png";
+    } else if (fileExt == "mpeg" || fileExt == "mpg") {
+      return "assets/icons/mpg.png";
+    } else if (fileExt == "mp4") {
+      return "assets/icons/mpg.png";
+    } else if (fileExt == "wav" || fileExt == "mp3") {
+      return "assets/icons/mp3.png";
+    } else if (fileExt == "xls" ||
+        fileExt == "xlsx" ||
+        fileExt == "xlsm" ||
+        fileExt == "xlsb" ||
+        fileExt == "xltx") {
+      return "assets/icons/xls.png";
+    } else {
+      return "assets/icons/doc.png";
+    }
+  }
+
  static Future<String?> findFilePath()
 async {
   String? basePath;
@@ -195,9 +237,27 @@ async {
         basePath = basePath.substring(0, basePath.length - 1);
       }
     }
+    Strings.basePath = basePath;
       print("base path $basePath");
-    return basePath;
+   // return basePath;
 }
+
+  static updateDownloadStatus(msgId,context) async
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateDownloadStatus(msgId, 1).then((response) {
+      if (response.status!) {
+        // AppUtils.showToastError("update status successfully");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
+    });
+  }
 
   static void showToastErrorTop(String message) {
     Fluttertoast.showToast(

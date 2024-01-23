@@ -8,6 +8,7 @@ import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
+import 'package:mta/models/Chat/ChatMessageWithPageCountRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/models/Chat/GroupCreationRes.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
@@ -47,7 +48,7 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-  @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+   @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
  // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
   // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
@@ -135,10 +136,11 @@ abstract class ApiService
   @GET("/chat/getGroupFiles?group_id={group_id}&file_type={file_type}")
   Future<MediaDetailsRes> getMediaDetails(@Path("group_id") int id, @Path("file_type") String type);
 
-  
-
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
+
+  @GET("/chat/getMessagesByGroupId?group_id={group_id}&page_no={page_no}")
+  Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(@Path("group_id") int id, @Path("page_no") int pageNo);
 
   @POST("/users/changePassword")
   Future<ChangePassRes> changePass(@Body() ChangePassReq body);

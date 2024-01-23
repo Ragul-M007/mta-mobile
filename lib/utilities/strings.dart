@@ -15,6 +15,8 @@ mixin Strings
   static String authToken = '';
   static bool fromReplies = false;
   static bool fromProjects = true;
+  static String? basePath = '';
+
   
  // static String baseImageUrl = "https://demo.emeetify.com:81/";
   static String socketUrl = 'https://demo.emeetify.com:5015/';
@@ -24,7 +26,9 @@ mixin Strings
  // static String socketUrl = 'http://192.168.0.134:5021/';
 
   static String uatImageUrl = 'https://demo.emeetify.com:5032/';
-  static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
+  
+  static String baseImageUrl = 'https://demo.emeetify.com:5032/';
+  // static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
 
   static bool documentUploadfromProject = false;
   static bool internetDialog = false;

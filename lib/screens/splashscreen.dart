@@ -64,7 +64,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   @override
   void initState() {
     super.initState();
- 
+    AppUtils.findFilePath();
 
     _firebaseMessaging.subscribeToTopic("messaging");
     _firebaseMessaging.getToken().then((value) {
