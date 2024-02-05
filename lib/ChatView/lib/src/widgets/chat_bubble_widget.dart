@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/lib/src/extensions/extensions.dart';
 import 'package:mta/ChatView/lib/src/utils/constants/constants.dart';
@@ -129,6 +131,8 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
   Widget build(BuildContext context) {
     // Get user from id.
     final messagedUser = chatController?.getUserFromId(widget.message.sendBy);
+
+    print("msg user ${jsonEncode(messagedUser)}");
     return Stack(
       children: [
         if (featureActiveConfig?.enableSwipeToSeeTime ?? true) ...[
@@ -170,6 +174,7 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
         children: [
           if (!isMessageBySender &&
               (featureActiveConfig?.enableOtherUserProfileAvatar ?? true))
+
             ProfileCircle(
               bottomPadding: widget.message.reaction.reactions.isNotEmpty
                   ? profileCircleConfig?.bottomPadding ?? 15
@@ -245,6 +250,7 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
   }
 
   void _onAvatarTap(ChatUser? user) {
+    print("userrr ${user!.profilePhoto}");
     if (profileCircleConfig?.onAvatarTap != null && user != null) {
       profileCircleConfig?.onAvatarTap!(user);
     }

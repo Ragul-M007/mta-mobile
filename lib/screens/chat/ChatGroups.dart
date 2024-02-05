@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/GroupChatListRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/screens/chat/ExampleChat.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
@@ -18,13 +16,17 @@ import 'package:dio/dio.dart';
 
 import 'package:path/path.dart' as path;
 
+import '../../models/Chat/GroupUsersRes.dart';
 import '../../utilities/apputilities.dart';
+import 'SelectUser.dart';
 
 class ChatGroups extends StatefulWidget {
   static const String routeName = "/chatGroups";
-  final int teamId;
+  final int? teamId;
+  final int? projectId;
 
-  ChatGroups({required this.teamId});
+
+  ChatGroups({this.teamId,this.projectId});
 
   @override
   _ChatGroupsState createState() => _ChatGroupsState();
@@ -65,7 +67,7 @@ class _ChatGroupsState extends State<ChatGroups>
   }
 
   connectSocket() {
-    print("teamid ${widget.teamId}");
+    print("teamid ${widget.teamId}  projectid ${widget.projectId}");
     print("trying to connect socket");
     _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
@@ -73,8 +75,8 @@ class _ChatGroupsState extends State<ChatGroups>
       'forceNew': false,
       'query': {
         'token': Strings.authToken,
-        "group_type": "team",
-        "project_group_id": null,
+        "group_type": widget.projectId == null ?"team":"project",
+        "project_group_id": widget.projectId,
         "team_id": widget.teamId
       }
     });
@@ -86,20 +88,25 @@ class _ChatGroupsState extends State<ChatGroups>
       print('Connected');
       print("Calling function");
       getChats();
-      recieveMessages();
+      //recieveMessages();
 
       //_socket?.disconnect();
     });
   }
 
-  recieveMessages() {
-    _socket?.on("message-received", (_data) {
-      getChats();
-    });
-  }
+  
+
+  // recieveMessages() {
+  //   _socket?.on("message-received", (_data) {
+  //     getChats();
+  //   });
+  // }
 
   getChats() {
     _socket?.on("all-groups", (_data) {
+
+      print("dataa from all groups $_data");
+
       setState(() {
         var formattedRes = GroupListRes.fromJson(_data);
 
@@ -170,17 +177,27 @@ class _ChatGroupsState extends State<ChatGroups>
     req.groupName = _groupNameFieldController.text;
     req.groupDescription = _groupDescriptionFieldController.text;
     req.teamId = widget.teamId;
-    req.groupType = "team";
+    req.projectId = widget.projectId;
+    req.groupType = widget.projectId == null ?"team":"project";
 
     print("loqinrequest ---> ${jsonEncode(req)}}");
     api.createGroup(req).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
+        
         AppUtils.showToastSuccess(response.message ?? "Error");
         connectSocket();
         _groupNameFieldController.clear();
         _groupDescriptionFieldController.clear();
         Navigator.of(context).pop();
+        Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddRemoveUsersIntoGroups(
+                    groupId: response.data!.groupId ?? 0 ,
+                  ),
+                ),
+              );
       } else {
         AppUtils.showToastError(response.message ?? "Error");
       }
@@ -195,7 +212,7 @@ class _ChatGroupsState extends State<ChatGroups>
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
       child: Scaffold(
-          floatingActionButton: InkWell(
+          floatingActionButton:Strings.groupCreationAccess == 1? InkWell(
             onTap: () {
               // upload();
               _showMyDialog(context);
@@ -208,7 +225,7 @@ class _ChatGroupsState extends State<ChatGroups>
               ),
               backgroundColor: Colors.grey.withOpacity(0.8),
             ),
-          ),
+          ):Container(),
           backgroundColor: const Color(0xFFececed),
           appBar: AppBar(
             backgroundColor: Colors.white,
@@ -278,7 +295,9 @@ class _ChatGroupsState extends State<ChatGroups>
                   size: 25.0,
                   color: const Color(0xFF979797),
                 ),
-                onPressed: () {
+                onPressed: () 
+                {
+                  Navigator.pop(context);
                   searchField.unfocus();
                   _controller?.toggle();
                 },
@@ -370,8 +389,10 @@ class _ChatGroupsState extends State<ChatGroups>
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => Example(
+                                          teamName: groupList[index].groupName ?? "No name",
                                           groupId: groupList[index].groupId!,
                                            teamId: widget.teamId,
+                                           projectId: widget.projectId,
                                         ),
                                       ),
                                     );
@@ -413,6 +434,7 @@ class _ChatGroupsState extends State<ChatGroups>
                                             SizedBox(
                                               width: 8,
                                             ),
+                                            groupList[index].unreadMessageCount != 0 ?
                                             Container(
                                               width: 24,
                                               height: 24,
@@ -428,7 +450,7 @@ class _ChatGroupsState extends State<ChatGroups>
                                                   shape: BoxShape.circle,
                                                   color: Color.fromARGB(
                                                       255, 60, 237, 80)),
-                                            )
+                                            ):Container()
                                           ],
                                         )),
                                     decoration: BoxDecoration(
@@ -450,7 +472,7 @@ class _ChatGroupsState extends State<ChatGroups>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _errText,
+                          "No Groups Available",
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.red,

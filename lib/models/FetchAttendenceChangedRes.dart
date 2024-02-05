@@ -34,6 +34,8 @@ class AttendanceDataNew {
   String? checkOutTime;
   String? checkInLocation;
   String? checkOutLocation;
+  String? projectName;
+  String? projectImg;
 
   AttendanceDataNew(
       {this.userId,
@@ -41,7 +43,9 @@ class AttendanceDataNew {
       this.checkInTime,
       this.checkOutTime,
       this.checkInLocation,
-      this.checkOutLocation});
+      this.checkOutLocation,
+      this.projectImg,
+      this.projectName});
 
   AttendanceDataNew.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
@@ -50,6 +54,8 @@ class AttendanceDataNew {
     checkOutTime = json['check_out_time'];
     checkInLocation = json['check_in_location'];
     checkOutLocation = json['check_out_location'];
+    projectImg = json['project_img'];
+    projectName = json['project_name'];
   }
 
   Map<String, dynamic> toJson() {
@@ -60,6 +66,8 @@ class AttendanceDataNew {
     data['check_out_time'] = this.checkOutTime;
     data['check_in_location'] = this.checkInLocation;
     data['check_out_location'] = this.checkOutLocation;
+    data['project_name'] = this.projectName;
+    data['project_img'] = this.projectImg;
     return data;
   }
 }

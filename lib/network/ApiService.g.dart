@@ -394,6 +394,33 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<AddUsersListRes> getUnlinkedUsers(int id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AddUsersListRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/unlinkedUsersInGroup?group_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AddUsersListRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<AddDocRes> addDoc(AddDocReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -437,6 +464,35 @@ class _ApiService implements ApiService {
             .compose(
               _dio.options,
               '/attendance',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AddAttendanceRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AddAttendanceRes> addRemoveUsersintoGroup(
+      AddRemoveUserReq body) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AddAttendanceRes>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/addUsersIntoGroup',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -551,6 +607,33 @@ class _ApiService implements ApiService {
             .compose(
               _dio.options,
               '/projects/getmappedUser?project_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = FetchMapedUsersRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<FetchMapedUsersRes> getReadedUsers(int id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedUsersRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/getMessageReadedUsers?message_id=${id}',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -698,6 +781,33 @@ class _ApiService implements ApiService {
               baseUrl,
             ))));
     final value = NotificationRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AccessDetailsRes> getAccessDetails() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AccessDetailsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/groupCreateAccessDetails',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AccessDetailsRes.fromJson(_result.data!);
     return value;
   }
 
@@ -946,6 +1056,33 @@ class _ApiService implements ApiService {
             .compose(
               _dio.options,
               '/users/removeImage/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = ChangePassRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ChangePassRes> deleteMessage(int id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/deleteMessage?message_id=${id}',
               queryParameters: queryParameters,
               data: _data,
             )

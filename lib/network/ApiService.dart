@@ -1,5 +1,6 @@
 
 import 'package:dio/dio.dart';
+import 'package:mta/ChatView/lib/src/models/AddRemoveUserReq.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
@@ -8,6 +9,7 @@ import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/ChangePassRes.dart';
+import 'package:mta/models/Chat/AddRemoveUserListRes.dart';
 import 'package:mta/models/Chat/ChatMessageWithPageCountRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/models/Chat/GroupCreationRes.dart';
@@ -41,6 +43,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 // 
 import 'package:retrofit/retrofit.dart';
 
+import '../models/AccessDetailsRes.dart';
 import '../models/Chat/GroupUsersRes.dart';
 import '../models/FetchCategoryUsersRes.dart';
 part 'ApiService.g.dart';
@@ -104,11 +107,17 @@ abstract class ApiService
   @GET("/categories?project_id={project_id}")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
 
+  @GET("/chat/unlinkedUsersInGroup?group_id={project_id}")
+  Future<AddUsersListRes> getUnlinkedUsers(@Path("project_id") int id);
+
   @POST("/projects/addDocument")
   Future<AddDocRes> addDoc(@Body() AddDocReq body);
 
   @POST("/attendance")
   Future<AddAttendanceRes> addAttendance(@Body() AddAttendanceReq body);
+
+@POST("/chat/addUsersIntoGroup")
+  Future<AddAttendanceRes> addRemoveUsersintoGroup(@Body() AddRemoveUserReq body);
 
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
@@ -124,6 +133,11 @@ abstract class ApiService
   @GET("/projects/getmappedUser?project_id={project_id}")
   Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);
 
+  @GET("/chat/getMessageReadedUsers?message_id={message_id}")
+  Future<FetchMapedUsersRes> getReadedUsers(@Path("message_id") int id);
+
+  
+
   @GET("/teams")
   Future<TeamsModel> fetchTeams(@Path("project_id") int id);
 
@@ -138,6 +152,10 @@ abstract class ApiService
 
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
+
+  @GET("/chat/groupCreateAccessDetails")
+  Future<AccessDetailsRes> getAccessDetails();
+
 
   @GET("/chat/getMessagesByGroupId?group_id={group_id}&page_no={page_no}")
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(@Path("group_id") int id, @Path("page_no") int pageNo);
@@ -168,6 +186,13 @@ abstract class ApiService
   @DELETE("/users/removeImage/{user_id}")
   Future<ChangePassRes> removeProPic(
       @Path("user_id") int id);
+  @DELETE("/chat/deleteMessage?message_id={msg_id}")
+  Future<ChangePassRes> deleteMessage(
+      @Path("msg_id") int id);
+
+      
+
+      
      
   @DELETE("/users/{user_id}")
   Future<ChangePassRes> deleteUser(

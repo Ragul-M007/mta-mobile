@@ -833,33 +833,37 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                                           ],
                                         ),
                                         SizedBox(height: 10),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              child: Text(Strings
-                                                  .comments[
-                                                      Strings.selectedCommentsIndex]
-                                                  .replies![index]
-                                                  .recipient?.replaceAll('"', '') == "[]"?"":Strings
-                                                  .comments[
-                                                      Strings.selectedCommentsIndex]
-                                                  .replies![index]
-                                                  .recipient?.replaceAll('"', '') ?? "",
-                                                  maxLines: 2,overflow: TextOverflow.ellipsis),
-                                            ),
-                                            Container(
-                                              child: Text(Strings
-                                                  .comments[
-                                                      Strings.selectedCommentsIndex]
-                                                  .replies![index]
-                                                  .categoryList?.replaceAll('"', '') == "[]"?"":Strings
-                                                  .comments[
-                                                      Strings.selectedCommentsIndex]
-                                                  .replies![index]
-                                                  .categoryList?.replaceAll('"', '') ?? "",
-                                                  maxLines: 2,overflow: TextOverflow.ellipsis),
-                                            ),
-                                          ],
+                                        Container(
+                                          width: MediaQuery.of(context).size.width * 0.8,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text(Strings
+                                                    .comments[
+                                                        Strings.selectedCommentsIndex]
+                                                    .replies![index]
+                                                    .recipient?.replaceAll('"', '') == "[]"?"":Strings
+                                                    .comments[
+                                                        Strings.selectedCommentsIndex]
+                                                    .replies![index]
+                                                    .recipient?.replaceAll('"', '') ?? "",
+                                                    maxLines: 10, overflow: TextOverflow.ellipsis),
+                                              ),
+                                              Container(
+                                                child: Text(Strings
+                                                    .comments[
+                                                        Strings.selectedCommentsIndex]
+                                                    .replies![index]
+                                                    .categoryList?.replaceAll('"', '') == "[]"?"":Strings
+                                                    .comments[
+                                                        Strings.selectedCommentsIndex]
+                                                    .replies![index]
+                                                    .categoryList?.replaceAll('"', '') ?? "",
+                                                    maxLines: 10, overflow: TextOverflow.ellipsis),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         Container(
                                           child: Row(

@@ -3,11 +3,14 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mta/screens/chat/ExampleChat.dart';
+import 'package:path/path.dart' as path;
 
 import '../../../../screens/MentionFiles/flutter_mentions.dart';
 import '../../chatview.dart';
@@ -15,11 +18,13 @@ import '../utils/constants/constants.dart';
 import '../utils/debounce.dart';
 import '../utils/package_strings.dart';
 
-class ChatUITextField extends StatefulWidget {
+class ChatUITextField extends StatefulWidget 
+{
   const ChatUITextField({
    required this.textEditingKey,
     this.sendMessageConfig,
     required this.focusNode,
+    this.userList,
     required this.textEditingController,
     required this.onPressed,
     required this.onRecordingComplete,
@@ -33,20 +38,24 @@ class ChatUITextField extends StatefulWidget {
   /// Provides focusNode for focusing text field.
   final FocusNode focusNode;
 
-  /// Provides functions which handles text field.
+  // Provides functions which handles text field.
   final TextEditingController textEditingController;
 
-  final GlobalKey<FlutterMentionsState>? textEditingKey ;
+
+  final GlobalKey<FlutterMentionsState>? textEditingKey;
 
 
-  /// Provides callback when user tap on text field.
+  // Provides callback when user tap on text field.
   final VoidCallBack onPressed;
 
   /// Provides callback once voice is recorded.
   final Function(String?) onRecordingComplete;
 
   /// Provides callback when user select images from camera/gallery.
-  final StringsCallBack onImageSelected;
+  final ListCallBack onImageSelected;
+
+  final List<Map<String, dynamic>>? userList;
+
 
   
 
@@ -94,7 +103,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
   @override
   void initState() {
     attachListeners();
-    addMentionUsers();
     debouncer = Debouncer(
         sendMessageConfig?.textFieldConfig?.compositionThresholdTime ??
             const Duration(seconds: 1));
@@ -106,20 +114,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     }
   }
 
-  addMentionUsers() {
-    userList.clear();
-    for (int i = 0; i < 10; i++) {
-      var user = {
-        "id": "56",
-        "display": "raaam",
-        "full_name": "raam",
-        "photo": ""
-      };
-      setState(() {
-              userList.add(user);
-      });
-    }
-  }
+  
 
   @override
   void dispose() {
@@ -232,11 +227,12 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                             Mention(
                                 trigger: '@',
                                 style: TextStyle(
-                                  color: Colors.amber,
+                                  color: Colors.blue,
                                 ),
-                                data: userList,
+                                data: widget.userList ?? [],
                                 matchAll: false,
-                                suggestionBuilder: (data) {
+                                suggestionBuilder: (data) 
+                                {
                                   return Container(
                                     padding: EdgeInsets.all(10.0),
                                     child: Row(
@@ -250,6 +246,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                                           width: 20.0,
                                         ),
                                         Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: <Widget>[
                                             Text(data['full_name']),
                                             Text('@${data['display']}'),
@@ -348,26 +345,51 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     ImagePickerConfiguration? config,
   }) async {
 
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: imageSource,
-        maxHeight: config?.maxHeight,
-        maxWidth: config?.maxWidth,
-        imageQuality: config?.imageQuality,
-        preferredCameraDevice:
-            config?.preferredCameraDevice ?? CameraDevice.rear,
-      );
-      String? imagePath = image?.path;
-      if (config?.onImagePicked != null) {
-        String? updatedImagePath = await config?.onImagePicked!(imagePath);
-        if (updatedImagePath != null) imagePath = updatedImagePath;
-      }
-      widget.onImageSelected(imagePath ?? '', '');
-    } catch (e) {
-      widget.onImageSelected('', e.toString());
-    }
-  }
+    try 
+    {
+ReplyMessage msg = ReplyMessage();
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3'],
+    );
+    if (result != null) {
+      List<MultipartFile> files = result.paths
+          .map((path) => MultipartFile.fromFileSync(
+                path!,
+                filename: getFileName(path),
+                // contentType: MediaType(
+                //     lookupMimeType(getFileName(path))?.split('/')[0],
+                //     lookupMimeType(getFileName(path))?.split('/')[1],
+                // ),
+              ))
+          .toList();
+                widget.onImageSelected('',msg,MessageType.image,files);
 
+    }
+
+      // final XFile? image = await _imagePicker.pickImage(
+      //   source: imageSource,
+      //   maxHeight: config?.maxHeight,
+      //   maxWidth: config?.maxWidth,
+      //   imageQuality: config?.imageQuality,
+      //   preferredCameraDevice:
+      //       config?.preferredCameraDevice ?? CameraDevice.rear,
+      // );
+      // String? imagePath = image?.path;
+      // if (config?.onImagePicked != null) {
+      //   String? updatedImagePath = await config?.onImagePicked!(imagePath);
+      //   if (updatedImagePath != null) imagePath = updatedImagePath;
+      // }
+      // widget.onImageSelected(imagePath ?? '', '');
+    } catch (e) {
+     // widget.onImageSelected(, e.toString());
+    }
+  
+  }
+String getFileName(String _path) {
+    return path.basename(_path);
+  }
   void _onChanged(String inputText) {
     debouncer.run(() {
       composingStatus.value = TypeWriterStatus.typed;

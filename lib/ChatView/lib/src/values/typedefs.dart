@@ -1,6 +1,6 @@
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import '../../chatview.dart';
 
 typedef StringCallback = void Function(String);
@@ -16,3 +16,5 @@ typedef VoidCallBackWithFuture = Future<void> Function();
 typedef StringsCallBack = void Function(String emoji, String messageId);
 typedef StringWithReturnWidget = Widget Function(String separator);
 typedef DragUpdateDetailsCallback = void Function(DragUpdateDetails);
+typedef ListCallBack = void Function(String emoji,ReplyMessage msg, MessageType type,List<MultipartFile> file);
+typedef DataRefreshCallback = void Function();

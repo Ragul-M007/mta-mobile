@@ -6,11 +6,15 @@ import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 
+import '../models/Chat/ChatNotificationRes.dart';
+
 mixin Strings 
 {
   static String testing = 'novalue';
   static bool fromNotificationComments = false;
   static bool fromNotificationDocuments = false;
+  static bool fromNotificationChat = false;
+
   static bool fromForgotPassword = false;
   static String authToken = '';
   static bool fromReplies = false;
@@ -60,6 +64,8 @@ mixin Strings
   static List<FectchCatsData> selectedCategory = [];
   static List<FetchCategoryDoc> selectedCatDocument = [];
   static List<ProjectDocData> selectedProDocument = [];
+  static ChatNotificationRes? chatNotificationResponse;
+
   static int selectedDocsIndex = 0;
   static int selectedCommentsIndex = 0;
   static List<CommentsRes> comments = [];
@@ -78,6 +84,8 @@ mixin Strings
   static String? preferedcourse;
   static String? pdfDoc;
   static int? selectedTeamId;
+  static int? groupCreationAccess;
+
 
   static List<ProjectDocData> selectedNotifyDocument = [];
   static bool selectedNotifyDocumentFlag = false;

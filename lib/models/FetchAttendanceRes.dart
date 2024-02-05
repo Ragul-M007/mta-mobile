@@ -28,19 +28,24 @@ class AttendanceData {
     required this.checkType,
     required this.checkTime,
     required this.locationName,
-   
+   this.projectImg,
+   this.projectName
     
   });
   late final String checkType;
   late final String checkTime;
   late final String locationName;
-  
+  late final String? projectName;
+  late final String? projectImg;
   
   AttendanceData.fromJson(Map<String, dynamic> json){
     checkType = json['checkType'];
     checkTime = json['checkTime'];
   //  latLng = json['latLng'];
     locationName = json['location_name'];
+
+     projectImg = json['project_img'];
+    projectName = json['project_name'];
   //  createdAt = json['created_at'];
   //  updatedAt = json['updated_at'];
   //  id = json['id'];
@@ -53,6 +58,8 @@ class AttendanceData {
     _data['checkTime'] = checkTime;
   //  _data['latLng'] = latLng;
     _data['location_name'] = locationName;
+    _data['project_name'] = this.projectName;
+    _data['project_img'] = this.projectImg;
   //  _data['created_at'] = createdAt;
   //  _data['updated_at'] = updatedAt;
   //  _data['id'] = id;

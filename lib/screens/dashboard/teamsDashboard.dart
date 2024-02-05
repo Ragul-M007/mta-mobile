@@ -42,10 +42,11 @@ class _TeamsDashboardState extends State<TeamsDashboard>
   void initState() {
     super.initState();
 
-    if(Strings.roleId == 7)
-    {
-        AppUtils.showprogress();
+    if (Strings.roleId == 7) {
+      AppUtils.showprogress();
     }
+
+    fetchChatCreateAcess();
     print("checkval--> ${Strings.roleId}");
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 100))
@@ -58,30 +59,29 @@ class _TeamsDashboardState extends State<TeamsDashboard>
     super.initState();
     getPermission();
 
-    if(Strings.roleId != 7)
-    {
-        WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
+    if (Strings.roleId != 7) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => getTeams());
     }
     configureWebview();
   }
-  configureWebview()
-  {
-controller = WebViewController()
-  ..setJavaScriptMode(JavaScriptMode.unrestricted)
-  ..setBackgroundColor(const Color(0x00000000))
-  ..setNavigationDelegate(
-    NavigationDelegate(
-      onProgress: (int progress) {
-        // Update loading bar.
-      },
-      onPageStarted: (String url) {},
-      onPageFinished: (String url) {
-        AppUtils.dismissprogress();
-      },
-      onWebResourceError: (WebResourceError error) {},
-    ),
-  )
-  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
+
+  configureWebview() {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            AppUtils.dismissprogress();
+          },
+          onWebResourceError: (WebResourceError error) {},
+        ),
+      )
+      ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
   }
 
   @override
@@ -122,7 +122,7 @@ controller = WebViewController()
     });
   }
 
-  getProjects() {
+  getTeams() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
 
@@ -154,9 +154,20 @@ controller = WebViewController()
       //getProjects();
     });
   }
+  fetchChatCreateAcess() {
+    final api = Provider.of<ApiService>(context, listen: false);
 
-  Future<bool> _onWillPop() async 
-  {
+    api.getAccessDetails().then((response) {
+      if (response.status!) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+       Strings.groupCreationAccess = response.data!.groupCreateAccess;
+      }
+    }).catchError((onError) {
+      print(onError.toString());
+      //getProjects();
+    });
+  }
+
+  Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -201,8 +212,7 @@ controller = WebViewController()
         false;
   }
 
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         _onWillPop();
@@ -240,25 +250,25 @@ controller = WebViewController()
                     ],
                   ),
                 ),
-            if (Strings.roleId != 6)               
-                menuoption(
-                  ontab: () {
-                    Strings.fromProjects = false;
-                    menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-                  },
-                  selectedmenuvalue: 1,
-                  menutitle: Strings.roleId == 7 ? "Home":"Teams",
-                ),
-                if (Strings.roleId != 7)               
-                    menuoption(
-                        ontab: () {
-                          Strings.fromProjects = true;
-                          menuRedirect(
-                              routename: "/projects", currentmenu: 2);
-                        },
-                        selectedmenuvalue: 2,
-                        menutitle: "Projects",
-                      ),
+                if (Strings.roleId != 6)
+                  menuoption(
+                    ontab: () {
+                      Strings.fromProjects = false;
+                      menuRedirect(
+                          routename: "/teamsDashboard", currentmenu: 1);
+                    },
+                    selectedmenuvalue: 1,
+                    menutitle: Strings.roleId == 7 ? "Home" : "Teams",
+                  ),
+                if (Strings.roleId != 7)
+                  menuoption(
+                    ontab: () {
+                      Strings.fromProjects = true;
+                      menuRedirect(routename: "/projects", currentmenu: 2);
+                    },
+                    selectedmenuvalue: 2,
+                    menutitle: "Projects",
+                  ),
 
                 // menuoption(
                 //   ontab: () {
@@ -268,16 +278,16 @@ controller = WebViewController()
                 //   menutitle: "Home",
                 // ),
 
-                if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
-                    menuoption(
-                        ontab: () {
-                          menuRedirect(
-                              routename: "/attendance", currentmenu: 3);
-                        },
-                        selectedmenuvalue: 3,
-                        menutitle: "Attendance",
-                      ),
-                    
+                if (Strings.roleId == 1 ||
+                    Strings.roleId == 2 ||
+                    Strings.roleId == 5)
+                  menuoption(
+                    ontab: () {
+                      menuRedirect(routename: "/attendance", currentmenu: 3);
+                    },
+                    selectedmenuvalue: 3,
+                    menutitle: "Attendance",
+                  ),
 
                 menuoption(
                   ontab: () {
@@ -324,51 +334,50 @@ controller = WebViewController()
                 menuoption(
                   ontab: () {
                     showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: (){
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.savePreferences("easyAccess", "N");
-                  AppUtils.removeDeviceId(ctx);
-                }                  
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );
+                      context: context,
+                      builder: (context) => new AlertDialog(
+                        title: Text(
+                          "Are you sure ?",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0061b0),
+                              fontWeight: FontWeight.w600),
+                        ),
+                        content: Text(
+                          'Do you want to logout from the App',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: new Text(
+                              'No',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              menuRedirect(routename: "/login", currentmenu: 9);
+                              AppUtils.savePreferences("easyAccess", "N");
+                              AppUtils.removeDeviceId(ctx);
+                            },
+                            child: new Text(
+                              'Yes',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   selectedmenuvalue: 9,
                   menutitle: "Logout",
@@ -376,7 +385,7 @@ controller = WebViewController()
               ],
               child: Scaffold(
                   backgroundColor: const Color(0xFFececed),
-                appBar: AppBar(
+                  appBar: AppBar(
                     backgroundColor: Colors.white,
                     actions: [
                       Padding(
@@ -394,97 +403,82 @@ controller = WebViewController()
                               radius: 20,
                               child: CircleAvatar(
                                 radius: 16,
-                                  backgroundImage: (
-                                      Strings.profilePic !=
-                                          "")
-                                  ? NetworkImage(Strings.baseImageUrl +
-                                      (Strings.profilePic ??
-                                          ""))
-                                  :  AssetImage("assets/icons/account.png")
-                                           as ImageProvider ,
-                                  backgroundColor: Colors.grey.withOpacity(0.3),
-                                ),
-                            ),
-                            
-                            // Strings.profilePic == null
-                            //     ? Image.asset(
-                            //         "assets/images/user.png",
-                            //         height: 40,
-                            //         width: 40,
-                            //       )
-                            //     : Image.network(
-                            //         Strings.baseImageUrl + Strings.profilePic!,
-                            //         height: 40,
-                            //         width: 40,
-                            //       ),
-                            // image.(
-                            //     Strings.baseImageUrl + Strings.profilePic!,
-                            //     40.0,
-                            //     40.0),
-                          ))
-                    ],
-                    bottom: Strings.roleId != 7 ? PreferredSize(
-                        preferredSize: Size.fromHeight(kToolbarHeight),
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Container(
-                            //  padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25),
-                              color: const Color(0xFFeceeef),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: Material(
-                                color: const Color(0xFFeceeef),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: TextField(
-                                        focusNode: searchField,
-                                        controller: _searchFieldController,
-                                        decoration: InputDecoration.collapsed(
-                                          hintText: ' Search',
-                                        ),
-                                        onChanged: (value) 
-                                        {
-                                          if (value.isEmpty) {
-                                            setState(() {
-                                              _searchLists = [];
-                                            });
-                                            return;
-                                          }
-                                          _searchLists = [];
-                                          _teamLists
-                                              .forEach((projectDetail) {
-                                            if (projectDetail.teamName!
-                                                .toLowerCase()
-                                                .startsWith(
-                                                    value.toLowerCase()))
-                                              _searchLists.add(projectDetail);
-                                            
-                                          });
-                                          print("dataaaa ${_searchLists.length}");
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                    InkWell(
-                                      child: Icon(
-                                        Icons.search,
-                                        color: Colors.black,
-                                      ),
-                                      onTap: () {},
-                                    )
-                                  ],
-                                ),
+                                backgroundImage: (Strings.profilePic != "")
+                                    ? NetworkImage(Strings.baseImageUrl +
+                                        (Strings.profilePic ?? ""))
+                                    : AssetImage("assets/icons/account.png")
+                                        as ImageProvider,
+                                backgroundColor: Colors.grey.withOpacity(0.3),
                               ),
                             ),
-                          ),
-                        )):PreferredSize(
-                        preferredSize: Size.zero,
-                        child: SizedBox()),
+
+                           
+                          ))
+                    ],
+                    bottom: Strings.roleId != 7
+                        ? PreferredSize(
+                            preferredSize: Size.fromHeight(kToolbarHeight),
+                            child: Padding(
+                              padding: EdgeInsets.all(15),
+                              child: Container(
+                                //  padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: const Color(0xFFeceeef),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Material(
+                                    color: const Color(0xFFeceeef),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: TextField(
+                                            focusNode: searchField,
+                                            controller: _searchFieldController,
+                                            decoration:
+                                                InputDecoration.collapsed(
+                                              hintText: ' Search',
+                                            ),
+                                            onChanged: (value) {
+                                              if (value.isEmpty) {
+                                                setState(() {
+                                                  _searchLists = [];
+                                                });
+                                                return;
+                                              }
+                                              _searchLists = [];
+                                              _teamLists
+                                                  .forEach((projectDetail) {
+                                                if (projectDetail.teamName!
+                                                    .toLowerCase()
+                                                    .startsWith(
+                                                        value.toLowerCase()))
+                                                  _searchLists
+                                                      .add(projectDetail);
+                                              });
+                                              print(
+                                                  "dataaaa ${_searchLists.length}");
+                                              setState(() {});
+                                            },
+                                          ),
+                                        ),
+                                        InkWell(
+                                          child: Icon(
+                                            Icons.search,
+                                            color: Colors.black,
+                                          ),
+                                          onTap: () {},
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ))
+                        : PreferredSize(
+                            preferredSize: Size.zero, child: SizedBox()),
                     leading: SizedBox(
                       height: 25.0,
                       width: 25.0,
@@ -503,67 +497,110 @@ controller = WebViewController()
                   ),
                   body: Builder(builder: (BuildContext newContext) {
                     ctx = newContext;
-                    return 
-                    Strings.roleId != 7 ?
-                    _teamLists.length > 0
-                        ? 
-                        _searchLists.length != 0? ListView.builder(
-                            padding: EdgeInsets.all(20),
-                            itemBuilder: (BuildContext ctx, int index) {
-                              return Padding(
-                                padding: EdgeInsets.all(10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    // Strings.selectedCategory = [];
-                                    // Strings.selectedCategory.add(_catsList[index]);
-                                    // Strings.category = true;
-                                    // Navigator.pushNamed(context, '/viewdoclist');
-                                    
-                                    Strings.selectedTeamId = _searchLists[index].teamId;
-                                    Navigator.pushNamed(context, '/dashboard');
-                                  },
-                                  child: Container(
-                                    child: Padding(
-                                        padding: EdgeInsets.all(20),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                        _searchLists[index].teamName!,
-                                                        style: Drawables.adddoccontentstyle(
-                                                            Colors.black87,
-                                                            14.0,
-                                                            FontWeight.w500)),
-                                                            Text(
-                                                        _searchLists[index].description!,
-                                                        style: Drawables.adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w300))
-                                                  ],
-                                                )),
-                                            Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: Colors.grey,
-                                              size: 14.0,
-                                            )
-                                          ],
-                                        )),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
+                    return Strings.roleId != 7
+                        ? _teamLists.length > 0
+                            ? _searchLists.length != 0
+                                ? ListView.builder(
+                                    padding: EdgeInsets.all(20),
+                                    itemBuilder: (BuildContext ctx, int index) {
+                                      return Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            // Strings.selectedCategory = [];
+                                            // Strings.selectedCategory.add(_catsList[index]);
+                                            // Strings.category = true;
+                                            // Navigator.pushNamed(context, '/viewdoclist');
 
-                              // return Text("hi");
-                            },
-                            itemCount: _searchLists.length,
-                          ):
-                          _searchFieldController.text != ""
+                                            Strings.selectedTeamId =
+                                                _searchLists[index].teamId;
+                                            Navigator.pushNamed(
+                                                context, '/dashboard');
+                                          },
+                                          child: Container(                                            
+                                            child: Padding(
+                                                    padding: EdgeInsets.fromLTRB(14,4,15,4),
+                                                    child: Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Row(
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: [
+                                                            Column(
+                                                                     mainAxisAlignment: MainAxisAlignment.center,                                                     crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                                                                                          children: [
+                                                            Text(
+                                                                _searchLists[
+                                                                        index]
+                                                                    .teamName!,
+                                                                style: Drawables.adddoccontentstyle(
+                                                                    Colors
+                                                                        .black87,
+                                                                    14.0,
+                                                                    FontWeight
+                                                                        .w500)),
+                                                            SizedBox(
+                                                              width: 2,
+                                                            ),
+                                                            Text(
+                                                                _searchLists[
+                                                                        index]
+                                                                    .description!.trim(),
+                                                                style: Drawables.adddoccontentstyle(
+                                                                    Colors
+                                                                        .grey,
+                                                                    12.0,
+                                                                    FontWeight
+                                                                        .w300)),
+                                                                                                                      ],
+                                                                     ),
+                                                                     SizedBox(width: 5,),
+                                                            IconButton(
+                                                                icon:  Image.asset(
+                                                                        'assets/images/zerochat.png',width: 25,height: 25,),
+                                                                onPressed:
+                                                                    () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ChatGroups(
+                                                                        teamId:
+                                                                            _searchLists[index].teamId!,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              ),
+                                                          ],
+                                                        ),
+                                                        Icon(
+                                                          Icons
+                                                              .arrow_forward_ios,
+                                                          color: Colors.grey,
+                                                          size: 14.0,
+                                                        )
+                                                      ],
+                                                    )),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      // return Text("hi");
+                                    },
+                                    itemCount: _searchLists.length,
+                                  )
+                                : _searchFieldController.text != ""
                                     ? Align(
                                         alignment: Alignment.center,
                                         child: Text(
@@ -573,100 +610,122 @@ controller = WebViewController()
                                               color: Colors.red,
                                               fontWeight: FontWeight.w600),
                                         ),
-                                      ): ListView.builder(
-                            padding: EdgeInsets.all(20),
-                            itemBuilder: (BuildContext ctx, int index) {
-                              return Padding(
-                                padding: EdgeInsets.all(10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                  
-                                    Strings.selectedTeamId = _teamLists[index].teamId;
-                                    Navigator.pushNamed(context, '/dashboard');
-                                  },
-                                  child: Container(
-                                    child: Padding(
-                                        padding: EdgeInsets.all(14),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
+                                      )
+                                    : ListView.builder(
+                                        padding: EdgeInsets.all(20),
+                                        itemBuilder:
+                                            (BuildContext ctx, int index) {
+                                          return Padding(
+                                            padding: EdgeInsets.all(10),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Strings.selectedTeamId =
+                                                    _teamLists[index].teamId;
+                                                Navigator.pushNamed(
+                                                    context, '/dashboard');
+                                              },
+                                              child: Container(
+                                                child: Padding(
+                                                    padding: EdgeInsets.fromLTRB(14,4,15,4),
+                                                    child: Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                       children: [
-                                                        Text(
-                                                            _teamLists[index].teamName!,
-                                                            style: Drawables.adddoccontentstyle(
-                                                                Colors.black87,
-                                                                14.0,
-                                                                FontWeight.w500)),
-                                                                SizedBox(width: 2,),
-                                                                InkWell(
-                                                                  onTap: (){
-
-                                                                    Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => ChatGroups(teamId: _teamLists[index].teamId!,),
-  ),
-);
-
-                                                                                  // Navigator.pushNamed(context, '/chatGroups',arguments: {'teamId': _teamLists[index].teamId});
-                                                                  },
-                                                                  child: Container(
-                                                                    margin: EdgeInsets.only(top: 2),
-                                                                    width: 30,
-                                                                    height: 20,
-                                                                    child: Icon(Icons.chat_rounded,size: 20,)),
-                                                                ),
-                                                      ],
-                                                    ),
+                                                        Row(
+                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          children: [
+                                                            Column(
+                                                                     mainAxisAlignment: MainAxisAlignment.center,                                                     crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                                                                                          children: [
                                                             Text(
-                                                        _teamLists[index].description!,
-                                                        style: Drawables.adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w300))
-                                                  ],
-                                                )),
-                                            Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: Colors.grey,
-                                              size: 14.0,
-                                            )
-                                          ],
-                                        )),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
+                                                                _teamLists[
+                                                                        index]
+                                                                    .teamName!,
+                                                                style: Drawables.adddoccontentstyle(
+                                                                    Colors
+                                                                        .black87,
+                                                                    14.0,
+                                                                    FontWeight
+                                                                        .w500)),
+                                                            SizedBox(
+                                                              width: 2,
+                                                            ),
+                                                            Text(
+                                                                _teamLists[
+                                                                        index]
+                                                                    .description!.trim(),
+                                                                style: Drawables.adddoccontentstyle(
+                                                                    Colors
+                                                                        .grey,
+                                                                    12.0,
+                                                                    FontWeight
+                                                                        .w300)),
+                                                                                                                      ],
+                                                                     ),
+                                                                     SizedBox(width: 5,),
+                                                            IconButton(
+                                                                icon:  Image.asset(
+                                                                        'assets/images/zerochat.png',width: 25,height: 25,),
+                                                                onPressed:
+                                                                    () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ChatGroups(
+                                                                        teamId:
+                                                                            _teamLists[index].teamId!,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              ),
+                                                          ],
+                                                        ),
+                                                        Icon(
+                                                          Icons
+                                                              .arrow_forward_ios,
+                                                          color: Colors.grey,
+                                                          size: 14.0,
+                                                        )
+                                                      ],
+                                                    )),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          );
 
-                              // return Text("hi");
-                            },
-                            itemCount: _teamLists.length,
-                          )
-                        : Container(
-                            child: Padding(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _errText,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w600),
+                                          // return Text("hi");
+                                        },
+                                        itemCount: _teamLists.length,
+                                      )
+                            : Container(
+                                child: Padding(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _errText,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            padding: EdgeInsets.all(20),
-                          )):Container(
-        child: WebViewWidget(controller: controller));
+                                padding: EdgeInsets.all(20),
+                              ))
+                        : Container(
+                            child: WebViewWidget(controller: controller));
                   }))),
         ),
       ),
@@ -695,44 +754,33 @@ controller = WebViewController()
   }
 
   Widget image(String img, double width, double height) {
-    try
-    {
-        return Container(
-      width: width,
-      height: height,
-      decoration: new BoxDecoration(
-        color: const Color(0xff7c94b6),
-        
-          image: new DecorationImage(
-          image: 
-            NetworkImage(img)
-            ,
-          fit: BoxFit.fill,
-        )
-        ,
-        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-      ),
-    );
-    }
-    catch(err)
-    {
+    try {
       return Container(
-      width: width,
-      height: height,
-      decoration: new BoxDecoration(
-        color: const Color(0xff7c94b6),
-        
+        width: width,
+        height: height,
+        decoration: new BoxDecoration(
+          color: const Color(0xff7c94b6),
           image: new DecorationImage(
-          image: new AssetImage("assets/images/logo.jpeg"),
-          fit: BoxFit.fill,
-        )
-        ,
-        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-      ),
-    );
+            image: NetworkImage(img),
+            fit: BoxFit.fill,
+          ),
+          borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+        ),
+      );
+    } catch (err) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: new BoxDecoration(
+          color: const Color(0xff7c94b6),
+          image: new DecorationImage(
+            image: new AssetImage("assets/images/logo.jpeg"),
+            fit: BoxFit.fill,
+          ),
+          borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+        ),
+      );
     }
-    
-    
   }
 
   void getPermission() async {
@@ -827,11 +875,13 @@ controller = WebViewController()
     );
   }
 
-  Future<void> _showMyDialog(context, imgurl, title) async {
+  Future<void> _showMyDialog(context, imgurl, title) async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
+      builder: (BuildContext context) 
+      {
         return AlertDialog(
           content: SingleChildScrollView(
             child: GestureDetector(
@@ -840,7 +890,7 @@ controller = WebViewController()
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.75,
-                 // height: MediaQuery.of(context).size.height * 0.75,
+                  // height: MediaQuery.of(context).size.height * 0.75,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -863,16 +913,13 @@ controller = WebViewController()
                       Center(
                         child: CircleAvatar(
                           radius: 100,
-                                backgroundImage: (
-                                    Strings.profilePic !=
-                                        "")
-                                ? NetworkImage(Strings.baseImageUrl +
-                                    (Strings.profilePic ??
-                                        ""))
-                                :  AssetImage("assets/icons/account.png")
-                                        as ImageProvider,
-                            backgroundColor: Colors.grey.withOpacity(0.3),
-                              ),
+                          backgroundImage: (Strings.profilePic != "")
+                              ? NetworkImage(Strings.baseImageUrl +
+                                  (Strings.profilePic ?? ""))
+                              : AssetImage("assets/icons/account.png")
+                                  as ImageProvider,
+                          backgroundColor: Colors.grey.withOpacity(0.3),
+                        ),
                       )
                     ],
                   ),

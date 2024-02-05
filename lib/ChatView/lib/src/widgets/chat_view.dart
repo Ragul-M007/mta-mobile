@@ -7,6 +7,7 @@
  WARE.
  */
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/lib/src/widgets/chat_list_widget.dart';
 import 'package:mta/ChatView/lib/src/widgets/chat_view_inherited_widget.dart';
@@ -22,6 +23,7 @@ class ChatView extends StatefulWidget {
     required this.chatController,
     required this.currentUser,
     this.onSendTap,
+    this.refreshCall,
     this.profileCircleConfig,
     this.chatBubbleConfig,
     this.repliedMessageConfig,
@@ -33,6 +35,7 @@ class ChatView extends StatefulWidget {
     this.messageConfig,
     this.isLastPage,
     this.appBar,
+    this.userList,
     ChatBackgroundConfiguration? chatBackgroundConfig,
     this.typeIndicatorConfig,
     this.sendMessageBuilder,
@@ -88,10 +91,15 @@ class ChatView extends StatefulWidget {
 
   /// Provides call back when user tap on send button in text field. It returns
   /// message, reply message and message type.
-  final StringMessageCallBack? onSendTap;
+  final ListCallBack? onSendTap;
 
   /// Provides builder which helps you to make custom text field and functionality.
   final ReplyMessageWithReturnWidget? sendMessageBuilder;
+
+  final DataRefreshCallback? refreshCall;
+
+  final List<Map<String, dynamic>>? userList;
+
 
   @Deprecated('Use [ChatController.setTypingIndicator]  instead')
 
@@ -219,6 +227,8 @@ class _ChatViewState extends State<ChatView>
                         return ChatListWidget(
                           /// TODO: Remove this in future releases.
                           // ignore: deprecated_member_use_from_same_package
+                          refreshCall: widget.refreshCall,
+                          
                           showTypingIndicator: widget.showTypingIndicator,
                           replyMessage: state,
                           chatController: widget.chatController,
@@ -243,6 +253,7 @@ class _ChatViewState extends State<ChatView>
                     ),
                   if (featureActiveConfig.enableTextField)
                     SendMessageWidget(
+                      userList: widget.userList,
                       key: _sendMessageKey,
                       chatController: chatController,
                       sendMessageBuilder: widget.sendMessageBuilder,
@@ -266,10 +277,11 @@ class _ChatViewState extends State<ChatView>
     String message,
     ReplyMessage replyMessage,
     MessageType messageType,
+    List<MultipartFile> files
   ) {
     if (widget.sendMessageBuilder == null) {
       if (widget.onSendTap != null) {
-        widget.onSendTap!(message, replyMessage, messageType);
+        widget.onSendTap!(message, replyMessage, messageType,files);
       }
       _assignReplyMessage();
     }

@@ -104,18 +104,13 @@ class ChatViewAppBar extends StatelessWidget {
                       (!kIsWeb && Platform.isIOS)
                           ? Icons.arrow_back_ios
                           : Icons.arrow_back,
-                      color: backArrowColor,
+                      color: Colors.black,
                     ),
                   ),
             Expanded(
               child: Row(
                 children: [
-                  if (profilePicture != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: CircleAvatar(
-                          backgroundImage: NetworkImage(profilePicture!)),
-                    ),
+                  
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

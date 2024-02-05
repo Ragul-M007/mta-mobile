@@ -91,9 +91,10 @@ class LinkPreview extends StatelessWidget {
   }
 
   void _launchURL() async {
+
     final parsedUrl = Uri.parse(url);
-    await canLaunchUrl(parsedUrl)
-        ? await launchUrl(parsedUrl)
-        : throw couldNotLunch;
+        print('urlll ${await canLaunchUrl(parsedUrl)}');
+
+    await launchUrl(parsedUrl);
   }
 }

@@ -8,6 +8,7 @@ import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/circleImage.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
@@ -324,66 +325,12 @@ showDialog(
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Icon(
-                                //   Icons.pin_drop,
-                                //   color: Color(0xFF0061b0),
-                                //   size: 26.0,
-                                // ),
-                                // SizedBox(width: 5.0),
-                                // Container(
-                                //   child: Text(location,
-                                //   style: TextStyle(
-                                //       fontSize: 12,
-                                //       fontWeight: FontWeight.w600,
-                                //       color: Colors.black87)),
-                                //                                 ),
-                                // GestureDetector(
-                                //   onTap: () {
-                                //     getUserLocation();
-                                //   },
-                                //   child: Icon(
-                                //     Icons.refresh,
-                                //     color: Color(0xFF0061b0),
-                                //     size: 26.0,
-                                //   ),
-                                // ),
-                                // SizedBox(
-                                //   width: 15,
-                                // ),
-                                InkWell(
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        height: 50,
-                                      ),
-                                      Text("Grid View",
-                                          style: Drawables.adddoccontentstyle(
-                                              Colors.black87,
-                                              14.0,
-                                              FontWeight.w600)),
-                                      SizedBox(width: 5.0),
-                                      Icon(
-                                        Icons.grid_view,
-                                        color: Color(0xFF0061b0),
-                                      )
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      isgridView = true;
-                                      isShowCheckInOut = true;
-                                      getAttendance(
-                                          day + "-" + month + "-" + year);
-                                    });
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 0, 0, 10),
+                               
+
+                                 Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 10, 0, 10),
                             child: DropdownButton<String>(
                               value: dropdownValue,
                               style: const TextStyle(
@@ -438,6 +385,37 @@ showDialog(
                               }).toList(),
                             ),
                           ),
+                                InkWell(
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 50,
+                                      ),
+                                      Text("Grid View",
+                                          style: Drawables.adddoccontentstyle(
+                                              Colors.black87,
+                                              14.0,
+                                              FontWeight.w600)),
+                                      SizedBox(width: 5.0),
+                                      Icon(
+                                        Icons.grid_view,
+                                        color: Color(0xFF0061b0),
+                                      )
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      isgridView = true;
+                                      isShowCheckInOut = true;
+                                      getAttendance(
+                                          day + "-" + month + "-" + year);
+                                    });
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                         
                           _attendance.length > 0
                               ? Expanded(
                                   child: ListView.builder(
@@ -521,6 +499,25 @@ showDialog(
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
+                                                         Row(
+                                              children: [
+                                                CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_attendance[index]
+                                                                .projectImg ?? ""), width: 40, height: 40,radius: 15, defaultImageUrl: "assets/images/background1.png"),
+                                                SizedBox(width: 5.0),
+                                                Expanded(
+                                                  child: Text(
+                                                    _attendance[index]
+                                                                .projectName ?? "",
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w400),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 5,),
                                                         RichText(
                                                           text: TextSpan(
                                                             text:
@@ -561,18 +558,7 @@ showDialog(
                                                             ),
                                                             SizedBox(
                                                                 width: 5.0),
-                                                            Expanded(
-                                                              child: Text(
-                                                                  _attendance[
-                                                                          index]
-                                                                      .checkInLocation ?? "",
-                                                                  style: Drawables.adddoccontentstyle(
-                                                                      Colors
-                                                                          .grey,
-                                                                      12.0,
-                                                                      FontWeight
-                                                                          .w400)),
-                                                            ),
+                                                           
                                                           ],
                                                         ),
                                                         Icon(Icons.more_vert,
@@ -615,20 +601,7 @@ showDialog(
                                                                   0xFF0061b0),
                                                               size: 16.0,
                                                             ),
-                                                            Expanded(
-                                                              child: Text(
-                                                                _attendance[
-                                                                        index]
-                                                                    .checkOutLocation ?? "",
-                                                                style: Drawables
-                                                                    .adddoccontentstyle(
-                                                                        Colors
-                                                                            .grey,
-                                                                        12.0,
-                                                                        FontWeight
-                                                                            .w400),
-                                                              ),
-                                                            ),
+                                                            
                                                           ],
                                                         ),
                                                         SizedBox(height: 3.0),
@@ -887,8 +860,10 @@ var lastSignIn = _attendance.last;
                               size: 26.0,
                             ),
                             SizedBox(width: 5.0),
+                             CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + ( _projectLists?.token?.projectImg ?? ""), width: 40, height: 40,radius: 12, defaultImageUrl: "assets/images/background1.png"),
+                            SizedBox(width: 5,),
                             Container(
-                              width: MediaQuery.of(context).size.width * 0.6,
+                              width: MediaQuery.of(context).size.width * 0.5,
                                                   child: Text(_projectLists?.token?.projectName ?? "Select Project",
                                                   maxLines: 3,
                               style: TextStyle(
@@ -912,9 +887,7 @@ var lastSignIn = _attendance.last;
                     //   ),
                     // ),
                     Spacer(),
-                    SizedBox(
-                      width: 15,
-                    ),
+                    
                     InkWell(
                       child: Row(
                         children: [
@@ -1084,6 +1057,25 @@ var lastSignIn = _attendance.last;
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
+                                             Row(
+                                              children: [
+                                                CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_attendance[index]
+                                                                .projectImg ?? ""), width: 40, height: 40,radius: 15, defaultImageUrl: "assets/images/background1.png"),
+                                                SizedBox(width: 5.0),
+                                                Expanded(
+                                                  child: Text(
+                                                    _attendance[index]
+                                                                .projectName ?? "",
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w400),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 8,),
                                             RichText(
                                               text: TextSpan(
                                                 text: 'Start Time -',
@@ -1107,28 +1099,11 @@ var lastSignIn = _attendance.last;
                                               ),
                                             ),
                                             SizedBox(height: 3.0),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.pin_drop,
-                                                  color: Color(0xFF0061b0),
-                                                  size: 16.0,
-                                                ),
-                                                SizedBox(width: 5.0),
-                                                Expanded(
-                                                  child: Text(
-                                                      _attendance[index]
-                                                          .checkInLocation ?? "",
-                                                      style: Drawables
-                                                          .adddoccontentstyle(
-                                                              Colors.grey,
-                                                              12.0,
-                                                              FontWeight.w400)),
-                                                ),
-                                              ],
-                                            ),
+                                           
                                             Icon(Icons.more_vert,
                                                 color: Colors.grey, size: 14.0),
+                                                                                            SizedBox(height: 3.0),
+
                                             RichText(
                                               text: TextSpan(
                                                 text: 'End Time -',
@@ -1152,33 +1127,7 @@ var lastSignIn = _attendance.last;
                                               ),
                                             ),
                                             SizedBox(height: 3.0),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.pin_drop,
-                                                  color: Color(0xFF0061b0),
-                                                  size: 16.0,
-                                                ),
-                                                SizedBox(width: 5.0),
-                                                Expanded(
-                                                  child: Text(
-                                                    _attendance[index]
-                                                                .checkOutLocation
-                                                                .toString() !=
-                                                            "null"
-                                                        ? _attendance[index]
-                                                            .checkOutLocation
-                                                            .toString()
-                                                        : "",
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w400),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                           
                                             SizedBox(height: 3.0),
                                             Text(
                                               getHours(
@@ -1301,6 +1250,8 @@ var lastSignIn = _attendance.last;
                     test.checkOutLocation = "";
                     test.checkOutTime = "";
                   }
+                  test.projectImg = _attendancemain[j].projectImg ?? "";
+                  test.projectName = _attendancemain[j].projectName ?? "";
              }
           print("testing ${test.checkInLocation}");
            setState(() 
@@ -1590,8 +1541,9 @@ var lastSignIn = _attendance.last;
                             return Column(
                               children: [
                                 Card(
-                                  color: const Color.fromARGB(255, 226, 223, 223).withOpacity(0.1),
+                                  color: Colors.white70,
                                   child: ListTile(
+                                    leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_projectLists?.data?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
                                     title: Text(
                                       _projectLists?.data?[index].projectName ?? "",maxLines: 3,
                                     ),

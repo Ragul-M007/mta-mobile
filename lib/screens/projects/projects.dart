@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/circleImage.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
@@ -15,6 +16,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
 
 import '../../utilities/checkResponsive.dart';
+import '../chat/ChatGroups.dart';
 
 class Projects extends StatefulWidget {
   static const String routeName = "/projects";
@@ -458,7 +460,7 @@ class _ProjectsState extends State<Projects>
                     ctx = newContext;
                     return _projectLists.length > 0
                         ? Padding(
-                            padding: EdgeInsets.all(20),
+                            padding: EdgeInsets.only(top: 20,bottom: 20,right: 6,left: 6),
                             child: _searchLists.length != 0
                                 ? GridView.builder(
                                     itemCount: _searchLists.length,
@@ -478,116 +480,158 @@ class _ProjectsState extends State<Projects>
                                             borderRadius:
                                                 BorderRadius.circular(15.0),
                                           ),
-                                          child: new GridTile(
-                                            child: Container(
-                                              height: 50,
-                                              width: 50,
-                                              child: Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      10, 10, 10, 0),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          _downloadfile(
-                                                              _projectLists[
-                                                                      index]
-                                                                  .projectImg,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .projectName,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .description,
-                                                              _projectLists[
-                                                                      index]
-                                                                  .status);
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  top: 10),
-                                                          child: image(
-                                                              Strings.baseImageUrl +
-                                                                  _searchLists[
-                                                                          index]
-                                                                      .projectImg!,
-                                                              65.0,
-                                                              65.0),
-                                                        ),
-                                                      ),
-                                                      Container()
-                                                    ],
-                                                  )),
-                                            ),
-                                            footer: GestureDetector(
-                                              onTap: () {
-                                                onTapProject(
-                                                    _searchLists[index]);
-                                              },
-                                              child: Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      10, 10, 0, 20),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 5),
-                                                        child: Text(
-                                                          _searchLists[index]
-                                                              .projectName!,
-                                                              overflow: TextOverflow.ellipsis,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ),
-                                                      Row(
+                                          child: new 
+                                          GridTile(
+                                                child: Container(
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 10, 10, 10),
+                                                      child: Row(
+                                                        
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
-                                                                .end,
+                                                                .start,
+                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                         children: [
-                                                          Icon(Icons.pin_drop,
-                                                              color: Color(
-                                                                  0xFF0061b0)),
-                                                          SizedBox(width: 5),
-                                                          Expanded(
-                                                            child: Text(
-                                                              _searchLists[
-                                                                          index]
-                                                                      .address! +
-                                                                  ' , ' +
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              _downloadfile(
                                                                   _searchLists[
                                                                           index]
-                                                                      .city!,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              style: TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .grey),
+                                                                      .projectImg,
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .projectName,
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .description,
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .status);
+                                                            },
+                                                            child: Padding(
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10),
+                                                              child: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl +
+                                                                      _searchLists[
+                                                                              index]
+                                                                          .projectImg!, width: 40, height: 40, defaultImageUrl: "assets/images/background1.png", radius: 20)
+                                                              
+                                                              
+                                                              
                                                             ),
                                                           ),
+
+
+                                                          Container(
+                                                            width: 40,
+                                                            height: 40,
+                                                            margin: EdgeInsets.only(top: 8),
+                                                            child: IconButton(icon: Image.asset('assets/images/zerochat.png'),onPressed:(){
+                                                                Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) => ChatGroups(projectId: _searchLists[index].projectId!,),
+                                                              ),
+                                                            );
+                                                            }),
+                                                          )
+
                                                         ],
-                                                      )
-                                                    ],
-                                                  )),
-                                            ),
-                                          ),
+                                                      )),
+                                                ),
+                                                footer: GestureDetector(
+                                                  onTap: () {
+                                                    onTapProject(
+                                                        _searchLists[index]);
+                                                  },
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 0, 0, 20),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Container(
+                                                            margin: EdgeInsets.fromLTRB(0, 12, 0, 0),
+                                                            child: Text(_searchLists[index].status!,style:TextStyle(fontSize: 14,color: _searchLists[index].status! == "Active"?Colors.lightGreen:_searchLists[index].status! =="Completed"? Colors.green:_searchLists[index].status! == "Cancelled"? Colors.red:Color.fromARGB(255, 216, 195, 3)))),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    bottom: 5,right: 8),
+                                                            child: Text(
+                                                              _searchLists[
+                                                                      index]
+                                                                  .projectName!,
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  maxLines: 2,
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
+                                                            ),
+                                                          ),
+                                                          Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Container(
+                                                                width: 14.0,
+                                                                height: 14.0,
+                                                                decoration:
+                                                                    new BoxDecoration(
+                                                                  image:
+                                                                      new DecorationImage(
+                                                                    image: new AssetImage(
+                                                                        "assets/icons/pin.png"),
+                                                                    fit: BoxFit
+                                                                        .fill,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      new BorderRadius
+                                                                          .all(new Radius
+                                                                              .circular(
+                                                                          50.0)),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 5),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  _searchLists[
+                                                                              index]
+                                                                          .address! +
+                                                                      ' , ' +
+                                                                      _searchLists[
+                                                                              index]
+                                                                          .city!,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .clip,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          10,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400,
+                                                                      color: Colors
+                                                                          .grey),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      )),
+                                                ),
+                                              ),
                                         ),
                                       );
                                     },
@@ -622,11 +666,9 @@ class _ProjectsState extends State<Projects>
                                                 borderRadius:
                                                     BorderRadius.circular(15.0),
                                               ),
-                                              child: new GridTile(
+                                              child: new 
+                                              GridTile(
                                                 child: Container(
-                                                  //color: Colors.green,
-                                                  height: 50,
-                                                  width: 50,
                                                   child: Padding(
                                                       padding:
                                                           EdgeInsets.fromLTRB(
@@ -658,18 +700,30 @@ class _ProjectsState extends State<Projects>
                                                               padding: EdgeInsets
                                                                   .only(
                                                                       top: 10),
-                                                              child: image(
-                                                                  Strings.baseImageUrl +
+                                                              child: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl +
                                                                       _projectLists[
                                                                               index]
-                                                                          .projectImg!,
-                                                                  65.0,
-                                                                  65.0),
+                                                                          .projectImg!, width: 40, height: 40, defaultImageUrl: "assets/images/background1.png", radius: 20)
+                                                              
+                                                              
+                                                              
                                                             ),
                                                           ),
+
+
                                                           Container(
-                                                            margin: EdgeInsets.fromLTRB(10, 12, 0, 0),
-                                                            child: Text(_projectLists[index].status!,style:TextStyle(color: _projectLists[index].status! == "Active"?Colors.lightGreen:_projectLists[index].status! =="Completed"? Colors.green:_projectLists[index].status! == "Cancelled"? Colors.red:Colors.yellow))),
+                                                            width: 40,
+                                                            height: 40,
+                                                            margin: EdgeInsets.only(top: 8),
+                                                            child: IconButton(icon: Image.asset('assets/images/zerochat.png'),onPressed:(){
+                                                                Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) => ChatGroups(projectId: _projectLists[index].projectId!,),
+                                                              ),
+                                                            );
+                                                            }),
+                                                          )
 
                                                         ],
                                                       )),
@@ -688,31 +742,36 @@ class _ProjectsState extends State<Projects>
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
+                                                          Container(
+                                                            margin: EdgeInsets.fromLTRB(0, 12, 0, 0),
+                                                            child: Text(_projectLists[index].status!,style:TextStyle(fontSize: 14,color: _projectLists[index].status! == "Active"?Colors.lightGreen:_projectLists[index].status! =="Completed"? Colors.green:_projectLists[index].status! == "Cancelled"? Colors.red:Color.fromARGB(255, 216, 195, 3)))),
                                                           Padding(
                                                             padding:
                                                                 EdgeInsets.only(
-                                                                    left: 5),
+                                                                    bottom: 5,right: 8),
                                                             child: Text(
                                                               _projectLists[
                                                                       index]
                                                                   .projectName!,
                                                                   overflow: TextOverflow.ellipsis,
+                                                                  maxLines: 2,
                                                               style: TextStyle(
+                                                                fontSize: 12,
                                                                   color: Colors
                                                                       .black,
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .bold),
+                                                                          .w600),
                                                             ),
                                                           ),
                                                           Row(
                                                             crossAxisAlignment:
                                                                 CrossAxisAlignment
-                                                                    .end,
+                                                                    .center,
                                                             children: [
                                                               Container(
-                                                                width: 20.0,
-                                                                height: 20.0,
+                                                                width: 14.0,
+                                                                height: 14.0,
                                                                 decoration:
                                                                     new BoxDecoration(
                                                                   image:
@@ -745,10 +804,10 @@ class _ProjectsState extends State<Projects>
                                                                           .clip,
                                                                   style: TextStyle(
                                                                       fontSize:
-                                                                          12,
+                                                                          10,
                                                                       fontWeight:
                                                                           FontWeight
-                                                                              .bold,
+                                                                              .w400,
                                                                       color: Colors
                                                                           .grey),
                                                                 ),

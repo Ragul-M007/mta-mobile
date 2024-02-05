@@ -253,25 +253,30 @@ class _CategoriesContentState extends State<CategoriesContent>
   {
     return Container(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            padding: EdgeInsets.fromLTRB(10, 18, 10, 10),
             child: Container(
-              height: 100,
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.12,
-                    height: MediaQuery.of(context).size.width * 0.12,
-                    decoration: new BoxDecoration(
-                      color: const Color(0xff7c94b6),
-                      image: new DecorationImage(
-                        image: new NetworkImage(Strings.baseImageUrl +
-                            Strings.selectedProject[0].projectImg!),
-                        fit: BoxFit.fill,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.12,
+                      height: MediaQuery.of(context).size.width * 0.12,
+                      decoration: new BoxDecoration(
+                        color: const Color(0xff7c94b6),
+                        image: new DecorationImage(
+                          image: new NetworkImage(Strings.baseImageUrl +
+                              Strings.selectedProject[0].projectImg!),
+                          fit: BoxFit.fill,
+                        ),
+                        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                       ),
-                      borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
                     ),
                   ),
                   Container(
@@ -284,45 +289,49 @@ class _CategoriesContentState extends State<CategoriesContent>
                             Strings.category = false;
                             Navigator.pushNamed(context, '/viewdoclist');
                           },
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.4,
+                          child: Container(
+                            padding: EdgeInsets.only(top: 5,bottom: 5,left: 5),
+                             width: MediaQuery.of(context).size.width * 0.5,
                             child: Text(
                               Strings.selectedProject[0].projectName!,
                               style: Drawables.adddoccontentstyle(
-                                  Colors.black, 18.0, FontWeight.w500),
+                                  Colors.black, 12.0, FontWeight.w600),
                             ),
                           ),
                         ),
                         
-                          Row(
-                            
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.04,
-                                height: 15.0,
-                                decoration: new BoxDecoration(
-                                  image: new DecorationImage(
-                                    image: new AssetImage("assets/icons/pin.png"),
-                                    fit: BoxFit.fill,
+                          Container(
+                            padding: EdgeInsets.only(left: 5),
+                            child: Row(
+                              
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.04,
+                                  height: 15.0,
+                                  decoration: new BoxDecoration(
+                                    image: new DecorationImage(
+                                      image: new AssetImage("assets/icons/pin.png"),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    borderRadius: new BorderRadius.all(
+                                        new Radius.circular(50.0)),
                                   ),
-                                  borderRadius: new BorderRadius.all(
-                                      new Radius.circular(50.0)),
                                 ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.36,
-                                child: Text(
-                                  Strings.selectedProject[0].address ?? "" +
-                                      ' , ' +
-                                      (Strings.selectedProject[0].city ?? ""),
-                                  style: Drawables.adddoccontentstyle(
-                                      Colors.grey, 13.0, FontWeight.normal),
-                                ),
-                              ),  
-                            ],
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.36,
+                                  child: Text(
+                                    Strings.selectedProject[0].address ?? "" +
+                                        ' , ' +
+                                        (Strings.selectedProject[0].city ?? ""),
+                                    style: Drawables.adddoccontentstyle(
+                                        Colors.grey, 10.0, FontWeight.normal),
+                                  ),
+                                ),  
+                              ],
+                            ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(0,6,0,0),
+                            padding: const EdgeInsets.fromLTRB(5,6,0,0),
                             child: GestureDetector(
                                                   onTap: () {
                                                     Strings.projectId = Strings.selectedProject[0].projectId!;
@@ -330,7 +339,7 @@ class _CategoriesContentState extends State<CategoriesContent>
                                                   },
                                                   child: Row(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
+                                                        CrossAxisAlignment.center,
                                                     children: [
                                                       Image.asset(
                                                           "assets/icons/Comments.png",
@@ -441,13 +450,12 @@ class _CategoriesContentState extends State<CategoriesContent>
           Expanded(
             child: _catsList.length > 0
                 ? ListView.builder(
-                    padding: EdgeInsets.fromLTRB(20,0,20,20),
+                    padding: EdgeInsets.fromLTRB(20,10,20,20),
                     itemBuilder: (BuildContext ctx, int index) {
                       return Padding(
-                        padding: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(5),
                         child: GestureDetector(
                           onTap: () {
-                            print("category check ${_catsList[index]}");
                             Strings.selectedCategory = [];
                             Strings.selectedCategory.add(_catsList[index]);
                             Strings.category = true;
@@ -455,7 +463,7 @@ class _CategoriesContentState extends State<CategoriesContent>
                           },
                           child: Container(
                             child: Padding(
-                                padding: EdgeInsets.fromLTRB(20,0,20,0),
+                                padding: EdgeInsets.fromLTRB(20,3,20,3),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -466,11 +474,11 @@ class _CategoriesContentState extends State<CategoriesContent>
                                                 _catsList[index].categoryName!,
                                                 style: Drawables.adddoccontentstyle(
                                                     Colors.black87,
-                                                    14.0,
+                                                    12.0,
                                                     FontWeight.w500)),
                                                     Text("${_catsList[index].documentCounts} Documents",
                                                     style: Drawables.adddoccontentstyle(
-                                    Colors.grey, 13.0, FontWeight.normal),)
+                                    Colors.grey, 12.0, FontWeight.normal),)
                                           ],
                                         )         
                                                 ),

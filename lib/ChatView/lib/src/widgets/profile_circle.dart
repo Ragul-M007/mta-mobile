@@ -33,6 +33,7 @@ class ProfileCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("immageee $imageUrl  $profileImage");
     return Padding(
       padding: profileCirclePadding ??
           EdgeInsets.only(left: 6.0, right: 4, bottom: bottomPadding),
@@ -41,7 +42,22 @@ class ProfileCircle extends StatelessWidget {
         onTap: onTap,
         child: CircleAvatar(
           radius: circleRadius ?? 16,
-          backgroundImage: NetworkImage(imageUrl ?? profileImage),
+          child: ClipOval(
+        child: Image.network(
+          imageUrl ?? "",
+          width: 50, // Adjust the width as needed
+          height: 50, // Adjust the height as needed
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              "assets/icons/defaultUser.jpeg",
+              width: 30, // Adjust the width as needed
+              height: 30, // Adjust the height as needed
+              fit: BoxFit.cover,
+            );
+          },
+        ),
+      ),
         ),
       ),
     );

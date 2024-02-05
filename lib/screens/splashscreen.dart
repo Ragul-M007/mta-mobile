@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:mta/models/Chat/ChatNotificationRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -16,13 +17,13 @@ import 'package:provider/provider.dart';
 import 'package:notification_permissions/notification_permissions.dart';
 
 import '../models/FetchCatsRes.dart';
+import 'chat/ChatGroups.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 class SplashScreen extends StatelessWidget {
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     // return Container(child: SplashScreenContent());
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
@@ -59,7 +60,7 @@ class SplashScreenContent extends StatefulWidget {
 
 class _SplashScreenContentState extends State<SplashScreenContent> {
   Timer? timer;
-  
+
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   @override
   void initState() {
@@ -75,7 +76,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     getusername();
     getuserid();
     requestNotificationPermissions();
-   // getConnectivity();
+    // getConnectivity();
   }
 
   Future<void> requestNotificationPermissions() async {
@@ -215,6 +216,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // Strings.selectedProDocument.add(peo);
       // print("dataaa ${Strings.selectedProDocument[0].documentId}");
       // print(message.notification?.body);
+
+
       AppUtils.showToastErrorTop("You have a new notification!");
       print("dataaa ${jsonEncode(message.data)}");
 
@@ -267,6 +270,13 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.fromNotificationDocuments = true;
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+        } else if (message.notification!.title!.contains("message")) {
+
+          print("oneee");
+          ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
+          print("oneee eee ${jsonEncode(res)}");
+          Strings.chatNotificationResponse = res;
+          Strings.fromNotificationChat = true;
         }
       }
     });
@@ -289,7 +299,8 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           int id = int.parse(peo.notiId!);
           Strings.projectId = int.parse(peo.projectId ?? "000");
           Strings.notificationID = id;
-        } else if (message.notification!.title!.contains("Documents")) {
+        } else if (message.notification!.title!.contains("Documents")) 
+        {
           DocumentData peo = DocumentData.fromJson(message.data);
           Strings.selectedProject.clear();
 
@@ -320,6 +331,12 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           checkLogin();
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
+        }else if (message.notification!.title!.contains("message")) {
+          ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
+          print("oneee eee ${jsonEncode(res)}");
+          Strings.chatNotificationResponse = res;
+          Strings.fromNotificationChat = true;
+          checkLogin();
         }
       }
     });
@@ -590,12 +607,9 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   void getToken() {
-    timer = new Timer(const Duration(milliseconds: 500), () 
-    {
-      AppUtils.getStringPreferences('easyAccess').then((value) 
-      {
-        if (value != null) 
-        {
+    timer = new Timer(const Duration(milliseconds: 500), () {
+      AppUtils.getStringPreferences('easyAccess').then((value) {
+        if (value != null) {
           print("value inside--> $value");
           if (value == "Y") {
             print("test");
@@ -614,8 +628,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
   }
 
-  checkLogin() 
-  {
+  checkLogin() {
     AppUtils.getStringPreferences('easyAccess').then((value) {
       print("Checking $value");
       if (value != null) {
@@ -629,7 +642,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         } else {
           navigatorKey.currentState?.pushNamed('/login');
           //Navigator.popAndPushNamed(context, "/comments");
-
         }
       }
     }).catchError((onError) {
@@ -682,8 +694,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     });
   }
 
-  getUserCats(proId) 
-  {
+  getUserCats(proId) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchUsers(proId).then((response) {

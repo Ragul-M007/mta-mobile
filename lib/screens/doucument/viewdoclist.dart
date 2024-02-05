@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/FectchProjectDocReq.dart';
@@ -271,7 +272,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
           // ),
           Container(
             padding:
-                EdgeInsets.only(top: 30.0, bottom: 10.0, right: 20, left: 20),
+                EdgeInsets.only(top: 20.0,right: 20, left: 20),
             child: Center(
               child: Text(
                 Strings.category == true
@@ -281,7 +282,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
                     : Strings.selectedProject[0].projectName!,
                 style: Drawables.adddoccontentstyle(
                   Colors.black,
-                  25.0,
+                  18.0,
                   FontWeight.bold,
                 ),
                 maxLines: 3,
@@ -361,175 +362,213 @@ class _ViewDocContentState extends State<ViewDocContent> {
               ),
             ),
           ),
-          _searchList.length != 0
-              ? GridView.builder(
-                  shrinkWrap: true,
-                  itemCount: _searchList.length,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10.0, top: 10.0, bottom: 10.0, right: 5.0),
-                      child: new Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        child: new GridTile(
-                          child: Container(
-                            child: Padding(
-                                padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        _downloadfile(_searchList[index].file,
-                                            _searchList[index].fileName);
-                                      },
-                                      child: Stack(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 0),
-                                            child: Image.asset(
-                                                getFileExt(
-                                                    _searchList[index].file),
-                                                width: 70.0,
-                                                height: 70.0),
-                                          ),
-                                          Positioned(
-                                            top: 2,
-                                            left: 10,
-                                            child: Container(
-                                                child: Icon(
-                                              Icons.download_rounded,
-                                              size: 20.0,
-                                            )),
-                                          ),
-                                        ],
-                                      ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5,right: 5),
+            child: _searchList.length != 0
+                ? GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: _searchList.length,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
+                    itemBuilder: (BuildContext context, int index) {
+                      return new 
+                      
+                      Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
                                     ),
-                                    SizedBox(
-                                      width: 45.0,
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        _showMyDialogProject(
-                                            context,
-                                            _searchList[index].fileName,
-                                            _searchList[index].description,
-                                            _searchList[index].createdAt,
-                                            _searchList[index].name);
-                                      },
+                                    child: new GridTile(
                                       child: Container(
-                                          child: Icon(
-                                        Icons.info_outlined,
-                                        size: 20.0,
-                                      )),
-                                    )
-                                  ],
-                                )),
-                          ),
-                          footer: Padding(
-                              padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      _searchList[index].fileName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Drawables.adddoccontentstyle(
-                                          Colors.black87,
-                                          14.0,
-                                          FontWeight.w500),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      "Created on: ${getForamtDate(_searchList[index].createdAt)}",
-                                      style: TextStyle(
-                                          fontSize: 12, color: Colors.grey),
-                                    ),
-                                  ),
-                                  SizedBox(height: 7.0),
-                                  GestureDetector(
-                                    onTap: () {
-                                      print("comments");
+                                        child: Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                10, 15, 10, 0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {                     
+                                                      _downloadfile(
+                                                        _searchList[index]
+                                                            .file,
+                                                        _searchList[index]
+                                                            .fileName);  
+                                                  },
+                                                  child: Stack(
+                                                    children: <Widget>[
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 0),
+                                                        child: Image.asset(
+                                                            getFileExt(
+                                                                _searchList[
+                                                                        index]
+                                                                    .file!),
+                                                            width: 70.0,
+                                                            height: 70.0),
+                                                      ),
+                                                      Positioned(
+                                                        top: 4,
+                                                        left: 14,
+                                                        child: Container(
+                                                            child: Icon(
+                                                          Icons
+                                                              .download_rounded,
+                                                          size: 20.0,
+                                                          color: Colors.grey,
+                                                        )),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _showMyDialogProject(
+                                                        context,
+                                                        _searchList[index]
+                                                            .fileName,
+                                                        _searchList[index]
+                                                            .description,
+                                                        _searchList[index]
+                                                            .createdAt,
+                                                        _searchList[index]
+                                                            .name);
+                                                  },
+                                                  child: Container(
+                                                      child: Icon(
+                                                    Icons.info_outlined,
+                                                    size: 20.0,
+                                                  )),
+                                                )
+                                              ],
+                                            )),
+                                      ),
+                                      footer: Padding(
+                                          padding:
+                                              EdgeInsets.fromLTRB(10, 0, 5, 10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              AutoSizeText(
+                                                _searchList[index]
+                                                    .fileName!,
+                                                style: 
+                                                
+                                                Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.black87,
+                                                        12.0,
+                                                        FontWeight.w500),
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 0),
+                                                child: Text(
+                                                  "Created on: ${getForamtDate(_searchList[index].createdAt!)}",
+                                                  style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                              SizedBox(height: 2.0),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  print("comments");
+
+
+                                                  if(Strings.category)
+                                                  {
                                       Strings.selectedDocsIndex = index;
                                       Strings.selectedCatDocument = [];
                                       Strings.selectedCatDocument
                                           .add(_searchList[index]);
                                       getUserCats();
-                                    },
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        SizedBox(width: 10.0),
-                                        Image.asset("assets/icons/Comments.png",
-                                            width: 15.0, height: 15.0),
-                                        SizedBox(width: 5),
-                                        Text(
-                                          _searchList[index]
-                                                  .commentsCount
-                                                  .toString() +
-                                              " Comments",
-                                          overflow: TextOverflow.clip,
-                                          style: TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.grey),
-                                        ),
-                                      ],
+                                                  }
+                                                  else
+                                                  {
+                                                      print("Comments final");
+                                                      Strings.selectedDocsIndex =
+                                                          index;
+                                                      Strings.selectedProDocument =
+                                                          [];
+                                                      Strings.selectedProDocument
+                                                          .add(_searchList[index]);
+                                                      getUserCats();
+
+                                                  }
+                                     
+                                                },
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Image.asset(
+                                                        "assets/icons/Comments.png",
+                                                        width: 15.0,
+                                                        height: 15.0),
+                                                    SizedBox(width: 5),
+                                                    Text(
+                                                      _searchList[index]
+                                                              .commentsCount
+                                                              .toString() +
+                                                          " Comments",
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      style: TextStyle(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .underline,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.grey),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          )),
                                     ),
-                                  )
-                                ],
-                              )),
+                                  );
+                    },
+                  )
+                : _searchFieldController.text != ""
+                    ? Align(
+                        alignment: Alignment.topCenter,
+                        child: Text(
+                          "No results found",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600),
                         ),
-                      ),
-                    );
-                  },
-                )
-              : _searchFieldController.text != ""
-                  ? Align(
-                      alignment: Alignment.topCenter,
-                      child: Text(
-                        "No results found",
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    )
-                  : Strings.category == true
-                      ? _categorydocsList.length > 0
-                          ? GridView.builder(
-                              shrinkWrap: true,
-                              itemCount: _categorydocsList.length,
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10.0,
-                                      top: 10.0,
-                                      bottom: 10.0,
-                                      right: 5.0),
-                                  child: new Card(
+                      )
+                    : Strings.category == true
+                        ? _categorydocsList.length > 0
+                            ? GridView.builder(
+                                shrinkWrap: true,
+                                itemCount: _categorydocsList.length,
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 3): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
+                                itemBuilder: (BuildContext context, int index) {
+                                  return new 
+                                  
+                                  Card(
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
@@ -566,13 +605,14 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                             height: 70.0),
                                                       ),
                                                       Positioned(
-                                                        top: 2,
-                                                        left: 10,
+                                                        top: 4,
+                                                        left: 14,
                                                         child: Container(
                                                             child: Icon(
                                                           Icons
                                                               .download_rounded,
                                                           size: 20.0,
+                                                          color: Colors.grey,
                                                         )),
                                                       ),
                                                     ],
@@ -603,38 +643,36 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                       ),
                                       footer: Padding(
                                           padding:
-                                              EdgeInsets.fromLTRB(10, 0, 0, 20),
+                                              EdgeInsets.fromLTRB(10, 0, 5, 10),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Padding(
-                                                padding:
-                                                    EdgeInsets.only(left: 10),
-                                                child: Text(
-                                                  _categorydocsList[index]
-                                                      .fileName!,
-                                                  style: Drawables
-                                                      .adddoccontentstyle(
-                                                          Colors.black87,
-                                                          14.0,
-                                                          FontWeight.w500),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
+                                              AutoSizeText(
+                                                _categorydocsList[index]
+                                                    .fileName!,
+                                                style: 
+                                                
+                                                Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.black87,
+                                                        12.0,
+                                                        FontWeight.w500),
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                maxLines: 2,
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    left: 10),
+                                                    left: 0),
                                                 child: Text(
                                                   "Created on: ${getForamtDate(_categorydocsList[index].createdAt!)}",
                                                   style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 10,
                                                       color: Colors.grey),
                                                 ),
                                               ),
-                                              SizedBox(height: 7.0),
+                                              SizedBox(height: 2.0),
                                               GestureDetector(
                                                 onTap: () {
                                                   print("Comments clicking");
@@ -650,9 +688,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                 },
                                                 child: Row(
                                                   crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
+                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(width: 10.0),
                                                     Image.asset(
                                                         "assets/icons/Comments.png",
                                                         width: 15.0,
@@ -680,45 +717,39 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             ],
                                           )),
                                     ),
-                                  ),
-                                );
-                              },
-                            )
-                          : Container(
-                              child: Padding(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    _errText,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(20),
-                            ))
-                      : _docsList.length > 0
-                          ? GridView.builder(
-                              shrinkWrap: true,
-                              itemCount: _docsList.length,
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10.0,
-                                      top: 10.0,
-                                      bottom: 10.0,
-                                      right: 5.0),
-                                  child: new Card(
+                                  );
+                                },
+                              )
+                            : Container(
+                                child: Padding(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _errText,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                                padding: EdgeInsets.all(20),
+                              ))
+                        : _docsList.length > 0
+                            ? GridView.builder(
+                                shrinkWrap: true,
+                                itemCount: _docsList.length,
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
+                                itemBuilder: (BuildContext context, int index) {
+                                  return new 
+                                  Card(
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
@@ -733,11 +764,12 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 GestureDetector(
-                                                  onTap: () {
-                                                    _downloadfile(
-                                                        _docsList[index].file,
+                                                  onTap: () {                     
+                                                      _downloadfile(
                                                         _docsList[index]
-                                                            .fileName);
+                                                            .file,
+                                                        _docsList[index]
+                                                            .fileName);  
                                                   },
                                                   child: Stack(
                                                     children: <Widget>[
@@ -747,27 +779,27 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                                 top: 0),
                                                         child: Image.asset(
                                                             getFileExt(
-                                                                _docsList[index]
+                                                                _docsList[
+                                                                        index]
                                                                     .file!),
                                                             width: 70.0,
                                                             height: 70.0),
                                                       ),
                                                       Positioned(
-                                                        top: 2,
-                                                        left: 10,
+                                                        top: 4,
+                                                        left: 14,
                                                         child: Container(
                                                             child: Icon(
                                                           Icons
                                                               .download_rounded,
                                                           size: 20.0,
+                                                          color: Colors.grey,
                                                         )),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  width: 45.0,
-                                                ),
+                                                
                                                 GestureDetector(
                                                   onTap: () {
                                                     _showMyDialogProject(
@@ -778,7 +810,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                             .description,
                                                         _docsList[index]
                                                             .createdAt,
-                                                        _docsList[index].name);
+                                                        _docsList[index]
+                                                            .name);
                                                   },
                                                   child: Container(
                                                       child: Icon(
@@ -791,39 +824,40 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                       ),
                                       footer: Padding(
                                           padding:
-                                              EdgeInsets.fromLTRB(10, 0, 0, 20),
+                                              EdgeInsets.fromLTRB(10, 0, 5, 10),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    10, 0, 10, 0),
-                                                child: Text(
-                                                    _docsList[index].fileName!,
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.black87,
-                                                            14.0,
-                                                            FontWeight.w500),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1),
+                                              AutoSizeText(
+                                                _docsList[index]
+                                                    .fileName!,
+                                                style: 
+                                                
+                                                Drawables
+                                                    .adddoccontentstyle(
+                                                        Colors.black87,
+                                                        12.0,
+                                                        FontWeight.w500),
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                maxLines: 2,
                                               ),
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    left: 10),
+                                                    left: 0),
                                                 child: Text(
                                                   "Created on: ${getForamtDate(_docsList[index].createdAt!)}",
                                                   style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 10,
                                                       color: Colors.grey),
                                                 ),
                                               ),
-                                              SizedBox(height: 5.0),
+                                              SizedBox(height: 2.0),
                                               GestureDetector(
                                                 onTap: () {
-                                                  print("Comments final");
+                                                  
+                                                   print("Comments final");
                                                   Strings.selectedDocsIndex =
                                                       index;
                                                   Strings.selectedProDocument =
@@ -834,9 +868,8 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                                 },
                                                 child: Row(
                                                   crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
+                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(width: 10.0),
                                                     Image.asset(
                                                         "assets/icons/Comments.png",
                                                         width: 15.0,
@@ -864,27 +897,27 @@ class _ViewDocContentState extends State<ViewDocContent> {
                                             ],
                                           )),
                                     ),
-                                  ),
-                                );
-                              },
-                            )
-                          : Container(
-                              child: Padding(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    _errText,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(20),
-                            ))
+                                  );
+                                },
+                              )
+                            : Container(
+                                child: Padding(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _errText,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                                padding: EdgeInsets.all(20),
+                              )),
+          )
         ],
       ),
     );

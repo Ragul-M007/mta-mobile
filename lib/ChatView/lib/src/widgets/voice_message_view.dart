@@ -252,14 +252,14 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
                     icon:
                         state.isStopped || state.isPaused || state.isInitialised
                             ? widget.config?.playIcon ??
-                                const Icon(
+                                 Icon(
                                   Icons.play_arrow,
-                                  color: Colors.white,
+                                  color: widget.isMessageBySender? Colors.white:Colors.black,
                                 )
                             : widget.config?.pauseIcon ??
-                                const Icon(
+                                 Icon(
                                   Icons.stop,
-                                  color: Colors.white,
+                                  color: widget.isMessageBySender? Colors.white:Colors.black,
                                 ),
                   );
                 },
@@ -269,13 +269,14 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
               {
                 downloadfile(widget.message.message,widget.message.fileName);
               }, icon: Icon(Icons.download,
-              color: Colors.white,)),
+              color: widget.isMessageBySender?Colors.white:Colors.black,)),
               AudioFileWaveforms(
                 size: Size(widget.screenWidth * 0.50, 60),
                 playerController: controller,
                 waveformType: WaveformType.fitWidth,
                 playerWaveStyle:
-                    widget.config?.playerWaveStyle ?? playerWaveStyle,
+                PlayerWaveStyle(scaleFactor: 70,liveWaveColor: widget.isMessageBySender?Colors.white:Colors.black,fixedWaveColor: widget.isMessageBySender?Colors.white70:Colors.grey),
+                  //  widget.config?.playerWaveStyle ?? playerWaveStyle,
                 padding: widget.config?.waveformPadding ??
                     const EdgeInsets.only(right: 10),
                 margin: widget.config?.waveformMargin,

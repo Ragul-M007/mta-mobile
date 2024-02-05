@@ -40,6 +40,7 @@ class ChatListWidget extends StatefulWidget {
     required this.showTypingIndicator,
     required this.assignReplyMessage,
     required this.replyMessage,
+    this.refreshCall,
     this.loadingWidget,
     this.reactionPopupConfig,
     this.messageConfig,
@@ -109,6 +110,9 @@ class ChatListWidget extends StatefulWidget {
   /// Provides callback when user tap anywhere on whole chat.
   final VoidCallBack? onChatListTap;
 
+  final DataRefreshCallback? refreshCall;
+
+
   @override
   State<ChatListWidget> createState() => _ChatListWidgetState();
 }
@@ -169,12 +173,14 @@ class _ChatListWidgetState extends State<ChatListWidget>
           valueListenable: _isNextPageLoading,
           builder: (_, isNextPageLoading, child) {
             if (isNextPageLoading &&
-                (featureActiveConfig?.enablePagination ?? false)) {
+                (featureActiveConfig?.enablePagination ?? false)) 
+                {
+                  print("printttt data ");
               return SizedBox(
                 height: Scaffold.of(context).appBarMaxHeight,
                 child: Center(
                   child:
-                      widget.loadingWidget ?? const CircularProgressIndicator(),
+                      widget.loadingWidget ?? const CircularProgressIndicator(color: Colors.blue,),
                 ),
               );
             } else {
@@ -246,7 +252,9 @@ class _ChatListWidgetState extends State<ChatListWidget>
     if ((scrollController.position.pixels ==
             scrollController.position.maxScrollExtent) &&
         !_isNextPageLoading.value) {
-      _isNextPageLoading.value = true;
+
+          print("truee loding");
+      _isNextPageLoading.value = true;    
       widget.loadMoreData!()
           .whenComplete(() => _isNextPageLoading.value = false);
     }
@@ -277,7 +285,7 @@ class _ChatListWidgetState extends State<ChatListWidget>
                       onMoreTap: () {
                         _onChatListTap();
                         if (replyPopup?.onMoreTap != null) {
-                          replyPopup?.onMoreTap!();
+                          replyPopup?.onMoreTap!(message);
                         }
                       },
                       onReportTap: () {
@@ -287,6 +295,7 @@ class _ChatListWidgetState extends State<ChatListWidget>
                         }
                       },
                       onUnsendTap: () {
+                        print("message id ${message.id}");
                         _onChatListTap();
                         if (replyPopup?.onUnsendTap != null) {
                           replyPopup?.onUnsendTap!(message);
@@ -319,6 +328,8 @@ class _ChatListWidgetState extends State<ChatListWidget>
     showPopUp.value = false;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
+
+
 
   @override
   void dispose() {

@@ -2,6 +2,7 @@
 import 'dart:io' if (kIsWeb) 'dart:html';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:dio/dio.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -25,11 +26,12 @@ class SendMessageWidget extends StatefulWidget {
     this.backgroundColor,
     this.sendMessageBuilder,
     this.onReplyCallback,
+    this.userList,
     this.onReplyCloseCallback,
   }) : super(key: key);
 
   /// Provides call back when user tap on send button on text field.
-  final StringMessageCallBack onSendTap;
+  final ListCallBack onSendTap;
 
   /// Provides configuration for text field appearance.
   final SendMessageConfiguration? sendMessageConfig;
@@ -48,6 +50,9 @@ class SendMessageWidget extends StatefulWidget {
 
   /// Provides controller for accessing few function for running chat.
   final ChatController chatController;
+  
+  final List<Map<String, dynamic>>? userList;
+
 
   @override
   State<SendMessageWidget> createState() => SendMessageWidgetState();
@@ -211,6 +216,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
                           valueListenable: _replyMessage,
                         ),
                         ChatUITextField(
+                          userList: widget.userList,
                           textEditingKey:_textEditingKey,
                           focusNode: _focusNode,
                           textEditingController: _textEditingController,
@@ -270,16 +276,17 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
 
   void _onRecordingComplete(String? path) {
     if (path != null) {
-      widget.onSendTap.call(path, replyMessage, MessageType.voice);
+      widget.onSendTap.call(path, replyMessage, MessageType.voice,[]);
       _assignRepliedMessage();
     }
   }
 
-  void _onImageSelected(String imagePath, String error) {
+  void _onImageSelected(String error,ReplyMessage replyMsg,MessageType typ,List<MultipartFile> imagePath, ) 
+  {
     debugPrint('Call in Send Message Widget');
     if (imagePath.isNotEmpty) 
     {
-      widget.onSendTap.call(imagePath, replyMessage, MessageType.image);
+      widget.onSendTap.call(error, replyMessage, MessageType.image,imagePath);
       _assignRepliedMessage();
     }
   }
@@ -297,7 +304,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
       widget.onSendTap.call(
         _textEditingKey.currentState!.controller!.markupText.trim(),
         replyMessage,
-        MessageType.text,
+        MessageType.text,[]
       );
       _assignRepliedMessage();
       _textEditingKey.currentState!.controller!.clear();

@@ -5,6 +5,7 @@ import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -177,6 +178,14 @@ static  String getFileExtension(String fileName) {
 static Future<void> openFile(filePath) async {
     await OpenFilex.open(filePath);
   }
+
+ static String formatDate(date)
+{
+ var convertedDate = DateTime.parse(date);
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+  final String formatted = formatter.format(convertedDate);
+  return formatted;
+}
 
 static String getFileExt(String? fileName) 
   {

@@ -72,9 +72,7 @@ final ScrollController _controller = ScrollController();
   
   String parsedText = "";
   final logs = <String>[];
-  final _fakeUsersDataServer = List.generate(100, (index) => "user$index");
   final users = <String>[];
-  bool _isSearchCanView = false;
   List<GroupChatUsersData> chatUsers = [];
   final _audioRecorder = AudioRecorder();
 

@@ -20,6 +20,8 @@ class ChatMessageRes {
   String? messageReadedUsers;
   String? createdAt;
   String? updatedAt;
+  String? fileDownloadedUsers;
+
 
   ChatMessageRes(
       {this.messageId,
@@ -42,7 +44,8 @@ class ChatMessageRes {
       this.isDownloaded,
       this.messageReadedUsers,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.fileDownloadedUsers});
 
   ChatMessageRes.fromJson(Map<String, dynamic> json) {
     messageId = json['message_id'];
@@ -66,6 +69,8 @@ class ChatMessageRes {
     messageReadedUsers = json['message_readed_users'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    fileDownloadedUsers = json['file_downloaded_users'];
+
   }
 
   Map<String, dynamic> toJson() {
@@ -91,6 +96,7 @@ class ChatMessageRes {
     data['message_readed_users'] = this.messageReadedUsers;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['file_downloaded_users'] = this.fileDownloadedUsers;
     return data;
   }
 }

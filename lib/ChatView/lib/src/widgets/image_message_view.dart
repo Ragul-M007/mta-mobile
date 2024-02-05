@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/ChatView/lib/src/extensions/extensions.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../../utilities/strings.dart';
 import '../../chatview.dart';
@@ -87,7 +88,7 @@ class _ImageMessageViewState extends State<ImageMessageView> {
    
     var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
     // var downloadedFile = await downloadFile(serverURL, fileName, path!);
-    AppUtils.openFile(downloadedFile);
+   // AppUtils.openFile(downloadedFile);
   }
 
   Future download2(Dio dio, String url, String savePath) async {
@@ -152,18 +153,18 @@ class _ImageMessageViewState extends State<ImageMessageView> {
       mainAxisAlignment:
           widget.isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (widget.isMessageBySender) widget.iconButton,
+        // if (widget.isMessageBySender) widget.iconButton,
         Stack(
           children: [
             GestureDetector(
               onTap: (){
 
-                if(widget.message.status == MessageStatus.downloaded)
+                if(downloadStatus == MessageStatus.downloaded)
                 {
                   var finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
                                             AppUtils.getFileExtension(
                                                 widget.message.message);
-                  AppUtils.openFile(finalPath);
+                                                OpenFilex.open(finalPath);
                 }
                 else
                 {
@@ -190,9 +191,8 @@ class _ImageMessageViewState extends State<ImageMessageView> {
                     borderRadius: widget.imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
                     child: (() {
-                      if (widget.imageUrl.isUrl && (widget.imageUrl.contains('.png') || widget.imageUrl.contains('.jpeg') || widget.imageUrl.contains('.jpg'))) 
+                      if (widget.imageUrl.isUrl && (widget.imageUrl.contains('.png') || widget.imageUrl.contains('.jpeg') || widget.imageUrl.contains('.jpg')) && downloadStatus != MessageStatus.downloaded) 
                       {
-                                                print("image imggg ");
                         return Container(
                           color: Colors.white,
                           padding: EdgeInsets.only(left: 0,top: 0,right: 0,bottom: 5),
@@ -232,12 +232,36 @@ class _ImageMessageViewState extends State<ImageMessageView> {
                             ],
                           ),
                         );
-                      } else if (widget.imageUrl.fromMemory) {
+                      } else if (widget.imageUrl.isUrl && (widget.imageUrl.contains('.png') || widget.imageUrl.contains('.jpeg') || widget.imageUrl.contains('.jpg')) && downloadStatus == MessageStatus.downloaded) 
+                      {
                                                 print("image mem");
-                        return Image.memory(
-                          base64Decode(widget.imageUrl
-                              .substring(widget.imageUrl.indexOf('base64') + 7)),
-                          fit: BoxFit.fill,
+                                                var finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
+                                            AppUtils.getFileExtension(
+                                                widget.message.message);
+                        return Container(
+                          color: Colors.white,
+                          padding: EdgeInsets.only(left: 0,top: 0,right: 0,bottom: 5),
+                          child: Column(
+                            children: [
+                              Container(                               
+                                height: (widget.imageMessageConfig?.height ?? 200)-40,
+                                child: Image.file(
+                                 File(finalPath),
+                                ),
+                              ),
+                              Spacer(),
+                                 Padding(
+                                padding: const EdgeInsets.only(left: 6,right: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    downloadStatus == MessageStatus.downloaded?Container(): Icon(Icons.download,size: 20,),
+                                    
+                                    Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),)
+                                  ],
+                                ))
+                            ],
+                          ),
                         );
                       } else {
                         print("image elseee");
@@ -252,8 +276,16 @@ class _ImageMessageViewState extends State<ImageMessageView> {
                                  fit: BoxFit.fill,
                               ),
                               Spacer(),
-                                                              Align(alignment: Alignment.bottomRight,
-                                                                child: Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),)
+                                 Padding(
+                                padding: const EdgeInsets.only(left: 6,right: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    downloadStatus == MessageStatus.downloaded?Container(): Icon(Icons.download,size: 20,),
+                                    
+                                    Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),)
+                                  ],
+                                ))
                             ],
                           ),
                         );

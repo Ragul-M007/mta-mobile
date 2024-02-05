@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:mta/screens/attendance/attendance.dart';
 
 import '../../models/validateOTPReq.dart';
+import '../chat/ChatGroups.dart';
 import '../doucument/viewdoclist.dart';
 
 class Verifypin extends StatefulWidget {
@@ -433,6 +434,30 @@ class _VerifypinState extends State<Verifypin> {
             {
               Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
+            }
+            else if(
+              Strings.fromNotificationChat
+            ){
+              if (Strings.chatNotificationResponse?.groupType == "team") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatGroups(
+                  teamId: int.parse(Strings.chatNotificationResponse?.teamId ?? "0"),
+                ),
+              ),
+            );
+          }
+          else{
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatGroups(
+                  projectId: int.parse(Strings.chatNotificationResponse?.projectId ?? "0"),
+                ),
+              ),
+            );
+          }
             }
             
             

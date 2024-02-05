@@ -278,10 +278,10 @@ class _ChatGroupedListWidgetState extends State<ChatGroupedListWidget>
     return StreamBuilder<List<Message>>(
       stream: chatController?.messageStreamController.stream,
       builder: (context, snapshot) {
-        return snapshot.connectionState.isActive
-            ? GroupedListView<Message, String>(
+        return 
+            GroupedListView<Message, String>(
                 shrinkWrap: true,
-                elements: snapshot.data!,
+                elements: snapshot.data ?? [],
                 groupBy: (element) => element.createdAt.getDateFromDateTime,
                 itemComparator: (message1, message2) =>
                     message1.message.compareTo(message2.message),
@@ -335,11 +335,7 @@ class _ChatGroupedListWidgetState extends State<ChatGroupedListWidget>
                     },
                   );
                 },
-              )
-            : Center(
-                child: chatBackgroundConfig.loadingWidget ??
-                    const CircularProgressIndicator(),
-              );
+              );  
       },
     );
   }

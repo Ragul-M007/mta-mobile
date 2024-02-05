@@ -24,6 +24,7 @@ class OptionList extends StatelessWidget {
   {
     return data.isNotEmpty
         ? Container(
+          padding: EdgeInsets.only(left:28),
             decoration:
                 suggestionListDecoration ?? BoxDecoration(color: Colors.white),
             constraints: BoxConstraints(
@@ -35,20 +36,36 @@ class OptionList extends StatelessWidget {
               shrinkWrap: true,
               itemBuilder: (context, index) 
               {
-                return GestureDetector(
+                return InkWell(
                   onTap: () {
+                    print("ontaaap");
                     onTap(data[index]);
                   },
-                  child: suggestionBuilder != null
+                  child: suggestionBuilder == null
                       ? suggestionBuilder!(data[index])
                       : Container(
-                          color: Colors.blue,
-                          padding: EdgeInsets.all(20.0),
-                          child: Text(
-                            data[index]['display'],
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
+                                    padding: EdgeInsets.all(10.0),
+                                    child: Row(
+                                      children: <Widget>[
+                                        CircleAvatar(
+                                          backgroundImage: NetworkImage(
+                                            data[index]['photo'],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 20.0,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(data[index]['full_name']),
+                                            Text('@${data[index]['display']}'),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  )
+                        ,
                 );
               },
             ),

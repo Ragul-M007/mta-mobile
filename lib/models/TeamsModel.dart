@@ -31,6 +31,7 @@ class TeamsData {
   int? teamId;
   String? teamName;
   String? description;
+  int? totalUnReadMessageCount;
 
   TeamsData({this.teamId, this.teamName, this.description});
 
@@ -38,6 +39,7 @@ class TeamsData {
     teamId = json['team_id'];
     teamName = json['team_name'];
     description = json['description'];
+    totalUnReadMessageCount = json['totalUnReadMessageCount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -45,6 +47,7 @@ class TeamsData {
     data['team_id'] = this.teamId;
     data['team_name'] = this.teamName;
     data['description'] = this.description;
+    data['totalUnReadMessageCount'] = this.totalUnReadMessageCount;
     return data;
   }
 }

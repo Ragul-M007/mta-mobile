@@ -25,13 +25,14 @@ class GroupListRes {
   }
 }
 
-class GroupDetails {
+class GroupDetails 
+{
   int? groupId;
   String? groupName;
   String? groupDescription;
-  Null? groupImage;
+  String? groupImage;
   String? groupType;
-  Null? projectId;
+  int? projectId;
   int? groupCreatedBy;
   String? createdAt;
   String? updatedAt;
