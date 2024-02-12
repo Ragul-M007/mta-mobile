@@ -35,7 +35,10 @@ var day = now.day.toString().padLeft(2, '0');
 var year = now.year.toString();
 DateTime _focusedDay = DateTime.now();
 DateTime? _selectedDay;
-DashboardRes? _projectLists = DashboardRes();
+List<Data>? _projectLists = [];
+List<Data>? _searchLists = [];
+Data? selectedProject;
+
 
 var monthMatch = [
   "Jan",
@@ -79,6 +82,9 @@ class _AttendanceContentState extends State<AttendanceContent>
   List<AttendanceDataNew> _attendance = [];
   List<AttendanceData> _attendancemain = [];
 
+   FocusNode searchField = new FocusNode();
+  TextEditingController _searchFieldController = TextEditingController();
+
   void initState() {
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
@@ -105,7 +111,8 @@ class _AttendanceContentState extends State<AttendanceContent>
       if (response.status!) {
         setState(() {
           print("messagee from api ${response.message}");
-          _projectLists = response;
+          _projectLists = response.data;
+          selectedProject  = response.token;
           location = response.token?.projectName ?? "";
 
         });
@@ -155,7 +162,7 @@ class _AttendanceContentState extends State<AttendanceContent>
   }
 
   Widget build(BuildContext context) {
-    print(" data ${_projectLists?.data?.length}");
+    print(" data ${_projectLists?.length}");
     return Material(
       child: Container(
         decoration:
@@ -628,7 +635,13 @@ showDialog(
                                     },
                                   ),
                                 )
-                              : SizedBox(),
+                              : Center(child: Text(
+                                    "No Attendance Marked",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),),
                         ],
                       ),
                     ),
@@ -647,7 +660,36 @@ showDialog(
               child: GestureDetector(
             onTap: () 
             async {
-              AppUtils.showprogress();
+             if(selectedProject?.latitude == "" || selectedProject?.latitude == null || selectedProject?.longitude == "" || selectedProject?.longitude == null)
+             {
+                  Widget okButton = TextButton(
+                      child: Text("OK"),
+                      onPressed: () { 
+                        Navigator.pop(context);
+                      },
+                      );
+
+                    AlertDialog alert = AlertDialog(
+                    title: Text("Location Not available",style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600)),
+                    content: Text("Kindly contact the admin and Update Project location."),
+                    actions: [
+                      okButton,
+                    ],
+                    );
+
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                    return alert;
+                      },
+                    );
+             }
+             else
+             {
+               AppUtils.showprogress();
               await getUserLocation();
               print("inside check");
               // checkInOut("IN");
@@ -658,6 +700,7 @@ showDialog(
               } 
               else 
               {
+                print("qwertyyy");
                 if(_attendance.length != 0)
                 {
                       var lastSignIn = _attendance.last;
@@ -690,8 +733,9 @@ showDialog(
                     );
                 }
                 else
-                {  
-                  if(distance != null && distance! < 50)
+                { 
+                  print("distancee   $distance") ;
+                  if(distance != null && distance! <= 50)
                   {
                     _onWillPop("IN");
                   }
@@ -714,6 +758,7 @@ showDialog(
                   }
               }  
               }
+             }
             },
             child: Container(
               child: Center(
@@ -731,7 +776,38 @@ showDialog(
           )),
           Expanded(
               child: GestureDetector(
-            onTap: () async {
+            onTap: () async 
+            {
+
+             if(selectedProject?.latitude == "" || selectedProject?.latitude == null || selectedProject?.longitude == "" || selectedProject?.longitude == null)
+              {
+                    Widget okButton = TextButton(
+                      child: Text("OK"),
+                      onPressed: () { 
+                        Navigator.pop(context);
+                      },
+                      );
+
+                    AlertDialog alert = AlertDialog(
+                    title: Text("Location Not available",style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600)),
+                    content: Text("Kindly contact the admin and Update Project location."),
+                    actions: [
+                      okButton,
+                    ],
+                    );
+                    showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                    return alert;
+                      },
+                    );
+              }
+              else{
+
+
               AppUtils.showprogress();
               await getUserLocation();
               //checkInOut("OUT");
@@ -744,7 +820,7 @@ showDialog(
 
                 if(_attendance.length == 0)
                 {
-Widget okButton = TextButton(
+                      Widget okButton = TextButton(
                       child: Text("OK"),
                       onPressed: () { 
                         Navigator.pop(context);
@@ -771,7 +847,7 @@ Widget okButton = TextButton(
                 }
                 else
                 {
-var lastSignIn = _attendance.last;
+                  var lastSignIn = _attendance.last;
                 print("last ${_attendance.last}");
                 if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
                 {
@@ -813,6 +889,7 @@ var lastSignIn = _attendance.last;
                 }   
                 }               
               }
+}
             },
             child: Container(
               child: Center(
@@ -860,11 +937,11 @@ var lastSignIn = _attendance.last;
                               size: 26.0,
                             ),
                             SizedBox(width: 5.0),
-                             CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + ( _projectLists?.token?.projectImg ?? ""), width: 40, height: 40,radius: 12, defaultImageUrl: "assets/images/background1.png"),
+                             CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + ( selectedProject?.projectImg ?? ""), width: 40, height: 40,radius: 12, defaultImageUrl: "assets/images/background1.png"),
                             SizedBox(width: 5,),
                             Container(
                               width: MediaQuery.of(context).size.width * 0.5,
-                                                  child: Text(_projectLists?.token?.projectName ?? "Select Project",
+                                                  child: Text(selectedProject?.projectName ?? "Select Project",
                                                   maxLines: 3,
                               style: TextStyle(
                                   fontSize: 12,
@@ -1065,7 +1142,7 @@ var lastSignIn = _attendance.last;
                                                 Expanded(
                                                   child: Text(
                                                     _attendance[index]
-                                                                .projectName ?? "",
+                                                                .projectName ?? "dttttt",
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.grey,
@@ -1148,9 +1225,13 @@ var lastSignIn = _attendance.last;
                               ));
                         },
                       )
-                    : SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.95,
-                      ),
+                    : Center(child: Text(
+                                    "No Attendance Marked",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),),
               ),
               isShowCheckInOut == true ? bottombutton() : SizedBox()
             ],
@@ -1234,11 +1315,13 @@ var lastSignIn = _attendance.last;
             DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
             String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
             test.date = formattedDate;
+            test.projectImg = _attendancemain[i].projectImg ?? "";
+                  test.projectName = _attendancemain[i].projectName ?? "";
              print("adding");
              if(i < _attendancemain.length-1)
              {
                     var j= i+1;
-              
+                      print("jsonEncode ${jsonEncode(_attendancemain[j])}");
                     if(_attendancemain[j].checkType == "OUT")
                     {
                       print("in else");
@@ -1250,6 +1333,8 @@ var lastSignIn = _attendance.last;
                     test.checkOutLocation = "";
                     test.checkOutTime = "";
                   }
+
+                  print("prrr name ${_attendancemain[j].projectName }");
                   test.projectImg = _attendancemain[j].projectImg ?? "";
                   test.projectName = _attendancemain[j].projectName ?? "";
              }
@@ -1362,7 +1447,7 @@ var lastSignIn = _attendance.last;
     req.checkType = action;
     req.latLng = lat.toString() + "," + long.toString();
     req.locationName = location;
-    req.projectId = _projectLists?.token?.projectId;
+    req.projectId = selectedProject?.projectId;
 
     print("payload ${jsonEncode(req)}");
   
@@ -1476,7 +1561,9 @@ var lastSignIn = _attendance.last;
                         lat = value.latitude;
                         long = value.longitude;
 
-                        distance = Geolocator.distanceBetween(lat, long, double.parse(_projectLists!.token!.latitude ?? "0.0"),double.parse(_projectLists!.token!.longitude ?? "0.0"));
+                        distance = Geolocator.distanceBetween(lat, long, double.parse(selectedProject?.latitude ?? "0.0"),double.parse(selectedProject?.longitude ?? "0.0"));
+                       
+                       
                         print("User distance $distance");
                         //getGeocode(lat, long);
                       },
@@ -1485,7 +1572,10 @@ var lastSignIn = _attendance.last;
             }
         }).onError((error, stackTrace){
           AppUtils.dismissprogress();
-          AppUtils.showToastError("Kindly Enable location");
+         // _onWillPop("IN");
+         // _outOfLocationPopUp();
+          
+         // AppUtils.showToastError("Kindly Enable location");
         });
   }
 
@@ -1514,53 +1604,149 @@ var lastSignIn = _attendance.last;
           content: StatefulBuilder(
             builder:(BuildContext context, StateSetter setState){
               return SingleChildScrollView(
-              child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child:
-                  Column(
-                    children: [
-                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        new Icon(Icons.close, size: 22.0, color: Colors.black)
-                      ]),
-                      Text(
-                        "Select Project",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        height: MediaQuery.of(context).size.width * 1,
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child:
-                         (_projectLists?.data?.length != 0 && _projectLists?.data?.length != null)? ListView.builder(
-                          itemCount: _projectLists?.data?.length,
-                          itemBuilder: (context, index) {
-                            return Column(
-                              children: [
-                                Card(
-                                  color: Colors.white70,
-                                  child: ListTile(
-                                    leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_projectLists?.data?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
-                                    title: Text(
-                                      _projectLists?.data?[index].projectName ?? "",maxLines: 3,
-                                    ),
-                                    subtitle: Text(_projectLists?.data?[index].description ?? "",maxLines: 3,),
-                                    onTap: () {
-                                      updateCurrentProject(_projectLists!.data![index].projectId!);
-                                      Navigator.of(context).pop();                                    },
-                                  ),
+                child: GestureDetector(
+                    onTap: () {
+                    },
+                    child:
+                    Column(
+                      children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                          InkWell(child: new Icon(Icons.close, size: 22.0, color: Colors.black),onTap: (){
+                            _searchFieldController.text = "";
+                            _searchLists?.clear();
+                            searchField.unfocus();
+                                                Navigator.of(context).pop();
+                          },)
+                        ]),
+                        Text(
+                          "Select Project",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+
+                         Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: const Color(0xFFeceeef),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Material(
+                        color: const Color(0xFFeceeef),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                focusNode: searchField,
+                                controller: _searchFieldController,
+                                decoration: InputDecoration.collapsed(
+                                  hintText: ' Search',
                                 ),
-                              ],
-                            );
-                          },
-                        ):Center(child: Text("No assigned projects found",style:TextStyle(color: Colors.red))),
+                                onChanged: (value) {
+                                  if (value.isEmpty) {
+                                    setState(() {
+                                      _searchLists = [];
+                                    });
+                                    return;
+                                  }
+                                  _searchLists = [];
+                                  _projectLists?.forEach((list) {
+                                    if (list.projectName!
+                                        .toLowerCase()
+                                        .startsWith(value.toLowerCase()))
+                                      _searchLists?.add(list);
+                                  });
+                                  print("dataaaa ${_searchLists?.length}");
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                            InkWell(
+                              child: Icon(
+                                Icons.search,
+                                color: Colors.black,
+                              ),
+                              onTap: () {},
+                            )
+                          ],
+                        ),
                       ),
-                    ],
-                  )),
-            );}
+                    ),
+                  ),
+                        Container(
+                          height: MediaQuery.of(context).size.width * 1,
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child:
+                           (_projectLists?.length != 0 && _projectLists?.length != null)? 
+                             _searchLists?.length != 0?
+                                            ListView.builder(
+                            itemCount: _searchLists?.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  Card(
+                                    color: Colors.white70,
+                                    child: ListTile(
+                                      leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_searchLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
+                                      title: Text(
+                                        _searchLists?[index].projectName ?? "",maxLines: 3,
+                                      ),
+                                      subtitle: Text(_searchLists?[index].description ?? "",maxLines: 3,),
+                                      onTap: () {
+                                       
+                                        updateCurrentProject(_searchLists![index].projectId!);
+                                         _searchFieldController.text = "";
+                            _searchLists?.clear();
+                            searchField.unfocus();
+                                        Navigator.of(context).pop();                                    },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          )
+                          :
+                           _searchFieldController.text != ""
+                        ? Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "No results found",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          )
+                        :
+                           ListView.builder(
+                            itemCount: _projectLists?.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  Card(
+                                    color: Colors.white70,
+                                    child: ListTile(
+                                      leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_projectLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
+                                      title: Text(
+                                        _projectLists?[index].projectName ?? "",maxLines: 3,
+                                      ),
+                                      subtitle: Text(_projectLists?[index].description ?? "",maxLines: 3,),
+                                      onTap: () {
+                                        updateCurrentProject(_projectLists![index].projectId!);
+                                        Navigator.of(context).pop();                                    },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ):Center(child: Text("No assigned projects found",style:TextStyle(color: Colors.red))),
+                        ),
+                      ],
+                    )),
+              );}
           ),
         );
       },

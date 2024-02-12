@@ -19,8 +19,8 @@ import 'package:mta/screens/others/newshighlights.dart';
 import 'package:mta/screens/others/notification.dart';
 import 'package:mta/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:mta/screens/projectcomments.dart/projectComments.dart';
-import 'package:mta/screens/projectcomments.dart/projectCommentsReplies.dart';
+import 'package:mta/screens/projectcomments/projectComments.dart';
+import 'package:mta/screens/projectcomments/projectCommentsReplies.dart';
 import 'package:mta/screens/projects/projects.dart';
 import 'package:mta/screens/splashscreen.dart';
 

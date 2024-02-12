@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,6 @@ import 'package:open_filex/open_filex.dart';
 
 import '../../../../utilities/strings.dart';
 import '../../chatview.dart';
-import 'reaction_widget.dart';
-import 'share_icon.dart';
 
 class ImageMessageView extends StatefulWidget {
   const ImageMessageView({
@@ -45,11 +44,7 @@ class ImageMessageView extends StatefulWidget {
 
   String get imageUrl => message.message;
 
-  Widget get iconButton => ShareIcon(
-        shareIconConfig: imageMessageConfig?.shareIconConfig,
-        imageUrl: imageUrl,
-      );
-
+ 
  
 
   @override
@@ -157,13 +152,20 @@ class _ImageMessageViewState extends State<ImageMessageView> {
         Stack(
           children: [
             GestureDetector(
-              onTap: (){
+              onTap: () async {
 
                 if(downloadStatus == MessageStatus.downloaded)
                 {
                   var finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
                                             AppUtils.getFileExtension(
                                                 widget.message.message);
+
+                var checkdt =   await io.Directory(finalPath).exists();
+               var kkdk = io.Directory(finalPath).existsSync();
+
+                print("qwwwwe $checkdt   $kkdk");
+
+
                                                 OpenFilex.open(finalPath);
                 }
                 else
@@ -295,15 +297,9 @@ class _ImageMessageViewState extends State<ImageMessageView> {
                 ),
               ),
             ),
-            if (widget.message.reaction.reactions.isNotEmpty)
-              ReactionWidget(
-                isMessageBySender: widget.isMessageBySender,
-                reaction: widget.message.reaction,
-                messageReactionConfig: widget.messageReactionConfig,
-              ),
+            
           ],
         ),
-        if (!widget.isMessageBySender) widget.iconButton,
       ],
     );
   }

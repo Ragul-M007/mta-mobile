@@ -39,6 +39,7 @@ class GroupChatUsersData {
   int? teamId;
   String? groupType;
   bool? isSelected;
+  int? groupCreateAccess;
 
   GroupChatUsersData(
       {this.userName,
@@ -51,7 +52,8 @@ class GroupChatUsersData {
       this.projectId,
       this.teamId,
       this.groupType,
-      this.isSelected});
+      this.isSelected,
+      this.groupCreateAccess});
 
   GroupChatUsersData.fromJson(Map<String, dynamic> json) {
     isSelected = json['is_selected'];
@@ -65,6 +67,8 @@ class GroupChatUsersData {
     projectId = json['project_id'];
     teamId = json['team_id'];
     groupType = json['group_type'];
+    groupCreateAccess = json['group_create_access'];
+
   }
 
   Map<String, dynamic> toJson() {
@@ -80,6 +84,7 @@ class GroupChatUsersData {
     data['project_id'] = this.projectId;
     data['team_id'] = this.teamId;
     data['group_type'] = this.groupType;
+    data['group_create_access'] = this.groupCreateAccess;
     return data;
   }
 }

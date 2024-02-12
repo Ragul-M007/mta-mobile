@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
-import 'package:mta/screens/chat/SelectUser.dart';
+import 'package:mta/screens/chat/RemoveUsers.dart';
+import 'package:mta/screens/chat/AddUsers.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/Chat/GroupUsersRes.dart';
@@ -12,9 +13,11 @@ import '../../utilities/drawables.dart';
 import '../../utilities/strings.dart';
 
 class ChatMedia extends StatefulWidget {
-  const ChatMedia({super.key, required this.groupId});
+  const ChatMedia({super.key, required this.groupId,this.projectId,this.teamId});
 
   final int groupId;
+  final int? projectId;
+  final int? teamId;
 
 
   @override
@@ -53,7 +56,6 @@ findPath() async
 }
   getDocumentDetails(type) 
   {
-    AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.getMediaDetails(widget.groupId,type).then((response) {
       if (response.status!) 
@@ -82,7 +84,10 @@ findPath() async
       print(onError.toString());
     });
   }
-getUsersByGroupId() {
+
+
+    getUsersByGroupId()
+    {
     final api = Provider.of<ApiService>(context, listen: false);
     api.getChatUsers(widget.groupId).then((response) {
       if (response.status!) {
@@ -96,17 +101,19 @@ getUsersByGroupId() {
       AppUtils.dismissprogress();
       print(onError.toString());
     });
-  }
+    }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Scaffold(
       appBar: AppBar(title: Text("Chat Media"),),
       body: tabbarwidget(),
     );
   }
 
-  Widget tabbarwidget() {
+  Widget tabbarwidget() 
+  {
     return Container(
         // padding: EdgeInsets.all(5),
         width: MediaQuery.of(context).size.width * 1,
@@ -142,7 +149,7 @@ getUsersByGroupId() {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF9e9e9e))),
+                            color: const Color(0xFF272626))),
                   ),
                   Container(
                     height: 36,
@@ -150,7 +157,7 @@ getUsersByGroupId() {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF9e9e9e))),
+                            color: const Color(0xFF272626))),
                   )
                 ],
                 unselectedLabelColor: const Color(0xffacb3bf),
@@ -172,7 +179,23 @@ getUsersByGroupId() {
 
                 //
               ]),
-            )
+            ),
+            // SizedBox(height: 5,),
+            // Center(child: Container(
+            //   width: MediaQuery.of(context).size.width * 0.6,
+            //   child: ElevatedButton(onPressed: (){
+            //       Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => RemoveUsersInGroup(
+            //         groupId: widget.groupId,
+            //       ),
+            //     ),
+            //   ).then((value) => {
+            //     getUsersByGroupId()
+            //   });
+
+            //   }, child: Text("Remove Users",style: TextStyle(color: Colors.white),),style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)),)))
           ],
         ));
   }
@@ -206,7 +229,7 @@ getUsersByGroupId() {
                                           fit: BoxFit.fill,
                                           child: ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(100.0),
+                                                  BorderRadius.circular(12.0),
                                               child: Image.file(File(basePath!+"/"+ _imageList[index].filesName!+AppUtils.getFileExtension(_imageList[index].files!))),
                                 
                                         ))),
@@ -215,6 +238,8 @@ getUsersByGroupId() {
                                         _imageList[index].fileOriginalName ?? "",
                                         textAlign: TextAlign.left,
                                         textDirection: TextDirection.ltr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -232,7 +257,7 @@ getUsersByGroupId() {
             },
             itemCount: _imageList.length, 
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          ):SizedBox();
+          ):Center(child:Text("No items found"));
   }
 
   Widget videoViewer() 
@@ -264,25 +289,8 @@ getUsersByGroupId() {
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(100.0),
-                                          child: Text("video")
-        //                                   VTImageView(
-        //   videoUrl:
-        //       Strings.uatImageUrl + _videoList[index].files!,
-        //   width: 200.0,
-        //   height: 200.0,
-        //   errorBuilder: (context, error, stack) {
-        //     return Container(
-        //       width: 200.0,
-        //       height: 200.0,
-        //       color: Colors.blue,
-        //       child: Center(
-        //         child: Text("Image Loading Error"),
-        //       ),
-        //     );
-        //   }, assetPlaceHolder: 'No Image',
-        // ),
-                                        //  Image.file(File(basePath!+"/"+ _videoList[index].filesName!+AppUtils.getFileExtension(_videoList[index].files!))),
-
+                                          child:                                  
+                                          Image.asset(AppUtils.getFilTypeImg(_videoList[index].files)),
                                     ))),
                                 SizedBox(
                                   width: 20,
@@ -344,7 +352,7 @@ getUsersByGroupId() {
                           )));
             },
             itemCount: _videoList.length,
-          ):SizedBox();
+          ):Center(child:Text("No items found"));
   }
 
    Widget documentViewer() 
@@ -441,7 +449,7 @@ getUsersByGroupId() {
                           )));
             },
             itemCount: _docList.length,
-          ):SizedBox();
+          ):Center(child: Text("No items found"),);
   }
 
   Widget memberList()
@@ -457,19 +465,26 @@ getUsersByGroupId() {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("(${chatUsers.length}) Members"),
-              TextButton(onPressed: (){
 
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddRemoveUsersIntoGroups(
-                    groupId: widget.groupId,
+              Strings.groupCreationAccess == 1?
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(onPressed: (){
+                
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddRemoveUsersIntoGroups(
+                      groupId: widget.groupId,
+                      teamId: widget.teamId,
+                      projectId: widget.projectId,
+                    ),
                   ),
-                ),
-              ).then((value) => {
-                getUsersByGroupId()
-              });
-              }, child: Text("Add Users"))
+                ).then((value) => {
+                  getUsersByGroupId()
+                });
+                }, child: Text("Add Users")),
+              ):Container()
             ],
           ),
         )
@@ -647,7 +662,7 @@ getUsersByGroupId() {
                                                 )),
                                                                                   decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(10),
-                                              color: Colors.white,
+                                              color: Colors.blueGrey.withOpacity(0.1),
                                                                                   ),
                                                                                 ),
                                                                               ),

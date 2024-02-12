@@ -50,6 +50,7 @@ class ChatBubbleWidget extends StatefulWidget {
     this.messageTimeIconColor,
     this.messageConfig,
     this.onReplyTap,
+    this.audioDownloadConfirmation,
     this.shouldHighlight = false,
   }) : super(key: key);
 
@@ -92,6 +93,9 @@ class ChatBubbleWidget extends StatefulWidget {
 
   /// Provides callback when user tap on replied message upon chat bubble.
   final Function(String)? onReplyTap;
+
+  final Function()? audioDownloadConfirmation;
+
 
   /// Flag for when user tap on replied message and highlight actual message.
   final bool shouldHighlight;
@@ -270,8 +274,8 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
               true) {
             return widget.chatBubbleConfig?.outgoingChatBubbleConfig
                     ?.receiptsWidgetConfig?.receiptsBuilder
-                    ?.call(value) ??
-                sendMessageAnimationBuilder(value);
+                    ?.call(value) ?? Container();
+                // sendMessageAnimationBuilder(value);
           }
           return const SizedBox();
         },
@@ -287,10 +291,11 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
                 true) {
               return widget.chatBubbleConfig?.outgoingChatBubbleConfig
                       ?.receiptsWidgetConfig?.receiptsBuilder
-                      ?.call(value) ??
-                  sendMessageAnimationBuilder(value);
+                      ?.call(value) ?? Container();
+                  // sendMessageAnimationBuilder(value);
             }
-            return sendMessageAnimationBuilder(value);
+            return Container();
+            // sendMessageAnimationBuilder(value);
           });
     }
     return const SizedBox();
@@ -330,6 +335,7 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
                       ?.call(widget.message.replyMessage.messageId),
                 ),
         MessageView(
+          audioDownloadConfirmation: widget.audioDownloadConfirmation,
           outgoingChatBubbleConfig:
               widget.chatBubbleConfig?.outgoingChatBubbleConfig,
           isLongPressEnable:

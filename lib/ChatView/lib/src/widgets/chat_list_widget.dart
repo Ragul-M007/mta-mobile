@@ -53,6 +53,7 @@ class ChatListWidget extends StatefulWidget {
     this.loadMoreData,
     this.isLastPage,
     this.onChatListTap,
+    this.audioDownloadConfirmation
   }) : super(key: key);
 
   /// Provides controller for accessing few function for running chat.
@@ -112,6 +113,9 @@ class ChatListWidget extends StatefulWidget {
 
   final DataRefreshCallback? refreshCall;
 
+  final Function()? audioDownloadConfirmation;
+
+
 
   @override
   State<ChatListWidget> createState() => _ChatListWidgetState();
@@ -166,7 +170,8 @@ class _ChatListWidgetState extends State<ChatListWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Column(
       children: [
         ValueListenableBuilder<bool>(
@@ -195,6 +200,7 @@ class _ChatListWidgetState extends State<ChatListWidget>
               return Stack(
                 children: [
                   ChatGroupedListWidget(
+                    audioDownloadConfirmation: widget.audioDownloadConfirmation,
                     showPopUp: showPopupValue,
                     showTypingIndicator: showTypingIndicator,
                     scrollController: scrollController,
@@ -229,13 +235,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
                     },
                     onChatListTap: _onChatListTap,
                   ),
-                  if (featureActiveConfig?.enableReactionPopup ?? false)
-                    ReactionPopup(
-                      key: _reactionPopupKey,
-                      reactionPopupConfig: widget.reactionPopupConfig,
-                      onTap: _onChatListTap,
-                      showPopUp: showPopupValue,
-                    ),
                 ],
               );
             },

@@ -149,9 +149,8 @@ class ReplyMessageWidget extends StatelessWidget {
                                   replyMessage: replyMessage,
                                   replyBySender: replyBySender,
                                 ),
-                                color: repliedMessageConfig?.backgroundColor ??
-                                    Colors.grey.shade500,
-                              ),
+                                color: 
+                                    Color.fromARGB(255, 2, 32, 93)                          ),
                               child: message.replyMessage.messageType.isVoice
                                   ? Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -175,12 +174,17 @@ class ReplyMessageWidget extends StatelessWidget {
                                           ),
                                       ],
                                     )
-                                  : Text(
-                                      replyMessage,
-                                      style: repliedMessageConfig?.textStyle ??
+                                  : 
+                                  Text.rich(TextSpan(
+                                      children: customizeText(
+                                          replyMessage),    style:  repliedMessageConfig?.textStyle ??
                                           textTheme.bodyMedium!
-                                              .copyWith(color: Colors.black),
-                                    ),
+                                              .copyWith(color: Colors.black) ??
+                            textTheme.bodyMedium!.copyWith(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),)
+                            ),
                             ),
                     ),
                   ),
@@ -197,6 +201,53 @@ class ReplyMessageWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+
+  List<InlineSpan> customizeText(String text) 
+  {
+    // final regex = RegExp('\'.+\'');
+    // final target = regex.stringMatch(testString)!;
+    List<InlineSpan> spans = [];
+
+    final regex = RegExp(r'##&&%(.*?)##&&%');
+    const placeholder = '{@}';
+
+    Iterable<Match> matches = regex.allMatches(text);
+    List<String> target = [];
+
+    for (Match match in matches) {
+      // match.group(1) contains the content inside the ##&&% sequence
+      print('Content: ${match.group(1)}');
+      target.add(match.group(1) ?? "");
+    }
+
+    // final target = regex.allMatches(text);
+    final updatedString = text.replaceAll(regex, placeholder);
+    final tokens = updatedString.split(RegExp(' '));
+
+    print("tokenssss $tokens");
+
+    var placeHolderindex = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == placeholder) {
+        print("iiu $placeHolderindex klklkl ${target[placeHolderindex]}");
+        spans.add(TextSpan(
+            text: target[placeHolderindex] + ' ',
+            style: const TextStyle(color: Color.fromARGB(255, 238, 243, 97))));
+        placeHolderindex = placeHolderindex + 1;
+      } else {
+        print("adding ${tokens[i]}");
+        spans.add(TextSpan(text: tokens[i] + ' '));
+      }
+    }
+
+    // spans = tokens.map((e) => e == placeholder
+    // ? TextSpan(text: target[target.indexOf(e)+1] + ' ', style: const TextStyle(color: Colors.blue))
+    // : TextSpan(text: e + ' '))
+    // .toList();
+
+    return spans;
   }
 
   BorderRadiusGeometry _borderRadius({

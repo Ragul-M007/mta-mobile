@@ -7,9 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mta/screens/chat/ExampleChat.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../screens/MentionFiles/flutter_mentions.dart';

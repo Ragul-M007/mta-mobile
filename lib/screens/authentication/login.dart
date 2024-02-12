@@ -10,6 +10,7 @@ import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/circleImage.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:mta/utilities/validators.dart';
 import 'package:provider/provider.dart';
@@ -552,22 +553,48 @@ class _LoginContentState extends State<LoginContent>
                                   _newsLists![index].description);
                             },
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               textDirection: TextDirection.ltr,
                               children: [
-                                Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    height: 80,
-                                    child: FittedBox(
-                                      fit: BoxFit.fill,
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(100.0),
-                                          child: Image.network(
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
                                               Strings.baseImageUrl +
-                                                  (_newsLists?[index].imgUrl ?? ""))),
-                                    )),
+                                                     (_newsLists?[index].imgUrl ?? ""),
+                                              width: 80, // Adjust the width as needed
+                                              height: 80, // Adjust the height as needed
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  "assets/images/background1.png",
+                                                  width: 80, // Adjust the width as needed
+                                                  height: 80, // Adjust the height as needed
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                            ),
+                                  ),
+          //                       Container(
+          //                           width:
+          //                               MediaQuery.of(context).size.width * 0.3,
+          //                           height: 80,
+          //                           child: FittedBox(
+          //                             fit: BoxFit.fill,
+          //                             child: ClipRRect(
+          //                                 borderRadius:
+          //                                     BorderRadius.circular(80.0),
+          //                                 child: Image.network(
+          //                                     Strings.baseImageUrl +
+          //                                         (_newsLists?[index].imgUrl ?? ""),
+          //                                         errorBuilder: (context, error, stackTrace) {
+          //   return Image.asset(
+          //     "assets/images/background1.png",
+          //     width: 50, // Adjust the width as needed
+          //     height: 50, // Adjust the height as needed
+          //     fit: BoxFit.cover,
+          //   );
+          // },)),
+          //                           )),
                                 SizedBox(
                                   width: 20,
                                 ),
@@ -820,7 +847,8 @@ class _LoginContentState extends State<LoginContent>
                                   size: 22.0, color: Colors.black),
                             ]),
                         Container(
-                          child: image(imgurl, 100.0, 100.0),
+                          child: CircleImageFromNetwork(imageUrl:imgurl
+                                                   , width: 100, height: 100, defaultImageUrl: "assets/images/background1.png", radius: 40),
                         ),
                         SizedBox(
                           height: 20,

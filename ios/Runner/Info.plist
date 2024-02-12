@@ -139,5 +139,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>The uses location to get the user&apos;s current location for marking the attendance.</string>
 </dict>
 </plist>

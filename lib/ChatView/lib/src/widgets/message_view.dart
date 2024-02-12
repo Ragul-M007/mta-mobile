@@ -1,13 +1,19 @@
 
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/lib/src/extensions/extensions.dart';
 import 'package:mta/ChatView/lib/src/widgets/chat_view_inherited_widget.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../network/ApiService.dart';
+import '../../../../utilities/apputilities.dart';
+import '../../../../utilities/strings.dart';
 import '../../chatview.dart';
 import '../utils/constants/constants.dart';
 import 'image_message_view.dart';
 import 'text_message_view.dart';
-import 'reaction_widget.dart';
 import 'voice_message_view.dart';
 
 class MessageView extends StatefulWidget {
@@ -29,6 +35,7 @@ class MessageView extends StatefulWidget {
     this.messageConfig,
     this.onMaxDuration,
     this.controller,
+    this.audioDownloadConfirmation
   }) : super(key: key);
 
   /// Provides message instance of chat.
@@ -74,8 +81,11 @@ class MessageView extends StatefulWidget {
   final ChatController? controller;
 
   final Function(int)? onMaxDuration;
+  final Function()? audioDownloadConfirmation;
+
 
   final String? fileName;
+
 
   @override
   State<MessageView> createState() => _MessageViewState();
@@ -86,12 +96,15 @@ class _MessageViewState extends State<MessageView>
   AnimationController? _animationController;
 
   MessageConfiguration? get messageConfig => widget.messageConfig;
+  var downloadStatus;
 
   bool get isLongPressEnable => widget.isLongPressEnable;
+  var dio = Dio();
 
   @override
   void initState() {
     super.initState();
+    downloadStatus = widget.message.status;
     if (isLongPressEnable) {
       _animationController = AnimationController(
         vsync: this,
@@ -110,6 +123,11 @@ class _MessageViewState extends State<MessageView>
         }
       });
     }
+  }
+
+  downloadAudio()
+  {
+      downloadfile(widget.message.message,widget.message.fileName);
   }
 
   @override
@@ -131,13 +149,14 @@ class _MessageViewState extends State<MessageView>
             animation: _animationController!,
           );
         } else {
-          return _messageView;
+          
         }
       }()),
     );
   }
 
   Widget get _messageView {
+    print("message view ${downloadStatus}  ${widget.message.createdAt}");
     final message = widget.message.message;
     final emojiMessageConfiguration = messageConfig?.emojiMessageConfig;
     return Padding(
@@ -173,13 +192,7 @@ class _MessageViewState extends State<MessageView>
                           ),
                         ),
                       ),
-                      if (widget.message.reaction.reactions.isNotEmpty)
-                        ReactionWidget(
-                          reaction: widget.message.reaction,
-                          messageReactionConfig:
-                              messageConfig?.messageReactionConfig,
-                          isMessageBySender: widget.isMessageBySender,
-                        ),
+                      
                     ],
                   );
                 } else if (widget.message.messageType.isImage) {
@@ -202,8 +215,11 @@ class _MessageViewState extends State<MessageView>
                     highlightColor: widget.highlightColor,
                     highlightMessage: widget.shouldHighlight,
                   );
-                } else if (widget.message.messageType.isVoice) {
+                } else if (widget.message.messageType.isVoice) 
+                {
+                  print("message view11 $downloadStatus ${widget.message.createdAt}");
                   return VoiceMessageView(
+                    parentDownloadStatus: downloadStatus,
                     fileName: widget.fileName,
                     screenWidth: MediaQuery.of(context).size.width,
                     message: widget.message,
@@ -213,6 +229,7 @@ class _MessageViewState extends State<MessageView>
                     messageReactionConfig: messageConfig?.messageReactionConfig,
                     inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
                     outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
+                    downloadAudioRequest: downloadAudio,
                   );
                 } else if (widget.message.messageType.isCustom &&
                     messageConfig?.customMessageBuilder != null) {
@@ -248,6 +265,112 @@ class _MessageViewState extends State<MessageView>
         ],
       ),
     );
+  }
+
+
+  downloadfile(serverURL, filename,) async 
+  {
+    // AppUtils.showprogress();
+    // AppUtils.showToast('Downloading');
+    
+    //var fileName = filename;//filenames[1];
+    var extn = AppUtils.getFileExtension(serverURL);
+    var nospace = filename.replaceAll(' ', '');
+    var fileName = nospace + extn;
+    print("url--> $fileName");
+    var basePath = Strings.basePath;
+
+    String fullPath = "$basePath/$fileName";
+    print("filepath $fullPath");
+
+   
+    var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
+  
+  // setState(() {
+  //      initializePlayer(downloadedFile);
+  // });
+ // initState();
+    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
+    //AppUtils.openFile(downloadedFile);
+  }
+
+  Future download2(Dio dio, String url, String savePath) async {
+    try {
+      var myUrl = url;
+      Response response = await dio.get(
+        myUrl,
+        onReceiveProgress: showDownloadProgress,
+        //Received data with List<int>
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) {
+              return status! < 500;
+            }),
+      );
+
+      print(response.headers);
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      // response.data is List<int> type
+      raf.writeFromSync(response.data);
+      await raf.close();
+      var filePath;
+      if (response.statusCode == 200) {
+        AppUtils.dismissprogress();
+        filePath = savePath;
+        file = File(filePath);
+      updateDownloadStatus(int.parse(widget.message.id), context);
+      
+        
+        setState(() {
+         downloadStatus = MessageStatus.downloaded;
+        });
+      } else if (response.statusCode == 404) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Sorry, File  not Found !");
+      } else {
+        AppUtils.dismissprogress();
+        filePath = 'Error code: ' + response.statusCode.toString();
+      }
+      return filePath;
+    } catch (e) {
+      AppUtils.dismissprogress();
+      var filePath = 'Error $e';
+      print(e);
+      return filePath;
+    }
+  }
+
+
+  updateDownloadStatus(msgId,context) async
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.updateDownloadStatus(msgId, 1).then((response) 
+    {
+
+      print("response ${response.status}");
+      if (response.status == true) {
+        print("truee downloaded");
+                  widget.audioDownloadConfirmation!();
+
+        // AppUtils.showToastError("update status successfully");
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+      print(onError.toString());
+    });
+  }
+
+  void showDownloadProgress(received, total) {
+    if (total != -1) {
+      AppUtils.showprogresswithpercent(received / total);
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
   }
 
   void _onLongPressStart(LongPressStartDetails details) async {

@@ -6,7 +6,7 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mta/ChatView/lib/src/widgets/reaction_widget.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../utilities/apputilities.dart';
 import '../../../../utilities/strings.dart';
@@ -26,6 +26,8 @@ class VoiceMessageView extends StatefulWidget
     this.onMaxDuration,
     this.messageReactionConfig,
     this.config,
+    this.downloadAudioRequest,
+    this.parentDownloadStatus
   }) : super(key: key);
 
   /// Provides configuration related to voice message.
@@ -37,6 +39,8 @@ class VoiceMessageView extends StatefulWidget
   /// Provides message instance of chat.
   final Message message;
   final Function(int)? onMaxDuration;
+  final Function()? downloadAudioRequest;
+
 
   /// Represents current message is sent by current user.
   final bool isMessageBySender;
@@ -51,6 +55,8 @@ class VoiceMessageView extends StatefulWidget
   final ChatBubble? outgoingChatBubbleConfig;
 
   final String? fileName;
+
+  final MessageStatus? parentDownloadStatus;
 
 
   @override
@@ -71,6 +77,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   var dio = Dio();
 
   var downloadStatus;
+var finalPath;
 
 
 
@@ -79,13 +86,13 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   {
     super.initState();
 
-     var finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
+     finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
                                             AppUtils.getFileExtension(
                                                 widget.message.message);
+        print("message view33 ${widget.parentDownloadStatus}");
+        downloadStatus = widget.parentDownloadStatus;
 
-        downloadStatus = widget.message.status;
-
-        if(widget.message.status == MessageStatus.downloaded)
+        if(downloadStatus == MessageStatus.downloaded)
         {
           controller = PlayerController()
                 ..preparePlayer(
@@ -96,6 +103,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
                 ).whenComplete(() => widget.onMaxDuration?.call(controller.maxDuration));
               playerStateSubscription = controller.onPlayerStateChanged
                   .listen((state) => _playerState.value = state);
+
         }
         else
         {
@@ -109,10 +117,17 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
               playerStateSubscription = controller.onPlayerStateChanged
                   .listen((state) => _playerState.value = state);
         }
-        
+
+        WidgetsBinding.instance.addPostFrameCallback((_) 
+        {
+          print("qqwweerr");
+  // executes after build
+        });
 
      
   }
+
+
 
    
 
@@ -131,7 +146,10 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
     playerStateSubscription = controller.onPlayerStateChanged
         .listen((state) => _playerState.value = state);
     });
-    
+
+    setState(() {
+      
+    });
   }
 
   downloadfile(serverURL, filename,) async 
@@ -154,7 +172,11 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
 
    
     var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
-  initializePlayer(downloadedFile);
+  
+  setState(() {
+       initializePlayer(downloadedFile);
+  });
+ // initState();
     // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     //AppUtils.openFile(downloadedFile);
   }
@@ -220,8 +242,11 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    print("message view22 $downloadStatus  ${widget.parentDownloadStatus}");
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -229,7 +254,10 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
           decoration: widget.config?.decoration ??
               BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: widget.isMessageBySender
+                color:       
+        
+                
+                widget.isMessageBySender
                     ? widget.outgoingChatBubbleConfig?.color
                     : widget.inComingChatBubbleConfig?.color,
               ),
@@ -240,60 +268,67 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
                 horizontal: 8,
                 vertical: widget.message.reaction.reactions.isNotEmpty ? 15 : 0,
               ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              downloadStatus == MessageStatus.downloaded?
-              ValueListenableBuilder<PlayerState>(
-                builder: (context, state, child) {
-                  return IconButton(
-                    onPressed: _playOrPause,
-                  // onPressed: downloadfile(widget.message,widget.fileName),
-                    icon:
-                        state.isStopped || state.isPaused || state.isInitialised
-                            ? widget.config?.playIcon ??
-                                 Icon(
-                                  Icons.play_arrow,
-                                  color: widget.isMessageBySender? Colors.white:Colors.black,
-                                )
-                            : widget.config?.pauseIcon ??
-                                 Icon(
-                                  Icons.stop,
-                                  color: widget.isMessageBySender? Colors.white:Colors.black,
-                                ),
-                  );
-                },
-                valueListenable: _playerState,
-              ):
-              IconButton( onPressed: ()
-              {
-                downloadfile(widget.message.message,widget.message.fileName);
-              }, icon: Icon(Icons.download,
-              color: widget.isMessageBySender?Colors.white:Colors.black,)),
-              AudioFileWaveforms(
-                size: Size(widget.screenWidth * 0.50, 60),
-                playerController: controller,
-                waveformType: WaveformType.fitWidth,
-                playerWaveStyle:
-                PlayerWaveStyle(scaleFactor: 70,liveWaveColor: widget.isMessageBySender?Colors.white:Colors.black,fixedWaveColor: widget.isMessageBySender?Colors.white70:Colors.grey),
-                  //  widget.config?.playerWaveStyle ?? playerWaveStyle,
-                padding: widget.config?.waveformPadding ??
-                    const EdgeInsets.only(right: 10),
-                margin: widget.config?.waveformMargin,
-                animationCurve: widget.config?.animationCurve ?? Curves.easeIn,
-                animationDuration: widget.config?.animationDuration ??
-                    const Duration(milliseconds: 500),
-                enableSeekGesture: widget.config?.enableSeekGesture ?? true,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.parentDownloadStatus == MessageStatus.downloaded?
+                  ValueListenableBuilder<PlayerState>(
+                    builder: (context, state, child) {
+                      return IconButton(
+                        onPressed: _playOrPause,
+                      // onPressed: downloadfile(widget.message,widget.fileName),
+                        icon:
+                            state.isStopped || state.isPaused || state.isInitialised
+                                ? widget.config?.playIcon ??
+                                     Icon(
+                                      Icons.play_arrow,
+                                      color: widget.isMessageBySender? Colors.white:Colors.black,
+                                    )
+                                : widget.config?.pauseIcon ??
+                                     Icon(
+                                      Icons.stop,
+                                      color: widget.isMessageBySender? Colors.white:Colors.black,
+                                    ),
+                      );
+                    },
+                    valueListenable: _playerState,
+                  ):
+                  IconButton( onPressed: ()
+                  {
+                    widget.downloadAudioRequest!();
+                    // downloadfile(widget.message.message,widget.message.fileName);
+                  }, icon: Icon(Icons.download,
+                  color: widget.isMessageBySender?Colors.white:Colors.black,)),
+                  AudioFileWaveforms(
+                    
+                    size: Size(widget.screenWidth * 0.50, 60),
+                    playerController: controller,
+                    waveformType: WaveformType.fitWidth,
+                    playerWaveStyle:
+                    PlayerWaveStyle(scaleFactor: 70,liveWaveColor: widget.isMessageBySender?Colors.white:Colors.black,fixedWaveColor: widget.isMessageBySender?Colors.white70:Colors.grey),
+                      //  widget.config?.playerWaveStyle ?? playerWaveStyle,
+                    padding: widget.config?.waveformPadding ??
+                        const EdgeInsets.only(right: 10),
+                    margin: widget.config?.waveformMargin,
+                    animationCurve: Curves.easeIn,
+                    
+                    animationDuration: 
+                        const Duration(milliseconds: 10),
+                    enableSeekGesture: widget.config?.enableSeekGesture ?? true,
+                  ),
+                ],
               ),
+              widget.isMessageBySender?
+                      Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color:  Color.fromARGB(255, 246, 242, 242),fontSize: 12)):                           
+                       Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color:Colors.black,fontSize: 12),),
+              SizedBox(height: 3,)
             ],
           ),
         ),
-        if (widget.message.reaction.reactions.isNotEmpty)
-          ReactionWidget(
-            isMessageBySender: widget.isMessageBySender,
-            reaction: widget.message.reaction,
-            messageReactionConfig: widget.messageReactionConfig,
-          ),
+        
       ],
     );
   }

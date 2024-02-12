@@ -48,6 +48,7 @@ class ChatGroupedListWidget extends StatefulWidget {
     this.swipeToReplyConfig,
     this.repliedMessageConfig,
     this.typeIndicatorConfig,
+    this.audioDownloadConfirmation
   }) : super(key: key);
 
   /// Allow user to swipe to see time while reaction pop is not open.
@@ -88,6 +89,7 @@ class ChatGroupedListWidget extends StatefulWidget {
 
   /// Provides callback when user press chat bubble for certain time then usual.
   final void Function(double, double, Message) onChatBubbleLongPress;
+  final Function()? audioDownloadConfirmation;
 
   /// Provide flag for turn on/off to see message crated time view when user
   /// swipe whole chat.
@@ -303,6 +305,7 @@ class _ChatGroupedListWidgetState extends State<ChatGroupedListWidget>
                     valueListenable: _replyId,
                     builder: (context, state, child) {
                       return ChatBubbleWidget(
+                        audioDownloadConfirmation: widget.audioDownloadConfirmation,
                         fileName: message.fileName,
                         key: message.key,
                         messageTimeTextStyle:

@@ -64,7 +64,6 @@ class ReplyPopupWidget extends StatelessWidget {
             padding: const EdgeInsets.only(left: 20,bottom: 10,top: 10),
             child: Row(
               children: [
-
                 Icon(Icons.reply_rounded),
                 SizedBox(width: 5),
                 InkWell(

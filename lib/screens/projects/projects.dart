@@ -925,7 +925,8 @@ class _ProjectsState extends State<Projects>
   }
 
   Future<void> _showMyDialogProject(
-      context, imgurl, title, desc, status) async {
+      context, imgurl, title, desc, status) async 
+  {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -934,15 +935,19 @@ class _ProjectsState extends State<Projects>
           content: SingleChildScrollView(
             child: GestureDetector(
                 onTap: () {
-                  Navigator.of(context).pop();
                 },
                 child: Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        new Icon(Icons.close, size: 22.0, color: Colors.black)
-                      ]),
+                       Align(
+                        alignment: Alignment.centerRight,
+                        child: InkWell(
+                          onTap: (){
+                              Navigator.of(context).pop();
+                          },
+                          child: Icon(Icons.close, size: 22.0, color: Colors.black))),
                       SizedBox(
                         height: 20,
                       ),
@@ -973,13 +978,24 @@ class _ProjectsState extends State<Projects>
                           height: 200,
                           decoration: new BoxDecoration(
                             color: const Color(0xff7c94b6),
-                            image: new DecorationImage(
-                              image: new NetworkImage(imgurl),
-                              fit: BoxFit.fill,
-                            ),
                             borderRadius:
                                 new BorderRadius.all(new Radius.circular(5.0)),
                           ),
+
+                          child: Image.network(
+          imgurl,
+          width: 200, // Adjust the width as needed
+          height: 200, // Adjust the height as needed
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              "assets/images/background1.png",
+              width: 200, // Adjust the width as needed
+              height: 200, // Adjust the height as needed
+              fit: BoxFit.cover,
+            );
+          },
+        ),
                         ),
                       ),
                       SizedBox(
@@ -1010,7 +1026,6 @@ class _ProjectsState extends State<Projects>
           content: SingleChildScrollView(
             child: GestureDetector(
                 onTap: () {
-                  Navigator.of(context).pop();
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.75,
@@ -1018,7 +1033,11 @@ class _ProjectsState extends State<Projects>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      new Icon(Icons.close, size: 22.0, color: Colors.black),
+                      InkWell(
+                        onTap: (){
+                             Navigator.of(context).pop();
+                        },
+                        child: new Icon(Icons.close, size: 22.0, color: Colors.black)),
                       SizedBox(
                         height: 20,
                       ),

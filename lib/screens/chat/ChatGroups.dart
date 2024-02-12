@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/GroupChatListRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/chat/ExampleChat.dart';
+import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -16,9 +16,8 @@ import 'package:dio/dio.dart';
 
 import 'package:path/path.dart' as path;
 
-import '../../models/Chat/GroupUsersRes.dart';
 import '../../utilities/apputilities.dart';
-import 'SelectUser.dart';
+import 'AddUsers.dart';
 
 class ChatGroups extends StatefulWidget {
   static const String routeName = "/chatGroups";
@@ -40,6 +39,7 @@ class _ChatGroupsState extends State<ChatGroups>
   IO.Socket? _socket;
 
   BuildContext? ctx;
+  bool loading = true;
 
   List<GroupDetails> _searchLists = [];
   FocusNode searchField = new FocusNode();
@@ -54,16 +54,32 @@ class _ChatGroupsState extends State<ChatGroups>
   var dio = Dio();
 
   String _errText = "";
-  void initState() {
+  void initState() 
+  {
     super.initState();
-
     connectSocket();
+    fetchChatCreateAcess();
   }
 
   @override
   void dispose() {
     _controller?.dispose();
     super.dispose();
+  }
+
+  fetchChatCreateAcess() {
+    final api = Provider.of<ApiService>(context, listen: false);
+
+    api.getAccessDetails().then((response) {
+      if (response.status!) { 
+        setState(() {
+            Strings.groupCreationAccess = response.data!.groupCreateAccess;
+        });                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+      }
+    }).catchError((onError) {
+      print(onError.toString());
+      //getProjects();
+    });
   }
 
   connectSocket() {
@@ -106,11 +122,12 @@ class _ChatGroupsState extends State<ChatGroups>
     _socket?.on("all-groups", (_data) {
 
       print("dataa from all groups $_data");
-
-      setState(() {
+    if(mounted)
+    {
+        setState(() {
         var formattedRes = GroupListRes.fromJson(_data);
 
-        if (formattedRes.userId == Strings.userID) {
+        if (formattedRes.userId == Strings.userID && ((formattedRes.projectId != null && formattedRes.projectId == widget.projectId) || (formattedRes.teamId != null && formattedRes.teamId == widget.teamId)) ) {
           groupList.clear();
 
           for (var item in formattedRes.groupDetails ??[]) {
@@ -120,7 +137,10 @@ class _ChatGroupsState extends State<ChatGroups>
         }
         else
         {print("else");}
+        loading = false;
       });
+    }
+      
     });
   }
 
@@ -195,6 +215,8 @@ class _ChatGroupsState extends State<ChatGroups>
                 MaterialPageRoute(
                   builder: (context) => AddRemoveUsersIntoGroups(
                     groupId: response.data!.groupId ?? 0 ,
+                    teamId: widget.teamId,
+                    projectId: widget.projectId,
                   ),
                 ),
               );
@@ -211,7 +233,12 @@ class _ChatGroupsState extends State<ChatGroups>
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
+      child: 
+      loading?Center(child: Container(
+        height: 30,
+        width:30,
+        child: CircularProgressIndicator())):
+      Scaffold(
           floatingActionButton:Strings.groupCreationAccess == 1? InkWell(
             onTap: () {
               // upload();
@@ -234,7 +261,8 @@ class _ChatGroupsState extends State<ChatGroups>
                 preferredSize: Size.fromHeight(kToolbarHeight),
                 child: Padding(
                   padding: EdgeInsets.all(15),
-                  child: Container(
+                  child: 
+                  Container(
                     //  padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
@@ -309,50 +337,97 @@ class _ChatGroupsState extends State<ChatGroups>
             return groupList.length > 0
                 ? _searchLists.length != 0
                     ? ListView.builder(
-                        padding: EdgeInsets.all(20),
+                        padding: EdgeInsets.all(8),
                         itemBuilder: (BuildContext ctx, int index) {
-                          return Padding(
-                            padding: EdgeInsets.all(10),
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                            child: Column(
+                          return 
+                          Padding(
+                                padding: EdgeInsets.all(8),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => ChatScreen(
+                                    //       groupId: groupList[index].groupId!,
+                                    //       teamId: widget.teamId,
+                                    //     ),
+                                    //   ),
+                                    // );
+                                     Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          teamName: _searchLists[index].groupName ?? "No name",
+                                          groupId: _searchLists[index].groupId!,
+                                           teamId: widget.teamId,
+                                           projectId: widget.projectId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    child: Padding(
+                                        padding:
+                                            EdgeInsets.fromLTRB(12, 14, 12, 14),
+                                        child: Row(
                                           children: [
-                                            Text(_searchLists[index].groupName!,
-                                                style: Drawables
-                                                    .adddoccontentstyle(
-                                                        Colors.black87,
-                                                        14.0,
-                                                        FontWeight.w500)),
-                                            Text(
-                                                _searchLists[index]
-                                                    .groupDescription!,
-                                                style: Drawables
-                                                    .adddoccontentstyle(
-                                                        Colors.grey,
-                                                        12.0,
-                                                        FontWeight.w300))
+                                            Expanded(
+                                                child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    _searchLists[index]
+                                                            .groupName ??
+                                                        "",
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.black87,
+                                                            14.0,
+                                                            FontWeight.w500)),
+                                                Text(
+                                                    _searchLists[index]
+                                                            .groupDescription ??
+                                                        "",
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: Drawables
+                                                        .adddoccontentstyle(
+                                                            Colors.grey,
+                                                            12.0,
+                                                            FontWeight.w300))
+                                              ],
+                                            )),
+                                            SizedBox(
+                                              width: 8,
+                                            ),
+                                            _searchLists[index].unreadMessageCount != 0 ?
+                                            Container(
+                                              width: 24,
+                                              height: 24,
+                                              child: Center(
+                                                  child: Text(
+                                                "${_searchLists[index].unreadMessageCount ?? 0}",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              )),
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Color.fromARGB(
+                                                      255, 60, 237, 80)),
+                                            ):Container()
                                           ],
                                         )),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: Colors.grey,
-                                          size: 14.0,
-                                        )
-                                      ],
-                                    )),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
+                              );
 
                           // return Text("hi");
                         },
@@ -372,7 +447,9 @@ class _ChatGroupsState extends State<ChatGroups>
                         : ListView.builder(
                             padding: EdgeInsets.all(2),
                             itemBuilder: (BuildContext ctx, int index) {
-                              return Padding(
+                              return 
+                              
+                              Padding(
                                 padding: EdgeInsets.all(8),
                                 child: GestureDetector(
                                   onTap: () {
@@ -388,7 +465,7 @@ class _ChatGroupsState extends State<ChatGroups>
                                      Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => Example(
+                                        builder: (context) => ChatScreen(
                                           teamName: groupList[index].groupName ?? "No name",
                                           groupId: groupList[index].groupId!,
                                            teamId: widget.teamId,
@@ -525,7 +602,7 @@ class _ChatGroupsState extends State<ChatGroups>
                       SizedBox(
                         height: 20,
                       ),
-                      Text("Group name"),
+                      Text("Group name *"),
                       SizedBox(
                         height: 4,
                       ),
@@ -547,7 +624,7 @@ class _ChatGroupsState extends State<ChatGroups>
                       SizedBox(
                         height: 8,
                       ),
-                      Text("Description"),
+                      Text("Description *"),
                       SizedBox(
                         height: 4,
                       ),
@@ -592,11 +669,20 @@ class _ChatGroupsState extends State<ChatGroups>
                                     AppUtils.showToastError(
                                         "Please enter Group name");
                                   } else if (_groupNameFieldController
-                                          .text.length <=
+                                          .text.length <
                                       3) {
                                     AppUtils.showToastError(
                                         "Group name should be minimum 3 letters");
-                                  } else {
+                                  } else if (_groupDescriptionFieldController.text.isEmpty) {
+                                    AppUtils.showToastError(
+                                        "Please enter Group description");
+                                  } else if (_groupDescriptionFieldController
+                                          .text.length <
+                                      3) {
+                                    AppUtils.showToastError(
+                                        "Group description should be minimum 3 letters");
+                                  } else
+                                  {
                                     createGroup();
                                   }
                                 },

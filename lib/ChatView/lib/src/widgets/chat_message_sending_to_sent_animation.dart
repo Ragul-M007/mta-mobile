@@ -49,8 +49,8 @@ class _SendingMessageAnimatingWidgetState
                   bottom: 5,
                 ),
                 child: Icon(
-                  Icons.send,
-                  color: Colors.grey,
+                  Icons.download,
+                  color: Colors.green,
                   size: 12,
                 ),
               )),

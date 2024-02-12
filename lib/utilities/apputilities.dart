@@ -160,11 +160,15 @@ static  String getFileExtension(String fileName) {
       return "assets/icons/ppt.png";
     } else if (fileExt == "mpeg" || fileExt == "mpg") {
       return "assets/icons/mpg.png";
-    } else if (fileExt == "mp4") {
-      return "assets/icons/mpg.png";
+    } else if (fileExt == "mp4" || fileExt == "mkv") {
+      return "assets/icons/mp4.png";
     } else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
-    } else if (fileExt == "xls" ||
+    } else if (fileExt == "m4a")
+    {
+      return "assets/icons/aac.png";
+    }
+     else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
         fileExt == "xlsb" ||
@@ -251,21 +255,30 @@ async {
    // return basePath;
 }
 
-  static updateDownloadStatus(msgId,context) async
+  static Future<bool?> updateDownloadStatus(msgId,context) async
   {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.updateDownloadStatus(msgId, 1).then((response) {
+    var status = false;
+    api.updateDownloadStatus(msgId, 1).then((response) 
+    {
+
+      print("response ${response.status}");
       if (response.status!) {
+        status = true;
         // AppUtils.showToastError("update status successfully");
       } else {
         AppUtils.dismissprogress();
         AppUtils.showToastError(response.message!);
+        status = false;
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
       AppUtils.showToastError("Unable to connect to server");
       print(onError.toString());
+      status=false;
     });
+
+    return status;
   }
 
   static void showToastErrorTop(String message) {

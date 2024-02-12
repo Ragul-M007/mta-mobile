@@ -273,7 +273,7 @@ showDialog(
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorWeight: 3.0,
                 indicatorPadding: EdgeInsets.all(10),
-                isScrollable: true,
+                isScrollable: false,
                 controller: _tabController,
               ),
             ),
@@ -315,11 +315,23 @@ showDialog(
                                     child: FittedBox(
                                       fit: BoxFit.fill,
                                       child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(100.0),
-                                          child: Image.network(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
                                               Strings.baseImageUrl +
-                                                  (_newsLists![index].imgUrl ?? ""))),
+                                                     (_newsLists?[index].imgUrl ?? ""),
+                                              width: 80, // Adjust the width as needed
+                                              height: 80, // Adjust the height as needed
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  "assets/images/background1.png",
+                                                  width: 80, // Adjust the width as needed
+                                                  height: 80, // Adjust the height as needed
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                            ),
+                                  ),
                                     )),
                                 SizedBox(
                                   width: 20,

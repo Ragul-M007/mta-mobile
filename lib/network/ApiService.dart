@@ -104,7 +104,7 @@ abstract class ApiService
   @GET("/projects/getDocuments?project_id={project_id}&&users_id={users_id}")
   Future<FectchProjectDocRes> getProjectDoc(@Path("project_id") int id, @Path("users_id") int userid);
 
-  @GET("/categories?project_id={project_id}")
+  @GET("/categories?project_id={project_id}&&type=mobile")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
 
   @GET("/chat/unlinkedUsersInGroup?group_id={project_id}")
@@ -119,10 +119,12 @@ abstract class ApiService
 @POST("/chat/addUsersIntoGroup")
   Future<AddAttendanceRes> addRemoveUsersintoGroup(@Body() AddRemoveUserReq body);
 
+  @POST("/chat/removeUserInGroup")
+  Future<AddAttendanceRes> removeUsersintoGroup(@Body() AddRemoveUserReq body);
+
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
-      @Path("user_id") int id, @Path("date") String date);
-
+  @Path("user_id") int id, @Path("date") String date);
 
   @GET("/categories?project_id={project_id}")
   Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
@@ -242,8 +244,8 @@ abstract class ApiService
             // return false;
           }
           else if(status == 502){
-AppUtils.showToastError("Bad Gateway");          
-}
+            AppUtils.showToastError("Bad Gateway");          
+        }
           return status < 500;
         };
         print("Printing api service");

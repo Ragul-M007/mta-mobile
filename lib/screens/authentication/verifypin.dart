@@ -9,8 +9,8 @@ import 'package:mta/models/LoginReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
-import 'package:mta/screens/projectcomments.dart/projectComments.dart';
-import 'package:mta/screens/projectcomments.dart/projectCommentsReplies.dart';
+import 'package:mta/screens/projectcomments/projectComments.dart';
+import 'package:mta/screens/projectcomments/projectCommentsReplies.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +18,7 @@ import 'package:mta/screens/attendance/attendance.dart';
 
 import '../../models/validateOTPReq.dart';
 import '../chat/ChatGroups.dart';
+import '../chat/ChatScreen.dart';
 import '../doucument/viewdoclist.dart';
 
 class Verifypin extends StatefulWidget {
@@ -376,17 +377,14 @@ class _VerifypinState extends State<Verifypin> {
             }
           }
 
-          if (response.status!) 
-          {
+          if (response.status!) {
             AppUtils.savePreferences("emailId", response.data!.emailId);
             AppUtils.savePreferences("userId", response.data!.userId);
             AppUtils.savePreferences("username", response.data!.name);
-            if (response.data!.userImg != null) 
-            {
+            if (response.data!.userImg != null) {
               AppUtils.savePreferences("profilePic", response.data!.userImg);
               Strings.profilePic = response.data!.userImg!;
-            } else 
-            {
+            } else {
               AppUtils.savePreferences("profilePic", "");
               Strings.profilePic = "";
             }
@@ -397,83 +395,55 @@ class _VerifypinState extends State<Verifypin> {
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
             Strings.isLogin = true;
-            if (Strings.FromNotification) 
-            {
+            if (Strings.FromNotification) {
               Strings.FromNotification = false;
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => Attendance()));
-            } else if (Strings.fromNotificationComments) 
-            {
-
-              if(Strings.selectedProDocument[0].projectComments == "true")
-              {
-                  if (Strings.selectedProDocument[0].commentId == null) 
-                  {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) => ProjectComments()));
-                  } else 
-                  {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) => ProjectCommentsReplies()));
-                  }
+            } else if (Strings.fromNotificationComments) {
+              if (Strings.selectedProDocument[0].projectComments == "true") {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProjectComments()));
+                } else {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProjectCommentsReplies()));
+                }
+              } else {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => Comments()));
+                } else {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => Replies()));
+                }
               }
-              else
-              {
-                  if (Strings.selectedProDocument[0].commentId == null) 
-                  {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) => Comments()));
-                  } else 
-                  {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) => Replies()));
-                  }
-              }
-              
-            } else if(Strings.fromNotificationDocuments)
-            {
-              Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
-            }
-            else if(
-              Strings.fromNotificationChat
-            ){
-              if (Strings.chatNotificationResponse?.groupType == "team") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatGroups(
-                  teamId: int.parse(Strings.chatNotificationResponse?.teamId ?? "0"),
+            } else if (Strings.fromNotificationDocuments) {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => ViewDocScreen()));
+            } else if (Strings.fromNotificationChat) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    teamName:
+                        Strings.chatNotificationResponse?.groupName ?? "0",
+                    groupId: int.parse(
+                        Strings.chatNotificationResponse?.groupId ?? "0"),
+                    teamId: int.parse(
+                        Strings.chatNotificationResponse?.teamId ?? "0"),
+                    projectId: int.parse(
+                        Strings.chatNotificationResponse?.projectId ?? "0"),
+                  ),
                 ),
-              ),
-            );
-          }
-          else{
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatGroups(
-                  projectId: int.parse(Strings.chatNotificationResponse?.projectId ?? "0"),
-                ),
-              ),
-            );
-          }
-            }
-            
-            
-            else 
-            {
-              if(Strings.roleId == 6)
-              {
+              );
+            } else {
+              if (Strings.roleId == 6) {
                 Navigator.pushNamed(context, "/projects");
-              }
-              else
-              {
+              } else {
                 Navigator.pushNamed(ctx!, "/teamsDashboard");
               }
             }
-          } else 
-          {
+          } else {
             AppUtils.showToastError(response.message!);
           }
         }).catchError((onError) {
@@ -497,136 +467,145 @@ class _VerifypinState extends State<Verifypin> {
           ctx = newContext;
           return Stack(
             children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.height * .35,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              image: new DecorationImage(
-                image: new AssetImage("assets/images/logo.jpg"),
-                fit: BoxFit.fill,
-              ),
-            ),
-            padding: EdgeInsets.all(10),
-            width: double.infinity,
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(
-                0, MediaQuery.of(context).size.height * .35, 0, 0),
-            padding: EdgeInsets.all(5),
-            width: double.infinity,
-            decoration: BoxDecoration(color: Colors.grey[200]),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(
-                20, MediaQuery.of(context).size.height * .22, 20, 10),
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15)),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    height: 54,
+              Container(
+                height: MediaQuery.of(context).size.height * .35,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  image: new DecorationImage(
+                    image: new AssetImage("assets/images/logo.jpg"),
+                    fit: BoxFit.fill,
                   ),
-                  Text(
-                    "Verify Pin",
-                    style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 50,
-                  ),
-                  Text(
-                    "Enter your 4 digit secret pin",
-                    style: TextStyle(color: const Color(0xFF9e9e9e)),
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  _boxBuilder(),
-                  SizedBox(
-                    height: 40,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              _forgotPass();
-              //AppUtils.clearAllPreferences();
-              //  Navigator.popAndPushNamed(context, '/login');
-            },
-            child: Container(
+                ),
+                padding: EdgeInsets.all(10),
                 width: double.infinity,
+              ),
+              Container(
                 margin: EdgeInsets.fromLTRB(
-                    10, MediaQuery.of(context).size.height * .68, 10, 20),
-                child: Text("Forgot Pin",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF9e9e9e)))),
-          ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.fromLTRB(
-                  10, MediaQuery.of(context).size.height * .75, 10, 20),
-              child: ButtonTheme(
-                minWidth: double.infinity,
-                child: ElevatedButton(
-                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Color(0xFF0061b0)),foregroundColor: MaterialStateProperty.all(Colors.white), shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0),),
-                                ),),
-                    onPressed: () {
-                      print(
-                          "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
-                      codeVerifyField =
-                          oneT.text + twoT.text + threeT.text + fourT.text;
-                      print(codeVerifyField);
-                      print("${codeVerifyField!.length}");
-                      if (codeVerifyField!.length < 4) {
-                        AppUtils.showToastError("Please Enter Pin");
-                      } else {
-                        signin();
-                      }
-                    },
-                    child: Text("SUBMIT",
+                    0, MediaQuery.of(context).size.height * .35, 0, 0),
+                padding: EdgeInsets.all(5),
+                width: double.infinity,
+                decoration: BoxDecoration(color: Colors.grey[200]),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(
+                    20, MediaQuery.of(context).size.height * .22, 20, 10),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15)),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 54,
+                      ),
+                      Text(
+                        "Verify Pin",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.white)),
-                    ),
-              ),
-            ),
-          ),
-          Align(
-            alignment: FractionalOffset.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Not ${Strings.username}?",
-                    style: TextStyle(color: const Color(0xFF9e9e9e)),
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      Text(
+                        "Enter your 4 digit secret pin",
+                        style: TextStyle(color: const Color(0xFF9e9e9e)),
+                      ),
+                      SizedBox(
+                        height: 5.0,
+                      ),
+                      _boxBuilder(),
+                      SizedBox(
+                        height: 40,
+                      ),
+                    ],
                   ),
-                  TextButton(
-                      onPressed: () {
-                        AppUtils.savePreferences("easyAccess", "N");
-                        AppUtils.removeDeviceId(context);
-                        Navigator.popAndPushNamed(context, "/login");
-                      },
-                      child: Text(
-                        "Logout",
-                        style: TextStyle(color: Colors.red),
-                      ))
-                ],
+                ),
               ),
-            ),
-          )
+              GestureDetector(
+                onTap: () {
+                  _forgotPass();
+                  //AppUtils.clearAllPreferences();
+                  //  Navigator.popAndPushNamed(context, '/login');
+                },
+                child: Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.fromLTRB(
+                        10, MediaQuery.of(context).size.height * .68, 10, 20),
+                    child: Text("Forgot Pin",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF9e9e9e)))),
+              ),
+              Center(
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(
+                      10, MediaQuery.of(context).size.height * .75, 10, 20),
+                  child: ButtonTheme(
+                    minWidth: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Color(0xFF0061b0)),
+                        foregroundColor:
+                            MaterialStateProperty.all(Colors.white),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {
+                        print(
+                            "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
+                        codeVerifyField =
+                            oneT.text + twoT.text + threeT.text + fourT.text;
+                        print(codeVerifyField);
+                        print("${codeVerifyField!.length}");
+                        if (codeVerifyField!.length < 4) {
+                          AppUtils.showToastError("Please Enter Pin");
+                        } else {
+                          signin();
+                        }
+                      },
+                      child: Text("SUBMIT",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Not ${Strings.username}?",
+                        style: TextStyle(color: const Color(0xFF9e9e9e)),
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            AppUtils.savePreferences("easyAccess", "N");
+                            AppUtils.removeDeviceId(context);
+                            Navigator.popAndPushNamed(context, "/login");
+                          },
+                          child: Text(
+                            "Logout",
+                            style: TextStyle(color: Colors.red),
+                          ))
+                    ],
+                  ),
+                ),
+              )
             ],
           );
         })),

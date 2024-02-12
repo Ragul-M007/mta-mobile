@@ -70,6 +70,7 @@ mixin Strings
   static int selectedCommentsIndex = 0;
   static List<CommentsRes> comments = [];
   static String fcmToken = "";
+  static List<String> audioLoded = [];
   static List<CatsData> categories = [];
   static List<FetchMapedUsersData> users = [];
   static bool showNotification = false;

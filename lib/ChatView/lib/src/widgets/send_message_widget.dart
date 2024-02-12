@@ -194,17 +194,15 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
                                       else if (state.messageType.isImage)
                                         _imageReplyMessageView
                                       else
-                                        Text(
-                                          state.message,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
+                                      Text.rich(TextSpan(
+                                      children: customizeText(
+                                          state.message),    style:TextStyle(
                                             fontSize: 12,
                                             color: widget.sendMessageConfig
                                                     ?.replyMessageColor ??
                                                 Colors.black,
-                                          ),
-                                        ),
+                                          ),)
+                            )
                                     ],
                                   ),
                                 ),
@@ -232,6 +230,46 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
               ),
             ),
           );
+  }
+
+  List<InlineSpan> customizeText(String text) 
+  {
+    // final regex = RegExp('\'.+\'');
+    // final target = regex.stringMatch(testString)!;
+    List<InlineSpan> spans = [];
+
+    final regex = RegExp(r'##&&%(.*?)##&&%');
+    const placeholder = '{@}';
+
+    Iterable<Match> matches = regex.allMatches(text);
+    List<String> target = [];
+
+    for (Match match in matches) {
+      // match.group(1) contains the content inside the ##&&% sequence
+      target.add(match.group(1) ?? "");
+    }
+
+    // final target = regex.allMatches(text);
+    final updatedString = text.replaceAll(regex, placeholder);
+    final tokens = updatedString.split(RegExp(' '));
+    var placeHolderindex = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == placeholder) {
+        spans.add(TextSpan(
+            text: target[placeHolderindex] + ' ',
+            style: const TextStyle(color: Color.fromARGB(255, 97, 136, 243))));
+        placeHolderindex = placeHolderindex + 1;
+      } else {
+        spans.add(TextSpan(text: tokens[i] + ' '));
+      }
+    }
+
+    // spans = tokens.map((e) => e == placeholder
+    // ? TextSpan(text: target[target.indexOf(e)+1] + ' ', style: const TextStyle(color: Colors.blue))
+    // : TextSpan(text: e + ' '))
+    // .toList();
+
+    return spans;
   }
 
   Widget get _voiceReplyMessageView {

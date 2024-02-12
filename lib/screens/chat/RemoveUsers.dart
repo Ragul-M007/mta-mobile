@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -9,77 +8,95 @@ import 'package:provider/provider.dart';
 import '../../models/Chat/AddRemoveUserListRes.dart';
 import '../../network/ApiService.dart';
 import '../../utilities/apputilities.dart';
-import '../../utilities/constant.dart';
+import '../../utilities/strings.dart';
 
 
 
 
-class AddRemoveUsersIntoGroups extends StatefulWidget {
+class RemoveUsersInGroup extends StatefulWidget {
 
-  const AddRemoveUsersIntoGroups({super.key, required this.groupId});
+  const RemoveUsersInGroup({super.key, required this.groupId});
 
   final int groupId;
   @override
   _AddRemoveUsersIntoGroupsState createState() => _AddRemoveUsersIntoGroupsState();
 }
 
-class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
+class _AddRemoveUsersIntoGroupsState extends State<RemoveUsersInGroup> {
  
-  List<AddUsersData> chatUsers = [];
-  getUnlinkUsersByGroupId() 
-  {
+  List<GroupChatUsersData> chatUsers = [];
+
+
+  
+
+ getUsersByGroupId()
+    {
+      AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-    api.getUnlinkedUsers(widget.groupId).then((response) {
-      if (response.status!) 
-      {
+    api.getChatUsers(widget.groupId).then((response) {
+      if (response.status!) {
         setState(() {
+          chatUsers.clear();
           chatUsers = response.data!;
           for(int i = 0;i<chatUsers.length;i++)
           {
-            if(chatUsers[i].alreadyLinked == true)
+            if(chatUsers[i].groupCreateAccess == 1)
             {
-               chatUsers[i].isSelected = true;
+                chatUsers[i].isSelected = true;
             }
             else
             {
-                chatUsers[i].isSelected = false;
+               chatUsers[i].isSelected = false;
             }
           }
+          AppUtils.dismissprogress();
         });
       } else {
+        AppUtils.showToastError("Unable to load users");
         print('error');
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
+      AppUtils.showToastError(onError.toString());
       print(onError.toString());
     });
-  }
+    }
 
-
+    
   updateSelectedUsers()
   {
-    List<int> selectedUsers = [];
+          List<int> selectedUsers = [];
           chatUsers.forEach((element) 
           {
-            if(element.isSelected == true && element.alreadyLinked != true)
+            if(element.isSelected == true && element.groupCreateAccess != 1)
             {
               selectedUsers.add(element.userId!);
             }
-           });
+          });
             AddRemoveUserReq req = AddRemoveUserReq();
             req.groupId = widget.groupId;
             req.userId = selectedUsers;
 
             print("jsone ${jsonEncode(req)}");
-            addUsersToGroupApiCall(req);
+
+            if(selectedUsers.length>0)
+            {
+                removeUsersToGroupApiCall(req);
+            }
+            else
+            {
+              AppUtils.showToastError("Please select atleast any user");
+            }
            
   }
 
 
-  addUsersToGroupApiCall(req) 
+  removeUsersToGroupApiCall(req) 
   {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.addRemoveUsersintoGroup(req).then((response) {
+
+    print("req  ${jsonEncode(req)}");
+    api.removeUsersintoGroup(req).then((response) {
       if (response.status!) 
       {
         AppUtils.showToastSuccess(response.message ?? "Success");
@@ -96,7 +113,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
   @override
   void initState() 
   {
-    getUnlinkUsersByGroupId();
+    getUsersByGroupId();
     // TODO: implement initState
     super.initState();
   }
@@ -115,7 +132,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
                 itemCount: chatUsers.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
-                    enabled: (!chatUsers[index].alreadyLinked!),
+                    enabled: !(chatUsers[index].groupCreateAccess == 1),
                     title: Text('${chatUsers[index].userName}'),
                     value: chatUsers[index].isSelected,
                     onChanged: (value) 
@@ -134,9 +151,10 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
             ),
             Container(
               width: MediaQuery.of(context).size.width * 0.80,
-              child: ElevatedButton(onPressed: (){
+              child: ElevatedButton(onPressed: ()
+              {
                   updateSelectedUsers();
-              }, child: Text("Add",style: TextStyle(color: Colors.white),),style: ButtonStyle(
+              }, child: Text("Remove",style: TextStyle(color: Colors.white),),style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)
               ),))
           ],

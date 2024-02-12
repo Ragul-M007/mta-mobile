@@ -27,7 +27,6 @@ import 'package:mta/ChatView/lib/src/extensions/extensions.dart';
 import '../models/models.dart';
 import '../utils/constants/constants.dart';
 import 'link_preview.dart';
-import 'reaction_widget.dart';
 
 class TextMessageView extends StatelessWidget {
   const TextMessageView({

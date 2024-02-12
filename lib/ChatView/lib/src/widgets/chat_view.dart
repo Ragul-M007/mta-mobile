@@ -42,6 +42,7 @@ class ChatView extends StatefulWidget {
     this.showTypingIndicator = false,
     this.sendMessageConfig,
     this.onChatListTap,
+    this.audioDownloadConfirmation,
     required this.chatViewState,
     ChatViewStateConfiguration? chatViewStateConfig,
     this.featureActiveConfig = const FeatureActiveConfig(),
@@ -99,6 +100,7 @@ class ChatView extends StatefulWidget {
   final DataRefreshCallback? refreshCall;
 
   final List<Map<String, dynamic>>? userList;
+  final Function()? audioDownloadConfirmation;
 
 
   @Deprecated('Use [ChatController.setTypingIndicator]  instead')
@@ -221,35 +223,39 @@ class _ChatViewState extends State<ChatView>
                       onReloadButtonTap: chatViewStateConfig?.onReloadButtonTap,
                     )
                   else if (chatViewState.hasMessages)
-                    ValueListenableBuilder<ReplyMessage>(
-                      valueListenable: replyMessage,
-                      builder: (_, state, child) {
-                        return ChatListWidget(
-                          /// TODO: Remove this in future releases.
-                          // ignore: deprecated_member_use_from_same_package
-                          refreshCall: widget.refreshCall,
-                          
-                          showTypingIndicator: widget.showTypingIndicator,
-                          replyMessage: state,
-                          chatController: widget.chatController,
-                          chatBackgroundConfig: widget.chatBackgroundConfig,
-                          reactionPopupConfig: widget.reactionPopupConfig,
-                          typeIndicatorConfig: widget.typeIndicatorConfig,
-                          chatBubbleConfig: widget.chatBubbleConfig,
-                          loadMoreData: widget.loadMoreData,
-                          isLastPage: widget.isLastPage,
-                          replyPopupConfig: widget.replyPopupConfig,
-                          loadingWidget: widget.loadingWidget,
-                          messageConfig: widget.messageConfig,
-                          profileCircleConfig: widget.profileCircleConfig,
-                          repliedMessageConfig: widget.repliedMessageConfig,
-                          swipeToReplyConfig: widget.swipeToReplyConfig,
-                          onChatListTap: widget.onChatListTap,
-                          assignReplyMessage: (message) => _sendMessageKey
-                              .currentState
-                              ?.assignReplyMessage(message),
-                        );
-                      },
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 70),
+                      child: ValueListenableBuilder<ReplyMessage>(
+                        valueListenable: replyMessage,
+                        builder: (_, state, child) {
+                          return ChatListWidget(
+                            audioDownloadConfirmation: widget.audioDownloadConfirmation,
+                            /// TODO: Remove this in future releases.
+                            // ignore: deprecated_member_use_from_same_package
+                            refreshCall: widget.refreshCall,
+                            
+                            showTypingIndicator: widget.showTypingIndicator,
+                            replyMessage: state,
+                            chatController: widget.chatController,
+                            chatBackgroundConfig: widget.chatBackgroundConfig,
+                            reactionPopupConfig: widget.reactionPopupConfig,
+                            typeIndicatorConfig: widget.typeIndicatorConfig,
+                            chatBubbleConfig: widget.chatBubbleConfig,
+                            loadMoreData: widget.loadMoreData,
+                            isLastPage: widget.isLastPage,
+                            replyPopupConfig: widget.replyPopupConfig,
+                            loadingWidget: widget.loadingWidget,
+                            messageConfig: widget.messageConfig,
+                            profileCircleConfig: widget.profileCircleConfig,
+                            repliedMessageConfig: widget.repliedMessageConfig,
+                            swipeToReplyConfig: widget.swipeToReplyConfig,
+                            onChatListTap: widget.onChatListTap,
+                            assignReplyMessage: (message) => _sendMessageKey
+                                .currentState
+                                ?.assignReplyMessage(message),
+                          );
+                        },
+                      ),
                     ),
                   if (featureActiveConfig.enableTextField)
                     SendMessageWidget(

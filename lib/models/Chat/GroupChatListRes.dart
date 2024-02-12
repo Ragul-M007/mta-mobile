@@ -1,11 +1,17 @@
 class GroupListRes {
   int? userId;
+  int? projectId;
+  int? teamId;
+
   List<GroupDetails>? groupDetails;
 
   GroupListRes({this.userId, this.groupDetails});
 
   GroupListRes.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
+        teamId = json['team_id'] ;
+    projectId = json['project_id'];
+
     if (json['group_details'] != null) {
       groupDetails = <GroupDetails>[];
       json['group_details'].forEach((v) {
@@ -17,6 +23,9 @@ class GroupListRes {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['user_id'] = this.userId;
+        data['team_id'] = this.teamId;
+    data['project_id'] = this.projectId;
+
     if (this.groupDetails != null) {
       data['group_details'] =
           this.groupDetails!.map((v) => v.toJson()).toList();

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:mta/ChatView/lib/src/extensions/extensions.dart';
 
 import '../../chatview.dart';
-import 'reaction_widget.dart';
-import 'share_icon.dart';
 
 
 
@@ -42,10 +40,7 @@ class CustomImageView extends StatefulWidget {
 
   String get imageUrl => message.message;
 
-  Widget get iconButton => ShareIcon(
-        shareIconConfig: imageMessageConfig?.shareIconConfig,
-        imageUrl: imageUrl,
-      );
+  
 
 
 
@@ -68,7 +63,6 @@ class _CustomImageViewState extends State<CustomImageView> {
       mainAxisAlignment:
           widget.isMessageBySender ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (widget.isMessageBySender) widget.iconButton,
         Stack(
           children: [
             GestureDetector(
@@ -131,15 +125,9 @@ class _CustomImageViewState extends State<CustomImageView> {
                 ),
               ),
             ),
-            if (widget.message.reaction.reactions.isNotEmpty)
-              ReactionWidget(
-                isMessageBySender: widget.isMessageBySender,
-                reaction: widget.message.reaction,
-                messageReactionConfig: widget.messageReactionConfig,
-              ),
+            
           ],
         ),
-        if (!widget.isMessageBySender) widget.iconButton,
       ],
     );
   }
