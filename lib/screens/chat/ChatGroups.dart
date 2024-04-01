@@ -23,9 +23,9 @@ class ChatGroups extends StatefulWidget {
   static const String routeName = "/chatGroups";
   final int? teamId;
   final int? projectId;
+  final bool? fromTeamProjects;
 
-
-  ChatGroups({this.teamId,this.projectId});
+  ChatGroups({this.teamId, this.projectId, this.fromTeamProjects});
 
   @override
   _ChatGroupsState createState() => _ChatGroupsState();
@@ -54,8 +54,7 @@ class _ChatGroupsState extends State<ChatGroups>
   var dio = Dio();
 
   String _errText = "";
-  void initState() 
-  {
+  void initState() {
     super.initState();
     connectSocket();
     fetchChatCreateAcess();
@@ -71,10 +70,10 @@ class _ChatGroupsState extends State<ChatGroups>
     final api = Provider.of<ApiService>(context, listen: false);
 
     api.getAccessDetails().then((response) {
-      if (response.status!) { 
+      if (response.status!) {
         setState(() {
-            Strings.groupCreationAccess = response.data!.groupCreateAccess;
-        });                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+          Strings.groupCreationAccess = response.data!.groupCreateAccess;
+        });
       }
     }).catchError((onError) {
       print(onError.toString());
@@ -91,7 +90,7 @@ class _ChatGroupsState extends State<ChatGroups>
       'forceNew': false,
       'query': {
         'token': Strings.authToken,
-        "group_type": widget.projectId == null ?"team":"project",
+        "group_type": widget.projectId == null ? "team" : "project",
         "project_group_id": widget.projectId,
         "team_id": widget.teamId
       }
@@ -110,8 +109,6 @@ class _ChatGroupsState extends State<ChatGroups>
     });
   }
 
-  
-
   // recieveMessages() {
   //   _socket?.on("message-received", (_data) {
   //     getChats();
@@ -120,27 +117,27 @@ class _ChatGroupsState extends State<ChatGroups>
 
   getChats() {
     _socket?.on("all-groups", (_data) {
-
       print("dataa from all groups $_data");
-    if(mounted)
-    {
+      if (mounted) {
         setState(() {
-        var formattedRes = GroupListRes.fromJson(_data);
+          var formattedRes = GroupListRes.fromJson(_data);
 
-        if (formattedRes.userId == Strings.userID && ((formattedRes.projectId != null && formattedRes.projectId == widget.projectId) || (formattedRes.teamId != null && formattedRes.teamId == widget.teamId)) ) {
-          groupList.clear();
+          if (formattedRes.userId == Strings.userID &&
+              ((formattedRes.projectId != null &&
+                      formattedRes.projectId == widget.projectId) ||
+                  (formattedRes.teamId != null &&
+                      formattedRes.teamId == widget.teamId))) {
+            groupList.clear();
 
-          for (var item in formattedRes.groupDetails ??[]) {
-            groupList.add(item);
+            for (var item in formattedRes.groupDetails ?? []) {
+              groupList.add(item);
+            }
+          } else {
+            print("else");
           }
-
-        }
-        else
-        {print("else");}
-        loading = false;
-      });
-    }
-      
+          loading = false;
+        });
+      }
     });
   }
 
@@ -198,28 +195,27 @@ class _ChatGroupsState extends State<ChatGroups>
     req.groupDescription = _groupDescriptionFieldController.text;
     req.teamId = widget.teamId;
     req.projectId = widget.projectId;
-    req.groupType = widget.projectId == null ?"team":"project";
+    req.groupType = widget.projectId == null ? "team" : "project";
 
     print("loqinrequest ---> ${jsonEncode(req)}}");
     api.createGroup(req).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-        
         AppUtils.showToastSuccess(response.message ?? "Error");
         connectSocket();
         _groupNameFieldController.clear();
         _groupDescriptionFieldController.clear();
         Navigator.of(context).pop();
         Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddRemoveUsersIntoGroups(
-                    groupId: response.data!.groupId ?? 0 ,
-                    teamId: widget.teamId,
-                    projectId: widget.projectId,
-                  ),
-                ),
-              );
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddRemoveUsersIntoGroups(
+              groupId: response.data!.groupId ?? 0,
+              teamId: widget.teamId,
+              projectId: widget.projectId,
+            ),
+          ),
+        );
       } else {
         AppUtils.showToastError(response.message ?? "Error");
       }
@@ -233,333 +229,383 @@ class _ChatGroupsState extends State<ChatGroups>
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: 
-      loading?Center(child: Container(
-        height: 30,
-        width:30,
-        child: CircularProgressIndicator())):
-      Scaffold(
-          floatingActionButton:Strings.groupCreationAccess == 1? InkWell(
-            onTap: () {
-              // upload();
-              _showMyDialog(context);
-            },
-            child: CircleAvatar(
-              radius: 20,
-              child: Icon(
-                Icons.people_rounded,
-                color: Colors.white,
-              ),
-              backgroundColor: Colors.grey.withOpacity(0.8),
-            ),
-          ):Container(),
-          backgroundColor: const Color(0xFFececed),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            title: Text("Chats"),
-            bottom: PreferredSize(
-                preferredSize: Size.fromHeight(kToolbarHeight),
-                child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: 
-                  Container(
-                    //  padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color: const Color(0xFFeceeef),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Material(
-                        color: const Color(0xFFeceeef),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              child: TextField(
-                                focusNode: searchField,
-                                controller: _searchFieldController,
-                                decoration: InputDecoration.collapsed(
-                                  hintText: ' Search',
-                                ),
-                                onChanged: (value) {
-                                  if (value.isEmpty) {
-                                    setState(() {
-                                      _searchLists = [];
-                                    });
-                                    return;
-                                  }
-                                  _searchLists = [];
-                                  groupList.forEach((list) {
-                                    if (list.groupName!
-                                        .toLowerCase()
-                                        .startsWith(value.toLowerCase()))
-                                      _searchLists.add(list);
-                                  });
-                                  print("dataaaa ${_searchLists.length}");
-                                  setState(() {});
-                                },
+      child: WillPopScope(
+        onWillPop: () {
+          if (widget.fromTeamProjects == true) {
+            Navigator.pushNamed(context, "/dashboard");
+          } else if (widget.projectId == null) {
+            Navigator.pushNamed(context, "/teamsDashboard");
+          } else {
+            Navigator.pushNamed(context, "/projects");
+          }
+
+          throw '';
+        },
+        child: loading
+            ? Center(
+                child: Container(
+                    height: 30, width: 30, child: CircularProgressIndicator()))
+            : Scaffold(
+                floatingActionButton: Strings.groupCreationAccess == 1
+                    ? InkWell(
+                        onTap: () {
+                          // upload();
+                          _showMyDialog(context);
+                        },
+                        child: CircleAvatar(
+                          radius: 20,
+                          child: Icon(
+                            Icons.people_rounded,
+                            color: Colors.white,
+                          ),
+                          backgroundColor: Colors.grey.withOpacity(0.8),
+                        ),
+                      )
+                    : Container(),
+                backgroundColor: const Color(0xFFececed),
+                appBar: AppBar(
+                  backgroundColor: Colors.white,
+                  title: Text("Chats"),
+                  bottom: PreferredSize(
+                      preferredSize: Size.fromHeight(kToolbarHeight),
+                      child: Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Container(
+                          //  padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            color: const Color(0xFFeceeef),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Material(
+                              color: const Color(0xFFeceeef),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: TextField(
+                                      focusNode: searchField,
+                                      controller: _searchFieldController,
+                                      decoration: InputDecoration.collapsed(
+                                        hintText: ' Search',
+                                      ),
+                                      onChanged: (value) {
+                                        if (value.isEmpty) {
+                                          setState(() {
+                                            _searchLists = [];
+                                          });
+                                          return;
+                                        }
+                                        _searchLists = [];
+                                        groupList.forEach((list) {
+                                          if (list.groupName!
+                                              .toLowerCase()
+                                              .startsWith(value.toLowerCase()))
+                                            _searchLists.add(list);
+                                        });
+                                        print("dataaaa ${_searchLists.length}");
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                  InkWell(
+                                    child: Icon(
+                                      Icons.search,
+                                      color: Colors.black,
+                                    ),
+                                    onTap: () {},
+                                  )
+                                ],
                               ),
                             ),
-                            InkWell(
-                              child: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                              ),
-                              onTap: () {},
-                            )
-                          ],
+                          ),
                         ),
+                      )),
+                  leading: SizedBox(
+                    height: 25.0,
+                    width: 25.0,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        size: 25.0,
+                        color: const Color(0xFF979797),
                       ),
+                      onPressed: () {
+                        if (widget.fromTeamProjects == true) {
+                          Navigator.pushNamed(context, "/dashboard");
+                        } else if (widget.projectId == null) {
+                          Navigator.pushNamed(context, "/teamsDashboard");
+                        } else {
+                          Navigator.pushNamed(context, "/projects");
+                        }
+                        searchField.unfocus();
+                        _controller?.toggle();
+                      },
                     ),
                   ),
-                )),
-            leading: SizedBox(
-              height: 25.0,
-              width: 25.0,
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 25.0,
-                  color: const Color(0xFF979797),
                 ),
-                onPressed: () 
-                {
-                  Navigator.pop(context);
-                  searchField.unfocus();
-                  _controller?.toggle();
-                },
-              ),
-            ),
-          ),
-          body: Builder(builder: (BuildContext newContext) {
-            ctx = newContext;
-            return groupList.length > 0
-                ? _searchLists.length != 0
-                    ? ListView.builder(
-                        padding: EdgeInsets.all(8),
-                        itemBuilder: (BuildContext ctx, int index) {
-                          return 
-                          Padding(
-                                padding: EdgeInsets.all(8),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => ChatScreen(
-                                    //       groupId: groupList[index].groupId!,
-                                    //       teamId: widget.teamId,
-                                    //     ),
-                                    //   ),
-                                    // );
-                                     Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                          teamName: _searchLists[index].groupName ?? "No name",
-                                          groupId: _searchLists[index].groupId!,
-                                           teamId: widget.teamId,
-                                           projectId: widget.projectId,
+                body: Builder(builder: (BuildContext newContext) {
+                  ctx = newContext;
+                  return groupList.length > 0
+                      ? _searchLists.length != 0
+                          ? ListView.builder(
+                              padding: EdgeInsets.all(8),
+                              itemBuilder: (BuildContext ctx, int index) {
+                                return Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (context) => ChatScreen(
+                                      //       groupId: groupList[index].groupId!,
+                                      //       teamId: widget.teamId,
+                                      //     ),
+                                      //   ),
+                                      // );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                            teamName:
+                                                _searchLists[index].groupName ??
+                                                    "No name",
+                                            groupId:
+                                                _searchLists[index].groupId!,
+                                            teamId: widget.teamId,
+                                            projectId: widget.projectId,
+                                          ),
+                                        ),
+                                      ).then((value) {
+                                        setState(() {
+                                          _searchLists.clear();
+                                          _searchFieldController.clear();
+                                        });
+                                      });
+                                    },
+                                    child: Container(
+                                      child: Padding(
+                                          padding: EdgeInsets.fromLTRB(
+                                              12, 14, 12, 14),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                  child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                      _searchLists[index]
+                                                              .groupName ??
+                                                          "",
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.black87,
+                                                              14.0,
+                                                              FontWeight.w500)),
+                                                  Text(
+                                                      _searchLists[index]
+                                                              .groupDescription ??
+                                                          "",
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Drawables
+                                                          .adddoccontentstyle(
+                                                              Colors.grey,
+                                                              12.0,
+                                                              FontWeight.w300))
+                                                ],
+                                              )),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              _searchLists[index]
+                                                          .unreadMessageCount !=
+                                                      0
+                                                  ? Container(
+                                                      width: 24,
+                                                      height: 24,
+                                                      child: Center(
+                                                          child: Text(
+                                                        "${_searchLists[index].unreadMessageCount ?? 0}",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w400),
+                                                      )),
+                                                      decoration: BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              60,
+                                                              237,
+                                                              80)),
+                                                    )
+                                                  : Container()
+                                            ],
+                                          )),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
+
+                                // return Text("hi");
+                              },
+                              itemCount: _searchLists.length,
+                            )
+                          : _searchFieldController.text != ""
+                              ? Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "No results found",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  padding: EdgeInsets.all(2),
+                                  itemBuilder: (BuildContext ctx, int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          // Navigator.push(
+                                          //   context,
+                                          //   MaterialPageRoute(
+                                          //     builder: (context) => ChatScreen(
+                                          //       groupId: groupList[index].groupId!,
+                                          //       teamId: widget.teamId,
+                                          //     ),
+                                          //   ),
+                                          // );
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChatScreen(
+                                                teamName: groupList[index]
+                                                        .groupName ??
+                                                    "No name",
+                                                groupId:
+                                                    groupList[index].groupId!,
+                                                teamId: widget.teamId,
+                                                projectId: widget.projectId,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          child: Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  12, 14, 12, 14),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                          groupList[index]
+                                                                  .groupName ??
+                                                              "",
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black87,
+                                                                  14.0,
+                                                                  FontWeight
+                                                                      .w500)),
+                                                      Text(
+                                                          groupList[index]
+                                                                  .groupDescription ??
+                                                              "",
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.grey,
+                                                                  12.0,
+                                                                  FontWeight
+                                                                      .w300))
+                                                    ],
+                                                  )),
+                                                  SizedBox(
+                                                    width: 8,
+                                                  ),
+                                                  groupList[index]
+                                                              .unreadMessageCount !=
+                                                          0
+                                                      ? Container(
+                                                          width: 24,
+                                                          height: 24,
+                                                          child: Center(
+                                                              child: Text(
+                                                            "${groupList[index].unreadMessageCount ?? 0}",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                          )),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  color: Color
+                                                                      .fromARGB(
+                                                                          255,
+                                                                          60,
+                                                                          237,
+                                                                          80)),
+                                                        )
+                                                      : Container()
+                                                ],
+                                              )),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     );
-                                  },
-                                  child: Container(
-                                    child: Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(12, 14, 12, 14),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                                child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    _searchLists[index]
-                                                            .groupName ??
-                                                        "",
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.black87,
-                                                            14.0,
-                                                            FontWeight.w500)),
-                                                Text(
-                                                    _searchLists[index]
-                                                            .groupDescription ??
-                                                        "",
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w300))
-                                              ],
-                                            )),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            _searchLists[index].unreadMessageCount != 0 ?
-                                            Container(
-                                              width: 24,
-                                              height: 24,
-                                              child: Center(
-                                                  child: Text(
-                                                "${_searchLists[index].unreadMessageCount ?? 0}",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              )),
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Color.fromARGB(
-                                                      255, 60, 237, 80)),
-                                            ):Container()
-                                          ],
-                                        )),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
 
-                          // return Text("hi");
-                        },
-                        itemCount: _searchLists.length,
-                      )
-                    : _searchFieldController.text != ""
-                        ? Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "No results found",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: EdgeInsets.all(2),
-                            itemBuilder: (BuildContext ctx, int index) {
-                              return 
-                              
-                              Padding(
-                                padding: EdgeInsets.all(8),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => ChatScreen(
-                                    //       groupId: groupList[index].groupId!,
-                                    //       teamId: widget.teamId,
-                                    //     ),
-                                    //   ),
-                                    // );
-                                     Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                          teamName: groupList[index].groupName ?? "No name",
-                                          groupId: groupList[index].groupId!,
-                                           teamId: widget.teamId,
-                                           projectId: widget.projectId,
-                                        ),
-                                      ),
-                                    );
+                                    // return Text("hi");
                                   },
-                                  child: Container(
-                                    child: Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(12, 14, 12, 14),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                                child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    groupList[index]
-                                                            .groupName ??
-                                                        "",
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.black87,
-                                                            14.0,
-                                                            FontWeight.w500)),
-                                                Text(
-                                                    groupList[index]
-                                                            .groupDescription ??
-                                                        "",
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w300))
-                                              ],
-                                            )),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            groupList[index].unreadMessageCount != 0 ?
-                                            Container(
-                                              width: 24,
-                                              height: 24,
-                                              child: Center(
-                                                  child: Text(
-                                                "${groupList[index].unreadMessageCount ?? 0}",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              )),
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Color.fromARGB(
-                                                      255, 60, 237, 80)),
-                                            ):Container()
-                                          ],
-                                        )),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
-
-                              // return Text("hi");
-                            },
-                            itemCount: groupList.length,
-                          )
-                : Container(
-                    child: Padding(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "No Groups Available",
-                          style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.all(20),
-                  ));
-          })),
+                                  itemCount: groupList.length,
+                                )
+                      : Container(
+                          child: Padding(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "No Groups Available",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(20),
+                        ));
+                })),
+      ),
     );
   }
 
@@ -583,6 +629,7 @@ class _ChatGroupsState extends State<ChatGroups>
                       InkWell(
                           onTap: () {
                             _groupNameFieldController.clear();
+                            _groupDescriptionFieldController.clear();
                             Navigator.of(context).pop();
                           },
                           child: Icon(Icons.close,
@@ -638,11 +685,13 @@ class _ChatGroupsState extends State<ChatGroups>
                           child: SizedBox(
                             height: 100,
                             child: TextField(
-                              maxLines: 5,
                               controller: _groupDescriptionFieldController,
                               decoration: InputDecoration.collapsed(
                                 hintText: ' Enter description',
                               ),
+                              onEditingComplete: () {
+                                FocusScope.of(context).unfocus();
+                              },
                             ),
                           ),
                         ),
@@ -657,6 +706,7 @@ class _ChatGroupsState extends State<ChatGroups>
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                     _groupNameFieldController.clear();
+                                    _groupDescriptionFieldController.clear();
                                   },
                                   child: Text("Cancel"))),
                           SizedBox(
@@ -666,23 +716,23 @@ class _ChatGroupsState extends State<ChatGroups>
                             child: TextButton(
                                 onPressed: () {
                                   if (_groupNameFieldController.text.isEmpty) {
-                                    AppUtils.showToastError(
+                                    showValidationalert(
                                         "Please enter Group name");
                                   } else if (_groupNameFieldController
                                           .text.length <
                                       3) {
-                                    AppUtils.showToastError(
+                                    showValidationalert(
                                         "Group name should be minimum 3 letters");
-                                  } else if (_groupDescriptionFieldController.text.isEmpty) {
-                                    AppUtils.showToastError(
+                                  } else if (_groupDescriptionFieldController
+                                      .text.isEmpty) {
+                                    showValidationalert(
                                         "Please enter Group description");
                                   } else if (_groupDescriptionFieldController
                                           .text.length <
                                       3) {
-                                    AppUtils.showToastError(
+                                    showValidationalert(
                                         "Group description should be minimum 3 letters");
-                                  } else
-                                  {
+                                  } else {
                                     createGroup();
                                   }
                                 },
@@ -699,6 +749,34 @@ class _ChatGroupsState extends State<ChatGroups>
                 )),
           ),
         );
+      },
+    );
+  }
+
+  showValidationalert(bodyText) {
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Invalid Feilds",
+          style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFF0061b0),
+              fontWeight: FontWeight.w600)),
+      content: Text(bodyText),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
       },
     );
   }

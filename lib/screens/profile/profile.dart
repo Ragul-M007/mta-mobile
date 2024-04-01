@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/EditProfileReq.dart';
@@ -1222,6 +1223,9 @@ class _ProfileContentState extends State<ProfileContent> {
                         TextField(
                           focusNode: name,
                           controller: editName,
+                           inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]")),
+                          ],
                           decoration: InputDecoration(
                               prefixIcon: Icon(Icons.person,
                                   size: 14, color: Color(0xFF0061b0))),
@@ -1237,6 +1241,8 @@ class _ProfileContentState extends State<ProfileContent> {
                               fontWeight: FontWeight.bold),
                         ),
                         TextField(
+                          maxLength: 10,
+                          keyboardType: TextInputType.phone,
                           controller: editNumber,
                           decoration: InputDecoration(
                               prefixIcon: Icon(Icons.call,

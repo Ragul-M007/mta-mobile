@@ -17,11 +17,19 @@ import 'package:provider/provider.dart';
 import 'package:notification_permissions/notification_permissions.dart';
 
 import '../models/FetchCatsRes.dart';
+import 'attendance/attendance.dart';
 import 'chat/ChatGroups.dart';
+import 'chat/ChatScreen.dart';
+import 'comments/comments.dart';
+import 'comments/replies.dart';
+import 'doucument/viewdoclist.dart';
+import 'projectcomments/projectComments.dart';
+import 'projectcomments/projectCommentsReplies.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatelessWidget 
+{
   @override
   Widget build(BuildContext context) {
     // return Container(child: SplashScreenContent());
@@ -65,43 +73,208 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   @override
   void initState() {
     super.initState();
+        getuserid();
     AppUtils.findFilePath();
 
     _firebaseMessaging.subscribeToTopic("messaging");
     _firebaseMessaging.getToken().then((value) {
       print(value);
     });
-
-    getFCMToken();
-    getusername();
-    getuserid();
     requestNotificationPermissions();
+
+
     // getConnectivity();
   }
+  redirectFromNotification(){
+    if (Strings.FromNotification) 
+            {
+              Strings.FromNotification = false;
+              navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => Attendance()));
+            } else if (Strings.fromNotificationComments) 
+            {
+              if (Strings.selectedProDocument[0].projectComments == "true") {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  navigatorKey.currentState?.push(MaterialPageRoute(
+                      builder: (context) => ProjectComments()));
+                } else {
+                  navigatorKey.currentState?.push(MaterialPageRoute(
+                      builder: (context) => ProjectCommentsReplies()));
+                }
+              } else {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  navigatorKey.currentState?.push(
+                      MaterialPageRoute(builder: (context) => Comments()));
+                } else {
+                 navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => Replies()));
+                }
+              }
+            } else if (Strings.fromNotificationDocuments) 
+            {
+             navigatorKey.currentState?.push(
+                  MaterialPageRoute(builder: (context) => ViewDocScreen()));
+            } else if (Strings.fromNotificationChat) {
+             navigatorKey.currentState?.pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    teamName:
+                        Strings.chatNotificationResponse?.groupName ?? "0",
+                    groupId: int.parse(
+                        Strings.chatNotificationResponse?.groupId ?? "0"),
+                    teamId: int.parse(
+                        Strings.chatNotificationResponse?.teamId ?? "0"),
+                    projectId: int.parse(
+                        Strings.chatNotificationResponse?.projectId ?? "0"),
+                  ),
+                ),(route) => false,
+              );
+            }
+             else {
+              if (Strings.roleId == 6) {
+                navigatorKey.currentState?.pushNamed("/projects");
+              } else {
+                navigatorKey.currentState?.pushNamed("/teamsDashboard");
+              }
+            }
+  }
 
-  Future<void> requestNotificationPermissions() async {
+  checkLoginTime() 
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchLoginHours(Strings.userID ?? 0).then((response) 
+    {
+      if (response.status!) 
+      {
+        if(response.data == 0)
+        {
+          AppUtils.getStringPreferences('authToken').then((value) {
+            print("rolee token");
+            Strings.authToken = value;
+          AppUtils.getStringPreferences('roleId').then((value) {
+            print("rolee id ${value}");
+            Strings.roleId = int.parse(value);
+          });
+
+          AppUtils.getStringPreferences('profilePic').then((value) {
+            Strings.profilePic = value;
+          });
+
+            if (Strings.FromNotification) 
+            {
+              Strings.FromNotification = false;
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => Attendance()));
+            } else if (Strings.fromNotificationComments) 
+            {
+              if (Strings.selectedProDocument[0].projectComments == "true") {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProjectComments()));
+                } else {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProjectCommentsReplies()));
+                }
+              } else {
+                if (Strings.selectedProDocument[0].commentId == null) {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => Comments()));
+                } else {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => Replies()));
+                }
+              }
+            } else if (Strings.fromNotificationDocuments) 
+            {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => ViewDocScreen()));
+            } else if (Strings.fromNotificationChat) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    teamName:
+                        Strings.chatNotificationResponse?.groupName ?? "0",
+                    groupId: int.parse(
+                        Strings.chatNotificationResponse?.groupId ?? "0"),
+                    teamId: int.parse(
+                        Strings.chatNotificationResponse?.teamId ?? "0"),
+                    projectId: int.parse(
+                        Strings.chatNotificationResponse?.projectId ?? "0"),
+                  ),
+                ),(route) => false,
+              );
+            }
+             else {
+              if (Strings.roleId == 6) {
+                Navigator.pushNamed(context, "/projects");
+              } else {
+                Navigator.pushNamed(context, "/teamsDashboard");
+              }
+            }
+            // if (Strings.roleId == 6) {
+            //     Navigator.pushNamed(context, "/projects");
+            //   } else {
+            //     Navigator.pushNamed(context, "/teamsDashboard");
+            //   }
+          }).onError((error, stackTrace) {
+            Navigator.popAndPushNamed(context, "/verifypin");
+          });
+        }
+        else
+        {
+          Navigator.popAndPushNamed(context, "/verifypin");
+        }
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.showToastError("We are unable to connect to the server");
+      print(onError.toString());
+    });
+  }
+
+  Future<void> requestNotificationPermissions() async 
+  {
     print("inside request");
-    final status = await Permission.notification.request();
+    await Permission.notification.request();
+    await Permission.notification.isDenied.then((value) {
+        if (value) {
+          print("denied");
+          // Permission.notification.request();
+        }
+      });
+    await Permission.notification.isGranted.then((value) {
+        if (value) {
+          // Permission.notification.request();
+                    print("grant");
+        }
+      });
+      var status = await Permission.notification.request();
+    AppUtils.getStringPreferences('showNotificationAlert').then((res) 
+    {
+      print("reeesdsss res");
+      if (res == "null" ) 
+      {
+              print("reees res");
 
-    AppUtils.getStringPreferences('showNotificationAlert').then((res) {
-      if (res == "null") {
         AppUtils.savePreferences('showNotificationAlert', "true");
         if (status.isGranted) {
-          getToken();
+          reDirectScreen();
           print("Notification permissions granted");
         } else if (status.isDenied) {
           permissionDialog();
           print("Notification permissions denied");
         } else if (status.isPermanentlyDenied) {
-// //print(
-//     "Notification permissions permanently denied, open app settings");
           permissionDialog();
-          // await openAppSettings();
         }
       } else {
-        getToken();
+        reDirectScreen();
       }
+    }).onError((error, stackTrace) {
+      print("errror on catch");
     });
+  getFCMToken();
+  getusername();
+
   }
 
   permissionDialog() {
@@ -135,7 +308,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                     height: 33,
                     child: ElevatedButton(
                         onPressed: () {
-                          getToken();
+                          reDirectScreen();
                           Navigator.of(ctx).pop();
                         },
                         child: Text(
@@ -162,7 +335,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                                     sound: true, badge: true, alert: true))
                             .whenComplete(() {
                           Navigator.of(ctx).pop();
-                          getToken();
+                          reDirectScreen();
                         });
                       },
                       child: Text(
@@ -195,13 +368,23 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   getFCMToken() async {
-    _firebaseMessaging.getToken().then((String? token) {
-      assert(token != null);
-      setState(() {
-        print("token: $token");
-        Strings.fcmToken = token!;
-      });
-    });
+    print("fetching token");
+       String? token = await FirebaseMessaging.instance.getToken();
+
+       print("token $token");
+
+               Strings.fcmToken = token ?? "unable to fetch token";
+
+
+    // _firebaseMessaging.getToken().then((String? token) {
+    //   assert(token != null);
+    //   setState(() {
+    //     print("token1: $token");
+    //     Strings.fcmToken = token!;
+    //   });
+    // }).onError((error, stackTrace)  {
+    //       print("error  $error");
+    // });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // print("message recieved inside get");
@@ -251,7 +434,10 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                 ? int.parse(peo.projectId ?? "0")
                 : null
           }));
-          Strings.selectedCategory.clear();
+        
+
+          if (peo.categoryId != "null" && peo.categoryId != null) {
+              Strings.selectedCategory.clear();
           Strings.selectedCategory.add(FectchCatsData.fromJson({
             "category_id": (peo.categoryId != "null" && peo.categoryId != null)
                 ? int.parse(peo.categoryId ?? "0")
@@ -261,8 +447,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                 ? int.parse(peo.projectId ?? "0")
                 : null
           }));
-
-          if (peo.categoryId != "null" && peo.categoryId != null) {
             Strings.category = true;
           } else {
             Strings.category = false;
@@ -272,7 +456,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.notificationID = id;
         } else if (message.notification!.title!.contains("message")) {
 
-          print("oneee");
+          print("oneee11");
           ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
           print("oneee eee ${jsonEncode(res)}");
           Strings.chatNotificationResponse = res;
@@ -280,12 +464,13 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         }
       }
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async 
+    {
       if (message.notification?.body != null) {
         print(message.notification?.body);
         if (message.notification!.title!.contains("logout")) {
           Strings.FromNotification = true;
-          await checkLogin();
+          await checkLoginTime();
         } else if (message.notification!.title!.contains("Commented") ||
             message.notification!.title!.contains("Replied")) {
           print("test inside");
@@ -295,7 +480,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
           print(jsonEncode(peo));
-          await checkLogin();
+          await checkLoginTime();
           int id = int.parse(peo.notiId!);
           Strings.projectId = int.parse(peo.projectId ?? "000");
           Strings.notificationID = id;
@@ -328,15 +513,27 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
             Strings.category = false;
           }
           Strings.fromNotificationDocuments = true;
-          checkLogin();
+          checkLoginTime();
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
-        }else if (message.notification!.title!.contains("message")) {
+        }else if (message.notification!.title!.contains("message")) 
+        {
           ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
           print("oneee eee ${jsonEncode(res)}");
           Strings.chatNotificationResponse = res;
           Strings.fromNotificationChat = true;
-          checkLogin();
+
+          if(mounted)
+          {
+            print("qqww");
+          }
+          else
+          {
+              print("qq else");
+             // SplashScreenContent();
+          }
+          redirectFromNotification();
+         // checkLoginTime();
         }
       }
     });
@@ -606,21 +803,18 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     );
   }
 
-  void getToken() {
+  void reDirectScreen() {
     timer = new Timer(const Duration(milliseconds: 500), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
-        if (value != null) {
-          print("value inside--> $value");
-          if (value == "Y") {
-            print("test");
-            Navigator.popAndPushNamed(context, "/verifypin");
-            // Navigator.popAndPushNamed(context, "/comments");
-          } else {
-            Navigator.popAndPushNamed(context, "/login");
-            //Navigator.popAndPushNamed(context, "/comments");
-          }
+        if (value == "Y") 
+        {
+          checkLoginTime();
+          // Navigator.popAndPushNamed(context, "/comments");
+        } else {
+          Navigator.popAndPushNamed(context, "/login");
+          //Navigator.popAndPushNamed(context, "/comments");
         }
-      }).catchError((onError) {
+            }).catchError((onError) {
         print(onError);
         Navigator.popAndPushNamed(context, "/login");
         // Navigator.popAndPushNamed(context, "/comments");
@@ -631,23 +825,19 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   checkLogin() {
     AppUtils.getStringPreferences('easyAccess').then((value) {
       print("Checking $value");
-      if (value != null) {
-        print(value);
+      print(value);
 
-        if (value == "Y") {
-          // Navigator.pushNamed(context, "/verifypin",);
-          navigatorKey.currentState?.pushNamed('/verifypin');
+      if (value == "Y") {
+        // Navigator.pushNamed(context, "/verifypin",);
+        navigatorKey.currentState?.pushNamed('/verifypin');
 
-          // Navigator.popAndPushNamed(context, "/comments");
-        } else {
-          navigatorKey.currentState?.pushNamed('/login');
-          //Navigator.popAndPushNamed(context, "/comments");
-        }
+        // Navigator.popAndPushNamed(context, "/comments");
+      } else {
+        navigatorKey.currentState?.pushNamed('/login');
+        //Navigator.popAndPushNamed(context, "/comments");
       }
-    }).catchError((onError) {
+        }).catchError((onError) {
       print("inside catch error: " + onError.message);
-      //Navigator.popAndPushNamed(context, "/login");
-      // Navigator.popAndPushNamed(context, "/comments");
     });
   }
 

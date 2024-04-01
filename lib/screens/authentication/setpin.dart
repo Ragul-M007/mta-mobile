@@ -49,6 +49,7 @@ class _SetpinState extends State<Setpin> {
 
           if (response.status!) {
             AppUtils.savePreferences("easyAccess", "Y");
+
             Strings.isLogin = true;
             signinafterpin();
             // if(Strings.FromNotification)
@@ -141,6 +142,9 @@ class _SetpinState extends State<Setpin> {
             } else if (response.data?.role == "PUBLICUSER") {
               Strings.roleId = 7;
             }
+
+            print("rolee IId ${Strings.roleId}");
+            AppUtils.savePreferences("roleId", "${Strings.roleId}");
           }
 
           if (response.status!) {
@@ -158,6 +162,7 @@ class _SetpinState extends State<Setpin> {
             Strings.username = response.data!.name;
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
+            AppUtils.savePreferences("authToken", response.token);
             Strings.isLogin = true;
             if (Strings.FromNotification) {
               Strings.FromNotification = false;

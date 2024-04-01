@@ -950,7 +950,7 @@ class _CommentsContentState extends State<CommentsContent>
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.85,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.fromLTRB(10,8,10,28),
                   child: 
                   Container(
                     padding: EdgeInsets.only(left: 20),
@@ -962,7 +962,7 @@ class _CommentsContentState extends State<CommentsContent>
                       width: MediaQuery.of(context).size.width * 0.85,
                       child: Row(
                         children: [
-                          InkWell(
+                          GestureDetector(
                               onTap: () {
                                 Strings.documentUploadfromProject = true;
                                 Navigator.pushNamed(context, '/adddocComments');
@@ -1017,7 +1017,7 @@ class _CommentsContentState extends State<CommentsContent>
             ),
             Positioned(
               right: startRecording == true ? 10 : 15,
-              bottom: startRecording == true ? 0 : 12,
+              bottom: startRecording == true ? 12 : 32,
               child: Container(
                 width: startRecording == true ? 60 : 40,
                 height: startRecording == true ? 60 : 40,
@@ -1026,7 +1026,7 @@ class _CommentsContentState extends State<CommentsContent>
                     borderRadius:
                         new BorderRadius.all(new Radius.circular(50.0))),
                 child: GestureDetector(
-                  onLongPress: () {
+                  onLongPressStart: (details) {
                     setState(() async {
                           var status = await Permission.microphone.status;
                           if (status.isGranted) {
@@ -1056,24 +1056,28 @@ class _CommentsContentState extends State<CommentsContent>
                     if (typing == true) {
                       postComments();
                     } else {
-                      setState(() {
-                        showtoastinfo = true;
-                      });
-                      _timer =
-                          new Timer(const Duration(milliseconds: 2000), () {
-                        setState(() {
-                          showtoastinfo = false;
-                        });
-                      });
+                        AppUtils.showToastError("Please enter the Comments");
+                      // setState(() {
+                      //   showtoastinfo = true;
+                      // });
+                      // _timer =
+                      //     new Timer(const Duration(milliseconds: 2000), () {
+                      //   setState(() {
+                      //     showtoastinfo = false;
+                      //   });
+                      // });
                     }
                   },
-                  child: typing == false
-                      ? Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 22,
-                        )
-                      : Icon(
+                  child: 
+                  
+                  // typing == false
+                  //     ? Icon(
+                  //         Icons.mic,
+                  //         color: Colors.white,
+                  //         size: 22,
+                  //       )
+                  //     : 
+                      Icon(
                           Icons.send,
                           color: Colors.white,
                           size: 18,

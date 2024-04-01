@@ -545,10 +545,16 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                         .w300)),
                                                                                                                       ],
                                                                      ),
-                                                                     SizedBox(width: 5,),
-                                                            IconButton(
-                                                                icon:  Image.asset(
-                                                                        'assets/images/zerochat.png',width: 25,height: 25,),
+                                                           
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                             IconButton(
+                                                                icon:  
+                                                                
+                                                               (_searchLists[index].unReadedUserId != null && _searchLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
+                                                            Image.asset('assets/images/chat.png',width: 25,height: 25,):Image.asset('assets/images/zerochat.png',width: 25,height: 25,),
                                                                 onPressed:
                                                                     () {
                                                                   Navigator
@@ -565,13 +571,13 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                   );
                                                                 }
                                                               ),
+                                                            Icon(
+                                                              Icons
+                                                                  .arrow_forward_ios,
+                                                              color: Colors.grey,
+                                                              size: 14.0,
+                                                            ),
                                                           ],
-                                                        ),
-                                                        Icon(
-                                                          Icons
-                                                              .arrow_forward_ios,
-                                                          color: Colors.grey,
-                                                          size: 14.0,
                                                         )
                                                       ],
                                                     )),
@@ -652,10 +658,16 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                         .w300)),
                                                                                                                       ],
                                                                      ),
-                                                                     SizedBox(width: 5,),
+                                                            
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                           
                                                             IconButton(
-                                                                icon:  Image.asset(
-                                                                        'assets/images/zerochat.png',width: 25,height: 25,),
+                                                                icon: 
+                                                                (_teamLists[index].unReadedUserId != null && _teamLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
+                                                            Image.asset('assets/images/chat.png',width: 25,height: 25,):Image.asset('assets/images/zerochat.png',width: 25,height: 25,),
                                                                 onPressed:
                                                                     () {
                                                                   Navigator
@@ -672,13 +684,13 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                   );
                                                                 }
                                                               ),
+                                                               Icon(
+                                                              Icons
+                                                                  .arrow_forward_ios,
+                                                              color: Colors.grey,
+                                                              size: 14.0,
+                                                            ),
                                                           ],
-                                                        ),
-                                                        Icon(
-                                                          Icons
-                                                              .arrow_forward_ios,
-                                                          color: Colors.grey,
-                                                          size: 14.0,
                                                         )
                                                       ],
                                                     )),

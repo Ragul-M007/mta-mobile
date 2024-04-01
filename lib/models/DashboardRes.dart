@@ -69,6 +69,7 @@ class Data
   String? description;
   String? latitude;
   String? longitude;
+  String? unReadedUserId;
 
   List<Documents>? documents;
 
@@ -87,7 +88,9 @@ class Data
       this.description,
       this.documents,
       this.latitude,
-      this.longitude});
+      this.longitude,
+      this.unReadedUserId
+      });
 
   Data.fromJson(Map<String, dynamic> json) {
     latitude = json['latitude'];
@@ -104,6 +107,7 @@ class Data
     startDate = json['start_date'];
     endDate = json['end_date'];
     description = json['description'];
+    unReadedUserId = json['un_readed_user_id'];
     if (json['documents'] != null) {
       documents = <Documents>[];
       json['documents'].forEach((v) {
@@ -128,6 +132,7 @@ class Data
     data['start_date'] = this.startDate;
     data['end_date'] = this.endDate;
     data['description'] = this.description;
+    data['un_readed_user_id'] = this.unReadedUserId;
     if (this.documents != null) {
       data['documents'] = this.documents?.map((v) => v.toJson()).toList();
     }

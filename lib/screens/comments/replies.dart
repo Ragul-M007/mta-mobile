@@ -1246,7 +1246,7 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
             ),
             Positioned(
               right: startRecording == true ? 10 : 15,
-              bottom: startRecording == true ? 0 : 12,
+              bottom: startRecording == true ? 12 : 32,
               child: Container(
                 width: startRecording == true ? 60 : 40,
                 height: startRecording == true ? 60 : 40,
@@ -1275,24 +1275,27 @@ final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create
                     if (typing == true) {
                       postReplies();
                     } else {
-                      setState(() {
-                        showtoastinfo = true;
-                      });
-                      _timer =
-                          new Timer(const Duration(milliseconds: 2000), () {
-                        setState(() {
-                          showtoastinfo = false;
-                        });
-                      });
+                                            AppUtils.showToastError("Please enter the Comments");
+                      // setState(() {
+                      //   showtoastinfo = true;
+                      // });
+                      // _timer =
+                      //     new Timer(const Duration(milliseconds: 2000), () {
+                      //   setState(() {
+                      //     showtoastinfo = false;
+                      //   });
+                      // });
                     }
                   },
-                  child: typing == false
-                      ? Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 22,
-                        )
-                      : Icon(
+                  child: 
+                  // typing == false
+                  //     ? Icon(
+                  //         Icons.mic,
+                  //         color: Colors.white,
+                  //         size: 22,
+                  //       )
+                  //     : 
+                      Icon(
                           Icons.send,
                           color: Colors.white,
                           size: 18,

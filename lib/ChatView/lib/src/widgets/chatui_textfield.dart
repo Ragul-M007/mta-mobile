@@ -9,8 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../screens/MentionFiles/flutter_mentions.dart';
+import '../../../../utilities/apputilities.dart';
+import '../../../../utilities/strings.dart';
 import '../../chatview.dart';
 import '../utils/constants/constants.dart';
 import '../utils/debounce.dart';
@@ -322,20 +326,49 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     );
   }
 
-  Future<void> _recordOrStop() async {
+  Future<void> _recordOrStop() async 
+  {
     assert(
       defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android,
       "Voice messages are only supported with android and ios platform",
     );
-    if (!isRecording.value) {
-      await controller?.record();
+
+
+    var status = await Permission.microphone.status;
+  if (status.isDenied) {
+    await Permission.microphone.request();
+  } else if (status.isPermanentlyDenied) {
+    AppUtils.showToastError(
+        "Please enable Microphone from App permission Settings");
+  } else {
+    await Permission.microphone.request();
+  }
+
+  if(status.isGranted)
+  {
+    if (!isRecording.value) 
+    {
+      if(Platform.isIOS)
+      {
+           var uniqueRecordId = Uuid().v1();
+        await controller?.record(path: "${Strings.basePath}/$uniqueRecordId-mta.m4a");
+      }
+      else
+      {
+        await controller?.record();
+      }
       isRecording.value = true;
     } else {
       final path = await controller?.stop();
+
+
+      print("pathhh $path");
       isRecording.value = false;
       widget.onRecordingComplete(path);
     }
+  }
+    
   }
 
   void _onIconPressed(
@@ -349,7 +382,7 @@ ReplyMessage msg = ReplyMessage();
       FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3'],
+      allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3', 'mp4'],
     );
     if (result != null) {
       List<MultipartFile> files = result.paths

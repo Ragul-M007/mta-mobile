@@ -273,7 +273,7 @@ findPath() async
                           padding: EdgeInsets.all(8),
                           child: GestureDetector(
                             onTap: () {
-                              print("ooon ${Strings.uatImageUrl + _videoList[index].files!}");
+                              print("ooon ${Strings.baseImageUrl + _videoList[index].files!}");
                                                  AppUtils.openFile(basePath!+"/"+ _videoList[index].filesName!+AppUtils.getFileExtension(_videoList[index].files!));
                             },
                             child: Row(

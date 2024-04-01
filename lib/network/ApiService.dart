@@ -8,7 +8,7 @@ import 'package:mta/models/AddDocRes.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
-import 'package:mta/models/ChangePassRes.dart';
+import 'package:mta/models/CommonRes.dart';
 import 'package:mta/models/Chat/AddRemoveUserListRes.dart';
 import 'package:mta/models/Chat/ChatMessageWithPageCountRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
@@ -46,12 +46,14 @@ import 'package:retrofit/retrofit.dart';
 import '../models/AccessDetailsRes.dart';
 import '../models/Chat/GroupUsersRes.dart';
 import '../models/FetchCategoryUsersRes.dart';
+import '../models/LoginStatusRes.dart';
 part 'ApiService.g.dart';
 
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-   @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+
+ @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
  // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
   // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
@@ -69,7 +71,7 @@ abstract class ApiService
   Future<LoginRes> login(@Body() LoginReq body);
 
   @POST("/users/publicusersignup")
-  Future<ChangePassRes>signUp(@Body() SignUpReq body);
+  Future<CommonRes>signUp(@Body() SignUpReq body);
 
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);
@@ -95,6 +97,10 @@ abstract class ApiService
 
   @GET("/chat/getUsersByGroupId?group_id={group_id}")
   Future<GroupUsersRes> getChatUsers(@Path("group_id") int groupid);
+
+
+  @GET("/users/getUserLoginHours?user_id={user_id}")
+  Future<LoginStatusRes> fetchLoginHours(@Path("user_id") int userId);
 
   @GET(
       "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
@@ -158,46 +164,48 @@ abstract class ApiService
   @GET("/chat/groupCreateAccessDetails")
   Future<AccessDetailsRes> getAccessDetails();
 
+@GET("/chat/getureadMessageDetails?group_type={group_type}&team_id={team_id}&project_id={project_id}&user_id={user_id}&type={type}&group_id={group_id}")
+  Future<ChatMessageWithPageCountRes> checkMessageAvailability(@Path("project_id") int? projectId, @Path("team_id") int? teamId, @Path("user_id") int? userId,@Path("group_type") String? groupType,@Path("type") String? type,@Path("group_id") int? grpId);
 
   @GET("/chat/getMessagesByGroupId?group_id={group_id}&page_no={page_no}")
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(@Path("group_id") int id, @Path("page_no") int pageNo);
 
   @POST("/users/changePassword")
-  Future<ChangePassRes> changePass(@Body() ChangePassReq body);
+  Future<CommonRes> changePass(@Body() ChangePassReq body);
 
   @POST("/chat/createGroup")
   Future<GroupCreationRes> createGroup(@Body() GroupCreationReq body);
 
   @POST("/users/forgotPassword")
-  Future<ChangePassRes> forgotPass(@Body() ForgotPassReq body);
+  Future<CommonRes> forgotPass(@Body() ForgotPassReq body);
 
   @POST("/users/validate_otp")
-  Future<ChangePassRes> otpVerify(@Body() ValidateOTPReq body);
+  Future<CommonRes> otpVerify(@Body() ValidateOTPReq body);
 
   @PUT("/users/{user_id}")
-  Future<ChangePassRes> editProfile(
+  Future<CommonRes> editProfile(
       @Path("user_id") int id, @Body() EditProfileReq body);
 
   @PUT("/utils/updateNotification/{noti_id}")
-  Future<ChangePassRes> updateNotificationStatus(
+  Future<CommonRes> updateNotificationStatus(
       @Path("noti_id") int id);
   @PUT("/chat/updateFileDownloadStatus?message_id={msg_id}&status={status}")
-  Future<ChangePassRes> updateDownloadStatus(
+  Future<CommonRes> updateDownloadStatus(
       @Path("msg_id") int id, @Path("status") int status);
 
   @DELETE("/users/removeImage/{user_id}")
-  Future<ChangePassRes> removeProPic(
+  Future<CommonRes> removeProPic(
       @Path("user_id") int id);
-  @DELETE("/chat/deleteMessage?message_id={msg_id}")
-  Future<ChangePassRes> deleteMessage(
-      @Path("msg_id") int id);
+  @DELETE("/chat/deleteMessage?message_id={msg_id}&&group_id={grp_id}")
+  Future<CommonRes> deleteMessage(
+      @Path("msg_id") int id,@Path("grp_id") int grpId);
 
       
 
       
      
   @DELETE("/users/{user_id}")
-  Future<ChangePassRes> deleteUser(
+  Future<CommonRes> deleteUser(
       @Path("user_id") int id);
 
   @DELETE("/users/deleteDeviceId/{user_id}")
@@ -235,6 +243,7 @@ abstract class ApiService
         //   print("dataa $data");
         // };
         options.validateStatus = (status) {
+          
           Strings.statusCode = status!;
           if (status == 401) {
             Strings.isLogin = false;

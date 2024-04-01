@@ -529,7 +529,13 @@ class _ProjectsState extends State<Projects>
                                                             width: 40,
                                                             height: 40,
                                                             margin: EdgeInsets.only(top: 8),
-                                                            child: IconButton(icon: Image.asset('assets/images/zerochat.png'),onPressed:(){
+                                                            child: IconButton(icon: 
+
+                                                            
+                                                            (_searchLists[index].unReadedUserId != null && _searchLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
+                                                            Image.asset('assets/images/chat.png'):Image.asset('assets/images/zerochat.png'),
+                                                            
+                                                            onPressed:(){
                                                                 Navigator.push(
                                                               context,
                                                               MaterialPageRoute(
@@ -715,7 +721,9 @@ class _ProjectsState extends State<Projects>
                                                             width: 40,
                                                             height: 40,
                                                             margin: EdgeInsets.only(top: 8),
-                                                            child: IconButton(icon: Image.asset('assets/images/zerochat.png'),onPressed:(){
+                                                            child: IconButton(icon: 
+                                                           (_projectLists[index].unReadedUserId != null && _projectLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
+                                                            Image.asset('assets/images/chat.png'):Image.asset('assets/images/zerochat.png'),onPressed:(){
                                                                 Navigator.push(
                                                               context,
                                                               MaterialPageRoute(

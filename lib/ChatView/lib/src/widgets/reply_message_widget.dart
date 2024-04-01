@@ -234,7 +234,7 @@ class ReplyMessageWidget extends StatelessWidget {
         print("iiu $placeHolderindex klklkl ${target[placeHolderindex]}");
         spans.add(TextSpan(
             text: target[placeHolderindex] + ' ',
-            style: const TextStyle(color: Color.fromARGB(255, 238, 243, 97))));
+            style: const TextStyle(color: Color.fromARGB(255, 134, 240, 41),fontWeight: FontWeight.w600)));
         placeHolderindex = placeHolderindex + 1;
       } else {
         print("adding ${tokens[i]}");

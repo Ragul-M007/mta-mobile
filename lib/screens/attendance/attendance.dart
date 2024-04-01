@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -22,7 +21,6 @@ import 'package:mta/models/FetchAttendenceChangedRes.dart';
 
 import '../../models/DashboardRes.dart';
 
-
 FancyDrawerController? _controller;
 
 double lat = 0.00;
@@ -38,7 +36,6 @@ DateTime? _selectedDay;
 List<Data>? _projectLists = [];
 List<Data>? _searchLists = [];
 Data? selectedProject;
-
 
 var monthMatch = [
   "Jan",
@@ -76,13 +73,13 @@ class AttendanceContent extends StatefulWidget {
 
 class _AttendanceContentState extends State<AttendanceContent>
     with SingleTickerProviderStateMixin {
- // CalendarController _calendarController;
+  // CalendarController _calendarController;
   bool isgridView = true;
   bool isShowCheckInOut = true;
   List<AttendanceDataNew> _attendance = [];
   List<AttendanceData> _attendancemain = [];
 
-   FocusNode searchField = new FocusNode();
+  FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
 
   void initState() {
@@ -97,12 +94,10 @@ class _AttendanceContentState extends State<AttendanceContent>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => getAttendance(day + "-" + month + "-" + year));
-          getProjects();
-
+    getProjects();
   }
 
-  getProjects() 
-  {
+  getProjects() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
@@ -112,13 +107,11 @@ class _AttendanceContentState extends State<AttendanceContent>
         setState(() {
           print("messagee from api ${response.message}");
           _projectLists = response.data;
-          selectedProject  = response.token;
+          selectedProject = response.token;
           location = response.token?.projectName ?? "";
-
         });
       } else {
         AppUtils.showToastError(response.message ?? "Error");
-       
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -127,8 +120,7 @@ class _AttendanceContentState extends State<AttendanceContent>
     });
   }
 
-  updateCurrentProject(int projectId) 
-  {
+  updateCurrentProject(int projectId) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     print("qw11");
@@ -140,10 +132,9 @@ class _AttendanceContentState extends State<AttendanceContent>
     api.setCurrentProject(req).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-       getProjects();
+        getProjects();
       } else {
         AppUtils.showToastError(response.message ?? "Error");
-       
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
@@ -195,8 +186,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                 ),
               ),
               menuoption(
-                ontab: () 
-                {
+                ontab: () {
                   Strings.fromProjects = false;
                   menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
                 },
@@ -204,8 +194,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                 menutitle: "Teams",
               ),
               menuoption(
-                ontab: () 
-                {
+                ontab: () {
                   Strings.fromProjects = true;
                   menuRedirect(routename: "/projects", currentmenu: 2);
                 },
@@ -263,61 +252,60 @@ class _AttendanceContentState extends State<AttendanceContent>
               // ),
               menuoption(
                 ontab: () {
-showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  AppUtils.savePreferences("easyAccess", "N");
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.removeDeviceId(context);
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );
-                  
+                  showDialog(
+                    context: context,
+                    builder: (context) => new AlertDialog(
+                      title: Text(
+                        "Are you sure ?",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600),
+                      ),
+                      content: Text(
+                        'Do you want to logout from the App',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: new Text(
+                            'No',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            AppUtils.savePreferences("easyAccess", "N");
+                            menuRedirect(routename: "/login", currentmenu: 9);
+                            AppUtils.removeDeviceId(context);
+                          },
+                          child: new Text(
+                            'Yes',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 selectedmenuvalue: 9,
                 menutitle: "Logout",
               ),
             ],
             child: Scaffold(
-              backgroundColor:
-                  isgridView ? Color.fromARGB(255, 47, 62, 75) : Colors.grey[300],
+              backgroundColor: isgridView
+                  ? Color.fromARGB(255, 47, 62, 75)
+                  : Colors.grey[300],
               appBar: mainappbar(
                   ontab: menuopen,
                   title: "Attendance",
@@ -334,64 +322,64 @@ showDialog(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                               
-
-                                 Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 10, 0, 10),
-                            child: DropdownButton<String>(
-                              value: dropdownValue,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16),
-                              underline: Container(
-                                height: 3,
-                                color: Colors.transparent,
-                              ),
-                              onChanged: (String? newValue) {
-                                var index = 0;
-                                monthMatch.map((element) {
-                                  // get index
-                                  if (newValue != null)
-                                  {
-                                    index = monthMatch.indexOf(newValue);
-                                  }
-                                }).toList();
-                                var selecetedMonth = index + 1;
-                                var editedMonth = "";
-                                if (selecetedMonth.toString().length == 1) {
-                                  editedMonth = "0" + selecetedMonth.toString();
-                                } else {
-                                  selecetedMonth.toString();
-                                }
-                                getAttendance(editedMonth + "-" + year);
-                                setState(() 
-                                {
-                                  if(newValue != null)
-                                  dropdownValue = newValue;
-                                });
-                              },
-                              items: <String>[
-                                "Jan",
-                                "Feb",
-                                "Mar",
-                                "Apr",
-                                "May",
-                                "Jun",
-                                "Jul",
-                                "Aug",
-                                "Sep",
-                                "Oct",
-                                "Nov",
-                                "Dec"
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                            ),
-                          ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(30, 10, 0, 10),
+                                  child: DropdownButton<String>(
+                                    value: dropdownValue,
+                                    style: const TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16),
+                                    underline: Container(
+                                      height: 3,
+                                      color: Colors.transparent,
+                                    ),
+                                    onChanged: (String? newValue) {
+                                      var index = 0;
+                                      monthMatch.map((element) {
+                                        // get index
+                                        if (newValue != null) {
+                                          index = monthMatch.indexOf(newValue);
+                                        }
+                                      }).toList();
+                                      var selecetedMonth = index + 1;
+                                      var editedMonth = "";
+                                      if (selecetedMonth.toString().length ==
+                                          1) {
+                                        editedMonth =
+                                            "0" + selecetedMonth.toString();
+                                      } else {
+                                        selecetedMonth.toString();
+                                      }
+                                      getAttendance(editedMonth + "-" + year);
+                                      setState(() {
+                                        if (newValue != null)
+                                          dropdownValue = newValue;
+                                      });
+                                    },
+                                    items: <String>[
+                                      "Jan",
+                                      "Feb",
+                                      "Mar",
+                                      "Apr",
+                                      "May",
+                                      "Jun",
+                                      "Jul",
+                                      "Aug",
+                                      "Sep",
+                                      "Oct",
+                                      "Nov",
+                                      "Dec"
+                                    ].map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                                 InkWell(
                                   child: Row(
                                     children: [
@@ -422,7 +410,6 @@ showDialog(
                               ],
                             ),
                           ),
-                         
                           _attendance.length > 0
                               ? Expanded(
                                   child: ListView.builder(
@@ -467,15 +454,15 @@ showDialog(
                                                           child: Center(
                                                               child: Text(
                                                             getDateFormat(
-                                                                    _attendance[
-                                                                            index]
-                                                                        .date ?? "",
+                                                                    _attendance[index]
+                                                                            .date ??
+                                                                        "",
                                                                     1) +
                                                                 "\n" +
                                                                 getDateFormat(
-                                                                    _attendance[
-                                                                            index]
-                                                                        .date ?? "",
+                                                                    _attendance[index]
+                                                                            .date ??
+                                                                        "",
                                                                     2),
                                                             style: Drawables
                                                                 .adddoccontentstyle(
@@ -506,25 +493,40 @@ showDialog(
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                         Row(
-                                              children: [
-                                                CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_attendance[index]
-                                                                .projectImg ?? ""), width: 40, height: 40,radius: 15, defaultImageUrl: "assets/images/background1.png"),
-                                                SizedBox(width: 5.0),
-                                                Expanded(
-                                                  child: Text(
-                                                    _attendance[index]
-                                                                .projectName ?? "",
-                                                    style: Drawables
-                                                        .adddoccontentstyle(
-                                                            Colors.grey,
-                                                            12.0,
-                                                            FontWeight.w400),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(height: 5,),
+                                                        Row(
+                                                          children: [
+                                                            CircleImageFromNetwork(
+                                                                imageUrl: Strings
+                                                                        .uatImageUrl +
+                                                                    (_attendance[index]
+                                                                            .projectImg ??
+                                                                        ""),
+                                                                width: 40,
+                                                                height: 40,
+                                                                radius: 15,
+                                                                defaultImageUrl:
+                                                                    "assets/images/background1.png"),
+                                                            SizedBox(
+                                                                width: 5.0),
+                                                            Expanded(
+                                                              child: Text(
+                                                                _attendance[index]
+                                                                        .projectName ??
+                                                                    "",
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        Colors
+                                                                            .grey,
+                                                                        12.0,
+                                                                        FontWeight
+                                                                            .w400),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                          height: 5,
+                                                        ),
                                                         RichText(
                                                           text: TextSpan(
                                                             text:
@@ -536,13 +538,12 @@ showDialog(
                                                                     13.0,
                                                                     FontWeight
                                                                         .w400),
-                                                            children: <
-                                                                TextSpan>[
+                                                            children: <TextSpan>[
                                                               TextSpan(
                                                                 text: getTimeFormat(
-                                                                    _attendance[
-                                                                            index]
-                                                                        .checkInTime ?? ""),
+                                                                    _attendance[index]
+                                                                            .checkInTime ??
+                                                                        ""),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -565,7 +566,6 @@ showDialog(
                                                             ),
                                                             SizedBox(
                                                                 width: 5.0),
-                                                           
                                                           ],
                                                         ),
                                                         Icon(Icons.more_vert,
@@ -581,13 +581,12 @@ showDialog(
                                                                     13.0,
                                                                     FontWeight
                                                                         .w400),
-                                                            children: <
-                                                                TextSpan>[
+                                                            children: <TextSpan>[
                                                               TextSpan(
                                                                 text: getTimeFormat(
-                                                                    _attendance[
-                                                                            index]
-                                                                        .checkOutTime ?? ""),
+                                                                    _attendance[index]
+                                                                            .checkOutTime ??
+                                                                        ""),
                                                                 style: Drawables
                                                                     .adddoccontentstyle(
                                                                         Colors
@@ -608,16 +607,17 @@ showDialog(
                                                                   0xFF0061b0),
                                                               size: 16.0,
                                                             ),
-                                                            
                                                           ],
                                                         ),
                                                         SizedBox(height: 3.0),
                                                         Text(
                                                           getHours(
                                                               _attendance[index]
-                                                                  .checkInTime ?? "",
+                                                                      .checkInTime ??
+                                                                  "",
                                                               _attendance[index]
-                                                                  .checkOutTime ?? ""),
+                                                                      .checkOutTime ??
+                                                                  ""),
                                                           style: TextStyle(
                                                               color: Color(
                                                                   0xFF0061b0),
@@ -635,13 +635,15 @@ showDialog(
                                     },
                                   ),
                                 )
-                              : Center(child: Text(
+                              : Center(
+                                  child: Text(
                                     "No Attendance Marked",
                                     style: TextStyle(
                                         fontSize: 18,
                                         color: Colors.red,
                                         fontWeight: FontWeight.w600),
-                                  ),),
+                                  ),
+                                ),
                         ],
                       ),
                     ),
@@ -658,107 +660,97 @@ showDialog(
         children: [
           Expanded(
               child: GestureDetector(
-            onTap: () 
-            async {
-             if(selectedProject?.latitude == "" || selectedProject?.latitude == null || selectedProject?.longitude == "" || selectedProject?.longitude == null)
-             {
+            onTap: () async {
+              if (location == '') {
+                AppUtils.showToast("Please Select the Project");
+              } else {
+                if (selectedProject?.latitude == "" ||
+                    selectedProject?.latitude == null ||
+                    selectedProject?.longitude == "" ||
+                    selectedProject?.longitude == null) {
                   Widget okButton = TextButton(
-                      child: Text("OK"),
-                      onPressed: () { 
-                        Navigator.pop(context);
-                      },
-                      );
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  );
 
-                    AlertDialog alert = AlertDialog(
-                    title: Text("Location Not available",style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600)),
-                    content: Text("Kindly contact the admin and Update Project location."),
+                  AlertDialog alert = AlertDialog(
+                    title: Text("Location Not available",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600)),
+                    content: Text(
+                        "Kindly contact the admin and Update Project location."),
                     actions: [
                       okButton,
                     ],
-                    );
+                  );
 
-                    showDialog(
+                  showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                    return alert;
-                      },
-                    );
-             }
-             else
-             {
-               AppUtils.showprogress();
-              await getUserLocation();
-              print("inside check");
-              // checkInOut("IN");
-              if (location == '') 
-              {
-                AppUtils.showToastErrorTop(
-                    "Please Select a Project.");
-              } 
-              else 
-              {
-                print("qwertyyy");
-                if(_attendance.length != 0)
-                {
+                      return alert;
+                    },
+                  );
+                } else {
+                  AppUtils.showprogress();
+                  var status = await getUserLocation();
+                  print("inside check  $status");
+
+                  if (status) {
+                    
+                    if (_attendance.length != 0) {
                       var lastSignIn = _attendance.last;
-                  print("last Signin --> ${lastSignIn.checkOutTime}");
-                  if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
-                  {
-                     Widget okButton = TextButton(
-                      child: Text("OK"),
-                      onPressed: () { 
-                        Navigator.pop(context);
-                      },
-                      );
+                      print("last Signin --> ${lastSignIn.checkOutTime}");
+                      if (lastSignIn.checkOutTime == "" ||
+                          lastSignIn.checkOutTime == null) {
+                        Widget okButton = TextButton(
+                          child: Text("OK"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        );
 
-                    AlertDialog alert = AlertDialog(
-                    title: Text("You haven't Checked out",style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600)),
-                    content: Text("Kindly Checkout from the Previous Session"),
-                    actions: [
-                      okButton,
-                    ],
-                    );
+                        AlertDialog alert = AlertDialog(
+                          title: Text("You haven't Checked out",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xFF0061b0),
+                                  fontWeight: FontWeight.w600)),
+                          content:
+                              Text("Kindly Checkout from the Previous Session"),
+                          actions: [
+                            okButton,
+                          ],
+                        );
 
-                    showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                    return alert;
-                      },
-                    );
-                }
-                else
-                { 
-                  print("distancee   $distance") ;
-                  if(distance != null && distance! <= 50)
-                  {
-                    _onWillPop("IN");
-                  }
-                  else if(distance != null)
-                  {
-                      _outOfLocationPopUp();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert;
+                          },
+                        );
+                      } else {
+                        print("distancee   $distance");
+                        if (distance != null && distance! <= 50) {
+                          _onWillPop("IN");
+                        } else if (distance != null) {
+                          _outOfLocationPopUp();
+                        }
+                      }
+                    } else {
+                      print("dis $distance");
+                      if (distance != null && distance! < 50) {
+                        _onWillPop("IN");
+                      } else if (distance != null) {
+                        _outOfLocationPopUp();
+                      }
+                    }
                   }
                 }
               }
-              else
-              {
-                  print("dis $distance");
-                  if(distance != null && distance! < 50)
-                  {
-                    _onWillPop("IN");
-                  }
-                  else if(distance != null)
-                  {
-                      _outOfLocationPopUp();
-                  }
-              }  
-              }
-             }
             },
             child: Container(
               child: Center(
@@ -776,120 +768,114 @@ showDialog(
           )),
           Expanded(
               child: GestureDetector(
-            onTap: () async 
-            {
+            onTap: () async {
+              if (location == '') {
+                AppUtils.showToastErrorTop("Please Select a Project.");
+              } else {
+                if (selectedProject?.latitude == "" ||
+                    selectedProject?.latitude == null ||
+                    selectedProject?.longitude == "" ||
+                    selectedProject?.longitude == null) {
+                  Widget okButton = TextButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  );
 
-             if(selectedProject?.latitude == "" || selectedProject?.latitude == null || selectedProject?.longitude == "" || selectedProject?.longitude == null)
-              {
-                    Widget okButton = TextButton(
-                      child: Text("OK"),
-                      onPressed: () { 
-                        Navigator.pop(context);
-                      },
-                      );
-
-                    AlertDialog alert = AlertDialog(
-                    title: Text("Location Not available",style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600)),
-                    content: Text("Kindly contact the admin and Update Project location."),
+                  AlertDialog alert = AlertDialog(
+                    title: Text("Location Not available",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600)),
+                    content: Text(
+                        "Kindly contact the admin and Update Project location."),
                     actions: [
                       okButton,
                     ],
-                    );
-                    showDialog(
+                  );
+                  showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                    return alert;
-                      },
-                    );
-              }
-              else{
+                      return alert;
+                    },
+                  );
+                } else {
+                  AppUtils.showprogress();
+                  var status = await getUserLocation();
+                  //checkInOut("OUT");
 
-
-              AppUtils.showprogress();
-              await getUserLocation();
-              //checkInOut("OUT");
-              if (location == '') 
-              {
-                AppUtils.showToastErrorTop(
-                    "Please Select a Project.");
-              } else 
-              { 
-
-                if(_attendance.length == 0)
-                {
+                  if (status) {
+                    if (_attendance.length == 0) {
                       Widget okButton = TextButton(
-                      child: Text("OK"),
-                      onPressed: () { 
-                        Navigator.pop(context);
-                      },
+                        child: Text("OK"),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       );
 
-                    AlertDialog alert = AlertDialog(
-                    title: Text("You haven't Checked In",style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600)),
-                    content: Text("You were not allowed to check out, since you were not checkedin."),
-                    actions: [
-                      okButton,
-                    ],
-                    );
-
-                    showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                    return alert;
-                      },
-                    );
-                }
-                else
-                {
-                  var lastSignIn = _attendance.last;
-                print("last ${_attendance.last}");
-                if(lastSignIn.checkOutTime == "" || lastSignIn.checkOutTime == null)
-                {
-                    if(distance != null && distance! < 50)
-                  {
-                      _onWillPop("OUT"); 
-                  }
-                  else if(distance != null)
-                  {
-                      _outOfLocationPopUp();
-                  }
-                }
-                else
-                {
-                     Widget okButton = TextButton(
-                      child: Text("OK"),
-                      onPressed: () { 
-                        Navigator.pop(context);
-                      },
+                      AlertDialog alert = AlertDialog(
+                        title: Text("You haven't Checked In",
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Color(0xFF0061b0),
+                                fontWeight: FontWeight.w600)),
+                        content: Text(
+                            "You were not allowed to check out, since you were not checkedin."),
+                        actions: [
+                          okButton,
+                        ],
                       );
 
-                    AlertDialog alert = AlertDialog(
-                    title: Text("You haven't Checked In",style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600)),
-                    content: Text("You were not allowed to checked out, since you are not checkedin."),
-                    actions: [
-                      okButton,
-                    ],
-                    );
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return alert;
+                        },
+                      );
+                    } else {
+                      var lastSignIn = _attendance.last;
+                      print("last ${_attendance.last}");
+                      if (lastSignIn.checkOutTime == "" ||
+                          lastSignIn.checkOutTime == null) {
+                        if (distance != null && distance! < 50) {
+                          _onWillPop("OUT");
+                        } else if (distance != null) {
+                          _outOfLocationPopUp();
+                        }
+                      } else {
+                        Widget okButton = TextButton(
+                          child: Text("OK"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        );
 
-                    showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                    return alert;
-                      },
-                    );
-                }   
-                }               
+                        AlertDialog alert = AlertDialog(
+                          title: Text("You haven't Checked In",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Color(0xFF0061b0),
+                                  fontWeight: FontWeight.w600)),
+                          content: Text(
+                              "You were not allowed to checked out, since you are not checkedin."),
+                          actions: [
+                            okButton,
+                          ],
+                        );
+
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert;
+                          },
+                        );
+                      }
+                    }
+                  }
+                }
               }
-}
             },
             child: Container(
               child: Center(
@@ -925,8 +911,8 @@ showDialog(
                 child: Row(
                   children: [
                     InkWell(
-                      onTap: (){
-                          showUserProjectsDialog();
+                      onTap: () {
+                        showUserProjectsDialog();
                       },
                       child: Container(
                         child: Row(
@@ -937,22 +923,33 @@ showDialog(
                               size: 26.0,
                             ),
                             SizedBox(width: 5.0),
-                             CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + ( selectedProject?.projectImg ?? ""), width: 40, height: 40,radius: 12, defaultImageUrl: "assets/images/background1.png"),
-                            SizedBox(width: 5,),
+                            CircleImageFromNetwork(
+                                imageUrl: Strings.baseImageUrl +
+                                    (selectedProject?.projectImg ?? ""),
+                                width: 40,
+                                height: 40,
+                                radius: 12,
+                                defaultImageUrl:
+                                    "assets/images/background1.png"),
+                            SizedBox(
+                              width: 5,
+                            ),
                             Container(
                               width: MediaQuery.of(context).size.width * 0.5,
-                                                  child: Text(selectedProject?.projectName ?? "Select Project",
-                                                  maxLines: 3,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white)),
-                                                ),
+                              child: Text(
+                                  selectedProject?.projectName ??
+                                      "Select Project",
+                                  maxLines: 3,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white)),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                   
+
                     // GestureDetector(
                     //   onTap: () {
                     //     getUserLocation();
@@ -964,7 +961,7 @@ showDialog(
                     //   ),
                     // ),
                     Spacer(),
-                    
+
                     InkWell(
                       child: Row(
                         children: [
@@ -999,48 +996,48 @@ showDialog(
                 // color: Color.fromRGBO(36, 58, 142,1),
                 child: TableCalendar(
                   rowHeight: 30,
-                 // calendarController: _calendarController,
-                 
+                  // calendarController: _calendarController,
+
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
-                   // centerHeaderTitle: true,
+                    // centerHeaderTitle: true,
                     titleTextStyle: TextStyle(color: Colors.white),
                   ),
-                  
+
                   daysOfWeekStyle: DaysOfWeekStyle(
-                  
                       weekdayStyle: TextStyle(color: Colors.white),
                       weekendStyle: TextStyle(color: Colors.red)),
                   calendarStyle: CalendarStyle(
-                    disabledTextStyle: TextStyle(color: Colors.grey),
-                    //outsideWeekendStyle: TextStyle(color: Colors.white),
-                    holidayTextStyle: TextStyle(color: Colors.white),
-                    withinRangeTextStyle: TextStyle(color: Colors.white),
-                    selectedDecoration: BoxDecoration(color: Colors.red,shape: BoxShape.circle),
-                    todayDecoration: BoxDecoration(color: Colors.blue,shape: BoxShape.circle),
-                    todayTextStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                   // todayColor: Colors.red,
-                    selectedTextStyle: TextStyle(color: Colors.white),
-                    //selectedStyle: TextStyle(color: Colors.black),
-                   // weekdayStyle: TextStyle(color: Colors.white),
-                    outsideDaysVisible: false,
-                   // outsideStyle: TextStyle(color: Colors.grey),
-                   defaultTextStyle: TextStyle(color: Colors.white),
-                   weekendTextStyle: TextStyle(color: Colors.red.withOpacity(0.7))
-                  ),
+                      disabledTextStyle: TextStyle(color: Colors.grey),
+                      //outsideWeekendStyle: TextStyle(color: Colors.white),
+                      holidayTextStyle: TextStyle(color: Colors.white),
+                      withinRangeTextStyle: TextStyle(color: Colors.white),
+                      selectedDecoration: BoxDecoration(
+                          color: Colors.red, shape: BoxShape.circle),
+                      todayDecoration: BoxDecoration(
+                          color: Colors.blue, shape: BoxShape.circle),
+                      todayTextStyle: TextStyle(
+                        color: Colors.white,
+                      ),
+                      // todayColor: Colors.red,
+                      selectedTextStyle: TextStyle(color: Colors.white),
+                      //selectedStyle: TextStyle(color: Colors.black),
+                      // weekdayStyle: TextStyle(color: Colors.white),
+                      outsideDaysVisible: false,
+                      // outsideStyle: TextStyle(color: Colors.grey),
+                      defaultTextStyle: TextStyle(color: Colors.white),
+                      weekendTextStyle:
+                          TextStyle(color: Colors.red.withOpacity(0.7))),
                   selectedDayPredicate: (day) {
-                      return isSameDay(_selectedDay, day);
-                    },
+                    return isSameDay(_selectedDay, day);
+                  },
                   onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
                     var month1 = selectedDay.month.toString().padLeft(2, '0');
                     var day1 = selectedDay.day.toString().padLeft(2, '0');
                     var year1 = selectedDay.year.toString();
                     getAttendance(day1 + "-" + month1 + "-" + year1);
-                    setState(() 
-                    {
-                       _selectedDay = selectedDay;
+                    setState(() {
+                      _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
                     });
                     if ((day1 + "-" + month1 + "-" + year1) ==
@@ -1049,7 +1046,10 @@ showDialog(
                     } else {
                       isShowCheckInOut = false;
                     }
-                  }, firstDay: DateTime.utc(2010, 10, 16), focusedDay: _focusedDay, lastDay: DateTime.now(),
+                  },
+                  firstDay: DateTime.utc(2010, 10, 16),
+                  focusedDay: _focusedDay,
+                  lastDay: DateTime.now(),
                 ),
               ),
             ],
@@ -1107,11 +1107,15 @@ showDialog(
                                               child: Center(
                                                   child: Text(
                                                 getDateFormat(
-                                                        _attendance[index].date ?? "",
+                                                        _attendance[index]
+                                                                .date ??
+                                                            "",
                                                         1) +
                                                     "\n" +
                                                     getDateFormat(
-                                                        _attendance[index].date ?? "",
+                                                        _attendance[index]
+                                                                .date ??
+                                                            "",
                                                         2),
                                                 style: Drawables
                                                     .adddoccontentstyle(
@@ -1134,15 +1138,25 @@ showDialog(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                             Row(
+                                            Row(
                                               children: [
-                                                CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_attendance[index]
-                                                                .projectImg ?? ""), width: 40, height: 40,radius: 15, defaultImageUrl: "assets/images/background1.png"),
+                                                CircleImageFromNetwork(
+                                                    imageUrl: Strings
+                                                            .uatImageUrl +
+                                                        (_attendance[index]
+                                                                .projectImg ??
+                                                            ""),
+                                                    width: 40,
+                                                    height: 40,
+                                                    radius: 15,
+                                                    defaultImageUrl:
+                                                        "assets/images/background1.png"),
                                                 SizedBox(width: 5.0),
                                                 Expanded(
                                                   child: Text(
                                                     _attendance[index]
-                                                                .projectName ?? "dttttt",
+                                                            .projectName ??
+                                                        "dttttt",
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.grey,
@@ -1152,7 +1166,9 @@ showDialog(
                                                 ),
                                               ],
                                             ),
-                                            SizedBox(height: 8,),
+                                            SizedBox(
+                                              height: 8,
+                                            ),
                                             RichText(
                                               text: TextSpan(
                                                 text: 'Start Time -',
@@ -1165,7 +1181,8 @@ showDialog(
                                                   TextSpan(
                                                     text: getTimeFormat(
                                                         _attendance[index]
-                                                            .checkInTime ?? ""),
+                                                                .checkInTime ??
+                                                            ""),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -1176,11 +1193,9 @@ showDialog(
                                               ),
                                             ),
                                             SizedBox(height: 3.0),
-                                           
                                             Icon(Icons.more_vert,
                                                 color: Colors.grey, size: 14.0),
-                                                                                            SizedBox(height: 3.0),
-
+                                            SizedBox(height: 3.0),
                                             RichText(
                                               text: TextSpan(
                                                 text: 'End Time -',
@@ -1193,7 +1208,8 @@ showDialog(
                                                   TextSpan(
                                                     text: getTimeFormat(
                                                         _attendance[index]
-                                                            .checkOutTime ?? ""),
+                                                                .checkOutTime ??
+                                                            ""),
                                                     style: Drawables
                                                         .adddoccontentstyle(
                                                             Colors.black54,
@@ -1204,14 +1220,15 @@ showDialog(
                                               ),
                                             ),
                                             SizedBox(height: 3.0),
-                                           
                                             SizedBox(height: 3.0),
                                             Text(
                                               getHours(
                                                   _attendance[index]
-                                                      .checkInTime.toString(),
+                                                      .checkInTime
+                                                      .toString(),
                                                   _attendance[index]
-                                                      .checkOutTime.toString()),
+                                                      .checkOutTime
+                                                      .toString()),
                                               style: TextStyle(
                                                   color: Color(0xFF0061b0),
                                                   fontWeight: FontWeight.w600),
@@ -1225,13 +1242,15 @@ showDialog(
                               ));
                         },
                       )
-                    : Center(child: Text(
-                                    "No Attendance Marked",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w600),
-                                  ),),
+                    : Center(
+                        child: Text(
+                          "No Attendance Marked",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
               ),
               isShowCheckInOut == true ? bottombutton() : SizedBox()
             ],
@@ -1243,8 +1262,7 @@ showDialog(
 
   menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
-      if (currentmenu != null)
-      Strings.currentmenuvalue = currentmenu;
+      if (currentmenu != null) Strings.currentmenuvalue = currentmenu;
     });
     if (routename == "/login") {
       //AppUtils.clearAllPreferences();
@@ -1256,9 +1274,8 @@ showDialog(
     }
   }
 
-  getAttendance(String date) 
-  {
-    getUserLocation();
+  getAttendance(String date) {
+    // getUserLocation();
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
 
@@ -1266,22 +1283,17 @@ showDialog(
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
 
-      if (response.status) 
-      {
+      if (response.status) {
         setState(() {
-          if (response.data.length > 0) 
-          {
+          if (response.data.length > 0) {
             print("response fetched");
             _attendancemain = response.data;
             formatAttendanceData();
-          }
-          else
-          {
+          } else {
             _attendancemain = [];
           }
         });
-      } else 
-      {
+      } else {
         setState(() {
           _attendance = [];
         });
@@ -1296,65 +1308,51 @@ showDialog(
       print("error on catch ${onError.toString()}");
     });
   }
-  formatAttendanceData()
-  {
+
+  formatAttendanceData() {
     _attendance.clear();
     print("inside format");
     print(_attendancemain.length);
-      for (var i = 0; i < _attendancemain.length; i++) 
-      {
-        print("inside if");
-        if( _attendancemain[i].checkType == "IN")
-        {
-            AttendanceDataNew test = new AttendanceDataNew();
-            print("inside Inn");
-            print("i $i");
-            test.checkInLocation = _attendancemain[i].locationName;
-            test.checkInTime = _attendancemain[i].checkTime;
-          //  test.userId = _attendancemain[i].userId;
-            DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
-            String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
-            test.date = formattedDate;
-            test.projectImg = _attendancemain[i].projectImg ?? "";
-                  test.projectName = _attendancemain[i].projectName ?? "";
-             print("adding");
-             if(i < _attendancemain.length-1)
-             {
-                    var j= i+1;
-                      print("jsonEncode ${jsonEncode(_attendancemain[j])}");
-                    if(_attendancemain[j].checkType == "OUT")
-                    {
-                      print("in else");
-                      test.checkOutLocation = _attendancemain[j].locationName;
-                      test.checkOutTime = _attendancemain[j].checkTime;
-                    }
-                   else
-                  {
-                    test.checkOutLocation = "";
-                    test.checkOutTime = "";
-                  }
+    for (var i = 0; i < _attendancemain.length; i++) {
+      print("inside if");
+      if (_attendancemain[i].checkType == "IN") {
+        AttendanceDataNew test = new AttendanceDataNew();
+        print("inside Inn");
+        print("i $i");
+        test.checkInLocation = _attendancemain[i].locationName;
+        test.checkInTime = _attendancemain[i].checkTime;
+        //  test.userId = _attendancemain[i].userId;
+        DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
+        String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
+        test.date = formattedDate;
+        test.projectImg = _attendancemain[i].projectImg ?? "";
+        test.projectName = _attendancemain[i].projectName ?? "";
+        print("adding");
+        if (i < _attendancemain.length - 1) {
+          var j = i + 1;
+          print("jsonEncode ${jsonEncode(_attendancemain[j])}");
+          if (_attendancemain[j].checkType == "OUT") {
+            print("in else");
+            test.checkOutLocation = _attendancemain[j].locationName;
+            test.checkOutTime = _attendancemain[j].checkTime;
+          } else {
+            test.checkOutLocation = "";
+            test.checkOutTime = "";
+          }
 
-                  print("prrr name ${_attendancemain[j].projectName }");
-                  test.projectImg = _attendancemain[j].projectImg ?? "";
-                  test.projectName = _attendancemain[j].projectName ?? "";
-             }
-          print("testing ${test.checkInLocation}");
-           setState(() 
-           {
-                _attendance.add(test);
-           });
-       
-
-
+          print("prrr name ${_attendancemain[j].projectName}");
+          test.projectImg = _attendancemain[j].projectImg ?? "";
+          test.projectName = _attendancemain[j].projectName ?? "";
         }
-         
-
-      }      
+        print("testing ${test.checkInLocation}");
+        setState(() {
+          _attendance.add(test);
+        });
+      }
+    }
   }
 
-  
-  Future<bool> _onWillPop(action) async 
-  {
+  Future<bool> _onWillPop(action) async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -1402,8 +1400,7 @@ showDialog(
         false;
   }
 
-  Future<bool> _outOfLocationPopUp() async 
-  {
+  Future<bool> _outOfLocationPopUp() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -1450,7 +1447,7 @@ showDialog(
     req.projectId = selectedProject?.projectId;
 
     print("payload ${jsonEncode(req)}");
-  
+
     api.addAttendance(req).then((response) {
       print("checking out");
       AppUtils.dismissprogress();
@@ -1535,52 +1532,55 @@ showDialog(
     }
   }
 
-  getUserLocation() async 
-  {
-    await Geolocator.checkPermission().then((value) async
-    {
-          if (value == LocationPermission.denied)
-            {
-              AppUtils.dismissprogress();
-              {await Geolocator.requestPermission().then((value) => {});}
-            }
-          else if (value == LocationPermission.deniedForever)
-            {
-                            AppUtils.dismissprogress();
-              AppUtils.showToastError(
-                  "Please enable loaction from App permission Settings");
-            }
-          else
-            {
-              await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best).then((value) => 
-              {
-                    setState(
-                      () {
-                        AppUtils.dismissprogress();
-                       // AppUtils.showprogress();
-                        lat = value.latitude;
-                        long = value.longitude;
+  getUserLocation() async {
+    var permisionStatus = false;
+    await Geolocator.checkPermission().then((value) async {
+      if (value == LocationPermission.denied) {
+        permisionStatus = false;
+        AppUtils.dismissprogress();
+        {
+          await Geolocator.requestPermission().then((value) => {});
+        }
+      } else if (value == LocationPermission.deniedForever) {
+        permisionStatus = false;
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(
+            "Please enable loaction from App permission Settings");
+      } else {
+        await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.best)
+            .then((value) => {
+                  setState(
+                    () {
+                      AppUtils.dismissprogress();
+                      // AppUtils.showprogress();
+                      lat = value.latitude;
+                      long = value.longitude;
 
-                        distance = Geolocator.distanceBetween(lat, long, double.parse(selectedProject?.latitude ?? "0.0"),double.parse(selectedProject?.longitude ?? "0.0"));
-                       
-                       
-                        print("User distance $distance");
-                        //getGeocode(lat, long);
-                      },
-                    )
-              });
-            }
-        }).onError((error, stackTrace){
-          AppUtils.dismissprogress();
-         // _onWillPop("IN");
-         // _outOfLocationPopUp();
-          
-         // AppUtils.showToastError("Kindly Enable location");
-        });
+                      distance = Geolocator.distanceBetween(
+                          lat,
+                          long,
+                          double.parse(selectedProject?.latitude ?? "0.0"),
+                          double.parse(selectedProject?.longitude ?? "0.0"));
+
+                      print("User distance $distance");
+                      permisionStatus = true;
+                      //getGeocode(lat, long);
+                    },
+                  )
+                });
+      }
+    }).onError((error, stackTrace)
+    {
+      permisionStatus = false;
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(
+          "$error");
+    });
+    return permisionStatus;
   }
 
-  Future<void> getGeocode(double latt, double longg) async 
-  {
+  Future<void> getGeocode(double latt, double longg) async {
     var results = await Geocoder.local
         .findAddressesFromCoordinates(new Coordinates(latt, longg));
     setState(() {
@@ -1690,7 +1690,7 @@ showDialog(
                                   Card(
                                     color: Colors.white70,
                                     child: ListTile(
-                                      leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_searchLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
+                                      leading: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl + (_searchLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
                                       title: Text(
                                         _searchLists?[index].projectName ?? "",maxLines: 3,
                                       ),
@@ -1729,7 +1729,7 @@ showDialog(
                                   Card(
                                     color: Colors.white70,
                                     child: ListTile(
-                                      leading: CircleImageFromNetwork(imageUrl: Strings.uatImageUrl + (_projectLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
+                                      leading: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl + (_projectLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
                                       title: Text(
                                         _projectLists?[index].projectName ?? "",maxLines: 3,
                                       ),

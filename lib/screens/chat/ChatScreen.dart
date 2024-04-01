@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -6,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/screens/chat/ChatMedia.dart';
-import 'package:mta/screens/chat/data.dart';
 import 'package:mta/screens/chat/theme.dart';
+import 'package:mta/screens/dashboard/teamsDashboard.dart';
+import 'package:mta/screens/projects/projects.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:path/path.dart' as path;
@@ -25,7 +27,12 @@ class ChatScreen extends StatefulWidget {
   final int? teamId;
   final String teamName;
 
-  const ChatScreen({Key? key, this.groupId, this.teamId,this.projectId, required this.teamName})
+  const ChatScreen(
+      {Key? key,
+      this.groupId,
+      this.teamId,
+      this.projectId,
+      required this.teamName})
       : super(key: key);
 
   @override
@@ -35,7 +42,7 @@ class ChatScreen extends StatefulWidget {
 List<Message> msgList = [];
 List<ChatUser> chtusers = [];
 
-  List<Map<String, dynamic>> flutterMentionUserList = [];
+List<Map<String, dynamic>> flutterMentionUserList = [];
 
 var dio = Dio();
 
@@ -45,25 +52,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool nextPageAvailable = true;
 
-  // final currentUser = ChatUser(
-  //   id: '1',
-  //   name: 'Flutter',
-  //   profilePhoto: Data.profileImage,
-  // );
+  // Assigning current user
   final currentUser = ChatUser(
     id: '${Strings.userID}',
     name: '${Strings.username}',
-    profilePhoto: Data.profileImage,
   );
-  var _chatController = ChatController(
-              initialMessageList: msgList,
-              scrollController: ScrollController(),
-              chatUsers: chtusers
-              );
 
-  void _showHideTypingIndicator() {
-    _chatController.setTypingIndicator = !_chatController.showTypingIndicator;
-  }
+  var _chatController = ChatController(
+      initialMessageList: msgList,
+      scrollController: ScrollController(),
+      chatUsers: chtusers);
 
   IO.Socket? _socket;
   int pageNo = 2;
@@ -71,8 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<FetchMapedUsersData> _readUsersList = [];
 
-
-@override
+  @override
   void dispose() {
     super.dispose();
     print("dispose called");
@@ -80,23 +77,23 @@ class _ChatScreenState extends State<ChatScreen> {
     _socket?.dispose();
   }
 
-
   @override
-  void initState() 
-  {
-    // TODO: implement initState
+  void initState() {
     msgList.clear();
     super.initState();
     getUsersByGroupId();
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>
-    {
+
+    print("team idd ${widget.teamId}");
+
+    //connect socket_io
+    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
       'forceNew': false,
       'query': {
         'token': Strings.authToken,
         'group_id': widget.groupId,
-        "group_type": widget.projectId==null?"team":"project",
+        "group_type": widget.projectId == null ? "team" : "project",
         "project_id": widget.projectId,
         "team_id": widget.teamId
       }
@@ -106,10 +103,14 @@ class _ChatScreenState extends State<ChatScreen> {
       print('Connected');
       joinGroup();
     });
+
+    // Timer(Duration(seconds: 5), () {
+    //       updateChatCountDetails("");
+    //   });
   }
 
-  joinGroup() 
-  {
+//join chatgroup
+  joinGroup() {
     _socket?.emit(
         'join-group',
         json.encode({
@@ -120,9 +121,10 @@ class _ChatScreenState extends State<ChatScreen> {
     getUsersList();
   }
 
-  updateUsersReadMessage()
-  {
-     _socket?.emit(
+
+//function call to update readed message user
+  updateUsersReadMessage() {
+    _socket?.emit(
         'update-message-readed-user',
         json.encode({
           "group_id": widget.groupId,
@@ -136,19 +138,23 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  getUsersByGroupId() {
+  getUsersByGroupId() 
+  {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.getChatUsers(widget.groupId!).then((response) {
+    api.getChatUsers(widget.groupId!).then((response) 
+    {
       if (response.status!) {
         setState(() {
           chtusers.clear();
           response.data?.forEach((element) {
-            print("user image ${ Strings.uatImageUrl+(element.userImage ?? "")}");
+            print(
+                "user image ${Strings.baseImageUrl + (element.userImage ?? "")}");
             chtusers.add(ChatUser(
-                id: '${element.userId}', name: element.userName ?? "test",profilePhoto: Strings.uatImageUrl+(element.userImage ?? "")));
-
+                id: '${element.userId}',
+                name: element.userName ?? "test",
+                profilePhoto: Strings.baseImageUrl + (element.userImage ?? "")));
           });
-                          log("added users ${jsonEncode(chtusers)}");
+          log("added users ${jsonEncode(chtusers)}");
 
           addMentionUsers(response.data);
         });
@@ -160,22 +166,28 @@ class _ChatScreenState extends State<ChatScreen> {
       print(onError.toString());
     });
   }
-addMentionUsers(users) {
+
+  //add users to mentioning list
+  addMentionUsers(users) {
     flutterMentionUserList.clear();
-    
+
     for (int i = 0; i < chtusers.length; i++) {
       var user = {
         "id": users[i].userId.toString(),
         "display": users[i].userName?.split(' ')[0],
         "full_name": users[i].userName,
-        "photo": Strings.uatImageUrl + (users[i].userImage ?? "")
+        "photo": Strings.baseImageUrl + (users[i].userImage ?? "")
       };
       flutterMentionUserList.add(user);
     }
   }
-  deleteMessagesById(int msgId) {
+
+
+  //function call delete messages
+  deleteMessagesById(int msgId,int grpId) {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.deleteMessage(msgId).then((response) {
+    api.deleteMessage(msgId,grpId).then((response) 
+    {
       if (response.status!) {
         setState(() {
           AppUtils.showToastSuccess(response.message ?? "Deleted Successfully");
@@ -190,120 +202,125 @@ addMentionUsers(users) {
     });
   }
 
-
-  getUsersList(){
-_socket?.on("group-users-list", (_data) 
+  updateChatCountDetails(String type) 
+  {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.checkMessageAvailability(widget.projectId,widget.teamId,Strings.userID,widget.projectId == null ? "team" : "project",type,widget.groupId).then((response) 
     {
-      print("userrrsss  ${_data}");
+      print("okkk");
+    }).catchError((onError) {
+      print(onError.toString());
+    });
+  }
 
+//get the users list from socket_io
+  getUsersList() {
+    _socket?.on("group-users-list", (_data) {
       setState(() {
-        
         flutterMentionUserList.clear();
         chtusers.clear();
-        for (var item in _data) 
-        {
+        for (var item in _data) {
           var users = GroupChatUsersData.fromJson(item);
-            print("user image ${ Strings.uatImageUrl+(users.userImage ?? "")}");
-            chtusers.add(ChatUser(
-                id: '${users.userId}', name: users.userName ?? "test",profilePhoto: Strings.uatImageUrl+(users.userImage ?? "")));
-
+          print("user image ${Strings.baseImageUrl + (users.userImage ?? "")}");
+          chtusers.add(ChatUser(
+              id: '${users.userId}',
+              name: users.userName ?? "test",
+              profilePhoto: Strings.baseImageUrl + (users.userImage ?? "")));
 
           var user = {
-        "id": users.userId.toString(),
-        "display": users.userName?.split(' ')[0],
-        "full_name": users.userName,
-        "photo": Strings.uatImageUrl + (users.userImage ?? "")
-      };
-      flutterMentionUserList.add(user);
+            "id": users.userId.toString(),
+            "display": users.userName?.split(' ')[0],
+            "full_name": users.userName,
+            "photo": Strings.baseImageUrl + (users.userImage ?? "")
+          };
+          flutterMentionUserList.add(user);
         }
-
       });
-
     });
   }
 
-  getMessages() 
-  {
+
+//get messages from socket io
+  getMessages() {
     print("getting messages");
-    _socket?.on("group-messages", (_data) 
-    {
+    _socket?.on("group-messages", (_data) {
       log("dataloaded $_data");
-            setState(() {
-      if(_data.length > 0)
-      {
+
+      // updateChatCountDetails("");
+      setState(() {
         msgList.clear();
-        for (var item in _data) 
-        {
-          var chat = ChatMessageRes.fromJson(item);
-          if (chat.parentMessageId != 0 && chat.parentMessageId != null) 
-          {
-            var mobj = Message(
-                message: chat.files == null
-                    ? chat.message ?? ""
-                    : Strings.uatImageUrl + (chat.files ?? ""),
-                createdAt: DateTime.parse(chat.createdAt!),
-                sendBy: '${chat.userId}',
-                id: '${chat.messageId}',
-                messageType: chat.files == null
-                    ? MessageType.text
-                    : chat.files!.contains("m4a")
-                        ? MessageType.voice
-                        : MessageType.image,
-                fileName: chat.fileName ?? "",
-                status: chat.isDownloaded == 0
-                    ? MessageStatus.downloadPending
-                    : MessageStatus.downloaded,
-                replyMessage: ReplyMessage(
-                    message: chat.parentFiles == null
-                        ? chat.parentMessage ?? ""
-                        : Strings.uatImageUrl + (chat.parentFiles ?? ""),
-                    messageId: "${chat.parentMessageId}",
-                    replyBy: '${chat.userId}',
-                    replyTo: '${chat.parentMessageUserId}',
-                    messageType: chat.parentFiles == null
-                        ? MessageType.text
-                        : chat.parentFiles!.contains("m4a")
-                            ? MessageType.voice
-                            : MessageType.image));
-            msgList.add(mobj);
-          } else {
-            var mobj = Message(
-                message: chat.files == null
-                    ? chat.message ?? ""
-                    : Strings.uatImageUrl + (chat.files ?? ""),
-                createdAt: DateTime.parse(chat.createdAt!),
-                sendBy: '${chat.userId}',
-                id: '${chat.messageId}',
-                messageType: chat.files == null
-                    ? MessageType.text
-                    : chat.files!.contains("m4a")
-                        ? MessageType.voice
-                        : MessageType.image,
-                fileName: chat.fileName ?? "",
-                status: chat.fileDownloadedUsers!.contains("${Strings.userID}")
-                    ? MessageStatus.downloaded
-                    : MessageStatus.downloadPending);
-            msgList.add(mobj);
+        if (_data.length > 0) {
+          for (var item in _data) {
+            var chat = ChatMessageRes.fromJson(item);
+            if (chat.parentMessageId != 0 && chat.parentMessageId != null) {
+              var mobj = Message(
+                  message: chat.files == null
+                      ? chat.message ?? ""
+                      : Strings.baseImageUrl + (chat.files ?? ""),
+                  createdAt: DateTime.parse(chat.createdAt!),
+                  sendBy: '${chat.userId}',
+                  id: '${chat.messageId}',
+                  messageType: chat.files == null
+                      ? MessageType.text
+                      : chat.files!.contains("m4a")
+                          ? MessageType.voice
+                          : MessageType.image,
+                  fileName: chat.fileName ?? "",
+                  status: chat.isDownloaded == 0
+                      ? MessageStatus.downloadPending
+                      : MessageStatus.downloaded,
+                  replyMessage: ReplyMessage(
+                      message: chat.parentFiles == null
+                          ? chat.parentMessage ?? ""
+                          : Strings.baseImageUrl + (chat.parentFiles ?? ""),
+                      messageId: "${chat.parentMessageId}",
+                      replyBy: '${chat.userId}',
+                      replyTo: '${chat.parentMessageUserId}',
+                      messageType: chat.parentFiles == null
+                          ? MessageType.text
+                          : chat.parentFiles!.contains("m4a")
+                              ? MessageType.voice
+                              : MessageType.image));
+              msgList.add(mobj);
+            } else {
+              var mobj = Message(
+                  message: chat.files == null
+                      ? chat.message ?? ""
+                      : Strings.baseImageUrl + (chat.files ?? ""),
+                  createdAt: DateTime.parse(chat.createdAt!),
+                  sendBy: '${chat.userId}',
+                  id: '${chat.messageId}',
+                  messageType: chat.files == null
+                      ? MessageType.text
+                      : chat.files!.contains("m4a")
+                          ? MessageType.voice
+                          : MessageType.image,
+                  fileName: chat.fileName ?? "",
+                  status:
+                      chat.fileDownloadedUsers!.contains("${Strings.userID}")
+                          ? MessageStatus.downloaded
+                          : MessageStatus.downloadPending);
+              msgList.add(mobj);
+            }
+
+            _chatController = ChatController(
+                initialMessageList: msgList,
+                scrollController: ScrollController(),
+                chatUsers: chtusers);
           }
-
-          _chatController = ChatController(
-              initialMessageList: msgList,
-              scrollController: ScrollController(),
-              chatUsers: chtusers
-              );
         }
-
-      }
-              isloading = false;
-                    });
+        isloading = false;
+      });
     });
   }
 
+
+//Pagination for older messages(API Call)
   Future<List<Message>> getMessagesWithPageCount() async {
     final api = Provider.of<ApiService>(context, listen: false);
     var val = await api.getMessagesWithPageCount(widget.groupId!, pageNo);
-   // msgList.clear();
-   List<Message> loasdedMsgList = [];
+    // msgList.clear();
+    List<Message> loasdedMsgList = [];
 
     if (val.status!) {
       pageNo += 1;
@@ -311,15 +328,14 @@ _socket?.on("group-users-list", (_data)
         val.nextpage == 0
             ? nextPageAvailable = false
             : nextPageAvailable = true;
-        for (ChatMessageRes item in val.data ?? []) 
-        {
+        for (ChatMessageRes item in val.data ?? []) {
           var chat = item;
 
           if (chat.parentMessageId != 0 && chat.parentMessageId != null) {
             var mobj = Message(
                 message: chat.files == null
                     ? chat.message ?? ""
-                    : Strings.uatImageUrl + (chat.files ?? ""),
+                    : Strings.baseImageUrl + (chat.files ?? ""),
                 createdAt: DateTime.parse(chat.createdAt!),
                 sendBy: '${chat.userId}',
                 id: '${chat.messageId}',
@@ -335,7 +351,7 @@ _socket?.on("group-users-list", (_data)
                 replyMessage: ReplyMessage(
                     message: chat.parentFiles == null
                         ? chat.parentMessage ?? ""
-                        : Strings.uatImageUrl + (chat.parentFiles ?? ""),
+                        : Strings.baseImageUrl + (chat.parentFiles ?? ""),
                     messageId: "${chat.parentMessageId}",
                     replyBy: '${chat.userId}',
                     replyTo: '${chat.parentMessageUserId}',
@@ -345,12 +361,11 @@ _socket?.on("group-users-list", (_data)
                             ? MessageType.voice
                             : MessageType.image));
             loasdedMsgList.add(mobj);
-          } else 
-          {
+          } else {
             var mobj = Message(
                 message: chat.files == null
                     ? chat.message ?? ""
-                    : Strings.uatImageUrl + (chat.files ?? ""),
+                    : Strings.baseImageUrl + (chat.files ?? ""),
                 createdAt: DateTime.parse(chat.createdAt!),
                 sendBy: '${chat.userId}',
                 id: '${chat.messageId}',
@@ -366,8 +381,7 @@ _socket?.on("group-users-list", (_data)
             loasdedMsgList.add(mobj);
           }
         }
-            msgList.insertAll(0, loasdedMsgList);
-
+        msgList.insertAll(0, loasdedMsgList);
       });
     } else {
       print('error');
@@ -388,8 +402,8 @@ _socket?.on("group-users-list", (_data)
   //   });
   // }
 
-  sendRecordedAudio(recordingPath,parentMsgId) 
-  {
+//send recorded audio via API
+  sendRecordedAudio(recordingPath, parentMsgId) {
     List<MultipartFile> audioFile = [
       MultipartFile.fromFileSync(
         "$recordingPath",
@@ -405,7 +419,10 @@ _socket?.on("group-users-list", (_data)
     uploadFile(formData);
   }
 
-  sendFiles(files,parentMsgId) {
+
+//send documents via API
+  sendFiles(files, parentMsgId) {
+    print("$parentMsgId ${Strings.userID} ${widget.groupId}");
     var formData = FormData.fromMap({
       'parent_message_id': parentMsgId,
       'user_id': Strings.userID,
@@ -415,14 +432,13 @@ _socket?.on("group-users-list", (_data)
     uploadFile(formData);
   }
 
-
   String getFileName(String _path) {
     return path.basename(_path);
   }
 
   uploadFile(formData) async {
     try {
-      var myUrl = 'https://demo.emeetify.com:81/mta/chat/createMessage';
+      var myUrl = '${Strings.baseUrl}/chat/createMessage';
       var response = await dio.post(
         myUrl,
         data: formData,
@@ -435,6 +451,7 @@ _socket?.on("group-users-list", (_data)
               return status! < 500;
             }),
       );
+
       print("response ${response.statusMessage}");
 
       print("status code ${response.statusCode}");
@@ -455,271 +472,287 @@ _socket?.on("group-users-list", (_data)
 
   @override
   Widget build(BuildContext context) {
-    return 
-    isloading?Center(child: CircularProgressIndicator()):
-    WillPopScope(
-      onWillPop: ()
-      {
-        if(Strings.fromNotificationChat)
-        {
-          Strings.fromNotificationChat = false;
-          if (Strings.roleId == 6) {
-                Navigator.pushNamed(context, "/projects");
+    return isloading
+        ? Center(child: CircularProgressIndicator())
+        : WillPopScope(
+            onWillPop: () {
+              if (Strings.fromNotificationChat) {
+                Strings.fromNotificationChat = false;
+                if (Strings.roleId == 6) {
+
+                  Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Projects(
+                  ),
+                ),(route) => false,
+              );
+               //   Navigator.pushNamed(context, "/projects");
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TeamsDashboard(
+                  ),
+                ),(route) => false,
+              );
+               //   Navigator.pushNamed(context, "/teamsDashboard");
+                }
               } else {
-                Navigator.pushNamed(context, "/teamsDashboard");
+                Navigator.pop(context);
               }
-        }
-        else
-        {
-          Navigator.pop(context);
-        }
-         
-          throw '';
-      },
-      child: MaterialApp(
-        builder: (_, child) => Portal(child: child!),
-        home: Scaffold(
-          body: ChatView(
-            refreshCall: (){
+
+              throw '';
             },
-            audioDownloadConfirmation: (){
-              joinGroup();
-            },
-            userList: flutterMentionUserList,
-            isLastPage: !nextPageAvailable,
-            loadMoreData: getMessagesWithPageCount,
-            currentUser: currentUser,
-            chatController: _chatController,
-            onSendTap: _onSendTap,
-            featureActiveConfig: const FeatureActiveConfig(
-              enableReactionPopup: false,
-              enablePagination: true,
-              lastSeenAgoBuilderVisibility: false,
-              receiptsBuilderVisibility: true,
-            ),
-            chatViewState: ChatViewState.hasMessages,
-            chatViewStateConfig: ChatViewStateConfiguration(
-              loadingWidgetConfig: ChatViewStateWidgetConfiguration(
-                loadingIndicatorColor: theme.outgoingChatBubbleColor,
-              ),
-              onReloadButtonTap: () {},
-            ),
-            typeIndicatorConfig: TypeIndicatorConfiguration(
-              flashingCircleBrightColor: theme.flashingCircleBrightColor,
-              flashingCircleDarkColor: theme.flashingCircleDarkColor,
-            ),
-            appBar: InkWell(
-              onTap: (){
-                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatMedia(
-                      groupId: widget.groupId!,
-                      teamId: widget.teamId,
-                      projectId: widget.projectId,
+            child: MaterialApp(
+              builder: (_, child) => Portal(child: child!),
+              home: Scaffold(
+                body: ChatView(
+                  refreshCall: () {},
+                  audioDownloadConfirmation: () {
+                    joinGroup();
+                  },
+                  userList: flutterMentionUserList,
+                  isLastPage: !nextPageAvailable,
+                  loadMoreData: getMessagesWithPageCount,
+                  currentUser: currentUser,
+                  chatController: _chatController,
+                  onSendTap: _onSendTap,
+                  featureActiveConfig: const FeatureActiveConfig(
+                    enableReactionPopup: false,
+                    enablePagination: true,
+                    lastSeenAgoBuilderVisibility: false,
+                    receiptsBuilderVisibility: true,
+                  ),
+                  chatViewState: ChatViewState.hasMessages,
+                  chatViewStateConfig: ChatViewStateConfiguration(
+                    loadingWidgetConfig: ChatViewStateWidgetConfiguration(
+                      loadingIndicatorColor: theme.outgoingChatBubbleColor,
+                    ),
+                    onReloadButtonTap: () {},
+                  ),
+                  typeIndicatorConfig: TypeIndicatorConfiguration(
+                    flashingCircleBrightColor: theme.flashingCircleBrightColor,
+                    flashingCircleDarkColor: theme.flashingCircleDarkColor,
+                  ),
+                  appBar: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatMedia(
+                            groupId: widget.groupId!,
+                            teamId: widget.teamId,
+                            projectId: widget.projectId,
+                          ),
+                        ),
+                      );
+                    },
+                    child: ChatViewAppBar(
+                      onBackPress: () {
+                        if (Strings.fromNotificationChat) {
+                          Strings.fromNotificationChat = false;
+                          if (Strings.roleId == 6) {
+                            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Projects(
+                  ),
+                ),(route) => false,
+              );
+                         //   Navigator.pushNamed(context, "/projects");
+                          } else {
+                           Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TeamsDashboard(
+                  ),
+                ),(route) => false,
+              );
+                           // Navigator.pushNamed(context, "/teamsDashboard");
+                          }
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      elevation: theme.elevation,
+                      backGroundColor: theme.appBarColor,
+                      backArrowColor: theme.backArrowColor,
+                      chatTitle: widget.teamName,
+                      userStatus: "Click here for group info",
+                      chatTitleTextStyle: TextStyle(
+                        color: theme.appBarTitleTextStyle,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        letterSpacing: 0.25,
+                      ),
+                      userStatusTextStyle: const TextStyle(color: Colors.grey),
                     ),
                   ),
-                );
-              },
-              child: ChatViewAppBar(
-                onBackPress: (){
-                  if(Strings.fromNotificationChat)
-                  {
-                    Strings.fromNotificationChat = false;
-                    if (Strings.roleId == 6) {
-                          Navigator.pushNamed(context, "/projects");
-                        } else {
-                          Navigator.pushNamed(context, "/teamsDashboard");
-                        }
-                  }
-                  else
-                  {
-                    Navigator.pop(context);
-                  }
-                },
-                elevation: theme.elevation,
-                backGroundColor: theme.appBarColor,
-                backArrowColor: theme.backArrowColor,
-                chatTitle: widget.teamName,
-                userStatus: "Click here for group info",
-                chatTitleTextStyle: TextStyle(
-                  color: theme.appBarTitleTextStyle,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 0.25,
-                ),
-                userStatusTextStyle: const TextStyle(color: Colors.grey),
-               
-              ),
-            ),
-            chatBackgroundConfig: ChatBackgroundConfiguration(
-              messageTimeIconColor: theme.messageTimeIconColor,
-              messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
-              defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
-                textStyle: TextStyle(
-                  color: theme.chatHeaderColor,
-                  fontSize: 17,
-                ),
-              ),
-              backgroundColor: theme.backgroundColor,
-            ),
-            sendMessageConfig: SendMessageConfiguration(
-              imagePickerIconsConfig: ImagePickerIconsConfiguration(
-                cameraIconColor: theme.cameraIconColor,
-                galleryIconColor: theme.galleryIconColor,
-              ),
-              replyMessageColor: theme.replyMessageColor,
-              defaultSendButtonColor: theme.sendButtonColor,
-              replyDialogColor: theme.replyDialogColor,
-              replyTitleColor: theme.replyTitleColor,
-              textFieldBackgroundColor: theme.textFieldBackgroundColor,
-              closeIconColor: theme.closeIconColor,
-              textFieldConfig: TextFieldConfiguration(
-                onMessageTyping: (status) {
-                  /// Do with status
-                  debugPrint(status.toString());
-                },
-                compositionThresholdTime: const Duration(seconds: 1),
-                textStyle: TextStyle(color: theme.textFieldTextColor),
-              ),
-              micIconColor: theme.replyMicIconColor,
-              voiceRecordingConfiguration: VoiceRecordingConfiguration(
-                backgroundColor: theme.waveformBackgroundColor,
-                recorderIconColor: theme.recordIconColor,
-                waveStyle: WaveStyle(
-                  showMiddleLine: false,
-                  waveColor: theme.waveColor ?? Colors.white,
-                  extendWaveform: true,
-                ),
-              ),
-            ),
-            chatBubbleConfig: ChatBubbleConfiguration(
-              outgoingChatBubbleConfig: ChatBubble(
-                linkPreviewConfig: LinkPreviewConfiguration(
-                  backgroundColor: theme.linkPreviewOutgoingChatColor,
-                  bodyStyle: theme.outgoingChatLinkBodyStyle,
-                  titleStyle: theme.outgoingChatLinkTitleStyle,
-                ),
-                receiptsWidgetConfig: const ReceiptsWidgetConfig(
-                    showReceiptsIn: ShowReceiptsIn.all),
-                color: theme.outgoingChatBubbleColor,
-              ),
-              inComingChatBubbleConfig: ChatBubble(
-                linkPreviewConfig: LinkPreviewConfiguration(
-                  linkStyle: TextStyle(
-                    color: theme.inComingChatBubbleTextColor,
-                    decoration: TextDecoration.underline,
+                  chatBackgroundConfig: ChatBackgroundConfiguration(
+                    messageTimeIconColor: theme.messageTimeIconColor,
+                    messageTimeTextStyle:
+                        TextStyle(color: theme.messageTimeTextColor),
+                    defaultGroupSeparatorConfig:
+                        DefaultGroupSeparatorConfiguration(
+                      textStyle: TextStyle(
+                        color: theme.chatHeaderColor,
+                        fontSize: 17,
+                      ),
+                    ),
+                    backgroundColor: theme.backgroundColor,
                   ),
-                  backgroundColor: theme.linkPreviewIncomingChatColor,
-                  bodyStyle: theme.incomingChatLinkBodyStyle,
-                  titleStyle: theme.incomingChatLinkTitleStyle,
-                ),
-                textStyle: TextStyle(color: theme.inComingChatBubbleTextColor),
-                onMessageRead: (message) {
-                  /// send your message reciepts to the other client
-                  debugPrint('Message Read');
-                },
-                senderNameTextStyle:
-                    TextStyle(color: theme.inComingChatBubbleTextColor),
-                color: theme.inComingChatBubbleColor,
-              ),
-            ),
-            replyPopupConfig: ReplyPopupConfiguration(
-              onUnsendTap: (message){
-
-            showDeleteDialog(context,int.parse(message.id));
-              },
-              onMoreTap: (message){
-                  print("morre");
-                  showLoading(context);
-                  getReadUsers(int.parse(message.id));
-      
-              },
-              onReportTap: (){
-                  print("report");
-      
-              },
-              backgroundColor: theme.replyPopupColor,
-              buttonTextStyle: TextStyle(color: theme.replyPopupButtonColor),
-              topBorderColor: theme.replyPopupTopBorderColor,
-            ),
-            
-          
-            messageConfig: MessageConfiguration(
-              messageReactionConfig: MessageReactionConfiguration(
-                backgroundColor: theme.messageReactionBackGroundColor,
-                borderColor: theme.messageReactionBackGroundColor,
-                reactedUserCountTextStyle:
-                    TextStyle(color: theme.inComingChatBubbleTextColor),
-                reactionCountTextStyle:
-                    TextStyle(color: theme.inComingChatBubbleTextColor),
-                reactionsBottomSheetConfig: ReactionsBottomSheetConfiguration(
-                  backgroundColor: theme.backgroundColor,
-                  reactedUserTextStyle: TextStyle(
-                    color: theme.inComingChatBubbleTextColor,
+                  sendMessageConfig: SendMessageConfiguration(
+                    imagePickerIconsConfig: ImagePickerIconsConfiguration(
+                      cameraIconColor: theme.cameraIconColor,
+                      galleryIconColor: theme.galleryIconColor,
+                    ),
+                    replyMessageColor: theme.replyMessageColor,
+                    defaultSendButtonColor: theme.sendButtonColor,
+                    replyDialogColor: theme.replyDialogColor,
+                    replyTitleColor: theme.replyTitleColor,
+                    textFieldBackgroundColor: theme.textFieldBackgroundColor,
+                    closeIconColor: theme.closeIconColor,
+                    textFieldConfig: TextFieldConfiguration(
+                      onMessageTyping: (status) {
+                        /// Do with status
+                        debugPrint(status.toString());
+                      },
+                      compositionThresholdTime: const Duration(seconds: 1),
+                      textStyle: TextStyle(color: theme.textFieldTextColor),
+                    ),
+                    micIconColor: theme.replyMicIconColor,
+                    voiceRecordingConfiguration: VoiceRecordingConfiguration(
+                      backgroundColor: theme.waveformBackgroundColor,
+                      recorderIconColor: theme.recordIconColor,
+                      waveStyle: WaveStyle(
+                        showMiddleLine: false,
+                        waveColor: theme.waveColor ?? Colors.white,
+                        extendWaveform: true,
+                      ),
+                    ),
                   ),
-                  reactionWidgetDecoration: BoxDecoration(
-                    color: theme.inComingChatBubbleColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            isDarkTheme ? Colors.black12 : Colors.grey.shade200,
-                        offset: const Offset(0, 20),
-                        blurRadius: 40,
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(10),
+                  chatBubbleConfig: ChatBubbleConfiguration(
+                    outgoingChatBubbleConfig: ChatBubble(
+                      linkPreviewConfig: LinkPreviewConfiguration(
+                        backgroundColor: theme.linkPreviewOutgoingChatColor,
+                        bodyStyle: theme.outgoingChatLinkBodyStyle,
+                        titleStyle: theme.outgoingChatLinkTitleStyle,
+                      ),
+                      receiptsWidgetConfig: const ReceiptsWidgetConfig(
+                          showReceiptsIn: ShowReceiptsIn.all),
+                      color: theme.outgoingChatBubbleColor,
+                    ),
+                    inComingChatBubbleConfig: ChatBubble(
+                      linkPreviewConfig: LinkPreviewConfiguration(
+                        linkStyle: TextStyle(
+                          color: theme.inComingChatBubbleTextColor,
+                          decoration: TextDecoration.underline,
+                        ),
+                        backgroundColor: theme.linkPreviewIncomingChatColor,
+                        bodyStyle: theme.incomingChatLinkBodyStyle,
+                        titleStyle: theme.incomingChatLinkTitleStyle,
+                      ),
+                      textStyle:
+                          TextStyle(color: theme.inComingChatBubbleTextColor),
+                      onMessageRead: (message) {
+                        /// send your message reciepts to the other client
+                        debugPrint('Message Read');
+                      },
+                      senderNameTextStyle:
+                          TextStyle(color: theme.inComingChatBubbleTextColor),
+                      color: theme.inComingChatBubbleColor,
+                    ),
+                  ),
+                  replyPopupConfig: ReplyPopupConfiguration(
+                    onUnsendTap: (message) {
+                      showDeleteDialog(context, int.parse(message.id));
+                    },
+                    onMoreTap: (message) {
+                      print("morre");
+                      showLoading(context);
+                      getReadUsers(int.parse(message.id));
+                    },
+                    onReportTap: () {
+                      print("report");
+                    },
+                    backgroundColor: theme.replyPopupColor,
+                    buttonTextStyle:
+                        TextStyle(color: theme.replyPopupButtonColor),
+                    topBorderColor: theme.replyPopupTopBorderColor,
+                  ),
+                  messageConfig: MessageConfiguration(
+                    messageReactionConfig: MessageReactionConfiguration(
+                      backgroundColor: theme.messageReactionBackGroundColor,
+                      borderColor: theme.messageReactionBackGroundColor,
+                      reactedUserCountTextStyle:
+                          TextStyle(color: theme.inComingChatBubbleTextColor),
+                      reactionCountTextStyle:
+                          TextStyle(color: theme.inComingChatBubbleTextColor),
+                      reactionsBottomSheetConfig:
+                          ReactionsBottomSheetConfiguration(
+                        backgroundColor: theme.backgroundColor,
+                        reactedUserTextStyle: TextStyle(
+                          color: theme.inComingChatBubbleTextColor,
+                        ),
+                        reactionWidgetDecoration: BoxDecoration(
+                          color: theme.inComingChatBubbleColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDarkTheme
+                                  ? Colors.black12
+                                  : Colors.grey.shade200,
+                              offset: const Offset(0, 20),
+                              blurRadius: 40,
+                            )
+                          ],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    imageMessageConfig: ImageMessageConfiguration(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 15),
+                      shareIconConfig: ShareIconConfiguration(
+                        defaultIconBackgroundColor:
+                            theme.shareIconBackgroundColor,
+                        defaultIconColor: theme.shareIconColor,
+                      ),
+                    ),
+                  ),
+                  repliedMessageConfig: RepliedMessageConfiguration(
+                    backgroundColor: theme.repliedMessageColor,
+                    verticalBarColor: theme.verticalBarColor,
+                    repliedMsgAutoScrollConfig: RepliedMsgAutoScrollConfig(
+                      enableHighlightRepliedMsg: true,
+                      highlightColor: Colors.pinkAccent.shade100,
+                      highlightScale: 1.1,
+                    ),
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.25,
+                    ),
+                    replyTitleTextStyle:
+                        TextStyle(color: theme.repliedTitleTextColor),
+                  ),
+                  swipeToReplyConfig: SwipeToReplyConfiguration(
+                    replyIconColor: theme.swipeToReplyIconColor,
                   ),
                 ),
               ),
-              imageMessageConfig: ImageMessageConfiguration(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                shareIconConfig: ShareIconConfiguration(
-                  defaultIconBackgroundColor: theme.shareIconBackgroundColor,
-                  defaultIconColor: theme.shareIconColor,
-                ),
-              ),
             ),
-           
-            repliedMessageConfig: RepliedMessageConfiguration(
-              backgroundColor: theme.repliedMessageColor,
-              verticalBarColor: theme.verticalBarColor,
-              repliedMsgAutoScrollConfig: RepliedMsgAutoScrollConfig(
-                enableHighlightRepliedMsg: true,
-                highlightColor: Colors.pinkAccent.shade100,
-                highlightScale: 1.1,
-              ),
-              textStyle: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.25,
-              ),
-              replyTitleTextStyle: TextStyle(color: theme.repliedTitleTextColor),
-            ),
-            swipeToReplyConfig: SwipeToReplyConfiguration(
-              replyIconColor: theme.swipeToReplyIconColor,
-            ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 
-  Future<void> _onSendTap(
-    String message,
-    ReplyMessage replyMessage,
-    MessageType messageType,
-    List<MultipartFile> files
-  ) async {
-
+  Future<void> _onSendTap(String message, ReplyMessage replyMessage,
+      MessageType messageType, List<MultipartFile> files) async {
     print(
         "reply msg ${replyMessage.messageId}  send${replyMessage.replyBy}  to ${replyMessage.replyTo}");
     if (messageType.isVoice) {
-      sendRecordedAudio(message,replyMessage.messageId);
-    } 
-   else if(messageType.isImage) 
-   {
-     int totalLength = 0;
+      sendRecordedAudio(message, replyMessage.messageId);
+    } else if (messageType.isImage) {
+      int totalLength = 0;
       for (MultipartFile file in files) {
         int content = await file.length;
         totalLength += content;
@@ -732,13 +765,11 @@ _socket?.on("group-users-list", (_data)
       //var response = await dio.post('https://demo.emeetify.com:81/mta/chat/createMessage', data: formData);
       // check response status code
       if (totalSize <= 25600) {
-            sendFiles(files,replyMessage.messageId);
-
+        sendFiles(files, replyMessage.messageId);
       } else {
         _showFileSizeWarning();
       }
-   }
-    else {
+    } else {
       updateChat(message, replyMessage.messageId);
     }
     print("reeeee ${files.length}");
@@ -763,7 +794,7 @@ _socket?.on("group-users-list", (_data)
     // });
   }
 
-    Future<bool> _showFileSizeWarning() async {
+  Future<bool> _showFileSizeWarning() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -798,48 +829,42 @@ _socket?.on("group-users-list", (_data)
         false;
   }
 
- 
-
-  getReadUsers(msgID)
-  {
-     _readUsersList = [];
-     final api = Provider.of<ApiService>(context, listen: false);
+  getReadUsers(msgID) {
+    _readUsersList = [];
+    final api = Provider.of<ApiService>(context, listen: false);
     api.getReadedUsers(msgID).then((response) {
       if (response.status!) {
         setState(() {
-         _readUsersList = response.data!;
+          _readUsersList = response.data!;
         });
         Navigator.pop(context);
         showReadUsersDialog();
       } else {
         AppUtils.showToastError(response.message ?? "Unknown Error");
-        Navigator.pop(context);    
+        Navigator.pop(context);
         print('error');
       }
-    }).catchError((onError) 
-    {
+    }).catchError((onError) {
       Navigator.pop(context);
       AppUtils.showToastError(onError.toString());
     });
   }
 
-   Future<void> showReadUsersDialog() async 
-  {
+  Future<void> showReadUsersDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           content: StatefulBuilder(
-            builder:(BuildContext context, StateSetter setState){
-              print("checkk ${              jsonEncode(_readUsersList)}");
-              return SingleChildScrollView(
+              builder: (BuildContext context, StateSetter setState) {
+            print("checkk ${jsonEncode(_readUsersList)}");
+            return SingleChildScrollView(
               child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
                   },
-                  child:
-                  Column(
+                  child: Column(
                     children: [
                       Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                         new Icon(Icons.close, size: 22.0, color: Colors.black)
@@ -854,110 +879,107 @@ _socket?.on("group-users-list", (_data)
                       Container(
                         height: MediaQuery.of(context).size.width * 1,
                         width: MediaQuery.of(context).size.width * 0.9,
-                        child:
-                         _readUsersList.length != 0? ListView.builder(
-                          itemCount: _readUsersList.length,
-                          itemBuilder: (context, index) {
-                            return Column(
-                              children: [
-                                Card(
-                                  color: Color.fromRGBO(230, 230, 230, 1),
-                                  child: ListTile(
-                                    title: Text(
-                                      _readUsersList[index].name ?? "",
-                                    ),
-                                   // subtitle: Text(_readUsersList[index].prof ?? ""),
-                                    onTap: () {},
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ):Center(child: Text("Not read by any users!",style:TextStyle(color: Colors.red))),
+                        child: _readUsersList.length != 0
+                            ? ListView.builder(
+                                itemCount: _readUsersList.length,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    children: [
+                                      Card(
+                                        color: Color.fromRGBO(230, 230, 230, 1),
+                                        child: ListTile(
+                                          title: Text(
+                                            _readUsersList[index].name ?? "",
+                                          ),
+                                          // subtitle: Text(_readUsersList[index].prof ?? ""),
+                                          onTap: () {},
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              )
+                            : Center(
+                                child: Text("Not read by any users!",
+                                    style: TextStyle(color: Colors.red))),
                       ),
                     ],
                   )),
-            );}
-          ),
+            );
+          }),
         );
       },
     );
   }
-  showLoading(BuildContext context) 
-  {
-   showDialog<void>(
+
+  showLoading(BuildContext context) {
+    showDialog<void>(
       barrierColor: Colors.white.withOpacity(0.4),
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-         return  SimpleDialog(
-            elevation: 8.0,
-            backgroundColor:
-                  Colors.white, // can change this to your prefered color
-            children: <Widget>[
-               Container(
-                height: 100,
-                 child: Center(
-                    child: CircularProgressIndicator(),
-                 ),
-               ),
-               Center(child: Text("Please wait! While the Details are being fetched"))     
-            ],
-         );
-      },
-   );
-  }
-
-
-   Future<bool> showDeleteDialog(ctx,messageId) async 
-  {
-    return await showDialog(
-          context: ctx,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Delete ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Are you sure to delete the Message?',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
+        return SimpleDialog(
+          elevation: 8.0,
+          backgroundColor:
+              Colors.white, // can change this to your prefered color
+          children: <Widget>[
+            Container(
+              height: 100,
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
-              TextButton(
-                onPressed: () {
-                   Navigator.of(context).pop(false);
-                             deleteMessagesById(messageId);
-
-                },
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
+            ),
+            Center(
+                child: Text("Please wait! While the Details are being fetched"))
+          ],
         );
+      },
+    );
   }
-  
+
+  Future<bool> showDeleteDialog(ctx, messageId) async {
+    return await showDialog(
+      context: ctx,
+      builder: (context) => new AlertDialog(
+        title: Text(
+          "Delete ?",
+          style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFF0061b0),
+              fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure to delete the Message?',
+          style: TextStyle(
+              fontSize: 14, color: Colors.black, fontWeight: FontWeight.w600),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text(
+              'No',
+              style: TextStyle(
+                  fontSize: 16, color: Colors.red, fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+              deleteMessagesById(messageId,widget.groupId ?? 0);
+            },
+            child: new Text(
+              'Yes',
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String getFileExt(String? fileName) {
     print("Filename--> $fileName");
     var file = fileName?.split("/");
@@ -1010,6 +1032,8 @@ _socket?.on("group-users-list", (_data)
         }), ack: (_data) {
       print("dataaa ${_data}");
     });
+
+   // updateChatCountDetails("create");
   }
 
   void _onThemeIconTap() {

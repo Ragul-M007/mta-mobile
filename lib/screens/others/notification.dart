@@ -334,7 +334,14 @@ class _NotificationContentState extends State<NotificationContent>
                                 }));
 
                                 print("peoo ${jsonEncode(peo)}");
-                                Strings.selectedCategory.clear();
+
+                                
+                              
+
+                                if (peo.categoryId != "null" &&
+                                    peo.categoryId != null) 
+                                    {
+                                      Strings.selectedCategory.clear();
                                 Strings.selectedCategory
                                     .add(FectchCatsData.fromJson(
                                       {
@@ -348,13 +355,10 @@ class _NotificationContentState extends State<NotificationContent>
                                       ? int.parse(peo.projectId ?? "0")
                                       : null
                                 }));
-
-                                if (peo.categoryId != "null" &&
-                                    peo.categoryId != null) 
-                                    {
                                   Strings.category = true;
                                 } else {
                                   Strings.category = false;
+                                    
                                 }
                                // Strings.fromNotificationDocuments = true;
                                 updateNotification(

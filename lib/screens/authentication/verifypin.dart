@@ -375,6 +375,7 @@ class _VerifypinState extends State<Verifypin> {
             } else if (response.data?.role == "PUBLICUSER") {
               Strings.roleId = 7;
             }
+            AppUtils.savePreferences("roleId", "${Strings.roleId}");
           }
 
           if (response.status!) {
@@ -394,12 +395,18 @@ class _VerifypinState extends State<Verifypin> {
             Strings.userID = response.data!.userId;
             assignroles();
             AppUtils.savePreferences("easyAccess", "Y");
+            AppUtils.savePreferences("authToken", response.token);
+
             Strings.isLogin = true;
-            if (Strings.FromNotification) {
+
+            
+            if (Strings.FromNotification) 
+            {
               Strings.FromNotification = false;
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => Attendance()));
-            } else if (Strings.fromNotificationComments) {
+            } else if (Strings.fromNotificationComments) 
+            {
               if (Strings.selectedProDocument[0].projectComments == "true") {
                 if (Strings.selectedProDocument[0].commentId == null) {
                   Navigator.of(context).push(MaterialPageRoute(
@@ -417,7 +424,8 @@ class _VerifypinState extends State<Verifypin> {
                       .push(MaterialPageRoute(builder: (context) => Replies()));
                 }
               }
-            } else if (Strings.fromNotificationDocuments) {
+            } else if (Strings.fromNotificationDocuments) 
+            {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => ViewDocScreen()));
             } else if (Strings.fromNotificationChat) {
@@ -436,7 +444,8 @@ class _VerifypinState extends State<Verifypin> {
                   ),
                 ),
               );
-            } else {
+            }
+             else {
               if (Strings.roleId == 6) {
                 Navigator.pushNamed(context, "/projects");
               } else {

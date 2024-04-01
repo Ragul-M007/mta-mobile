@@ -193,7 +193,7 @@ class _ImageMessageViewState extends State<ImageMessageView> {
                     borderRadius: widget.imageMessageConfig?.borderRadius ??
                         BorderRadius.circular(14),
                     child: (() {
-                      if (widget.imageUrl.isUrl && (widget.imageUrl.contains('.png') || widget.imageUrl.contains('.jpeg') || widget.imageUrl.contains('.jpg')) && downloadStatus != MessageStatus.downloaded) 
+                      if (widget.imageUrl.isUrl && (widget.imageUrl.toLowerCase().contains('.png') || widget.imageUrl.toLowerCase().contains('.jpeg') || widget.imageUrl.toLowerCase().contains('.jpg')) && downloadStatus != MessageStatus.downloaded) 
                       {
                         return Container(
                           color: Colors.white,

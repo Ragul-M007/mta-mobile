@@ -49,14 +49,14 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<ChangePassRes> signUp(SignUpReq body) async {
+  Future<CommonRes> signUp(SignUpReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -72,7 +72,7 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
@@ -302,6 +302,33 @@ class _ApiService implements ApiService {
               baseUrl,
             ))));
     final value = GroupUsersRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<LoginStatusRes> fetchLoginHours(int userId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<LoginStatusRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/getUserLoginHours?user_id=${userId}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = LoginStatusRes.fromJson(_result.data!);
     return value;
   }
 
@@ -840,6 +867,41 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<ChatMessageWithPageCountRes> checkMessageAvailability(
+    int? projectId,
+    int? teamId,
+    int? userId,
+    String? groupType,
+    String? type,
+    int? grpId,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<ChatMessageWithPageCountRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/getureadMessageDetails?group_type=${groupType}&team_id=${teamId}&project_id=${projectId}&user_id=${userId}&type=${type}&group_id=${grpId}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = ChatMessageWithPageCountRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(
     int id,
     int pageNo,
@@ -870,14 +932,14 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<ChangePassRes> changePass(ChangePassReq body) async {
+  Future<CommonRes> changePass(ChangePassReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -893,7 +955,7 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
@@ -926,14 +988,14 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<ChangePassRes> forgotPass(ForgotPassReq body) async {
+  Future<CommonRes> forgotPass(ForgotPassReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -949,19 +1011,19 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> otpVerify(ValidateOTPReq body) async {
+  Future<CommonRes> otpVerify(ValidateOTPReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -977,12 +1039,12 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> editProfile(
+  Future<CommonRes> editProfile(
     int id,
     EditProfileReq body,
   ) async {
@@ -992,7 +1054,7 @@ class _ApiService implements ApiService {
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
@@ -1008,18 +1070,18 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> updateNotificationStatus(int id) async {
+  Future<CommonRes> updateNotificationStatus(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
@@ -1035,12 +1097,12 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> updateDownloadStatus(
+  Future<CommonRes> updateDownloadStatus(
     int id,
     int status,
   ) async {
@@ -1049,7 +1111,7 @@ class _ApiService implements ApiService {
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
@@ -1065,18 +1127,18 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> removeProPic(int id) async {
+  Future<CommonRes> removeProPic(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
       headers: _headers,
       extra: _extra,
@@ -1092,25 +1154,28 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> deleteMessage(int id) async {
+  Future<CommonRes> deleteMessage(
+    int id,
+    int grpId,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
       headers: _headers,
       extra: _extra,
     )
             .compose(
               _dio.options,
-              '/chat/deleteMessage?message_id=${id}',
+              '/chat/deleteMessage?message_id=${id}&&group_id=${grpId}',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -1119,18 +1184,18 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<ChangePassRes> deleteUser(int id) async {
+  Future<CommonRes> deleteUser(int id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;
     final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<ChangePassRes>(Options(
+        .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
       headers: _headers,
       extra: _extra,
@@ -1146,7 +1211,7 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final value = ChangePassRes.fromJson(_result.data!);
+    final value = CommonRes.fromJson(_result.data!);
     return value;
   }
 
