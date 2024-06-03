@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:path/path.dart' as path;
 
-import '../../ChatView/lib/chatview.dart';
+import '../../ChatView/chatview.dart';
 import '../../models/Chat/ChatMessageRes.dart';
 import '../../models/Chat/GroupUsersRes.dart';
 import '../../network/ApiService.dart';
@@ -266,9 +266,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           ? MessageType.voice
                           : MessageType.image,
                   fileName: chat.fileName ?? "",
-                  status: chat.isDownloaded == 0
-                      ? MessageStatus.downloadPending
-                      : MessageStatus.downloaded,
+                  status:
+                      chat.fileDownloadedUsers!.contains("${Strings.userID}")
+                          ? MessageStatus.downloaded
+                          : MessageStatus.downloadPending,
                   replyMessage: ReplyMessage(
                       message: chat.parentFiles == null
                           ? chat.parentMessage ?? ""

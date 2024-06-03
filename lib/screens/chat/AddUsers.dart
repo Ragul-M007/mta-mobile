@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mta/ChatView/lib/src/models/AddRemoveUserReq.dart';
+import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 

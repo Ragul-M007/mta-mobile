@@ -26,14 +26,11 @@ mixin Strings
  // static String baseUrl ="https://demo.emeetify.com:81/mta";
     static String baseUrl ="https://mta.multitechcorp.in/mta";
 
- // static String baseImageUrl = "https://demo.emeetify.com:81/";
  // static String socketUrl = 'https://demo.emeetify.com:5015/';
-  //static String socketUrl = 'https://demo.emeetify.com:6253/';
 
   static String socketUrl = 'https://mta.multitechcorp.in:5022/';
  // static String socketUrl = 'http://192.168.0.134:5021/';
 
-  static String uatImageUrl = 'https://demo.emeetify.com:5032/';
   
  // static String baseImageUrl = 'https://demo.emeetify.com:5032/';
    static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';

@@ -1,0 +1,187 @@
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mta/ChatView/extensions/extensions.dart';
+
+
+import '../models/models.dart';
+import '../utils/constants/constants.dart';
+import 'link_preview.dart';
+
+class TextMessageView extends StatelessWidget {
+  const TextMessageView({
+    Key? key,
+    required this.isMessageBySender,
+    required this.message,
+    this.chatBubbleMaxWidth,
+    this.inComingChatBubbleConfig,
+    this.outgoingChatBubbleConfig,
+    this.messageReactionConfig,
+    this.highlightMessage = false,
+    this.highlightColor,
+  }) : super(key: key);
+
+  /// Represents current message is sent by current user.
+  final bool isMessageBySender;
+
+  /// Provides message instance of chat.
+  final Message message;
+
+  /// Allow users to give max width of chat bubble.
+  final double? chatBubbleMaxWidth;
+
+  /// Provides configuration of chat bubble appearance from other user of chat.
+  final ChatBubble? inComingChatBubbleConfig;
+
+  /// Provides configuration of chat bubble appearance from current user of chat.
+  final ChatBubble? outgoingChatBubbleConfig;
+
+  /// Provides configuration of reaction appearance in chat bubble.
+  final MessageReactionConfiguration? messageReactionConfig;
+
+  /// Represents message should highlight.
+  final bool highlightMessage;
+
+  /// Allow user to set color of highlighted message.
+  final Color? highlightColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final textMessage = message.message;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          constraints: BoxConstraints(
+              maxWidth: chatBubbleMaxWidth ??
+                  MediaQuery.of(context).size.width * 0.80,
+                  ),
+          padding: _padding ??
+              const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
+          margin: _margin ??
+              EdgeInsets.fromLTRB(
+                  5, 0, 6, 0),
+          decoration: BoxDecoration(
+            color: highlightMessage ? highlightColor : _color,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              textMessage.isUrl
+                  ? Container(
+                    width:  MediaQuery.of(context).size.width * 0.60,
+                    child: LinkPreview(
+                        linkPreviewConfig: _linkPreviewConfig,
+                        url: textMessage,
+                      ),
+                  )
+                  : 
+                  Container(
+                    width:  MediaQuery.of(context).size.width * 0.60,
+                    child: Text.rich(TextSpan(
+                                      children: customizeText(
+                                          textMessage),    style:  _textStyle ??
+                            textTheme.bodyMedium!.copyWith(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),)
+                            ),
+                  ),
+                          Spacer(),
+                          isMessageBySender?
+                          Text(DateFormat('hh:mm a').format(message.createdAt),style: TextStyle(color:  Color.fromARGB(255, 246, 242, 242),fontSize: 12)):                           
+                           Text(DateFormat('hh:mm a').format(message.createdAt),style: TextStyle(color:Colors.black,fontSize: 12),),
+
+            ],
+          )
+              // Text(
+              //     textMessage,
+              
+              //   ),
+        ),
+        
+      ],
+    );
+  }
+
+  List<InlineSpan> customizeText(String text) 
+  {
+    // final regex = RegExp('\'.+\'');
+    // final target = regex.stringMatch(testString)!;
+    List<InlineSpan> spans = [];
+
+    final regex = RegExp(r'##&&%(.*?)##&&%');
+    const placeholder = '{@}';
+
+    Iterable<Match> matches = regex.allMatches(text);
+    List<String> target = [];
+
+    for (Match match in matches) {
+      // match.group(1) contains the content inside the ##&&% sequence
+      print('Content: ${match.group(1)}');
+      target.add(match.group(1) ?? "");
+    }
+
+    // final target = regex.allMatches(text);
+    final updatedString = text.replaceAll(regex, placeholder);
+    final tokens = updatedString.split(RegExp(' '));
+
+    print("tokenssss $tokens");
+
+    var placeHolderindex = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == placeholder) {
+        print("iiu $placeHolderindex klklkl ${target[placeHolderindex]}");
+        spans.add(TextSpan(
+            text: target[placeHolderindex] + ' ',
+            style: const TextStyle(color: Color.fromARGB(255, 134, 240, 41),fontWeight: FontWeight.w600)));
+        placeHolderindex = placeHolderindex + 1;
+      } else {
+        print("adding ${tokens[i]}");
+        spans.add(TextSpan(text: tokens[i] + ' '));
+      }
+    }
+
+    // spans = tokens.map((e) => e == placeholder
+    // ? TextSpan(text: target[target.indexOf(e)+1] + ' ', style: const TextStyle(color: Colors.blue))
+    // : TextSpan(text: e + ' '))
+    // .toList();
+
+    return spans;
+  }
+
+  EdgeInsetsGeometry? get _padding => isMessageBySender
+      ? outgoingChatBubbleConfig?.padding
+      : inComingChatBubbleConfig?.padding;
+
+  EdgeInsetsGeometry? get _margin => isMessageBySender
+      ? outgoingChatBubbleConfig?.margin
+      : inComingChatBubbleConfig?.margin;
+
+  LinkPreviewConfiguration? get _linkPreviewConfig => isMessageBySender
+      ? outgoingChatBubbleConfig?.linkPreviewConfig
+      : inComingChatBubbleConfig?.linkPreviewConfig;
+
+  TextStyle? get _textStyle => isMessageBySender
+      ? outgoingChatBubbleConfig?.textStyle
+      : inComingChatBubbleConfig?.textStyle;
+
+  BorderRadiusGeometry _borderRadius(String message) => isMessageBySender
+      ? outgoingChatBubbleConfig?.borderRadius ??
+          (message.length < 37
+              ? BorderRadius.circular(replyBorderRadius1)
+              : BorderRadius.circular(replyBorderRadius2))
+      : inComingChatBubbleConfig?.borderRadius ??
+          (message.length < 29
+              ? BorderRadius.circular(replyBorderRadius1)
+              : BorderRadius.circular(replyBorderRadius2));
+
+  Color get _color => isMessageBySender
+      ? outgoingChatBubbleConfig?.color ?? Colors.purple
+      : inComingChatBubbleConfig?.color ?? Colors.grey.shade500;
+}

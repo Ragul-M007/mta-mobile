@@ -1,6 +1,6 @@
 
 import 'package:dio/dio.dart';
-import 'package:mta/ChatView/lib/src/models/AddRemoveUserReq.dart';
+import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
@@ -53,9 +53,9 @@ part 'ApiService.g.dart';
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
 
- @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+// @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
- // @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
   // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
 
 

@@ -293,7 +293,7 @@ class _LoginContentState extends State<LoginContent>
           ),
         ),
         Container(
-            height: MediaQuery.of(context).size.height * 0.44,
+            height: MediaQuery.of(context).size.height * 0.46,
             margin: EdgeInsets.fromLTRB(
                 20, MediaQuery.of(context).size.height * 12 / 100, 20, 0),
             decoration: BoxDecoration(

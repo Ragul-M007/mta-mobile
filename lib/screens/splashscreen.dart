@@ -343,7 +343,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                         style: TextStyle(color: Colors.black),
                       ),
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
+                        backgroundColor: Colors.white,
                       ),
                     ),
                   ),

@@ -497,7 +497,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                                           children: [
                                                             CircleImageFromNetwork(
                                                                 imageUrl: Strings
-                                                                        .uatImageUrl +
+                                                                        .baseImageUrl +
                                                                     (_attendance[index]
                                                                             .projectImg ??
                                                                         ""),
@@ -1142,7 +1142,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                                               children: [
                                                 CircleImageFromNetwork(
                                                     imageUrl: Strings
-                                                            .uatImageUrl +
+                                                            .baseImageUrl +
                                                         (_attendance[index]
                                                                 .projectImg ??
                                                             ""),
@@ -1412,7 +1412,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                   fontWeight: FontWeight.w600),
             ),
             content: Text(
-              "You were not inside the selected project location. Please move closer to the Project location and try again.",
+              "You were not inside the selected project location.You are $distance mtrs far from the location. Please move closer to the Project location and try again. ",
               style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,

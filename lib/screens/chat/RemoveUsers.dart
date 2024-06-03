@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mta/ChatView/lib/src/models/AddRemoveUserReq.dart';
+import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
 import 'package:mta/models/Chat/GroupUsersRes.dart';
 import 'package:provider/provider.dart';
 
