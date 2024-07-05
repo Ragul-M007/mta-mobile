@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/ChatView/extensions/extensions.dart';
-
 
 import '../models/models.dart';
 import '../utils/constants/constants.dart';
@@ -53,64 +51,64 @@ class TextMessageView extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          constraints: BoxConstraints(
+            constraints: BoxConstraints(
               maxWidth: chatBubbleMaxWidth ??
                   MediaQuery.of(context).size.width * 0.80,
-                  ),
-          padding: _padding ??
-              const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 10,
-              ),
-          margin: _margin ??
-              EdgeInsets.fromLTRB(
-                  5, 0, 6, 0),
-          decoration: BoxDecoration(
-            color: highlightMessage ? highlightColor : _color,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              textMessage.isUrl
-                  ? Container(
-                    width:  MediaQuery.of(context).size.width * 0.60,
-                    child: LinkPreview(
-                        linkPreviewConfig: _linkPreviewConfig,
-                        url: textMessage,
+            ),
+            padding: _padding ??
+                const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
+                ),
+            margin: _margin ?? EdgeInsets.fromLTRB(5, 0, 6, 0),
+            decoration: BoxDecoration(
+              color: highlightMessage ? highlightColor : _color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                textMessage.isUrl
+                    ? Container(
+                        width: MediaQuery.of(context).size.width * 0.60,
+                        child: LinkPreview(
+                          linkPreviewConfig: _linkPreviewConfig,
+                          url: textMessage,
+                        ),
+                      )
+                    : Container(
+                        width: MediaQuery.of(context).size.width * 0.60,
+                        child: Text.rich(TextSpan(
+                          children: customizeText(textMessage),
+                          style: _textStyle ??
+                              textTheme.bodyMedium!.copyWith(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                        )),
                       ),
-                  )
-                  : 
-                  Container(
-                    width:  MediaQuery.of(context).size.width * 0.60,
-                    child: Text.rich(TextSpan(
-                                      children: customizeText(
-                                          textMessage),    style:  _textStyle ??
-                            textTheme.bodyMedium!.copyWith(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),)
-                            ),
-                  ),
-                          Spacer(),
-                          isMessageBySender?
-                          Text(DateFormat('hh:mm a').format(message.createdAt),style: TextStyle(color:  Color.fromARGB(255, 246, 242, 242),fontSize: 12)):                           
-                           Text(DateFormat('hh:mm a').format(message.createdAt),style: TextStyle(color:Colors.black,fontSize: 12),),
+                Spacer(),
+                isMessageBySender
+                    ? Text(DateFormat('hh:mm a').format(message.createdAt),
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 246, 242, 242),
+                            fontSize: 12))
+                    : Text(
+                        DateFormat('hh:mm a').format(message.createdAt),
+                        style: TextStyle(color: Colors.black, fontSize: 12),
+                      ),
+              ],
+            )
+            // Text(
+            //     textMessage,
 
-            ],
-          )
-              // Text(
-              //     textMessage,
-              
-              //   ),
-        ),
-        
+            //   ),
+            ),
       ],
     );
   }
 
-  List<InlineSpan> customizeText(String text) 
-  {
+  List<InlineSpan> customizeText(String text) {
     // final regex = RegExp('\'.+\'');
     // final target = regex.stringMatch(testString)!;
     List<InlineSpan> spans = [];
@@ -139,7 +137,9 @@ class TextMessageView extends StatelessWidget {
         print("iiu $placeHolderindex klklkl ${target[placeHolderindex]}");
         spans.add(TextSpan(
             text: target[placeHolderindex] + ' ',
-            style: const TextStyle(color: Color.fromARGB(255, 134, 240, 41),fontWeight: FontWeight.w600)));
+            style: const TextStyle(
+                color: Color.fromARGB(255, 134, 240, 41),
+                fontWeight: FontWeight.w600)));
         placeHolderindex = placeHolderindex + 1;
       } else {
         print("adding ${tokens[i]}");

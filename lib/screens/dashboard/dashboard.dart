@@ -40,12 +40,10 @@ class _DashboardState extends State<Dashboard>
   var dio = Dio();
 
   String _errText = "No Projects Found";
-  void initState() 
-  {
+  void initState() {
     super.initState();
-    if(Strings.roleId == 7)
-    {
-        AppUtils.showprogress();
+    if (Strings.roleId == 7) {
+      AppUtils.showprogress();
     }
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 100))
@@ -57,32 +55,29 @@ class _DashboardState extends State<Dashboard>
       });
     super.initState();
     getPermission();
-    if(Strings.roleId != 7)
-    {
+    if (Strings.roleId != 7) {
       WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
     }
     configureWebview();
-    
   }
 
-  configureWebview()
-  {
-controller = WebViewController()
-  ..setJavaScriptMode(JavaScriptMode.unrestricted)
-  ..setBackgroundColor(const Color(0x00000000))
-  ..setNavigationDelegate(
-    NavigationDelegate(
-      onProgress: (int progress) {
-        // Update loading bar.
-      },
-      onPageStarted: (String url) {},
-      onPageFinished: (String url) {
-        AppUtils.dismissprogress();
-      },
-      onWebResourceError: (WebResourceError error) {},
-    ),
-  )
-  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
+  configureWebview() {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            AppUtils.dismissprogress();
+          },
+          onWebResourceError: (WebResourceError error) {},
+        ),
+      )
+      ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
   }
 
   @override
@@ -123,13 +118,11 @@ controller = WebViewController()
     });
   }
 
-  getProjects() 
-  {
+  getProjects() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(ctx!, listen: false);
 
-    api.fetchProjectByTeams(Strings.selectedTeamId!).then((response) 
-    {
+    api.fetchProjectByTeams(Strings.selectedTeamId!).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
@@ -141,8 +134,7 @@ controller = WebViewController()
           getUserCats(Strings.selectedProject[0].projectId);
         }
       } else {
-        setState(() 
-        {
+        setState(() {
           // _errText = "No Projects found !";
           _errText = response.message!;
         });
@@ -164,8 +156,7 @@ controller = WebViewController()
     });
   }
 
-  Future<bool> _onWillPop() async 
-  {
+  Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -210,11 +201,10 @@ controller = WebViewController()
         false;
   }
 
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-       Navigator.pushNamed(context, "/teamsDashboard");
+        Navigator.pushNamed(context, "/teamsDashboard");
         throw 'Screen Change';
       },
       child: Provider<ApiService>(
@@ -254,7 +244,7 @@ controller = WebViewController()
                     menuRedirect(routename: "/dashboard", currentmenu: 1);
                   },
                   selectedmenuvalue: 1,
-                  menutitle: Strings.roleId == 7 ? "Home":"Projects",
+                  menutitle: Strings.roleId == 7 ? "Home" : "Projects",
                 ),
 
                 // menuoption(
@@ -265,16 +255,16 @@ controller = WebViewController()
                 //   menutitle: "Home",
                 // ),
 
-                if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)               
-                    menuoption(
-                        ontab: () {
-                          menuRedirect(
-                              routename: "/attendance", currentmenu: 2);
-                        },
-                        selectedmenuvalue: 2,
-                        menutitle: "Attendance",
-                      ),
-                    
+                if (Strings.roleId == 1 ||
+                    Strings.roleId == 2 ||
+                    Strings.roleId == 5)
+                  menuoption(
+                    ontab: () {
+                      menuRedirect(routename: "/attendance", currentmenu: 2);
+                    },
+                    selectedmenuvalue: 2,
+                    menutitle: "Attendance",
+                  ),
 
                 menuoption(
                   ontab: () {
@@ -321,126 +311,124 @@ controller = WebViewController()
                 menuoption(
                   ontab: () {
                     showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: (){
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.savePreferences("easyAccess", "N");
-                  AppUtils.removeDeviceId(ctx);
-                }                  
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );
+                      context: context,
+                      builder: (context) => new AlertDialog(
+                        title: Text(
+                          "Are you sure ?",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF0061b0),
+                              fontWeight: FontWeight.w600),
+                        ),
+                        content: Text(
+                          'Do you want to logout from the App',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: new Text(
+                              'No',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              menuRedirect(routename: "/login", currentmenu: 9);
+                              AppUtils.savePreferences("easyAccess", "N");
+                              AppUtils.removeDeviceId(ctx);
+                            },
+                            child: new Text(
+                              'Yes',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   selectedmenuvalue: 9,
                   menutitle: "Logout",
                 ),
 
-                
                 Text("version name")
               ],
               child: Scaffold(
                   backgroundColor: const Color(0xFFececed),
                   appBar: AppBar(
                     backgroundColor: Colors.white,
-                    
-                    bottom: Strings.roleId != 7 ? PreferredSize(
-                        preferredSize: Size.fromHeight(kToolbarHeight),
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Container(
-                            //  padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25),
-                              color: const Color(0xFFeceeef),
-                            ),
+                    bottom: Strings.roleId != 7
+                        ? PreferredSize(
+                            preferredSize: Size.fromHeight(kToolbarHeight),
                             child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: Material(
-                                color: const Color(0xFFeceeef),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: TextField(
-                                        focusNode: searchField,
-                                        controller: _searchFieldController,
-                                        decoration: InputDecoration.collapsed(
-                                          hintText: ' Search',
-                                        ),
-                                        onChanged: (value) 
-                                        {
-                                          if (value.isEmpty) {
-                                            setState(() {
+                              padding: EdgeInsets.all(15),
+                              child: Container(
+                                //  padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: const Color(0xFFeceeef),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Material(
+                                    color: const Color(0xFFeceeef),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: TextField(
+                                            focusNode: searchField,
+                                            controller: _searchFieldController,
+                                            decoration:
+                                                InputDecoration.collapsed(
+                                              hintText: ' Search',
+                                            ),
+                                            onChanged: (value) {
+                                              if (value.isEmpty) {
+                                                setState(() {
+                                                  _searchLists = [];
+                                                });
+                                                return;
+                                              }
                                               _searchLists = [];
-                                            });
-                                            return;
-                                          }
-                                          _searchLists = [];
-                                          _projectLists
-                                              .forEach((projectDetail) {
-                                            if (projectDetail.projectName!
-                                                .toLowerCase()
-                                                .startsWith(
-                                                    value.toLowerCase()))
-                                              _searchLists.add(projectDetail);
-                                            
-                                          });
-                                          print(_searchLists.length);
-                                          setState(() {});
-                                        },
-                                      ),
+                                              _projectLists
+                                                  .forEach((projectDetail) {
+                                                if (projectDetail.projectName!
+                                                    .toLowerCase()
+                                                    .startsWith(
+                                                        value.toLowerCase()))
+                                                  _searchLists
+                                                      .add(projectDetail);
+                                              });
+                                              print(_searchLists.length);
+                                              setState(() {});
+                                            },
+                                          ),
+                                        ),
+                                        InkWell(
+                                          child: Icon(
+                                            Icons.search,
+                                            color: Colors.black,
+                                          ),
+                                          onTap: () {},
+                                        )
+                                      ],
                                     ),
-                                    InkWell(
-                                      child: Icon(
-                                        Icons.search,
-                                        color: Colors.black,
-                                      ),
-                                      onTap: () {},
-                                    )
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        )):PreferredSize(
-                        preferredSize: Size.zero,
-                        child: SizedBox()),
+                            ))
+                        : PreferredSize(
+                            preferredSize: Size.zero, child: SizedBox()),
                     leading: SizedBox(
                       height: 25.0,
                       width: 25.0,
@@ -451,52 +439,63 @@ controller = WebViewController()
                           color: const Color(0xFF979797),
                         ),
                         onPressed: () {
-                                Navigator.pushNamed(ctx!, "/teamsDashboard");
+                          Navigator.pushNamed(ctx!, "/teamsDashboard");
                         },
                       ),
                     ),
                   ),
-                  body: Builder(builder: (BuildContext newContext) 
-                  {
+                  body: Builder(builder: (BuildContext newContext) {
                     print("check length ${_searchLists.length}");
                     ctx = newContext;
-                    return 
-                    Strings.roleId != 7 ?
-                    _projectLists.length > 0
-                        ? Padding(
-                            padding: EdgeInsets.only(top: 20,bottom: 20,left: 6,right: 6),
-                            child: _searchLists.length != 0
-                                ? GridView.builder(
-                                    itemCount: _searchLists.length,
-                                         gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          onTapProject(_searchLists[index]);
-                                        },
-                                        child: new Card(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: new 
-                                          GridTile(
+                    return Strings.roleId != 7
+                        ? _projectLists.length > 0
+                            ? Padding(
+                                padding: EdgeInsets.only(
+                                    top: 20, bottom: 20, left: 6, right: 6),
+                                child: _searchLists.length != 0
+                                    ? GridView.builder(
+                                        itemCount: _searchLists.length,
+                                        gridDelegate: Responsive.isMobile(
+                                                context)
+                                            ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,
+                                                crossAxisSpacing: 2,
+                                                mainAxisSpacing: 8)
+                                            : MediaQuery.of(context)
+                                                        .orientation ==
+                                                    Orientation.portrait
+                                                ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 4,
+                                                    crossAxisSpacing: 8,
+                                                    mainAxisSpacing: 8)
+                                                : SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 5,
+                                                    crossAxisSpacing: 8,
+                                                    mainAxisSpacing: 8),
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              onTapProject(_searchLists[index]);
+                                            },
+                                            child: new Card(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: new GridTile(
                                                 child: Container(
                                                   child: Padding(
                                                       padding:
                                                           EdgeInsets.fromLTRB(
                                                               10, 10, 10, 10),
                                                       child: Row(
-                                                        
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
-                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                         children: [
                                                           GestureDetector(
                                                             onTap: () {
@@ -515,39 +514,55 @@ controller = WebViewController()
                                                                       .status);
                                                             },
                                                             child: Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10),
-                                                              child: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl +
-                                                                      _searchLists[
-                                                                              index]
-                                                                          .projectImg!, width: 40, height: 40, defaultImageUrl: "assets/images/background1.png", radius: 20)
-                                                              
-                                                              
-                                                              
-                                                            ),
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        top:
+                                                                            10),
+                                                                child: CircleImageFromNetwork(
+                                                                    imageUrl: Strings
+                                                                            .baseImageUrl +
+                                                                        _searchLists[index]
+                                                                            .projectImg!,
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    defaultImageUrl:
+                                                                        "assets/images/background1.png",
+                                                                    radius:
+                                                                        20)),
                                                           ),
-
-
                                                           Container(
                                                             width: 40,
                                                             height: 40,
-                                                            margin: EdgeInsets.only(top: 8),
-                                                            child: IconButton(icon: 
-                                                            
-                                                            
-                                                           (_searchLists[index].unReadedUserId != null && _searchLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
-                                                            Image.asset('assets/images/chat.png'):Image.asset('assets/images/zerochat.png'),
-                                                            onPressed:(){
-                                                                Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => ChatGroups(projectId: _searchLists[index].projectId!,fromTeamProjects: true,),
-                                                              ),
-                                                            );
-                                                            }),
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                                    top: 8),
+                                                            child: IconButton(
+                                                                icon: (_searchLists[index].unReadedUserId !=
+                                                                            null &&
+                                                                        _searchLists[index].unReadedUserId!.contains(Strings
+                                                                            .userID
+                                                                            .toString()))
+                                                                    ? Image.asset(
+                                                                        'assets/images/chat.png')
+                                                                    : Image.asset(
+                                                                        'assets/images/zerochat.png'),
+                                                                onPressed: () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ChatGroups(
+                                                                        projectId:
+                                                                            _searchLists[index].projectId!,
+                                                                        fromTeamProjects:
+                                                                            true,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }),
                                                           )
-
                                                         ],
                                                       )),
                                                 ),
@@ -566,20 +581,37 @@ controller = WebViewController()
                                                                 .start,
                                                         children: [
                                                           Container(
-                                                            margin: EdgeInsets.fromLTRB(0, 12, 0, 0),
-                                                            child: Text(_searchLists[index].status!,style:TextStyle(fontSize: 14,color: _searchLists[index].status! == "Active"?Colors.lightGreen:_searchLists[index].status! =="Completed"? Colors.green:_searchLists[index].status! == "Cancelled"? Colors.red:Color.fromARGB(255, 216, 195, 3)))),
+                                                              margin: EdgeInsets
+                                                                  .fromLTRB(0,
+                                                                      12, 0, 0),
+                                                              child: Text(
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .status!,
+                                                                  style: TextStyle(
+                                                                      fontSize: 14,
+                                                                      color: _searchLists[index].status! == "Active"
+                                                                          ? Colors.lightGreen
+                                                                          : _searchLists[index].status! == "Completed"
+                                                                              ? Colors.green
+                                                                              : _searchLists[index].status! == "Cancelled"
+                                                                                  ? Colors.red
+                                                                                  : Color.fromARGB(255, 216, 195, 3)))),
                                                           Padding(
                                                             padding:
                                                                 EdgeInsets.only(
-                                                                    bottom: 5,right: 8),
+                                                                    bottom: 5,
+                                                                    right: 8),
                                                             child: Text(
                                                               _searchLists[
                                                                       index]
                                                                   .projectName!,
-                                                                  overflow: TextOverflow.ellipsis,
-                                                                  maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              maxLines: 2,
                                                               style: TextStyle(
-                                                                fontSize: 12,
+                                                                  fontSize: 12,
                                                                   color: Colors
                                                                       .black,
                                                                   fontWeight:
@@ -604,10 +636,10 @@ controller = WebViewController()
                                                                     fit: BoxFit
                                                                         .fill,
                                                                   ),
-                                                                  borderRadius:
-                                                                      new BorderRadius
-                                                                          .all(new Radius
-                                                                              .circular(
+                                                                  borderRadius: new BorderRadius
+                                                                      .all(
+                                                                      new Radius
+                                                                          .circular(
                                                                           50.0)),
                                                                 ),
                                                               ),
@@ -620,197 +652,6 @@ controller = WebViewController()
                                                                           .address! +
                                                                       ' , ' +
                                                                       _searchLists[
-                                                                              index]
-                                                                          .city!,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .clip,
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          10,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400,
-                                                                      color: Colors
-                                                                          .grey),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      )),
-                                                ),
-                                              ),
-                                          
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : _searchFieldController.text != ""
-                                    ? Align(
-                                        alignment: Alignment.topCenter,
-                                        child: Text(
-                                          "No results found",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      )
-                                    : GridView.builder(
-                                        itemCount: _projectLists.length,
-                                        gridDelegate:Responsive.isMobile(context)?SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,crossAxisSpacing: 2,mainAxisSpacing: 8): MediaQuery.of(context).orientation == Orientation.portrait ?
-                                            SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 4,crossAxisSpacing: 8,mainAxisSpacing: 8):SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 5,crossAxisSpacing: 8,mainAxisSpacing: 8),
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              onTapProject(
-                                                  _projectLists[index]);
-                                            },
-                                            child: new Card(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                              ),
-                                              child: new 
-                                              
-                                             GridTile(
-                                                child: Container(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              10, 10, 10, 10),
-                                                      child: Row(
-                                                        
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              _downloadfile(
-                                                                  _projectLists[
-                                                                          index]
-                                                                      .projectImg,
-                                                                  _projectLists[
-                                                                          index]
-                                                                      .projectName,
-                                                                  _projectLists[
-                                                                          index]
-                                                                      .description,
-                                                                  _projectLists[
-                                                                          index]
-                                                                      .status);
-                                                            },
-                                                            child: Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10),
-                                                              child: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl +
-                                                                      _projectLists[
-                                                                              index]
-                                                                          .projectImg!, width: 40, height: 40, defaultImageUrl: "assets/images/background1.png", radius: 20)
-                                                              
-                                                              
-                                                              
-                                                            ),
-                                                          ),
-
-
-                                                          Container(
-                                                            width: 40,
-                                                            height: 40,
-                                                            margin: EdgeInsets.only(top: 8),
-                                                            child: IconButton(icon: 
-(_projectLists[index].unReadedUserId != null && _projectLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
-                                                            Image.asset('assets/images/chat.png'):Image.asset('assets/images/zerochat.png'),                                                            
-                                                            onPressed:(){
-                                                                Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => ChatGroups(projectId: _projectLists[index].projectId!,fromTeamProjects: true,),
-                                                              ),
-                                                            );
-                                                            }),
-                                                          )
-
-                                                        ],
-                                                      )),
-                                                ),
-                                                footer: GestureDetector(
-                                                  onTap: () {
-                                                    onTapProject(
-                                                        _projectLists[index]);
-                                                  },
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              10, 0, 0, 20),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Container(
-                                                            margin: EdgeInsets.fromLTRB(0, 12, 0, 0),
-                                                            child: Text(_projectLists[index].status!,style:TextStyle(fontSize: 14,color: _projectLists[index].status! == "Active"?Colors.lightGreen:_projectLists[index].status! =="Completed"? Colors.green:_projectLists[index].status! == "Cancelled"? Colors.red:Color.fromARGB(255, 216, 195, 3)))),
-                                                          Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    bottom: 5,right: 8),
-                                                            child: Text(
-                                                              _projectLists[
-                                                                      index]
-                                                                  .projectName!,
-                                                                  overflow: TextOverflow.ellipsis,
-                                                                  maxLines: 2,
-                                                              style: TextStyle(
-                                                                fontSize: 12,
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600),
-                                                            ),
-                                                          ),
-                                                          Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Container(
-                                                                width: 14.0,
-                                                                height: 14.0,
-                                                                decoration:
-                                                                    new BoxDecoration(
-                                                                  image:
-                                                                      new DecorationImage(
-                                                                    image: new AssetImage(
-                                                                        "assets/icons/pin.png"),
-                                                                    fit: BoxFit
-                                                                        .fill,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      new BorderRadius
-                                                                          .all(new Radius
-                                                                              .circular(
-                                                                          50.0)),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 5),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  _projectLists[
-                                                                              index]
-                                                                          .address! +
-                                                                      ' , ' +
-                                                                      _projectLists[
                                                                               index]
                                                                           .city!,
                                                                   overflow:
@@ -835,28 +676,268 @@ controller = WebViewController()
                                             ),
                                           );
                                         },
+                                      )
+                                    : _searchFieldController.text != ""
+                                        ? Align(
+                                            alignment: Alignment.topCenter,
+                                            child: Text(
+                                              "No results found",
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          )
+                                        : GridView.builder(
+                                            itemCount: _projectLists.length,
+                                            gridDelegate: Responsive.isMobile(
+                                                    context)
+                                                ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 2,
+                                                    crossAxisSpacing: 2,
+                                                    mainAxisSpacing: 8)
+                                                : MediaQuery.of(context)
+                                                            .orientation ==
+                                                        Orientation.portrait
+                                                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                        crossAxisCount: 4,
+                                                        crossAxisSpacing: 8,
+                                                        mainAxisSpacing: 8)
+                                                    : SliverGridDelegateWithFixedCrossAxisCount(
+                                                        crossAxisCount: 5,
+                                                        crossAxisSpacing: 8,
+                                                        mainAxisSpacing: 8),
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  onTapProject(
+                                                      _projectLists[index]);
+                                                },
+                                                child: new Card(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: new GridTile(
+                                                    child: Container(
+                                                      child: Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(10, 10,
+                                                                  10, 10),
+                                                          child: Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  _downloadfile(
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .projectImg,
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .projectName,
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .description,
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .status);
+                                                                },
+                                                                child: Padding(
+                                                                    padding: EdgeInsets
+                                                                        .only(
+                                                                            top:
+                                                                                10),
+                                                                    child: CircleImageFromNetwork(
+                                                                        imageUrl: Strings
+                                                                                .baseImageUrl +
+                                                                            _projectLists[index]
+                                                                                .projectImg!,
+                                                                        width:
+                                                                            40,
+                                                                        height:
+                                                                            40,
+                                                                        defaultImageUrl:
+                                                                            "assets/images/background1.png",
+                                                                        radius:
+                                                                            20)),
+                                                              ),
+                                                              Container(
+                                                                width: 40,
+                                                                height: 40,
+                                                                margin: EdgeInsets
+                                                                    .only(
+                                                                        top: 8),
+                                                                child:
+                                                                    IconButton(
+                                                                        icon: (_projectLists[index].unReadedUserId != null && _projectLists[index].unReadedUserId!.contains(Strings.userID.toString()))
+                                                                            ? Image.asset(
+                                                                                'assets/images/chat.png')
+                                                                            : Image.asset(
+                                                                                'assets/images/zerochat.png'),
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator
+                                                                              .push(
+                                                                            context,
+                                                                            MaterialPageRoute(
+                                                                              builder: (context) => ChatGroups(
+                                                                                projectId: _projectLists[index].projectId!,
+                                                                                fromTeamProjects: true,
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        }),
+                                                              )
+                                                            ],
+                                                          )),
+                                                    ),
+                                                    footer: GestureDetector(
+                                                      onTap: () {
+                                                        onTapProject(
+                                                            _projectLists[
+                                                                index]);
+                                                      },
+                                                      child: Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(
+                                                                  10, 0, 0, 20),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Container(
+                                                                  margin: EdgeInsets
+                                                                      .fromLTRB(
+                                                                          0,
+                                                                          12,
+                                                                          0,
+                                                                          0),
+                                                                  child: Text(
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .status!,
+                                                                      style: TextStyle(
+                                                                          fontSize: 14,
+                                                                          color: _projectLists[index].status! == "Active"
+                                                                              ? Colors.lightGreen
+                                                                              : _projectLists[index].status! == "Completed"
+                                                                                  ? Colors.green
+                                                                                  : _projectLists[index].status! == "Cancelled"
+                                                                                      ? Colors.red
+                                                                                      : Color.fromARGB(255, 216, 195, 3)))),
+                                                              Padding(
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        bottom:
+                                                                            5,
+                                                                        right:
+                                                                            8),
+                                                                child: Text(
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .projectName!,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  maxLines: 2,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          12,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600),
+                                                                ),
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  Container(
+                                                                    width: 14.0,
+                                                                    height:
+                                                                        14.0,
+                                                                    decoration:
+                                                                        new BoxDecoration(
+                                                                      image:
+                                                                          new DecorationImage(
+                                                                        image: new AssetImage(
+                                                                            "assets/icons/pin.png"),
+                                                                        fit: BoxFit
+                                                                            .fill,
+                                                                      ),
+                                                                      borderRadius: new BorderRadius
+                                                                          .all(
+                                                                          new Radius
+                                                                              .circular(
+                                                                              50.0)),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      width: 5),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      _projectLists[index]
+                                                                              .address! +
+                                                                          ' , ' +
+                                                                          _projectLists[index]
+                                                                              .city!,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .clip,
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              10,
+                                                                          fontWeight: FontWeight
+                                                                              .w400,
+                                                                          color:
+                                                                              Colors.grey),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ],
+                                                          )),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                              )
+                            : Container(
+                                height:
+                                    MediaQuery.of(context).size.height * .75,
+                                child: Padding(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _errText,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.w600),
                                       ),
-                          )
-                        : Container(
-                            height: MediaQuery.of(context).size.height * .75,
-                            child: Padding(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _errText,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w600),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(20),
-                            )):Container(
-        child: WebViewWidget(controller: controller)
-        );
+                                  padding: EdgeInsets.all(20),
+                                ))
+                        : Container(
+                            child: WebViewWidget(controller: controller));
                   }))),
         ),
       ),
@@ -885,49 +966,37 @@ controller = WebViewController()
   }
 
   Widget image(String img, double width, double height) {
-    try
-    {
-        return Container(
-      width: width,
-      height: height,
-      decoration: new BoxDecoration(
-        color: const Color(0xff7c94b6),
-        
-          image: new DecorationImage(
-          image: 
-            NetworkImage(img)
-            ,
-          fit: BoxFit.fill,
-        )
-        ,
-        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-      ),
-    );
-    }
-    catch(err)
-    {
+    try {
       return Container(
-      width: width,
-      height: height,
-      decoration: new BoxDecoration(
-        color: const Color(0xff7c94b6),
-        
+        width: width,
+        height: height,
+        decoration: new BoxDecoration(
+          color: const Color(0xff7c94b6),
           image: new DecorationImage(
-          image: new AssetImage("assets/images/logo.jpeg"),
-          fit: BoxFit.fill,
-        )
-        ,
-        borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
-      ),
-    );
+            image: NetworkImage(img),
+            fit: BoxFit.fill,
+          ),
+          borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+        ),
+      );
+    } catch (err) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: new BoxDecoration(
+          color: const Color(0xff7c94b6),
+          image: new DecorationImage(
+            image: new AssetImage("assets/images/logo.jpeg"),
+            fit: BoxFit.fill,
+          ),
+          borderRadius: new BorderRadius.all(new Radius.circular(50.0)),
+        ),
+      );
     }
-    
-    
   }
 
-  void getPermission() async 
-  {
-     print("getPermission");
+  void getPermission() async {
+    print("getPermission");
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();
@@ -1031,7 +1100,7 @@ controller = WebViewController()
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.75,
-                 // height: MediaQuery.of(context).size.height * 0.75,
+                  // height: MediaQuery.of(context).size.height * 0.75,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -1054,16 +1123,13 @@ controller = WebViewController()
                       Center(
                         child: CircleAvatar(
                           radius: 100,
-                                backgroundImage: (
-                                    Strings.profilePic !=
-                                        "")
-                                ? NetworkImage(Strings.baseImageUrl +
-                                    (Strings.profilePic ??
-                                        ""))
-                                :  AssetImage("assets/icons/account.png")
-                                        as ImageProvider,
-                            backgroundColor: Colors.grey.withOpacity(0.3),
-                              ),
+                          backgroundImage: (Strings.profilePic != "")
+                              ? NetworkImage(Strings.baseImageUrl +
+                                  (Strings.profilePic ?? ""))
+                              : AssetImage("assets/icons/account.png")
+                                  as ImageProvider,
+                          backgroundColor: Colors.grey.withOpacity(0.3),
+                        ),
                       )
                     ],
                   ),

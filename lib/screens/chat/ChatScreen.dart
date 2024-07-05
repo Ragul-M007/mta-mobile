@@ -121,7 +121,6 @@ class _ChatScreenState extends State<ChatScreen> {
     getUsersList();
   }
 
-
 //function call to update readed message user
   updateUsersReadMessage() {
     _socket?.emit(
@@ -138,11 +137,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  getUsersByGroupId() 
-  {
+  getUsersByGroupId() {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.getChatUsers(widget.groupId!).then((response) 
-    {
+    api.getChatUsers(widget.groupId!).then((response) {
       if (response.status!) {
         setState(() {
           chtusers.clear();
@@ -152,7 +149,8 @@ class _ChatScreenState extends State<ChatScreen> {
             chtusers.add(ChatUser(
                 id: '${element.userId}',
                 name: element.userName ?? "test",
-                profilePhoto: Strings.baseImageUrl + (element.userImage ?? "")));
+                profilePhoto:
+                    Strings.baseImageUrl + (element.userImage ?? "")));
           });
           log("added users ${jsonEncode(chtusers)}");
 
@@ -182,12 +180,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
   //function call delete messages
-  deleteMessagesById(int msgId,int grpId) {
+  deleteMessagesById(int msgId, int grpId) {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.deleteMessage(msgId,grpId).then((response) 
-    {
+    api.deleteMessage(msgId, grpId).then((response) {
       if (response.status!) {
         setState(() {
           AppUtils.showToastSuccess(response.message ?? "Deleted Successfully");
@@ -202,11 +198,17 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  updateChatCountDetails(String type) 
-  {
+  updateChatCountDetails(String type) {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.checkMessageAvailability(widget.projectId,widget.teamId,Strings.userID,widget.projectId == null ? "team" : "project",type,widget.groupId).then((response) 
-    {
+    api
+        .checkMessageAvailability(
+            widget.projectId,
+            widget.teamId,
+            Strings.userID,
+            widget.projectId == null ? "team" : "project",
+            type,
+            widget.groupId)
+        .then((response) {
       print("okkk");
     }).catchError((onError) {
       print(onError.toString());
@@ -238,7 +240,6 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
   }
-
 
 //get messages from socket io
   getMessages() {
@@ -314,7 +315,6 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
   }
-
 
 //Pagination for older messages(API Call)
   Future<List<Message>> getMessagesWithPageCount() async {
@@ -420,7 +420,6 @@ class _ChatScreenState extends State<ChatScreen> {
     uploadFile(formData);
   }
 
-
 //send documents via API
   sendFiles(files, parentMsgId) {
     print("$parentMsgId ${Strings.userID} ${widget.groupId}");
@@ -480,24 +479,23 @@ class _ChatScreenState extends State<ChatScreen> {
               if (Strings.fromNotificationChat) {
                 Strings.fromNotificationChat = false;
                 if (Strings.roleId == 6) {
-
                   Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Projects(
-                  ),
-                ),(route) => false,
-              );
-               //   Navigator.pushNamed(context, "/projects");
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Projects(),
+                    ),
+                    (route) => false,
+                  );
+                  //   Navigator.pushNamed(context, "/projects");
                 } else {
                   Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TeamsDashboard(
-                  ),
-                ),(route) => false,
-              );
-               //   Navigator.pushNamed(context, "/teamsDashboard");
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamsDashboard(),
+                    ),
+                    (route) => false,
+                  );
+                  //   Navigator.pushNamed(context, "/teamsDashboard");
                 }
               } else {
                 Navigator.pop(context);
@@ -555,22 +553,22 @@ class _ChatScreenState extends State<ChatScreen> {
                           Strings.fromNotificationChat = false;
                           if (Strings.roleId == 6) {
                             Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Projects(
-                  ),
-                ),(route) => false,
-              );
-                         //   Navigator.pushNamed(context, "/projects");
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Projects(),
+                              ),
+                              (route) => false,
+                            );
+                            //   Navigator.pushNamed(context, "/projects");
                           } else {
-                           Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TeamsDashboard(
-                  ),
-                ),(route) => false,
-              );
-                           // Navigator.pushNamed(context, "/teamsDashboard");
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TeamsDashboard(),
+                              ),
+                              (route) => false,
+                            );
+                            // Navigator.pushNamed(context, "/teamsDashboard");
                           }
                         } else {
                           Navigator.pop(context);
@@ -966,7 +964,7 @@ class _ChatScreenState extends State<ChatScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
-              deleteMessagesById(messageId,widget.groupId ?? 0);
+              deleteMessagesById(messageId, widget.groupId ?? 0);
             },
             child: new Text(
               'Yes',
@@ -1034,7 +1032,7 @@ class _ChatScreenState extends State<ChatScreen> {
       print("dataaa ${_data}");
     });
 
-   // updateChatCountDetails("create");
+    // updateChatCountDetails("create");
   }
 
   void _onThemeIconTap() {

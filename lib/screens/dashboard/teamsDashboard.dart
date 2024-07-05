@@ -10,6 +10,7 @@ import 'package:mta/screens/chat/ChatGroups.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
+import 'package:mta/utilities/mapClickEvent.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -153,7 +154,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
       //getProjects();
     });
   }
-  
 
   Future<bool> _onWillPop() async {
     return (await showDialog(
@@ -399,8 +399,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                 backgroundColor: Colors.grey.withOpacity(0.3),
                               ),
                             ),
-
-                           
                           ))
                     ],
                     bottom: Strings.roleId != 7
@@ -505,82 +503,106 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                             Navigator.pushNamed(
                                                 context, '/dashboard');
                                           },
-                                          child: Container(                                            
+                                          child: Container(
                                             child: Padding(
-                                                    padding: EdgeInsets.fromLTRB(14,4,15,4),
-                                                    child: Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                padding: EdgeInsets.fromLTRB(
+                                                    14, 4, 15, 4),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
                                                       children: [
-                                                        Row(
-                                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                                          children: [
-                                                            Column(
-                                                                     mainAxisAlignment: MainAxisAlignment.center,                                                     crossAxisAlignment:
+                                                        Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
-                                                                                                                          children: [
+                                                          children: [
                                                             Text(
                                                                 _searchLists[
                                                                         index]
                                                                     .teamName!,
-                                                                style: Drawables.adddoccontentstyle(
-                                                                    Colors
-                                                                        .black87,
-                                                                    14.0,
-                                                                    FontWeight
-                                                                        .w500)),
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        Colors
+                                                                            .black87,
+                                                                        14.0,
+                                                                        FontWeight
+                                                                            .w500)),
                                                             SizedBox(
                                                               width: 2,
                                                             ),
                                                             Text(
                                                                 _searchLists[
                                                                         index]
-                                                                    .description!.trim(),
-                                                                style: Drawables.adddoccontentstyle(
-                                                                    Colors
-                                                                        .grey,
-                                                                    12.0,
-                                                                    FontWeight
-                                                                        .w300)),
-                                                                                                                      ],
-                                                                     ),
-                                                           
+                                                                    .description!
+                                                                    .trim(),
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        Colors
+                                                                            .grey,
+                                                                        12.0,
+                                                                        FontWeight
+                                                                            .w300)),
                                                           ],
                                                         ),
-                                                        Row(
-                                                          children: [
-                                                             IconButton(
-                                                                icon:  
-                                                                
-                                                               (_searchLists[index].unReadedUserId != null && _searchLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
-                                                            Image.asset('assets/images/chat.png',width: 25,height: 25,):Image.asset('assets/images/zerochat.png',width: 25,height: 25,),
-                                                                onPressed:
-                                                                    () {
-                                                                  Navigator
-                                                                      .push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              ChatGroups(
-                                                                        teamId:
-                                                                            _searchLists[index].teamId!,
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                              ),
-                                                            Icon(
-                                                              Icons
-                                                                  .arrow_forward_ios,
-                                                              color: Colors.grey,
-                                                              size: 14.0,
-                                                            ),
-                                                          ],
-                                                        )
                                                       ],
-                                                    )),
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        IconButton(
+                                                            icon: (_searchLists[index]
+                                                                            .unReadedUserId !=
+                                                                        null &&
+                                                                    _searchLists[
+                                                                            index]
+                                                                        .unReadedUserId!
+                                                                        .contains(Strings
+                                                                            .userID
+                                                                            .toString()))
+                                                                ? Image.asset(
+                                                                    'assets/images/chat.png',
+                                                                    width: 25,
+                                                                    height: 25,
+                                                                  )
+                                                                : Image.asset(
+                                                                    'assets/images/zerochat.png',
+                                                                    width: 25,
+                                                                    height: 25,
+                                                                  ),
+                                                            onPressed: () {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          ChatGroups(
+                                                                    teamId: _searchLists[
+                                                                            index]
+                                                                        .teamId!,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }),
+                                                        Icon(
+                                                          Icons
+                                                              .arrow_forward_ios,
+                                                          color: Colors.grey,
+                                                          size: 14.0,
+                                                        ),
+                                                      ],
+                                                    )
+                                                  ],
+                                                )),
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(10),
@@ -620,56 +642,116 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                               },
                                               child: Container(
                                                 child: Padding(
-                                                    padding: EdgeInsets.fromLTRB(14,4,15,4),
+                                                    padding:
+                                                        EdgeInsets.fromLTRB(
+                                                            14, 4, 15, 4),
                                                     child: Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                       children: [
                                                         Row(
-                                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             Column(
-                                                                     mainAxisAlignment: MainAxisAlignment.center,                                                     crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                                                                                          children: [
-                                                            Text(
-                                                                _teamLists[
-                                                                        index]
-                                                                    .teamName!,
-                                                                style: Drawables.adddoccontentstyle(
-                                                                    Colors
-                                                                        .black87,
-                                                                    14.0,
-                                                                    FontWeight
-                                                                        .w500)),
-                                                            SizedBox(
-                                                              width: 2,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                    _teamLists[
+                                                                            index]
+                                                                        .teamName!,
+                                                                    style: Drawables.adddoccontentstyle(
+                                                                        Colors
+                                                                            .black87,
+                                                                        14.0,
+                                                                        FontWeight
+                                                                            .w500)),
+                                                                SizedBox(
+                                                                  width: 2,
+                                                                ),
+                                                                Text(
+                                                                    _teamLists[
+                                                                            index]
+                                                                        .description!
+                                                                        .trim(),
+                                                                    style: Drawables.adddoccontentstyle(
+                                                                        Colors
+                                                                            .grey,
+                                                                        12.0,
+                                                                        FontWeight
+                                                                            .w300)),
+                                                              ],
                                                             ),
-                                                            Text(
-                                                                _teamLists[
-                                                                        index]
-                                                                    .description!.trim(),
-                                                                style: Drawables.adddoccontentstyle(
-                                                                    Colors
-                                                                        .grey,
-                                                                    12.0,
-                                                                    FontWeight
-                                                                        .w300)),
-                                                                                                                      ],
-                                                                     ),
-                                                            
                                                           ],
                                                         ),
                                                         Row(
                                                           children: [
-                                                           
+                                                            // IconButton(
+                                                            //     icon: (_teamLists[index].unReadedUserId !=
+                                                            //                 null &&
+                                                            //             _teamLists[index].unReadedUserId!.contains(Strings
+                                                            //                 .userID
+                                                            //                 .toString()))
+                                                            //         ? Image
+                                                            //             .asset(
+                                                            //             'assets/images/chat.png',
+                                                            //             width:
+                                                            //                 25,
+                                                            //             height:
+                                                            //                 25,
+                                                            //           )
+                                                            //         : Image
+                                                            //             .asset(
+                                                            //             'assets/images/zerochat.png',
+                                                            //             width:
+                                                            //                 25,
+                                                            //             height:
+                                                            //                 25,
+                                                            //           ),
+                                                            //     onPressed: () {
+                                                            //       Navigator
+                                                            //           .push(
+                                                            //         context,
+                                                            //         MaterialPageRoute(
+                                                            //           builder:
+                                                            //               (context) =>
+                                                            //                   MapClickEvent(),
+                                                            //         ),
+                                                            //       );
+                                                            //     }),
                                                             IconButton(
-                                                                icon: 
-                                                                (_teamLists[index].unReadedUserId != null && _teamLists[index].unReadedUserId!.contains(Strings.userID.toString()))?
-                                                            Image.asset('assets/images/chat.png',width: 25,height: 25,):Image.asset('assets/images/zerochat.png',width: 25,height: 25,),
-                                                                onPressed:
-                                                                    () {
+                                                                icon: (_teamLists[index].unReadedUserId !=
+                                                                            null &&
+                                                                        _teamLists[index].unReadedUserId!.contains(Strings
+                                                                            .userID
+                                                                            .toString()))
+                                                                    ? Image
+                                                                        .asset(
+                                                                        'assets/images/chat.png',
+                                                                        width:
+                                                                            25,
+                                                                        height:
+                                                                            25,
+                                                                      )
+                                                                    : Image
+                                                                        .asset(
+                                                                        'assets/images/zerochat.png',
+                                                                        width:
+                                                                            25,
+                                                                        height:
+                                                                            25,
+                                                                      ),
+                                                                onPressed: () {
                                                                   Navigator
                                                                       .push(
                                                                     context,
@@ -682,12 +764,12 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                       ),
                                                                     ),
                                                                   );
-                                                                }
-                                                              ),
-                                                               Icon(
+                                                                }),
+                                                            Icon(
                                                               Icons
                                                                   .arrow_forward_ios,
-                                                              color: Colors.grey,
+                                                              color:
+                                                                  Colors.grey,
                                                               size: 14.0,
                                                             ),
                                                           ],
@@ -799,8 +881,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
   }
 
   Future<void> _showMyDialogProject(
-      context, imgurl, title, desc, status) async 
-  {
+      context, imgurl, title, desc, status) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -808,20 +889,20 @@ class _TeamsDashboardState extends State<TeamsDashboard>
         return AlertDialog(
           content: SingleChildScrollView(
             child: GestureDetector(
-                onTap: () {
-                },
+                onTap: () {},
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.9,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       Align(
-                        alignment: Alignment.centerRight,
-                        child: InkWell(
-                          onTap: (){
-                              Navigator.of(context).pop();
-                          },
-                          child: Icon(Icons.close, size: 22.0, color: Colors.black))),
+                      Align(
+                          alignment: Alignment.centerRight,
+                          child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Icon(Icons.close,
+                                  size: 22.0, color: Colors.black))),
                       SizedBox(
                         height: 20,
                       ),
@@ -855,21 +936,20 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                             borderRadius:
                                 new BorderRadius.all(new Radius.circular(5.0)),
                           ),
-
                           child: Image.network(
-          imgurl,
-          width: 200, // Adjust the width as needed
-          height: 200, // Adjust the height as needed
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.asset(
-              "assets/images/background1.png",
-              width: 200, // Adjust the width as needed
-              height: 200, // Adjust the height as needed
-              fit: BoxFit.cover,
-            );
-          },
-        ),
+                            imgurl,
+                            width: 200, // Adjust the width as needed
+                            height: 200, // Adjust the height as needed
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                "assets/images/background1.png",
+                                width: 200, // Adjust the width as needed
+                                height: 200, // Adjust the height as needed
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
                         ),
                       ),
                       SizedBox(
@@ -891,18 +971,15 @@ class _TeamsDashboardState extends State<TeamsDashboard>
     );
   }
 
-  Future<void> _showMyDialog(context, imgurl, title) async 
-  {
+  Future<void> _showMyDialog(context, imgurl, title) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) 
-      {
+      builder: (BuildContext context) {
         return AlertDialog(
           content: SingleChildScrollView(
             child: GestureDetector(
-                onTap: () {
-                },
+                onTap: () {},
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.75,
                   // height: MediaQuery.of(context).size.height * 0.75,
@@ -910,10 +987,11 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       InkWell(
-                        onTap: (){
-                          Navigator.of(context).pop();
-                        },
-                        child: new Icon(Icons.close, size: 22.0, color: Colors.black)),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: new Icon(Icons.close,
+                              size: 22.0, color: Colors.black)),
                       SizedBox(
                         height: 20,
                       ),

@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
@@ -39,8 +38,8 @@ import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';    
-// 
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+//
 import 'package:retrofit/retrofit.dart';
 
 import '../models/AccessDetailsRes.dart';
@@ -52,15 +51,12 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
+@RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
-// @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+// @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+// @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
 
-  @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
-  // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
-
-
-abstract class ApiService 
-{
+abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -71,20 +67,21 @@ abstract class ApiService
   Future<LoginRes> login(@Body() LoginReq body);
 
   @POST("/users/publicusersignup")
-  Future<CommonRes>signUp(@Body() SignUpReq body);
+  Future<CommonRes> signUp(@Body() SignUpReq body);
 
   @PUT("/users/{user_id}")
   Future<LoginRes> setPin(@Path("user_id") int id, @Body() SetPinReq body);
 
   @POST("/users/changePin")
-  Future<LoginRes> setForgotPin(@Path("user_id") int id, @Body() SetPinReq body);
+  Future<LoginRes> setForgotPin(
+      @Path("user_id") int id, @Body() SetPinReq body);
 
   @POST("/projects/currentProject")
   Future<LoginRes> setCurrentProject(@Body() CurrentProjectReq body);
-  
-  
+
   @PUT("/projects/putCategory/{user_id}")
-  Future<LoginRes> userAccess(@Path("user_id") String id, @Body() UserAccessReq body);
+  Future<LoginRes> userAccess(
+      @Path("user_id") String id, @Body() UserAccessReq body);
 
   @GET("/projects?user_id={user_id}")
   Future<DashboardRes> projects(@Path("user_id") int id);
@@ -98,17 +95,17 @@ abstract class ApiService
   @GET("/chat/getUsersByGroupId?group_id={group_id}")
   Future<GroupUsersRes> getChatUsers(@Path("group_id") int groupid);
 
-
   @GET("/users/getUserLoginHours?user_id={user_id}")
   Future<LoginStatusRes> fetchLoginHours(@Path("user_id") int userId);
 
   @GET(
       "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
-  Future<FetchCategoryDocRes> getCategoryDoc(
-      @Path("category_id") int id, @Path("project_id") int pid,@Path("users_id") int userid);
+  Future<FetchCategoryDocRes> getCategoryDoc(@Path("category_id") int id,
+      @Path("project_id") int pid, @Path("users_id") int userid);
 
   @GET("/projects/getDocuments?project_id={project_id}&&users_id={users_id}")
-  Future<FectchProjectDocRes> getProjectDoc(@Path("project_id") int id, @Path("users_id") int userid);
+  Future<FectchProjectDocRes> getProjectDoc(
+      @Path("project_id") int id, @Path("users_id") int userid);
 
   @GET("/categories?project_id={project_id}&&type=mobile")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
@@ -122,21 +119,24 @@ abstract class ApiService
   @POST("/attendance")
   Future<AddAttendanceRes> addAttendance(@Body() AddAttendanceReq body);
 
-@POST("/chat/addUsersIntoGroup")
-  Future<AddAttendanceRes> addRemoveUsersintoGroup(@Body() AddRemoveUserReq body);
+  @POST("/chat/addUsersIntoGroup")
+  Future<AddAttendanceRes> addRemoveUsersintoGroup(
+      @Body() AddRemoveUserReq body);
 
   @POST("/chat/removeUserInGroup")
   Future<AddAttendanceRes> removeUsersintoGroup(@Body() AddRemoveUserReq body);
 
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
-  @Path("user_id") int id, @Path("date") String date);
+      @Path("user_id") int id, @Path("date") String date);
 
   @GET("/categories?project_id={project_id}")
   Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
 
-  @GET("/categories/getCatUsers?project_id={project_id}&category_id={category_id}")
-  Future<FetchCategoryUsersRes> getCatUsers(@Path("project_id") int id,@Path("category_id") int catid);
+  @GET(
+      "/categories/getCatUsers?project_id={project_id}&category_id={category_id}")
+  Future<FetchCategoryUsersRes> getCatUsers(
+      @Path("project_id") int id, @Path("category_id") int catid);
 
   @GET("/projects/getmappedUser?project_id={project_id}")
   Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);
@@ -144,19 +144,18 @@ abstract class ApiService
   @GET("/chat/getMessageReadedUsers?message_id={message_id}")
   Future<FetchMapedUsersRes> getReadedUsers(@Path("message_id") int id);
 
-  
-
   @GET("/teams")
   Future<TeamsModel> fetchTeams(@Path("project_id") int id);
 
-  @GET("/projects/getProjectsByTeam/{team_id}") 
+  @GET("/projects/getProjectsByTeam/{team_id}")
   Future<DashboardRes> fetchProjectByTeams(@Path("team_id") int id);
 
   @GET("/projects/getProject/{project_id}")
   Future<ProjectDetailsRes> getProjectName(@Path("project_id") int id);
 
   @GET("/chat/getGroupFiles?group_id={group_id}&file_type={file_type}")
-  Future<MediaDetailsRes> getMediaDetails(@Path("group_id") int id, @Path("file_type") String type);
+  Future<MediaDetailsRes> getMediaDetails(
+      @Path("group_id") int id, @Path("file_type") String type);
 
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
@@ -164,11 +163,19 @@ abstract class ApiService
   @GET("/chat/groupCreateAccessDetails")
   Future<AccessDetailsRes> getAccessDetails();
 
-@GET("/chat/getureadMessageDetails?group_type={group_type}&team_id={team_id}&project_id={project_id}&user_id={user_id}&type={type}&group_id={group_id}")
-  Future<ChatMessageWithPageCountRes> checkMessageAvailability(@Path("project_id") int? projectId, @Path("team_id") int? teamId, @Path("user_id") int? userId,@Path("group_type") String? groupType,@Path("type") String? type,@Path("group_id") int? grpId);
+  @GET(
+      "/chat/getureadMessageDetails?group_type={group_type}&team_id={team_id}&project_id={project_id}&user_id={user_id}&type={type}&group_id={group_id}")
+  Future<ChatMessageWithPageCountRes> checkMessageAvailability(
+      @Path("project_id") int? projectId,
+      @Path("team_id") int? teamId,
+      @Path("user_id") int? userId,
+      @Path("group_type") String? groupType,
+      @Path("type") String? type,
+      @Path("group_id") int? grpId);
 
   @GET("/chat/getMessagesByGroupId?group_id={group_id}&page_no={page_no}")
-  Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(@Path("group_id") int id, @Path("page_no") int pageNo);
+  Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(
+      @Path("group_id") int id, @Path("page_no") int pageNo);
 
   @POST("/users/changePassword")
   Future<CommonRes> changePass(@Body() ChangePassReq body);
@@ -187,37 +194,25 @@ abstract class ApiService
       @Path("user_id") int id, @Body() EditProfileReq body);
 
   @PUT("/utils/updateNotification/{noti_id}")
-  Future<CommonRes> updateNotificationStatus(
-      @Path("noti_id") int id);
+  Future<CommonRes> updateNotificationStatus(@Path("noti_id") int id);
   @PUT("/chat/updateFileDownloadStatus?message_id={msg_id}&status={status}")
   Future<CommonRes> updateDownloadStatus(
       @Path("msg_id") int id, @Path("status") int status);
 
   @DELETE("/users/removeImage/{user_id}")
-  Future<CommonRes> removeProPic(
-      @Path("user_id") int id);
+  Future<CommonRes> removeProPic(@Path("user_id") int id);
   @DELETE("/chat/deleteMessage?message_id={msg_id}&&group_id={grp_id}")
   Future<CommonRes> deleteMessage(
-      @Path("msg_id") int id,@Path("grp_id") int grpId);
+      @Path("msg_id") int id, @Path("grp_id") int grpId);
 
-      
-
-      
-     
   @DELETE("/users/{user_id}")
-  Future<CommonRes> deleteUser(
-      @Path("user_id") int id);
+  Future<CommonRes> deleteUser(@Path("user_id") int id);
 
   @DELETE("/users/deleteDeviceId/{user_id}")
-  Future<CommentsRes> removeDeviceId(
-      @Path("user_id") int id);
+  Future<CommentsRes> removeDeviceId(@Path("user_id") int id);
 
   @DELETE("/utils/deletecomment/{comment_id}")
-  Future<CommentsRes> removeComment(
-      @Path("comment_id") int id);
-
-
-     
+  Future<CommentsRes> removeComment(@Path("comment_id") int id);
 
   @POST("/utils/getAudioUrl")
   Future<AudioRes> uploadAudio(@Body() AudioReq body);
@@ -226,15 +221,13 @@ abstract class ApiService
   /// Request and Response Body
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  static ApiService create() 
-  {
+  static ApiService create() {
     final dio = Dio();
     try {
       print("trying dio");
       dio.interceptors.add(PrettyDioLogger());
       dio.interceptors
-          .add(InterceptorsWrapper(onRequest: (options,handler) async 
-          {
+          .add(InterceptorsWrapper(onRequest: (options, handler) async {
         options.headers["Content-Type"] = "application/json";
         options.headers["x-access-token"] = Strings.authToken;
         //options.headers["Host"] = "<calculated when request is sent>";
@@ -243,7 +236,6 @@ abstract class ApiService
         //   print("dataa $data");
         // };
         options.validateStatus = (status) {
-          
           Strings.statusCode = status!;
           if (status == 401) {
             Strings.isLogin = false;
@@ -251,16 +243,15 @@ abstract class ApiService
                 "Session has been expired ! Please login again");
             navigatorKey.currentState?.popAndPushNamed('/verifypin');
             // return false;
+          } else if (status == 502) {
+            AppUtils.showToastError("Bad Gateway");
           }
-          else if(status == 502){
-            AppUtils.showToastError("Bad Gateway");          
-        }
           return status < 500;
         };
         print("Printing api service");
-       // print("dio api service-->${ApiService(dio)}");
+        // print("dio api service-->${ApiService(dio)}");
         return handler.next(options);
-       // return options;
+        // return options;
       }));
       return ApiService(dio);
     } on DioError catch (error) {

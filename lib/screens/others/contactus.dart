@@ -75,32 +75,34 @@ class _ContactusState extends State<Contactus>
                   ],
                 ),
               ),
-          if (Strings.roleId != 6)               
-              menuoption(
-                ontab: () {
+              if (Strings.roleId != 6)
+                menuoption(
+                  ontab: () {
                     Strings.fromProjects = false;
                     menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-                },
-                selectedmenuvalue: 1,
-                menutitle: Strings.roleId == 7 ? "Home":"Teams",
-              ),
-              if(Strings.roleId != 7)
-              menuoption(
-                ontab: () {
+                  },
+                  selectedmenuvalue: 1,
+                  menutitle: Strings.roleId == 7 ? "Home" : "Teams",
+                ),
+              if (Strings.roleId != 7)
+                menuoption(
+                  ontab: () {
                     Strings.fromProjects = true;
                     menuRedirect(routename: "/projects", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Projects",
-              ),
-              if(Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
-                   menuoption(
-                      ontab: () {
-                        menuRedirect(routename: "/attendance", currentmenu: 3);
-                      },
-                      selectedmenuvalue: 3,
-                      menutitle: "Attendance",
-                    ),
+                  },
+                  selectedmenuvalue: 2,
+                  menutitle: "Projects",
+                ),
+              if (Strings.roleId == 1 ||
+                  Strings.roleId == 2 ||
+                  Strings.roleId == 5)
+                menuoption(
+                  ontab: () {
+                    menuRedirect(routename: "/attendance", currentmenu: 3);
+                  },
+                  selectedmenuvalue: 3,
+                  menutitle: "Attendance",
+                ),
               menuoption(
                 ontab: () {
                   menuRedirect(routename: "/profile", currentmenu: 4);
@@ -145,54 +147,53 @@ class _ContactusState extends State<Contactus>
               // ),
               menuoption(
                 ontab: () {
-showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  print("yesy");
-                 menuRedirect(routename: "/login", currentmenu: 9);
-                 AppUtils.savePreferences("easyAccess", "N");
-                 AppUtils.removeDeviceId(context);
-
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );                },
+                  showDialog(
+                    context: context,
+                    builder: (context) => new AlertDialog(
+                      title: Text(
+                        "Are you sure ?",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF0061b0),
+                            fontWeight: FontWeight.w600),
+                      ),
+                      content: Text(
+                        'Do you want to logout from the App',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: new Text(
+                            'No',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            print("yesy");
+                            menuRedirect(routename: "/login", currentmenu: 9);
+                            AppUtils.savePreferences("easyAccess", "N");
+                            AppUtils.removeDeviceId(context);
+                          },
+                          child: new Text(
+                            'Yes',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 selectedmenuvalue: 9,
                 menutitle: "Logout",
               ),
@@ -227,8 +228,7 @@ class ContactusContent extends StatefulWidget {
   _ContactusContentState createState() => _ContactusContentState();
 }
 
-class _ContactusContentState extends State<ContactusContent> 
-{
+class _ContactusContentState extends State<ContactusContent> {
   final mobileField = TextEditingController();
   final mobileField1 = TextEditingController();
   final mobilechennai = TextEditingController();
@@ -243,8 +243,7 @@ class _ContactusContentState extends State<ContactusContent>
   var address = '';
 
   @override
-  void initState() 
-  {
+  void initState() {
     mobileField.text = "98940 61990, 98940 71990,\n0421-4341114 ";
     mobileField1.text = "";
     mobilechennai.text = "96292 11990, 044-22342848";
@@ -259,220 +258,272 @@ class _ContactusContentState extends State<ContactusContent>
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child:
-    SafeArea(
-        child: loader
-            ? Padding(padding: EdgeInsets.all(0.0))
-            : Stack(
-                children: <Widget>[
-                  Container(
-                    height: MediaQuery.of(context).size.height * .32,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0061b0),
-                    ),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                                width: 60.0,
-                                height: 60.0,
-                                decoration: Drawables.menudecorationImage(
-                                    "assets/images/logo.jpg", 50.0)),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+        child: SafeArea(
+            child: loader
+                ? Padding(padding: EdgeInsets.all(0.0))
+                : Stack(
+                    children: <Widget>[
+                      Container(
+                        height: MediaQuery.of(context).size.height * .32,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF0061b0),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(
-                                  "MTA Konnect",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
+                                Container(
+                                    width: 60.0,
+                                    height: 60.0,
+                                    decoration: Drawables.menudecorationImage(
+                                        "assets/images/logo.jpg", 50.0)),
+                                SizedBox(
+                                  width: 20,
                                 ),
-                                // SizedBox(
-                                //   height: 5,
-                                // ),
-                                // Text(
-                                //   "mtaenquiry@gmail.com",
-                                //   style: TextStyle(
-                                //       color: Colors.white, fontSize: 15),
-                                // ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "MTA Konnect",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    // SizedBox(
+                                    //   height: 5,
+                                    // ),
+                                    // Text(
+                                    //   "mtaenquiry@gmail.com",
+                                    //   style: TextStyle(
+                                    //       color: Colors.white, fontSize: 15),
+                                    // ),
+                                  ],
+                                )
                               ],
-                            )
-                          ],
+                            ),
+                          ),
+                        ),
+                        padding: EdgeInsets.all(10),
+                        width: double.infinity,
+                      ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(
+                            0, MediaQuery.of(context).size.height * .31, 0, 0),
+                        padding: EdgeInsets.all(5),
+                        width: double.infinity,
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                      ),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  _controller?.toggle();
+                                },
+                                child: Icon(
+                                  Icons.menu,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "Contact Us",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18),
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    padding: EdgeInsets.all(10),
-                    width: double.infinity,
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(
-                        0, MediaQuery.of(context).size.height * .31, 0, 0),
-                    padding: EdgeInsets.all(5),
-                    width: double.infinity,
-                    decoration: BoxDecoration(color: Colors.grey[200]),
-                  ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              _controller?.toggle();
-                            },
-                            child: Icon(
-                              Icons.menu,
-                              color: Colors.white,
-                            ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(20,
+                            MediaQuery.of(context).size.height * .25, 20, 10),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Padding(
+                          padding: EdgeInsets.all(30),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.pin_drop),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "MTA Tirupur",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text("74/33, Singaravelan Nagar,"),
+                                      SizedBox(
+                                        height: 3,
+                                      ),
+                                      Text(
+                                          "Sakthi Theatre Road, Tirupur - 641603")
+                                    ],
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phone Number",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  TextField(
+                                    enabled: false,
+                                    controller: mobileField,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(Icons.call)),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Text(
+                                    "Email",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  TextField(
+                                    enabled: false,
+                                    controller: userType,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(Icons.email)),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.pin_drop),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "MTA Chennai",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Text("25/41 Vembuli Subedar St,"),
+                                          SizedBox(
+                                            height: 3,
+                                          ),
+                                          Text("Alandur, Guindy - 600016"),
+                                          SizedBox(
+                                            height: 3,
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phone Number",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  TextField(
+                                    enabled: false,
+                                    controller: mobilechennai,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(Icons.call)),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  Text(
+                                    "Email",
+                                    style: TextStyle(
+                                        color: Color(0xFF0061b0),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  TextField(
+                                    enabled: false,
+                                    controller: emailChennai,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(Icons.email)),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "Contact Us",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
-                          )
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(
-                        20, MediaQuery.of(context).size.height * .25, 20, 10),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15)),
-                    child: Padding(
-                        padding: EdgeInsets.all(30),
-                        child: Column(children: [Row(
-                          children: [
-                            Icon(Icons.pin_drop),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Column(crossAxisAlignment: CrossAxisAlignment.start,children: [Text("MTA Tirupur",style: TextStyle(fontWeight: FontWeight.bold),),SizedBox(height: 5,),Text("74/33, Singaravelan Nagar,"),SizedBox(height: 3,),Text("Sakthi Theatre Road, Tirupur - 641603")],)
-                          ],
-                        ),
-                        SizedBox(height: 20,),
-                        Column(crossAxisAlignment: CrossAxisAlignment.start, 
-                        children: [
-                          Text(
-                            "Phone Number",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          
-                          TextField(
-                            enabled: false,
-                            controller: mobileField,
-                            decoration:
-                                InputDecoration(prefixIcon: Icon(Icons.call)),
-                          ),
-                          SizedBox(height: 20,),
-                          Text(
-                            "Email",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          TextField(
-                            enabled: false,
-                            controller: userType,
-                            decoration:
-                                InputDecoration(prefixIcon: Icon(Icons.email)),
-                          ),
-                          SizedBox(height: 20,),
-                          Row(children: [Icon(Icons.pin_drop),
-                            SizedBox(
-                              width: 5,
-                            ),
+                      Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.fromLTRB(10,
+                              MediaQuery.of(context).size.height * .40, 10, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 20,
+                              ),
 
-                            Column(crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [Text("MTA Chennai",style: TextStyle(fontWeight: FontWeight.bold),),SizedBox(height: 5,),Text("25/41 Vembuli Subedar St,"),SizedBox(height: 3,),Text("Alandur, Guindy - 600016"),SizedBox(height: 3,)],),
-                            ],)
-                          
-                          ],
-                        ),
-                        SizedBox(height: 20,),
-                        Column(crossAxisAlignment: CrossAxisAlignment.start, 
-                        children: [
-                          Text(
-                            "Phone Number",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          
-                          TextField(
-                            enabled: false,
-                            controller: mobilechennai,
-                            decoration:
-                                InputDecoration(prefixIcon: Icon(Icons.call)),
-                          ),
-                          SizedBox(height: 20,),
-                          Text(
-                            "Email",
-                            style: TextStyle(
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.bold),
-                          ),
-                          TextField(
-                            enabled: false,
-                            controller: emailChennai,
-                            decoration:
-                                InputDecoration(prefixIcon: Icon(Icons.email)),
-                          ),
-
-                        ],)],),
-                        
-                        ),
-                  ),
-                  Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.fromLTRB(
-                          10, MediaQuery.of(context).size.height * .40, 10, 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [                                                  
-                          SizedBox(
-                            height: 20,
-                          ),
-                          
-                          // SizedBox(
-                          //   height: 20,
-                          // ),
-                          // Text(
-                          //   "Password",
-                          //   style: TextStyle(
-                          //       color: Color(0xFF0061b0),
-                          //       fontWeight: FontWeight.bold),
-                          // ),
-                          // TextField(
-                          //   controller: password,
-                          //   decoration: InputDecoration(
-                          //       prefixIcon: Icon(Icons.vpn_key),
-                          //       suffixText: "Change Password",
-                          //       suffixStyle:
-                          //           TextStyle(color: Color(0xFF0061b0))),
-                          // )
-                        ],
-                      )),
-                ],
-              )));
+                              // SizedBox(
+                              //   height: 20,
+                              // ),
+                              // Text(
+                              //   "Password",
+                              //   style: TextStyle(
+                              //       color: Color(0xFF0061b0),
+                              //       fontWeight: FontWeight.bold),
+                              // ),
+                              // TextField(
+                              //   controller: password,
+                              //   decoration: InputDecoration(
+                              //       prefixIcon: Icon(Icons.vpn_key),
+                              //       suffixText: "Change Password",
+                              //       suffixStyle:
+                              //           TextStyle(color: Color(0xFF0061b0))),
+                              // )
+                            ],
+                          )),
+                    ],
+                  )));
   }
 
   // getContactus() {

@@ -1,4 +1,3 @@
-
 class PackageStrings {
   static const String today = "Today";
   static const String yesterday = "Yesterday";
@@ -9,6 +8,8 @@ class PackageStrings {
 
   static const String unsend = "Delete Message";
   static const String reply = "Reply";
+  static const String copy = "Copy";
+  static const String forward = "Forward";
   static const String replyTo = "Replying to";
   static const String message = "Message";
   static const String reactionPopupTitle =
