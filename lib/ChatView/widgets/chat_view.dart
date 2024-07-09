@@ -23,6 +23,7 @@ class ChatView extends StatefulWidget {
     required this.chatController,
     required this.currentUser,
     this.onSendTap,
+    this.onForwardTap,
     this.refreshCall,
     this.profileCircleConfig,
     this.chatBubbleConfig,
@@ -93,6 +94,10 @@ class ChatView extends StatefulWidget {
   /// Provides call back when user tap on send button in text field. It returns
   /// message, reply message and message type.
   final ListCallBack? onSendTap;
+
+  /// Provides call back when user tap on forward button. It returns
+  /// message, reply message and message type.
+  final MessageCallBack? onForwardTap;
 
   /// Provides builder which helps you to make custom text field and functionality.
   final ReplyMessageWithReturnWidget? sendMessageBuilder;
@@ -258,6 +263,7 @@ class _ChatViewState extends State<ChatView>
                               repliedMessageConfig: widget.repliedMessageConfig,
                               swipeToReplyConfig: widget.swipeToReplyConfig,
                               onChatListTap: widget.onChatListTap,
+                              onForwardTap: _onForwardTap,
                               assignReplyMessage: (message) => _sendMessageKey
                                   .currentState
                                   ?.assignReplyMessage(message),
@@ -286,6 +292,10 @@ class _ChatViewState extends State<ChatView>
         ),
       ),
     );
+  }
+
+  void _onForwardTap(message) {
+    widget.onForwardTap?.call(message);
   }
 
   void _onSendTap(String message, ReplyMessage replyMessage,

@@ -15,10 +15,9 @@ class CommentsRes {
   List<Replies>? replies;
 
   CommentsRes(
-      {
-        this.commentUserId,
-        this.status,
-        this.commentId,
+      {this.commentUserId,
+      this.status,
+      this.commentId,
       this.parentCommentId,
       this.comment,
       this.audio,

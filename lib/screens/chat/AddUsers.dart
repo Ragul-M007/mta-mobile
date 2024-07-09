@@ -40,7 +40,6 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
       if (response.status!) {
         setState(() {
           chatUsers = response.data!;
-          print(">>>123:${jsonEncode(chatUsers)}");
           for (int i = 0; i < chatUsers.length; i++) {
             if (chatUsers[i].alreadyLinked == true) {
               chatUsers[i].isSelected = true;

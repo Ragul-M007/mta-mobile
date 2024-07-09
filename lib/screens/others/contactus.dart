@@ -1,5 +1,7 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 //import 'package:mta/models/ContactusRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/splashscreen.dart';
@@ -8,6 +10,7 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 FancyDrawerController? _controller;
 
@@ -233,6 +236,22 @@ class _ContactusContentState extends State<ContactusContent> {
   final mobileField1 = TextEditingController();
   final mobilechennai = TextEditingController();
   final emailChennai = TextEditingController();
+  final twitter = TextEditingController();
+  final instagram = TextEditingController();
+  final linkedin = TextEditingController();
+  final socialLinksData = [
+    {
+      "social_media": "Instagram",
+      "url": "",
+      "image": "assets/icons/instagram.png"
+    },
+    {"social_media": "Twitter", "url": "", "image": "assets/icons/twitter.png"},
+    {
+      "social_media": "Linkedin",
+      "url": "",
+      "image": "assets/icons/linkedin.png"
+    }
+  ];
 
   final userType = TextEditingController();
   final password = TextEditingController();
@@ -251,7 +270,7 @@ class _ContactusContentState extends State<ContactusContent> {
     userType.text = "info@multitechcorp.in";
     emailChennai.text = "info@mtadesigns.com";
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) => getContactus());
+    WidgetsBinding.instance.addPostFrameCallback((_) => getSocialsMediaLinks());
     //getContactus();
   }
 
@@ -487,6 +506,10 @@ class _ContactusContentState extends State<ContactusContent> {
                                         prefixIcon: Icon(Icons.email)),
                                   ),
                                 ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: socialLinks(),
                               )
                             ],
                           ),
@@ -526,6 +549,22 @@ class _ContactusContentState extends State<ContactusContent> {
                   )));
   }
 
+  Widget socialLinks() {
+    return Container(
+        height: 50,
+        alignment: Alignment.center,
+        child: ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemCount: socialLinksData.length,
+            itemBuilder: (context, index) {
+              return IconButton(
+                  icon: Image.asset(socialLinksData[index]["image"]!),
+                  onPressed: () {
+                    launchUrl(Uri.parse(socialLinksData[index]["link"]!));
+                  });
+            }));
+  }
   // getContactus() {
   //   AppUtils.showprogress();
   //   final api = Provider.of<ApiService>(context, listen: false);
@@ -549,6 +588,32 @@ class _ContactusContentState extends State<ContactusContent> {
   //     print(onError.toString());
   //   });
   // }
+
+  getSocialsMediaLinks() {
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+
+    api.getSocialsBackLink().then((response) {
+      print('profileResponse status ${response.toJson()}');
+      socialLinksData.forEach((element) {
+        if (element['social_media'] == "Instagram") {
+          element['link'] = response.data![0].instagramLink!;
+        } else if (element['social_media'] == "Twitter") {
+          element['link'] = response.data![0].twitterLink!;
+        } else if (element['social_media'] == "Linkedin") {
+          element['link'] = response.data![0].linkedin!;
+        }
+      });
+      setState(() {
+        loader = false;
+      });
+
+      AppUtils.dismissprogress();
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
 
   Widget _loader() {
     return Container(

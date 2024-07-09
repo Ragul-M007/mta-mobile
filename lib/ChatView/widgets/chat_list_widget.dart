@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' if (kIsWeb) 'dart:html';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,7 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mta/ChatView/extensions/extensions.dart';
 import 'package:mta/ChatView/widgets/chat_groupedlist_widget.dart';
+import 'package:mta/models/GroupReq.dart';
+import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:provider/provider.dart';
 
 import '../chatview.dart';
 import 'reaction_popup.dart';
@@ -34,6 +38,7 @@ class ChatListWidget extends StatefulWidget {
       this.loadMoreData,
       this.isLastPage,
       this.onChatListTap,
+      this.onForwardTap,
       this.audioDownloadConfirmation})
       : super(key: key);
 
@@ -92,6 +97,9 @@ class ChatListWidget extends StatefulWidget {
   /// Provides callback when user tap anywhere on whole chat.
   final VoidCallBack? onChatListTap;
 
+  /// Provides callback when user tap anywhere on whole chat.
+  final MessageCallBack? onForwardTap;
+
   final DataRefreshCallback? refreshCall;
 
   final Function()? audioDownloadConfirmation;
@@ -106,8 +114,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
   ValueNotifier<bool> showPopUp = ValueNotifier(false);
   final GlobalKey<ReactionPopupState> _reactionPopupKey = GlobalKey();
 
-  List<String> _selectedItems = [];
-
   ChatController get chatController => widget.chatController;
 
   List<Message> get messageList => chatController.initialMessageList;
@@ -121,9 +127,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
 
   FeatureActiveConfig? featureActiveConfig;
   ChatUser? currentUser;
-
-  FocusNode searchField = new FocusNode();
-  TextEditingController _searchFieldController = TextEditingController();
 
   @override
   void initState() {
@@ -302,10 +305,8 @@ class _ChatListWidgetState extends State<ChatListWidget>
                         }
                       },
                       onForwardTap: () {
-                        print(">>>>>123");
-
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        showListPopup();
+                        widget.onForwardTap?.call(message);
                       },
                       onCopyTap: () async {
                         await Clipboard.setData(
@@ -333,186 +334,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
     }
     showPopUp.value = false;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  }
-
-// Dummy Listview for group selection
-  Future<void> showListPopup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        var items = [
-          'Item 1',
-          'Item 2',
-          'Item 3',
-          'Item 4',
-          'Item 5',
-          'Item 6',
-          'Item 7',
-          'Item 8',
-          'Item 9'
-        ];
-        List<String> tempList = [];
-        return AlertDialog(
-          content: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    InkWell(
-                      child: new Icon(Icons.close,
-                          size: 22.0, color: Colors.black),
-                      onTap: () {
-                        _searchFieldController.text = "";
-                        searchField.unfocus();
-                        Navigator.of(context).pop();
-                      },
-                    )
-                  ]),
-                  Text(
-                    'Select groups',
-                    style: TextStyle(
-                        // fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color: const Color(0xFFeceeef),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Material(
-                        color: const Color(0xFFeceeef),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              child: TextField(
-                                focusNode: searchField,
-                                controller: _searchFieldController,
-                                decoration: InputDecoration.collapsed(
-                                  hintText: ' Search',
-                                ),
-                                onChanged: (value) {
-                                  if (value.isEmpty) {
-                                    setState(() {
-                                      items = tempList;
-                                    });
-                                    return;
-                                  }
-                                  setState(() {
-                                    items = tempList
-                                        .where((data) => data
-                                            .toLowerCase()
-                                            .contains(value.toLowerCase()))
-                                        .toList();
-                                  });
-                                },
-                                onTap: () {
-                                  setState(() {
-                                    tempList = items;
-                                  });
-                                },
-                              ),
-                            ),
-                            InkWell(
-                              child: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                              ),
-                              onTap: () {},
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.width * 1,
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: items.length != 0
-                        ? ListView.builder(
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  ListTile(
-                                    title: Text(
-                                      items[index],
-                                      maxLines: 3,
-                                      style: TextStyle(
-                                          fontWeight: _selectedItems
-                                                  .contains(items[index])
-                                              ? FontWeight.bold
-                                              : FontWeight.normal),
-                                    ),
-                                    onTap: () {
-                                      if (!_selectedItems
-                                          .contains(items[index])) {
-                                        setState(() {
-                                          _selectedItems.add(items[index]);
-                                        });
-                                      } else {
-                                        setState(() {
-                                          _selectedItems.remove(items[index]);
-                                        });
-                                      }
-                                    },
-                                    trailing: Checkbox(
-                                      value:
-                                          _selectedItems.contains(items[index]),
-                                      onChanged: (bool? value) {
-                                        if (value!) {
-                                          setState(() {
-                                            _selectedItems.add(items[
-                                                index]); // Replace with your logic
-                                          });
-                                        } else {
-                                          setState(() {
-                                            _selectedItems.remove(items[
-                                                index]); // Replace with your logic
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  )
-                                ],
-                              );
-                            },
-                          )
-                        : _searchFieldController.text != ""
-                            ? Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "No results found",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              )
-                            : Center(
-                                child: Text("No assigned projects found",
-                                    style: TextStyle(color: Colors.red))),
-                  ),
-                ],
-              ),
-            );
-          }),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Send'),
-            ),
-          ],
-        );
-      },
-    ).whenComplete(() => _selectedItems.clear());
   }
 
   @override

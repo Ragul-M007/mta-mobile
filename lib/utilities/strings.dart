@@ -96,4 +96,8 @@ mixin Strings {
   static bool fromNotificationReply = false;
 
   static var ctx;
+
+  static bool fromTeamProjects = false;
+
+  static int checkInRadius = 0;
 }

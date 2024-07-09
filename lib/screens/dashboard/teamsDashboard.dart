@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mappls_gl/mappls_gl.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
@@ -12,6 +15,7 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/mapClickEvent.dart';
 import 'package:mta/utilities/strings.dart';
+import 'package:mappls_place_widget/mappls_place_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -43,6 +47,12 @@ class _TeamsDashboardState extends State<TeamsDashboard>
   void initState() {
     super.initState();
 
+    MapplsAccountManager.setMapSDKKey("d9edcb4cf5ee2ec1548f976fc4df6613");
+    MapplsAccountManager.setRestAPIKey("d9edcb4cf5ee2ec1548f976fc4df6613");
+    MapplsAccountManager.setAtlasClientId(
+        "96dHZVzsAusjeW22xqjQGtIpq2xN-9K4_c6YSj7N8RFgC9U0wzDlsqNl-E7bYG5HtfoTXI4WU-3TxCgvi2KJIw==");
+    MapplsAccountManager.setAtlasClientSecret(
+        "lrFxI-iSEg94zjTjoqrw-1s9kHOGP2LgG535AnqzVbWN4jb07CJ0l0kQijWK9nK-jHpW0wlRt-YMGaQUitSTE52XYUIadCyk");
     if (Strings.roleId == 7) {
       AppUtils.showprogress();
     }
@@ -500,6 +510,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
 
                                             Strings.selectedTeamId =
                                                 _searchLists[index].teamId;
+
                                             Navigator.pushNamed(
                                                 context, '/dashboard');
                                           },
@@ -637,6 +648,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                               onTap: () {
                                                 Strings.selectedTeamId =
                                                     _teamLists[index].teamId;
+                                                Strings.fromTeamProjects = true;
                                                 Navigator.pushNamed(
                                                     context, '/dashboard');
                                               },
@@ -679,17 +691,27 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                 SizedBox(
                                                                   width: 2,
                                                                 ),
-                                                                Text(
-                                                                    _teamLists[
-                                                                            index]
-                                                                        .description!
-                                                                        .trim(),
-                                                                    style: Drawables.adddoccontentstyle(
-                                                                        Colors
-                                                                            .grey,
-                                                                        12.0,
-                                                                        FontWeight
-                                                                            .w300)),
+                                                                Container(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.5,
+                                                                  child: Text(
+                                                                      _teamLists[
+                                                                              index]
+                                                                          .description!
+                                                                          .trim(),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: Drawables.adddoccontentstyle(
+                                                                          Colors
+                                                                              .grey,
+                                                                          12.0,
+                                                                          FontWeight
+                                                                              .w300)),
+                                                                ),
                                                               ],
                                                             ),
                                                           ],
@@ -719,15 +741,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                             //                 25,
                                                             //           ),
                                                             //     onPressed: () {
-                                                            //       Navigator
-                                                            //           .push(
-                                                            //         context,
-                                                            //         MaterialPageRoute(
-                                                            //           builder:
-                                                            //               (context) =>
-                                                            //                   MapClickEvent(),
-                                                            //         ),
-                                                            //       );
+                                                            //       openMapplsPlacePickerWidget();
                                                             //     }),
                                                             IconButton(
                                                                 icon: (_teamLists[index].unReadedUserId !=
@@ -812,6 +826,28 @@ class _TeamsDashboardState extends State<TeamsDashboard>
         ),
       ),
     );
+  }
+
+  openMapplsPlacePickerWidget() async {
+    ReverseGeocodePlace place;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      place = await openPlacePicker(PickerOption());
+    } on PlatformException {
+      place = ReverseGeocodePlace();
+    }
+    if (kDebugMode) {
+      print(jsonEncode(place.toJson()));
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+    print(">>>>>:${place.latitude}");
+    // setState(() {
+    //   _place = place;
+    // });
   }
 
   onTapProject(Data projectList) {

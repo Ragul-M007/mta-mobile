@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/models/ForwardMessageReq.dart';
+import 'package:mta/models/GroupReq.dart';
 import 'package:mta/screens/chat/ChatMedia.dart';
 import 'package:mta/screens/chat/theme.dart';
 import 'package:mta/screens/dashboard/teamsDashboard.dart';
@@ -17,6 +19,7 @@ import 'package:path/path.dart' as path;
 import '../../ChatView/chatview.dart';
 import '../../models/Chat/ChatMessageRes.dart';
 import '../../models/Chat/GroupUsersRes.dart';
+import '../../models/GroupRes.dart';
 import '../../network/ApiService.dart';
 import '../../utilities/apputilities.dart';
 import '../../utilities/strings.dart';
@@ -68,6 +71,14 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isloading = true;
 
   List<FetchMapedUsersData> _readUsersList = [];
+
+  List<int> _selectedItems = [];
+
+  TextEditingController _searchFieldController = TextEditingController();
+
+  FocusNode searchField = new FocusNode();
+
+  List<int>? GroupList = [];
 
   @override
   void dispose() {
@@ -517,6 +528,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   currentUser: currentUser,
                   chatController: _chatController,
                   onSendTap: _onSendTap,
+                  onForwardTap: _onForwardTap,
                   featureActiveConfig: const FeatureActiveConfig(
                     enableReactionPopup: false,
                     enablePagination: true,
@@ -742,6 +754,231 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           );
+  }
+
+  Future<void> _onForwardTap(Message message) async {
+    AppUtils.showprogress();
+
+    GroupReq req = GroupReq();
+    req.projectId = widget.projectId != null ? widget.projectId.toString() : "";
+    req.groupType = widget.projectId == null ? "team" : "project";
+    req.teamId = widget.teamId != null ? widget.teamId.toString() : "";
+    req.userId = Strings.userID!.toString();
+    req.groupId = widget.groupId.toString();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchGroupList(req).then((response) {
+      if (response.status!) {
+        AppUtils.dismissprogress();
+        showListPopup(message, response.data!);
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Something went wrong!");
+    });
+  }
+
+// Dummy Listview for group selection
+  Future<void> showListPopup(Message message, List<Data> groups) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        List<Data> tempList = [];
+        return AlertDialog(
+          content: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    InkWell(
+                      child: new Icon(Icons.close,
+                          size: 22.0, color: Colors.black),
+                      onTap: () {
+                        _searchFieldController.text = "";
+                        _selectedItems.clear();
+                        searchField.unfocus();
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ]),
+                  Text(
+                    'Select groups',
+                    style: TextStyle(
+                        // fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: const Color(0xFFeceeef),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Material(
+                        color: const Color(0xFFeceeef),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                focusNode: searchField,
+                                controller: _searchFieldController,
+                                decoration: InputDecoration.collapsed(
+                                  hintText: ' Search',
+                                ),
+                                onChanged: (value) {
+                                  if (value.isEmpty) {
+                                    setState(() {
+                                      groups = tempList;
+                                    });
+                                    return;
+                                  }
+                                  setState(() {
+                                    groups = tempList
+                                        .where((data) => data.groupName!
+                                            .toLowerCase()
+                                            .contains(value.toLowerCase()))
+                                        .toList();
+                                  });
+                                },
+                                onTap: () {
+                                  setState(() {
+                                    tempList = groups;
+                                  });
+                                },
+                              ),
+                            ),
+                            Icon(
+                              Icons.search,
+                              color: Colors.black,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.width * 1,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: groups.length != 0
+                        ? ListView.builder(
+                            itemCount: groups.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      groups[index].groupName ?? "",
+                                      maxLines: 3,
+                                      style: TextStyle(
+                                          fontWeight: _selectedItems.contains(
+                                                  groups[index].groupId)
+                                              ? FontWeight.bold
+                                              : FontWeight.normal),
+                                    ),
+                                    onTap: () {
+                                      if (!_selectedItems
+                                          .contains(groups[index].groupId)) {
+                                        setState(() {
+                                          _selectedItems
+                                              .add(groups[index].groupId!);
+                                        });
+                                      } else {
+                                        setState(() {
+                                          _selectedItems
+                                              .remove(groups[index].groupId);
+                                        });
+                                      }
+                                    },
+                                    trailing: Checkbox(
+                                      value: _selectedItems
+                                          .contains(groups[index].groupId),
+                                      onChanged: (bool? value) {
+                                        if (value!) {
+                                          if (_selectedItems.length < 5) {
+                                            setState(() {
+                                              _selectedItems.add(groups[index]
+                                                  .groupId!); // Replace with your logic
+                                            });
+                                          } else {
+                                            AppUtils.showToastError(
+                                                "You can only share with upto 5 groups");
+                                          }
+                                        } else {
+                                          setState(() {
+                                            _selectedItems.remove(groups[index]
+                                                .groupId); // Replace with your logic
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  )
+                                ],
+                              );
+                            },
+                          )
+                        : _searchFieldController.text != ""
+                            ? Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "No results found",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              )
+                            : Center(
+                                child: Text("No assigned projects found",
+                                    style: TextStyle(color: Colors.red))),
+                  ),
+                ],
+              ),
+            );
+          }),
+          actions: [
+            InkWell(
+              onTap: () {
+                if (_selectedItems.isNotEmpty) {
+                  sendForwardMessage(message);
+                }
+              },
+              child: Text('Send'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  sendForwardMessage(Message message) {
+    ForwadMessageReq req = ForwadMessageReq();
+    req.documentId = [int.tryParse(message.id)!];
+    req.receiverGroupId = _selectedItems;
+    req.senderGroupId = widget.groupId.toString();
+    req.userId = Strings.userID!.toString();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.sendForwadMessage(req).then((response) {
+      if (response.status!) {
+        _selectedItems.clear();
+        Navigator.pop(context);
+      } else {
+        _selectedItems.clear();
+        Navigator.pop(context);
+        AppUtils.showToastError(response.message!);
+      }
+    }).catchError((onError) {
+      _selectedItems.clear();
+      Navigator.pop(context);
+      AppUtils.showToastError("Something went wrong!");
+    });
   }
 
   Future<void> _onSendTap(String message, ReplyMessage replyMessage,

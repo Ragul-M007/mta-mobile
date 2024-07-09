@@ -231,10 +231,12 @@ class _ChatGroupsState extends State<ChatGroups>
       create: (context) => ApiService.create(),
       child: WillPopScope(
         onWillPop: () {
-          if (widget.fromTeamProjects == true) {
-            Navigator.pushNamed(context, "/dashboard");
-          } else if (widget.projectId == null) {
+          if (widget.projectId == null) {
             Navigator.pushNamed(context, "/teamsDashboard");
+          } else if (widget.fromTeamProjects == true ||
+              Strings.fromTeamProjects) {
+            Strings.fromTeamProjects = false;
+            Navigator.pushNamed(context, "/dashboard");
           } else {
             Navigator.pushNamed(context, "/projects");
           }
@@ -332,10 +334,12 @@ class _ChatGroupsState extends State<ChatGroups>
                         color: const Color(0xFF979797),
                       ),
                       onPressed: () {
-                        if (widget.fromTeamProjects == true) {
-                          Navigator.pushNamed(context, "/dashboard");
-                        } else if (widget.projectId == null) {
+                        if (widget.projectId == null) {
                           Navigator.pushNamed(context, "/teamsDashboard");
+                        } else if (widget.fromTeamProjects == true ||
+                            Strings.fromTeamProjects) {
+                          Strings.fromTeamProjects = false;
+                          Navigator.pushNamed(context, "/dashboard");
                         } else {
                           Navigator.pushNamed(context, "/projects");
                         }

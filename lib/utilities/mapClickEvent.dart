@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,8 +53,17 @@ class _MapClickEventState extends State {
   }
 
   void addMarker(ELocation eLocation) async {
-    LatLng latLng = LatLng(eLocation.latitude!, eLocation.longitude!);
-    await mapController.addSymbol(SymbolOptions(geometry: latLng));
+    PlaceDetailResponse? placeDetailResponse;
+    placeDetailResponse =
+        await MapplsPlaceDetail(mapplsPin: eLocation.mapplsPin!)
+            .callPlaceDetail();
+    LatLng latLng =
+        LatLng(placeDetailResponse!.latitude!, placeDetailResponse.longitude!);
+    mapController.addSymbol(
+      SymbolOptions(geometry: latLng, draggable: true),
+    );
+    mapController.setSymbolIconIgnorePlacement(false);
+    mapController.setSymbolIconAllowOverlap(true);
     mapController.animateCamera(CameraUpdate.newLatLngZoom(latLng, 14));
   }
 
@@ -77,13 +88,29 @@ class _MapClickEventState extends State {
             myLocationTrackingMode: MyLocationTrackingMode.Tracking,
             myLocationEnabled: true,
             onMapCreated: _onMapCreated,
+            annotationOrder: const [
+              AnnotationType.fill,
+              AnnotationType.circle,
+              AnnotationType.line,
+              AnnotationType.symbol,
+            ],
             onMapClick: (point, latlng) => {
-              print(">>>lat:${latlng.latitude},${latlng.longitude}"),
-              Fluttertoast.showToast(msg: latlng.toString()),
+              // Fluttertoast.showToast(msg: latlng.toString()),
+              mapController.clearSymbols(),
               mapController.addSymbol(SymbolOptions(
-                  geometry: LatLng(latlng.latitude, latlng.longitude))),
+                  geometry: LatLng(
+                    latlng.latitude,
+                    latlng.longitude,
+                  ),
+                  draggable: true)),
               mapController.animateCamera(CameraUpdate.newLatLngZoom(
-                  LatLng(latlng.latitude, latlng.longitude), 14))
+                  LatLng(
+                    latlng.latitude,
+                    latlng.longitude,
+                  ),
+                  14)),
+              mapController.setSymbolIconIgnorePlacement(false),
+              mapController.setSymbolIconAllowOverlap(true)
             },
             onUserLocationUpdated: (location) {
               _kInitialPosition = CameraPosition(
@@ -150,7 +177,9 @@ class _MapClickEventState extends State {
                               maxLines: 2,
                             ),
                             onTap: () {
-                              addMarker(_elocation[index]);
+                              if (_elocation[index].mapplsPin != null) {
+                                addMarker(_elocation[index]);
+                              }
                               setState(() {
                                 _elocation = [];
                               });

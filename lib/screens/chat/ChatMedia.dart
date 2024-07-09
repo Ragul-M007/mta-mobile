@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
+import 'package:mta/screens/chat/ChatGroups.dart';
+import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/screens/chat/RemoveUsers.dart';
 import 'package:mta/screens/chat/AddUsers.dart';
+import 'package:mta/screens/splashscreen.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/Chat/GroupUsersRes.dart';
@@ -33,7 +36,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
   List<GroupChatUsersData> _searchLists = [];
   TextEditingController _searchFieldController = TextEditingController();
   FocusNode searchField = new FocusNode();
-
+  int? groupCreatedUserId = 0;
   String? basePath;
 
   @override
@@ -46,6 +49,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
     getDocumentDetails("document");
     getDocumentDetails("video");
     getUsersByGroupId();
+    getGroupData();
   }
 
   findPath() async {
@@ -92,17 +96,36 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
     });
   }
 
+  getGroupData() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.getGroupData(widget.groupId).then((response) {
+      if (response.status!) {
+        setState(() {
+          // chatUsers = response.data!;
+          groupCreatedUserId = response.data?.groupCreatedBy;
+        });
+      } else {
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Chat Media"),
         actions: [
-          IconButton(
-              onPressed: () {
-                showDeleteDialog();
-              },
-              icon: Icon(Icons.delete_outline_outlined))
+          groupCreatedUserId == Strings.userID
+              ? IconButton(
+                  onPressed: () {
+                    showDeleteDialog();
+                  },
+                  icon: Icon(Icons.delete_outline_outlined))
+              : Container()
         ],
       ),
       body: tabbarwidget(),
@@ -222,7 +245,9 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              deleteGroup();
+            },
             child: new Text(
               'Yes',
               style: TextStyle(
@@ -748,5 +773,37 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
               )),
       ],
     );
+  }
+
+  deleteGroup() {
+    Navigator.of(context).pop(true);
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.deleteGroup(widget.groupId).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatGroups(
+                    teamId: widget.teamId,
+                    projectId: widget.projectId,
+                    fromTeamProjects: widget.projectId == null ? true : false,
+                  )),
+          (route) => false,
+        );
+        // setState(() {
+        //   AppUtils.showToastSuccess(response.comment ?? "Deleted Successfully");
+        // });
+      } else {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError("Something went wrong!");
+        print('error');
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Something went wrong!");
+      print(onError.toString());
+    });
   }
 }

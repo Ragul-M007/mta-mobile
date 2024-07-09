@@ -316,7 +316,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     var nextCursorPosition =
         selectedMention.start + 1 + value['display']?.length as int? ?? 0;
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller!.selection =
+    controller?.selection =
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 

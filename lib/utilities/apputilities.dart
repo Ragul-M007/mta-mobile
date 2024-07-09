@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:external_path/external_path.dart';
@@ -28,8 +27,7 @@ class AppUtils {
   /// Shared Preferences starts here
 //////////////////////////////////////////////////////////////////////////////////////////
 
-  static savePreferences(String key, dynamic value) async 
-  {
+  static savePreferences(String key, dynamic value) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     if (value is bool) {
       sharedPrefs.setBool(key, value);
@@ -37,14 +35,12 @@ class AppUtils {
       sharedPrefs.setString(key, value);
     } else if (value is int) {
       sharedPrefs.setInt(key, value);
-    } else if (value is List<String>) 
-    {
+    } else if (value is List<String>) {
       sharedPrefs.setStringList(key, value);
     }
   }
 
-  static Future<String> getStringPreferences(String key) async 
-  {
+  static Future<String> getStringPreferences(String key) async {
     final sharedPrefs = await SharedPreferences.getInstance();
     String pref = sharedPrefs.getString(key) ?? "null";
     return pref;
@@ -79,7 +75,7 @@ class AppUtils {
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 2,
         backgroundColor: Color(0xFF0061b0),
-        gravity: ToastGravity.CENTER,
+        gravity: ToastGravity.BOTTOM,
         fontSize: 16.0);
   }
 
@@ -94,7 +90,7 @@ class AppUtils {
         fontSize: 16.0);
   }
 
-static  String getFileExtension(String fileName) {
+  static String getFileExtension(String fileName) {
     var file = fileName.split(".");
     var fileExt = file[file.length - 1];
     if (fileExt == "png" || fileExt == "PNG") {
@@ -115,12 +111,10 @@ static  String getFileExtension(String fileName) {
     } else if (fileExt == "mp4" || fileExt == "MP4") {
       return ".mp4";
     } else if (fileExt == "wav" || fileExt == "mp3") {
-      return ".wav"; 
-    }
-    else if (fileExt == "m4a" || fileExt == "m4a") {
-      return ".m4a"; 
-    }
-    else if (fileExt == "ppt" || fileExt == "PPT") {
+      return ".wav";
+    } else if (fileExt == "m4a" || fileExt == "m4a") {
+      return ".m4a";
+    } else if (fileExt == "ppt" || fileExt == "PPT") {
       return ".ppt";
     } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
@@ -133,8 +127,7 @@ static  String getFileExtension(String fileName) {
     }
   }
 
- static String getFilTypeImg(String? fileName) 
-  {
+  static String getFilTypeImg(String? fileName) {
     print("Filename--> $fileName");
     var file = fileName?.split("/");
     var fileExttemp = file?[file.length - 1];
@@ -164,11 +157,9 @@ static  String getFileExtension(String fileName) {
       return "assets/icons/mp4.png";
     } else if (fileExt == "wav" || fileExt == "mp3") {
       return "assets/icons/mp3.png";
-    } else if (fileExt == "m4a")
-    {
+    } else if (fileExt == "m4a") {
       return "assets/icons/aac.png";
-    }
-     else if (fileExt == "xls" ||
+    } else if (fileExt == "xls" ||
         fileExt == "xlsx" ||
         fileExt == "xlsm" ||
         fileExt == "xlsb" ||
@@ -179,20 +170,18 @@ static  String getFileExtension(String fileName) {
     }
   }
 
-static Future<void> openFile(filePath) async {
+  static Future<void> openFile(filePath) async {
     await OpenFilex.open(filePath);
   }
 
- static String formatDate(date)
-{
- var convertedDate = DateTime.parse(date);
-  final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  final String formatted = formatter.format(convertedDate);
-  return formatted;
-}
+  static String formatDate(date) {
+    var convertedDate = DateTime.parse(date);
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    final String formatted = formatter.format(convertedDate);
+    return formatted;
+  }
 
-static String getFileExt(String? fileName) 
-  {
+  static String getFileExt(String? fileName) {
     print("Filename--> $fileName");
     var file = fileName?.split("/");
     var fileExttemp = file?[file.length - 1];
@@ -233,10 +222,9 @@ static String getFileExt(String? fileName)
     }
   }
 
- static Future<String?> findFilePath()
-async {
-  String? basePath;
-   if (Platform.isAndroid) {
+  static Future<String?> findFilePath() async {
+    String? basePath;
+    if (Platform.isAndroid) {
       basePath = await ExternalPath.getExternalStoragePublicDirectory(
           ExternalPath.DIRECTORY_DOWNLOADS);
     } else if (Platform.isIOS) {
@@ -251,17 +239,14 @@ async {
       }
     }
     Strings.basePath = basePath;
-      print("base path $basePath");
-   // return basePath;
-}
+    print("base path $basePath");
+    // return basePath;
+  }
 
-  static Future<bool?> updateDownloadStatus(msgId,context) async
-  {
+  static Future<bool?> updateDownloadStatus(msgId, context) async {
     final api = Provider.of<ApiService>(context, listen: false);
     var status = false;
-    api.updateDownloadStatus(msgId, 1).then((response) 
-    {
-
+    api.updateDownloadStatus(msgId, 1).then((response) {
       print("response ${response.status}");
       if (response.status!) {
         status = true;
@@ -275,7 +260,7 @@ async {
       AppUtils.dismissprogress();
       AppUtils.showToastError("Unable to connect to server");
       print(onError.toString());
-      status=false;
+      status = false;
     });
 
     return status;
@@ -320,7 +305,8 @@ async {
     //     backgroundColor: Colors.white.withOpacity(0),
     //     textStyle: TextStyle(color: Colors.black));
     print('showProgress');
-    EasyLoading.showProgress(percent,status: "Downloading ${(percent * 100).toStringAsFixed(0) + "%"}");
+    EasyLoading.showProgress(percent,
+        status: "Downloading ${(percent * 100).toStringAsFixed(0) + "%"}");
   }
 
   static void showUploadProgressWithPercent(double percent) {
@@ -328,7 +314,9 @@ async {
     //     backgroundColor: Colors.white.withOpacity(0),
     //     textStyle: TextStyle(color: Colors.black));
     print('showProgress');
-    EasyLoading.showProgress(percent,status: "Please wait, while your file are being uploaded ${(percent * 100).toStringAsFixed(0) + "%"}");
+    EasyLoading.showProgress(percent,
+        status:
+            "Please wait, while your file are being uploaded ${(percent * 100).toStringAsFixed(0) + "%"}");
   }
 
   static void dismissprogress() {
@@ -337,15 +325,15 @@ async {
 
     EasyLoading.dismiss();
   }
-  
 
   static void removeDeviceId(ctx) {
     final api = Provider.of<ApiService>(ctx!, listen: false);
     AppUtils.getIntPreferences('userId').then((value) {
       if (value != null) {
-        api.removeDeviceId(Strings.userID!).then((response) {
-
-        }).catchError((onError) {
+        api
+            .removeDeviceId(Strings.userID!)
+            .then((response) {})
+            .catchError((onError) {
           AppUtils.dismissprogress();
           print(onError.toString());
         });

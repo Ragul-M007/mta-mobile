@@ -100,7 +100,6 @@ class _AttendanceContentState extends State<AttendanceContent>
   getProjects() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-
     api.projects(Strings.userID!).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
@@ -700,7 +699,6 @@ class _AttendanceContentState extends State<AttendanceContent>
                   print("inside check  $status");
 
                   if (status) {
-                    
                     if (_attendance.length != 0) {
                       var lastSignIn = _attendance.last;
                       print("last Signin --> ${lastSignIn.checkOutTime}");
@@ -734,7 +732,8 @@ class _AttendanceContentState extends State<AttendanceContent>
                         );
                       } else {
                         print("distancee   $distance");
-                        if (distance != null && distance! <= 50) {
+                        if (distance != null &&
+                            distance! <= Strings.checkInRadius) {
                           _onWillPop("IN");
                         } else if (distance != null) {
                           _outOfLocationPopUp();
@@ -742,7 +741,8 @@ class _AttendanceContentState extends State<AttendanceContent>
                       }
                     } else {
                       print("dis $distance");
-                      if (distance != null && distance! < 50) {
+                      if (distance != null &&
+                          distance! < Strings.checkInRadius) {
                         _onWillPop("IN");
                       } else if (distance != null) {
                         _outOfLocationPopUp();
@@ -839,7 +839,8 @@ class _AttendanceContentState extends State<AttendanceContent>
                       print("last ${_attendance.last}");
                       if (lastSignIn.checkOutTime == "" ||
                           lastSignIn.checkOutTime == null) {
-                        if (distance != null && distance! < 50) {
+                        if (distance != null &&
+                            distance! < Strings.checkInRadius) {
                           _onWillPop("OUT");
                         } else if (distance != null) {
                           _outOfLocationPopUp();
@@ -1278,16 +1279,17 @@ class _AttendanceContentState extends State<AttendanceContent>
     // getUserLocation();
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-
     api.getAttendance(Strings.userID!, date).then((response) {
       AppUtils.dismissprogress();
       print('Response status ${response.toJson()}');
 
-      if (response.status) {
+      if (response.status!) {
+        // // to handle the check in distance
+        Strings.checkInRadius = int.tryParse(response.radius ?? "50")!;
         setState(() {
-          if (response.data.length > 0) {
+          if (response.data!.length > 0) {
             print("response fetched");
-            _attendancemain = response.data;
+            _attendancemain = response.data!;
             formatAttendanceData();
           } else {
             _attendancemain = [];
@@ -1297,7 +1299,7 @@ class _AttendanceContentState extends State<AttendanceContent>
         setState(() {
           _attendance = [];
         });
-        AppUtils.showToastError(response.message);
+        AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
       print("catch");
@@ -1322,7 +1324,7 @@ class _AttendanceContentState extends State<AttendanceContent>
         test.checkInLocation = _attendancemain[i].locationName;
         test.checkInTime = _attendancemain[i].checkTime;
         //  test.userId = _attendancemain[i].userId;
-        DateTime dateData = DateTime.parse(_attendancemain[i].checkTime);
+        DateTime dateData = DateTime.parse(_attendancemain[i].checkTime!);
         String formattedDate = DateFormat('yyyy-MM-dd').format(dateData);
         test.date = formattedDate;
         test.projectImg = _attendancemain[i].projectImg ?? "";
@@ -1570,12 +1572,10 @@ class _AttendanceContentState extends State<AttendanceContent>
                   )
                 });
       }
-    }).onError((error, stackTrace)
-    {
+    }).onError((error, stackTrace) {
       permisionStatus = false;
       AppUtils.dismissprogress();
-      AppUtils.showToastError(
-          "$error");
+      AppUtils.showToastError("$error");
     });
     return permisionStatus;
   }
@@ -1594,160 +1594,203 @@ class _AttendanceContentState extends State<AttendanceContent>
     AppUtils.dismissprogress();
   }
 
-  Future<void> showUserProjectsDialog() async 
-  {
+  Future<void> showUserProjectsDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           content: StatefulBuilder(
-            builder:(BuildContext context, StateSetter setState){
-              return SingleChildScrollView(
-                child: GestureDetector(
-                    onTap: () {
-                    },
-                    child:
-                    Column(
-                      children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                          InkWell(child: new Icon(Icons.close, size: 22.0, color: Colors.black),onTap: (){
+              builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: GestureDetector(
+                  onTap: () {},
+                  child: Column(
+                    children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        InkWell(
+                          child: new Icon(Icons.close,
+                              size: 22.0, color: Colors.black),
+                          onTap: () {
                             _searchFieldController.text = "";
                             _searchLists?.clear();
                             searchField.unfocus();
-                                                Navigator.of(context).pop();
-                          },)
-                        ]),
-                        Text(
-                          "Select Project",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ]),
+                      Text(
+                        "Select Project",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          color: const Color(0xFFeceeef),
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
-
-                         Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color: const Color(0xFFeceeef),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Material(
-                        color: const Color(0xFFeceeef),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              child: TextField(
-                                focusNode: searchField,
-                                controller: _searchFieldController,
-                                decoration: InputDecoration.collapsed(
-                                  hintText: ' Search',
-                                ),
-                                onChanged: (value) {
-                                  if (value.isEmpty) {
-                                    setState(() {
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Material(
+                            color: const Color(0xFFeceeef),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Expanded(
+                                  child: TextField(
+                                    focusNode: searchField,
+                                    controller: _searchFieldController,
+                                    decoration: InputDecoration.collapsed(
+                                      hintText: ' Search',
+                                    ),
+                                    onChanged: (value) {
+                                      if (value.isEmpty) {
+                                        setState(() {
+                                          _searchLists = [];
+                                        });
+                                        return;
+                                      }
                                       _searchLists = [];
-                                    });
-                                    return;
-                                  }
-                                  _searchLists = [];
-                                  _projectLists?.forEach((list) {
-                                    if (list.projectName!
-                                        .toLowerCase()
-                                        .startsWith(value.toLowerCase()))
-                                      _searchLists?.add(list);
-                                  });
-                                  print("dataaaa ${_searchLists?.length}");
-                                  setState(() {});
-                                },
-                              ),
+                                      _projectLists?.forEach((list) {
+                                        if (list.projectName!
+                                            .toLowerCase()
+                                            .startsWith(value.toLowerCase()))
+                                          _searchLists?.add(list);
+                                      });
+                                      print("dataaaa ${_searchLists?.length}");
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                                InkWell(
+                                  child: Icon(
+                                    Icons.search,
+                                    color: Colors.black,
+                                  ),
+                                  onTap: () {},
+                                )
+                              ],
                             ),
-                            InkWell(
-                              child: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                              ),
-                              onTap: () {},
-                            )
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                        Container(
-                          height: MediaQuery.of(context).size.width * 1,
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          child:
-                           (_projectLists?.length != 0 && _projectLists?.length != null)? 
-                             _searchLists?.length != 0?
-                                            ListView.builder(
-                            itemCount: _searchLists?.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  Card(
-                                    color: Colors.white70,
-                                    child: ListTile(
-                                      leading: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl + (_searchLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
-                                      title: Text(
-                                        _searchLists?[index].projectName ?? "",maxLines: 3,
-                                      ),
-                                      subtitle: Text(_searchLists?[index].description ?? "",maxLines: 3,),
-                                      onTap: () {
-                                       
-                                        updateCurrentProject(_searchLists![index].projectId!);
-                                         _searchFieldController.text = "";
-                            _searchLists?.clear();
-                            searchField.unfocus();
-                                        Navigator.of(context).pop();                                    },
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          )
-                          :
-                           _searchFieldController.text != ""
-                        ? Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "No results found",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          )
-                        :
-                           ListView.builder(
-                            itemCount: _projectLists?.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  Card(
-                                    color: Colors.white70,
-                                    child: ListTile(
-                                      leading: CircleImageFromNetwork(imageUrl: Strings.baseImageUrl + (_projectLists?[index].projectImg ?? ""), width: 40, height: 40,radius: 18, defaultImageUrl: "assets/images/background1.png"),
-                                      title: Text(
-                                        _projectLists?[index].projectName ?? "",maxLines: 3,
-                                      ),
-                                      subtitle: Text(_projectLists?[index].description ?? "",maxLines: 3,),
-                                      onTap: () {
-                                        updateCurrentProject(_projectLists![index].projectId!);
-                                        Navigator.of(context).pop();                                    },
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ):Center(child: Text("No assigned projects found",style:TextStyle(color: Colors.red))),
-                        ),
-                      ],
-                    )),
-              );}
-          ),
+                      Container(
+                        height: MediaQuery.of(context).size.width * 1,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: (_projectLists?.length != 0 &&
+                                _projectLists?.length != null)
+                            ? _searchLists?.length != 0
+                                ? ListView.builder(
+                                    itemCount: _searchLists?.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          Card(
+                                            color: Colors.white70,
+                                            child: ListTile(
+                                              leading: CircleImageFromNetwork(
+                                                  imageUrl:
+                                                      Strings.baseImageUrl +
+                                                          (_searchLists?[index]
+                                                                  .projectImg ??
+                                                              ""),
+                                                  width: 40,
+                                                  height: 40,
+                                                  radius: 18,
+                                                  defaultImageUrl:
+                                                      "assets/images/background1.png"),
+                                              title: Text(
+                                                _searchLists?[index]
+                                                        .projectName ??
+                                                    "",
+                                                maxLines: 3,
+                                              ),
+                                              subtitle: Text(
+                                                _searchLists?[index]
+                                                        .description ??
+                                                    "",
+                                                maxLines: 3,
+                                              ),
+                                              onTap: () {
+                                                updateCurrentProject(
+                                                    _searchLists![index]
+                                                        .projectId!);
+                                                _searchFieldController.text =
+                                                    "";
+                                                _searchLists?.clear();
+                                                searchField.unfocus();
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  )
+                                : _searchFieldController.text != ""
+                                    ? Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "No results found",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        itemCount: _projectLists?.length,
+                                        itemBuilder: (context, index) {
+                                          return Column(
+                                            children: [
+                                              Card(
+                                                color: Colors.white70,
+                                                child: ListTile(
+                                                  leading: CircleImageFromNetwork(
+                                                      imageUrl: Strings
+                                                              .baseImageUrl +
+                                                          (_projectLists?[index]
+                                                                  .projectImg ??
+                                                              ""),
+                                                      width: 40,
+                                                      height: 40,
+                                                      radius: 18,
+                                                      defaultImageUrl:
+                                                          "assets/images/background1.png"),
+                                                  title: Text(
+                                                    _projectLists?[index]
+                                                            .projectName ??
+                                                        "",
+                                                    maxLines: 3,
+                                                  ),
+                                                  subtitle: Text(
+                                                    _projectLists?[index]
+                                                            .description ??
+                                                        "",
+                                                    maxLines: 3,
+                                                  ),
+                                                  onTap: () {
+                                                    updateCurrentProject(
+                                                        _projectLists![index]
+                                                            .projectId!);
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      )
+                            : Center(
+                                child: Text("No assigned projects found",
+                                    style: TextStyle(color: Colors.red))),
+                      ),
+                    ],
+                  )),
+            );
+          }),
         );
       },
     );

@@ -6,6 +6,7 @@ import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
+import 'package:mta/models/BackLinkRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
 import 'package:mta/models/CommonRes.dart';
 import 'package:mta/models/Chat/AddRemoveUserListRes.dart';
@@ -22,6 +23,10 @@ import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/ForwardMessageReq.dart';
+import 'package:mta/models/GroupDetailsRes.dart';
+import 'package:mta/models/GroupReq.dart';
+import 'package:mta/models/GroupRes.dart';
 import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/ForgotPassReq.dart';
@@ -177,6 +182,9 @@ abstract class ApiService {
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(
       @Path("group_id") int id, @Path("page_no") int pageNo);
 
+  @GET("/chat/getGroupDetailsByGroupId?group_id={group_id}")
+  Future<GroupDetailsRes> getGroupData(@Path("group_id") int id);
+
   @POST("/users/changePassword")
   Future<CommonRes> changePass(@Body() ChangePassReq body);
 
@@ -216,6 +224,18 @@ abstract class ApiService {
 
   @POST("/utils/getAudioUrl")
   Future<AudioRes> uploadAudio(@Body() AudioReq body);
+
+  @GET("/users/backlink")
+  Future<BackLinkRes> getSocialsBackLink();
+
+  @POST("/chat/getGroupDetails")
+  Future<GroupRes> fetchGroupList(@Body() GroupReq body);
+
+  @POST("/chat/forwardMessage")
+  Future<AudioRes> sendForwadMessage(@Body() ForwadMessageReq body);
+
+  @DELETE("/chat/deleteGroup?group_id={group_id}")
+  Future<CommentsRes> deleteGroup(@Path("group_id") int id);
 
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
