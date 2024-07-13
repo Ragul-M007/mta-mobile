@@ -966,9 +966,19 @@ class _ChatScreenState extends State<ChatScreen> {
           }),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_selectedItems.isNotEmpty) {
-                  sendForwardMessage(messages);
+                  // sendForwardMessage(messages);
+                  await updateForwardMessage(messages);
+                  var ids = messages
+                      .where((element) => element.isSelected == true)
+                      .map((element) {
+                        return int.tryParse(element.id);
+                      })
+                      .cast<int>()
+                      .toList();
+                  unSelectList(ids);
+                  AppUtils.showToastSuccess("Message forwarded successfully!");
                 }
               },
               child: Text('Send', style: TextStyle(fontSize: 16)),
@@ -1312,6 +1322,24 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     // updateChatCountDetails("create");
+  }
+
+  updateForwardMessage(List<Message> messages) {
+    _socket?.emitWithAck(
+        'forward-message',
+        json.encode({
+          "document_id": messages
+              .where((element) => element.isSelected == true)
+              .map((element) {
+                // Assuming 'id' property exists for true elements
+                return int.tryParse(element.id);
+              })
+              .cast<int>()
+              .toList(),
+          "receiver_group_id": _selectedItems,
+          "sender_group_id": widget.groupId.toString(),
+          "user_id": Strings.userID!.toString()
+        }));
   }
 
   void _onThemeIconTap() {
