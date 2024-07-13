@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -36,6 +35,8 @@ class Message {
   Duration? voiceMessageDuration;
 
   String? fileName;
+
+  bool? isSelected;
 
   Message({
     this.id = '',
@@ -75,7 +76,7 @@ class Message {
   }
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
-      fileName:json["file_name"],
+      fileName: json["file_name"],
       id: json["id"],
       message: json["message"],
       createdAt: json["createdAt"],
@@ -87,7 +88,7 @@ class Message {
       status: json['status']);
 
   Map<String, dynamic> toJson() => {
-        'file_name':fileName,
+        'file_name': fileName,
         'id': id,
         'message': message,
         'createdAt': createdAt,

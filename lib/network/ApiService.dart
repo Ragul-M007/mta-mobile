@@ -182,9 +182,6 @@ abstract class ApiService {
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(
       @Path("group_id") int id, @Path("page_no") int pageNo);
 
-  @GET("/chat/getGroupDetailsByGroupId?group_id={group_id}")
-  Future<GroupDetailsRes> getGroupData(@Path("group_id") int id);
-
   @POST("/users/changePassword")
   Future<CommonRes> changePass(@Body() ChangePassReq body);
 
@@ -236,6 +233,9 @@ abstract class ApiService {
 
   @DELETE("/chat/deleteGroup?group_id={group_id}")
   Future<CommentsRes> deleteGroup(@Path("group_id") int id);
+
+  @GET("/chat/getGroupDetailsByGroupId?group_id={group_id}")
+  Future<GroupDetailsRes> getGroupData(@Path("group_id") int id);
 
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body

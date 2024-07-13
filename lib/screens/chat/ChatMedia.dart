@@ -122,7 +122,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
           groupCreatedUserId == Strings.userID
               ? IconButton(
                   onPressed: () {
-                    showDeleteDialog();
+                    showDeleteDialog(context);
                   },
                   icon: Icon(Icons.delete_outline_outlined))
               : Container()
@@ -219,10 +219,10 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
         ));
   }
 
-  showDeleteDialog() {
+  showDeleteDialog(context) {
     showDialog(
       context: context,
-      builder: (context) => new AlertDialog(
+      builder: (ctx) => new AlertDialog(
         title: Text(
           "Are you sure ?",
           style: TextStyle(
@@ -237,7 +237,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: new Text(
               'No',
               style: TextStyle(
@@ -246,7 +246,8 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
           ),
           TextButton(
             onPressed: () {
-              deleteGroup();
+              Navigator.of(ctx).pop();
+              deleteGroup(context);
             },
             child: new Text(
               'Yes',
@@ -775,14 +776,13 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
     );
   }
 
-  deleteGroup() {
-    Navigator.of(context).pop(true);
+  deleteGroup(context) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.deleteGroup(widget.groupId).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-        Navigator.pushAndRemoveUntil(
+        Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => ChatGroups(
@@ -790,11 +790,10 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
                     projectId: widget.projectId,
                     fromTeamProjects: widget.projectId == null ? true : false,
                   )),
-          (route) => false,
         );
-        // setState(() {
-        //   AppUtils.showToastSuccess(response.comment ?? "Deleted Successfully");
-        // });
+        setState(() {
+          AppUtils.showToastSuccess(response.comment ?? "Deleted Successfully");
+        });
       } else {
         AppUtils.dismissprogress();
         AppUtils.showToastError("Something went wrong!");

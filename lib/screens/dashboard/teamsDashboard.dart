@@ -530,41 +530,49 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                           CrossAxisAlignment
                                                               .center,
                                                       children: [
-                                                        Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                                _searchLists[
-                                                                        index]
-                                                                    .teamName!,
-                                                                style: Drawables
-                                                                    .adddoccontentstyle(
-                                                                        Colors
-                                                                            .black87,
-                                                                        14.0,
-                                                                        FontWeight
-                                                                            .w500)),
-                                                            SizedBox(
-                                                              width: 2,
-                                                            ),
-                                                            Text(
-                                                                _searchLists[
-                                                                        index]
-                                                                    .description!
-                                                                    .trim(),
-                                                                style: Drawables
-                                                                    .adddoccontentstyle(
-                                                                        Colors
-                                                                            .grey,
-                                                                        12.0,
-                                                                        FontWeight
-                                                                            .w300)),
-                                                          ],
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.5,
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .teamName!,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: Drawables.adddoccontentstyle(
+                                                                      Colors
+                                                                          .black87,
+                                                                      14.0,
+                                                                      FontWeight
+                                                                          .w500)),
+                                                              SizedBox(
+                                                                width: 2,
+                                                              ),
+                                                              Text(
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .description!
+                                                                      .trim(),
+                                                                  style: Drawables.adddoccontentstyle(
+                                                                      Colors
+                                                                          .grey,
+                                                                      12.0,
+                                                                      FontWeight
+                                                                          .w300)),
+                                                            ],
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -670,34 +678,37 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                               CrossAxisAlignment
                                                                   .center,
                                                           children: [
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                    _teamLists[
-                                                                            index]
-                                                                        .teamName!,
-                                                                    style: Drawables.adddoccontentstyle(
-                                                                        Colors
-                                                                            .black87,
-                                                                        14.0,
-                                                                        FontWeight
-                                                                            .w500)),
-                                                                SizedBox(
-                                                                  width: 2,
-                                                                ),
-                                                                Container(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.5,
-                                                                  child: Text(
+                                                            Container(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.5,
+                                                              child: Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                      _teamLists[
+                                                                              index]
+                                                                          .teamName!,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: Drawables.adddoccontentstyle(
+                                                                          Colors
+                                                                              .black87,
+                                                                          14.0,
+                                                                          FontWeight
+                                                                              .w500)),
+                                                                  SizedBox(
+                                                                    width: 2,
+                                                                  ),
+                                                                  Text(
                                                                       _teamLists[
                                                                               index]
                                                                           .description!
@@ -711,8 +722,8 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                                           12.0,
                                                                           FontWeight
                                                                               .w300)),
-                                                                ),
-                                                              ],
+                                                                ],
+                                                              ),
                                                             ),
                                                           ],
                                                         ),

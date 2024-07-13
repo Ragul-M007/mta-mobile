@@ -29,8 +29,7 @@ import '../screens/authentication/login.dart';
 class RoutesGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final arg = settings.arguments;
-    switch (settings.name) 
-    {
+    switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
         break;

@@ -932,33 +932,6 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<GroupDetailsRes> getGroupData(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<GroupDetailsRes>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/chat/getGroupDetailsByGroupId?group_id=${id}',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final _value = GroupDetailsRes.fromJson(_result.data!);
-    return _value;
-  }
-
-  @override
   Future<CommonRes> changePass(ChangePassReq body) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -1431,6 +1404,33 @@ class _ApiService implements ApiService {
               baseUrl,
             ))));
     final _value = CommentsRes.fromJson(_result.data!);
+    return _value;
+  }
+
+  @override
+  Future<GroupDetailsRes> getGroupData(int id) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<GroupDetailsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/chat/getGroupDetailsByGroupId?group_id=${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final _value = GroupDetailsRes.fromJson(_result.data!);
     return _value;
   }
 

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:mta/ChatView/extensions/extensions.dart';
@@ -11,25 +9,26 @@ import 'chat_bubble_widget.dart';
 import 'chat_group_header.dart';
 
 class ChatGroupedListWidget extends StatefulWidget {
-  const ChatGroupedListWidget({
-    Key? key,
-    required this.showPopUp,
-    required this.showTypingIndicator,
-    required this.scrollController,
-    required this.chatBackgroundConfig,
-    required this.replyMessage,
-    required this.assignReplyMessage,
-    required this.onChatListTap,
-    required this.onChatBubbleLongPress,
-    required this.isEnableSwipeToSeeTime,
-    this.messageConfig,
-    this.chatBubbleConfig,
-    this.profileCircleConfig,
-    this.swipeToReplyConfig,
-    this.repliedMessageConfig,
-    this.typeIndicatorConfig,
-    this.audioDownloadConfirmation
-  }) : super(key: key);
+  const ChatGroupedListWidget(
+      {Key? key,
+      required this.showPopUp,
+      required this.showTypingIndicator,
+      required this.scrollController,
+      required this.chatBackgroundConfig,
+      required this.replyMessage,
+      required this.assignReplyMessage,
+      required this.onChatListTap,
+      required this.onChatBubbleLongPress,
+      required this.onTap,
+      required this.isEnableSwipeToSeeTime,
+      this.messageConfig,
+      this.chatBubbleConfig,
+      this.profileCircleConfig,
+      this.swipeToReplyConfig,
+      this.repliedMessageConfig,
+      this.typeIndicatorConfig,
+      this.audioDownloadConfirmation})
+      : super(key: key);
 
   /// Allow user to swipe to see time while reaction pop is not open.
   final bool showPopUp;
@@ -70,6 +69,8 @@ class ChatGroupedListWidget extends StatefulWidget {
   /// Provides callback when user press chat bubble for certain time then usual.
   final void Function(double, double, Message) onChatBubbleLongPress;
   final Function()? audioDownloadConfirmation;
+
+  final void Function(Message) onTap;
 
   /// Provide flag for turn on/off to see message crated time view when user
   /// swipe whole chat.
@@ -260,65 +261,65 @@ class _ChatGroupedListWidgetState extends State<ChatGroupedListWidget>
     return StreamBuilder<List<Message>>(
       stream: chatController?.messageStreamController.stream,
       builder: (context, snapshot) {
-        return 
-            GroupedListView<Message, String>(
-                shrinkWrap: true,
-                elements: snapshot.data ?? [],
-                groupBy: (element) => element.createdAt.getDateFromDateTime,
-                itemComparator: (message1, message2) =>
-                    message1.message.compareTo(message2.message),
-                physics: const NeverScrollableScrollPhysics(),
-                order: chatBackgroundConfig.groupedListOrder,
-                sort: chatBackgroundConfig.sortEnable,
-                groupSeparatorBuilder: (separator) =>
-                    featureActiveConfig?.enableChatSeparator ?? false
-                        ? _GroupSeparatorBuilder(
-                            separator: separator,
-                            defaultGroupSeparatorConfig: chatBackgroundConfig
-                                .defaultGroupSeparatorConfig,
-                            groupSeparatorBuilder:
-                                chatBackgroundConfig.groupSeparatorBuilder,
-                          )
-                        : const SizedBox.shrink(),
-                indexedItemBuilder: (context, message, index) {
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: _replyId,
-                    builder: (context, state, child) {
-                      return ChatBubbleWidget(
-                        audioDownloadConfirmation: widget.audioDownloadConfirmation,
-                        fileName: message.fileName,
-                        key: message.key,
-                        messageTimeTextStyle:
-                            chatBackgroundConfig.messageTimeTextStyle,
-                        messageTimeIconColor:
-                            chatBackgroundConfig.messageTimeIconColor,
-                        message: message,
-                        messageConfig: widget.messageConfig,
-                        chatBubbleConfig: chatBubbleConfig,
-                        profileCircleConfig: profileCircleConfig,
-                        swipeToReplyConfig: widget.swipeToReplyConfig,
-                        repliedMessageConfig: widget.repliedMessageConfig,
-                        slideAnimation: _slideAnimation,
-                        onLongPress: (yCoordinate, xCoordinate) =>
-                            widget.onChatBubbleLongPress(
-                          yCoordinate,
-                          xCoordinate,
-                          message,
-                        ),
-                        onSwipe: widget.assignReplyMessage,
-                        shouldHighlight: state == message.id,
-                        onReplyTap: widget
-                                    .repliedMessageConfig
-                                    ?.repliedMsgAutoScrollConfig
-                                    .enableScrollToRepliedMsg ??
-                                false
-                            ? (replyId) => _onReplyTap(replyId, snapshot.data)
-                            : null,
-                      );
-                    },
-                  );
-                },
-              );  
+        return GroupedListView<Message, String>(
+          shrinkWrap: true,
+          elements: snapshot.data ?? [],
+          groupBy: (element) => element.createdAt.getDateFromDateTime,
+          itemComparator: (message1, message2) =>
+              message1.message.compareTo(message2.message),
+          physics: const NeverScrollableScrollPhysics(),
+          order: chatBackgroundConfig.groupedListOrder,
+          sort: chatBackgroundConfig.sortEnable,
+          groupSeparatorBuilder: (separator) =>
+              featureActiveConfig?.enableChatSeparator ?? false
+                  ? _GroupSeparatorBuilder(
+                      separator: separator,
+                      defaultGroupSeparatorConfig:
+                          chatBackgroundConfig.defaultGroupSeparatorConfig,
+                      groupSeparatorBuilder:
+                          chatBackgroundConfig.groupSeparatorBuilder,
+                    )
+                  : const SizedBox.shrink(),
+          indexedItemBuilder: (context, message, index) {
+            return ValueListenableBuilder<String?>(
+              valueListenable: _replyId,
+              builder: (context, state, child) {
+                return ChatBubbleWidget(
+                  audioDownloadConfirmation: widget.audioDownloadConfirmation,
+                  fileName: message.fileName,
+                  key: message.key,
+                  messageTimeTextStyle:
+                      chatBackgroundConfig.messageTimeTextStyle,
+                  messageTimeIconColor:
+                      chatBackgroundConfig.messageTimeIconColor,
+                  message: message,
+                  messageConfig: widget.messageConfig,
+                  chatBubbleConfig: chatBubbleConfig,
+                  profileCircleConfig: profileCircleConfig,
+                  swipeToReplyConfig: widget.swipeToReplyConfig,
+                  repliedMessageConfig: widget.repliedMessageConfig,
+                  slideAnimation: _slideAnimation,
+                  onLongPress: (yCoordinate, xCoordinate) =>
+                      widget.onChatBubbleLongPress(
+                    yCoordinate,
+                    xCoordinate,
+                    message,
+                  ),
+                  onTap: () => widget.onTap(message),
+                  onSwipe: widget.assignReplyMessage,
+                  shouldHighlight: state == message.id,
+                  onReplyTap: widget
+                              .repliedMessageConfig
+                              ?.repliedMsgAutoScrollConfig
+                              .enableScrollToRepliedMsg ??
+                          false
+                      ? (replyId) => _onReplyTap(replyId, snapshot.data)
+                      : null,
+                );
+              },
+            );
+          },
+        );
       },
     );
   }

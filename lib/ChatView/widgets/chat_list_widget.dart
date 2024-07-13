@@ -11,6 +11,7 @@ import 'package:mta/ChatView/widgets/chat_groupedlist_widget.dart';
 import 'package:mta/models/GroupReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 
 import '../chatview.dart';
@@ -20,6 +21,7 @@ import 'reply_popup_widget.dart';
 class ChatListWidget extends StatefulWidget {
   const ChatListWidget(
       {Key? key,
+      required this.msgList,
       required this.chatController,
       required this.chatBackgroundConfig,
       required this.showTypingIndicator,
@@ -38,9 +40,13 @@ class ChatListWidget extends StatefulWidget {
       this.loadMoreData,
       this.isLastPage,
       this.onChatListTap,
+      required this.onLongPressed,
+      required this.onTap,
       this.onForwardTap,
       this.audioDownloadConfirmation})
       : super(key: key);
+
+  final List<Message> msgList;
 
   /// Provides controller for accessing few function for running chat.
   final ChatController chatController;
@@ -96,6 +102,10 @@ class ChatListWidget extends StatefulWidget {
 
   /// Provides callback when user tap anywhere on whole chat.
   final VoidCallBack? onChatListTap;
+
+  final MessageCallBack onLongPressed;
+
+  final MessageCallBack onTap;
 
   /// Provides callback when user tap anywhere on whole chat.
   final MessageCallBack? onForwardTap;
@@ -220,11 +230,55 @@ class _ChatListWidgetState extends State<ChatListWidget>
                           showPopUp.value = true;
                         }
                         if (featureActiveConfig?.enableReplySnackBar ?? false) {
-                          _showReplyPopup(
-                            message: message,
-                            sendByCurrentUser:
-                                message.sendBy == currentUser?.id,
-                          );
+                          // _showReplyPopup(
+                          //   message: message,
+                          //   sendByCurrentUser:
+                          //       message.sendBy == currentUser?.id,
+                          // );
+                          if (widget.msgList
+                                      .where((element) =>
+                                          element.isSelected == true)
+                                      .length <
+                                  5 &&
+                              (message.isSelected == false ||
+                                  message.isSelected == null)) {
+                            message.isSelected = true;
+                            setState(() {});
+                            widget.onLongPressed(message);
+                          } else if (message.isSelected == true) {
+                            message.isSelected = false;
+                            setState(() {});
+                            widget.onLongPressed(message);
+                          } else {
+                            AppUtils.showToastError(
+                                Strings.messageSelectionWarning);
+                          }
+                        }
+                      },
+                      onTap: (message) {
+                        // To ensure initial message added by LongPress method
+                        if (widget.msgList
+                                .where((element) => element.isSelected == true)
+                                .length >
+                            0) {
+                          if (widget.msgList
+                                      .where((element) =>
+                                          element.isSelected == true)
+                                      .length <
+                                  5 &&
+                              (message.isSelected == false ||
+                                  message.isSelected == null)) {
+                            message.isSelected = true;
+                            setState(() {});
+                            widget.onTap(message);
+                          } else if (message.isSelected == true) {
+                            message.isSelected = false;
+                            setState(() {});
+                            widget.onTap(message);
+                          } else {
+                            AppUtils.showToastError(
+                                Strings.messageSelectionWarning);
+                          }
                         }
                       },
                       onChatListTap: _onChatListTap,

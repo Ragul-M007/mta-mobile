@@ -20,7 +20,7 @@ import '../../utilities/apputilities.dart';
 import 'AddUsers.dart';
 
 class ChatGroups extends StatefulWidget {
-  static const String routeName = "/chatGroups";
+  // static const String routeName = "/chatGroups";
   final int? teamId;
   final int? projectId;
   final bool? fromTeamProjects;
@@ -56,6 +56,7 @@ class _ChatGroupsState extends State<ChatGroups>
   String _errText = "";
   void initState() {
     super.initState();
+    print(">>>kkkkk");
     connectSocket();
     fetchChatCreateAcess();
   }
@@ -231,6 +232,8 @@ class _ChatGroupsState extends State<ChatGroups>
       create: (context) => ApiService.create(),
       child: WillPopScope(
         onWillPop: () {
+          print(
+              ">>>>>>kkk2:${widget.projectId},${widget.fromTeamProjects},${Strings.fromTeamProjects}");
           if (widget.projectId == null) {
             Navigator.pushNamed(context, "/teamsDashboard");
           } else if (widget.fromTeamProjects == true ||
@@ -334,6 +337,7 @@ class _ChatGroupsState extends State<ChatGroups>
                         color: const Color(0xFF979797),
                       ),
                       onPressed: () {
+                        print(">>>>>lll");
                         if (widget.projectId == null) {
                           Navigator.pushNamed(context, "/teamsDashboard");
                         } else if (widget.fromTeamProjects == true ||

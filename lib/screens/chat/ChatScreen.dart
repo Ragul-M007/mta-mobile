@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:mta/ChatView/widgets/send_message_widget.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/ForwardMessageReq.dart';
 import 'package:mta/models/GroupReq.dart';
@@ -195,6 +196,7 @@ class _ChatScreenState extends State<ChatScreen> {
   deleteMessagesById(int msgId, int grpId) {
     final api = Provider.of<ApiService>(context, listen: false);
     api.deleteMessage(msgId, grpId).then((response) {
+      unSelectList([]);
       if (response.status!) {
         setState(() {
           AppUtils.showToastSuccess(response.message ?? "Deleted Successfully");
@@ -205,6 +207,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
+      unSelectList([]);
       print(onError.toString());
     });
   }
@@ -487,29 +490,39 @@ class _ChatScreenState extends State<ChatScreen> {
         ? Center(child: CircularProgressIndicator())
         : WillPopScope(
             onWillPop: () {
-              if (Strings.fromNotificationChat) {
-                Strings.fromNotificationChat = false;
-                if (Strings.roleId == 6) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Projects(),
-                    ),
-                    (route) => false,
-                  );
-                  //   Navigator.pushNamed(context, "/projects");
-                } else {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamsDashboard(),
-                    ),
-                    (route) => false,
-                  );
-                  //   Navigator.pushNamed(context, "/teamsDashboard");
-                }
+              if (msgList
+                      .where((element) => element.isSelected == true)
+                      .length >
+                  0) {
+                msgList
+                    .where((item) => item.isSelected == true)
+                    .forEach((item) => item.isSelected = false);
+                setState(() {});
               } else {
-                Navigator.pop(context);
+                if (Strings.fromNotificationChat) {
+                  Strings.fromNotificationChat = false;
+                  if (Strings.roleId == 6) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Projects(),
+                      ),
+                      (route) => false,
+                    );
+                    //   Navigator.pushNamed(context, "/projects");
+                  } else {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TeamsDashboard(),
+                      ),
+                      (route) => false,
+                    );
+                    //   Navigator.pushNamed(context, "/teamsDashboard");
+                  }
+                } else {
+                  Navigator.pop(context);
+                }
               }
 
               throw '';
@@ -518,6 +531,11 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (_, child) => Portal(child: child!),
               home: Scaffold(
                 body: ChatView(
+                  msgList: msgList,
+                  projectId: widget.projectId,
+                  groupId: widget.groupId,
+                  teamId: widget.teamId,
+                  teamName: widget.teamName,
                   refreshCall: () {},
                   audioDownloadConfirmation: () {
                     joinGroup();
@@ -528,7 +546,61 @@ class _ChatScreenState extends State<ChatScreen> {
                   currentUser: currentUser,
                   chatController: _chatController,
                   onSendTap: _onSendTap,
+                  onLongPressed: _onLongPressed,
+                  onTap: _onLongPressed,
+                  onDeleteTap: () {
+                    String id = msgList
+                        .where((item) => item.isSelected == true)
+                        .first
+                        .id;
+                    showDeleteDialog(context, int.tryParse(id));
+                  },
                   onForwardTap: _onForwardTap,
+                  onMoreTap: () {
+                    print("morre");
+                    int? id = int.tryParse(msgList
+                        .where((item) => item.isSelected == true)
+                        .first
+                        .id);
+                    showLoading(context);
+                    getReadUsers(id);
+                  },
+                  onBackPress: () {
+                    if (msgList
+                            .where((element) => element.isSelected == true)
+                            .length >
+                        0) {
+                      msgList
+                          .where((item) => item.isSelected == true)
+                          .forEach((item) => item.isSelected = false);
+                      setState(() {});
+                    } else {
+                      if (Strings.fromNotificationChat) {
+                        Strings.fromNotificationChat = false;
+                        if (Strings.roleId == 6) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Projects(),
+                            ),
+                            (route) => false,
+                          );
+                          //   Navigator.pushNamed(context, "/projects");
+                        } else {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TeamsDashboard(),
+                            ),
+                            (route) => false,
+                          );
+                          //   Navigator.pushNamed(context, "/teamsDashboard");
+                        }
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
                   featureActiveConfig: const FeatureActiveConfig(
                     enableReactionPopup: false,
                     enablePagination: true,
@@ -545,60 +617,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   typeIndicatorConfig: TypeIndicatorConfiguration(
                     flashingCircleBrightColor: theme.flashingCircleBrightColor,
                     flashingCircleDarkColor: theme.flashingCircleDarkColor,
-                  ),
-                  appBar: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatMedia(
-                            groupId: widget.groupId!,
-                            teamId: widget.teamId,
-                            projectId: widget.projectId,
-                          ),
-                        ),
-                      );
-                    },
-                    child: ChatViewAppBar(
-                      onBackPress: () {
-                        if (Strings.fromNotificationChat) {
-                          Strings.fromNotificationChat = false;
-                          if (Strings.roleId == 6) {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Projects(),
-                              ),
-                              (route) => false,
-                            );
-                            //   Navigator.pushNamed(context, "/projects");
-                          } else {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TeamsDashboard(),
-                              ),
-                              (route) => false,
-                            );
-                            // Navigator.pushNamed(context, "/teamsDashboard");
-                          }
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                      elevation: theme.elevation,
-                      backGroundColor: theme.appBarColor,
-                      backArrowColor: theme.backArrowColor,
-                      chatTitle: widget.teamName,
-                      userStatus: "Click here for group info",
-                      chatTitleTextStyle: TextStyle(
-                        color: theme.appBarTitleTextStyle,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        letterSpacing: 0.25,
-                      ),
-                      userStatusTextStyle: const TextStyle(color: Colors.grey),
-                    ),
                   ),
                   chatBackgroundConfig: ChatBackgroundConfiguration(
                     messageTimeIconColor: theme.messageTimeIconColor,
@@ -756,9 +774,12 @@ class _ChatScreenState extends State<ChatScreen> {
           );
   }
 
-  Future<void> _onForwardTap(Message message) async {
-    AppUtils.showprogress();
+  Future<void> _onLongPressed(Message message) async {
+    setState(() {});
+  }
 
+  Future<void> _onForwardTap(List<Message> messages) async {
+    AppUtils.showprogress();
     GroupReq req = GroupReq();
     req.projectId = widget.projectId != null ? widget.projectId.toString() : "";
     req.groupType = widget.projectId == null ? "team" : "project";
@@ -769,7 +790,7 @@ class _ChatScreenState extends State<ChatScreen> {
     api.fetchGroupList(req).then((response) {
       if (response.status!) {
         AppUtils.dismissprogress();
-        showListPopup(message, response.data!);
+        showListPopup(response.data!, messages);
       } else {
         AppUtils.dismissprogress();
         AppUtils.showToastError(response.message!);
@@ -781,7 +802,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
 // Dummy Listview for group selection
-  Future<void> showListPopup(Message message, List<Data> groups) async {
+  Future<void> showListPopup(List<Data> groups, List<Message> messages) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -944,13 +965,13 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }),
           actions: [
-            InkWell(
-              onTap: () {
+            TextButton(
+              onPressed: () {
                 if (_selectedItems.isNotEmpty) {
-                  sendForwardMessage(message);
+                  sendForwardMessage(messages);
                 }
               },
-              child: Text('Send'),
+              child: Text('Send', style: TextStyle(fontSize: 16)),
             ),
           ],
         );
@@ -958,27 +979,49 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  sendForwardMessage(Message message) {
+  sendForwardMessage(List<Message> messages) {
     ForwadMessageReq req = ForwadMessageReq();
-    req.documentId = [int.tryParse(message.id)!];
+    req.documentId = messages
+        .where((element) => element.isSelected == true)
+        .map((element) {
+          // Assuming 'id' property exists for true elements
+          return int.tryParse(element.id);
+        })
+        .cast<int>()
+        .toList();
     req.receiverGroupId = _selectedItems;
     req.senderGroupId = widget.groupId.toString();
     req.userId = Strings.userID!.toString();
     final api = Provider.of<ApiService>(context, listen: false);
     api.sendForwadMessage(req).then((response) {
       if (response.status!) {
-        _selectedItems.clear();
-        Navigator.pop(context);
+        unSelectList(req.documentId);
+        AppUtils.showToastSuccess("Message forwarded successfully!");
       } else {
-        _selectedItems.clear();
-        Navigator.pop(context);
+        unSelectList(req.documentId);
         AppUtils.showToastError(response.message!);
       }
     }).catchError((onError) {
-      _selectedItems.clear();
-      Navigator.pop(context);
+      unSelectList(req.documentId);
       AppUtils.showToastError("Something went wrong!");
     });
+  }
+
+  unSelectList(List<int>? selectedId) {
+    if (selectedId!.isNotEmpty) {
+      for (var targetId in selectedId) {
+        msgList
+            .where((item) => item.id == targetId.toString())
+            .forEach((item) => item.isSelected = false);
+      }
+      _selectedItems.clear();
+    } else {
+      msgList
+          .where((item) => item.isSelected == true)
+          .forEach((item) => item.isSelected = false);
+    }
+    Navigator.pop(context);
+    setState(() {});
   }
 
   Future<void> _onSendTap(String message, ReplyMessage replyMessage,
@@ -1073,15 +1116,15 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           _readUsersList = response.data!;
         });
-        Navigator.pop(context);
+        unSelectList([]);
         showReadUsersDialog();
       } else {
         AppUtils.showToastError(response.message ?? "Unknown Error");
-        Navigator.pop(context);
+        unSelectList([]);
         print('error');
       }
     }).catchError((onError) {
-      Navigator.pop(context);
+      unSelectList([]);
       AppUtils.showToastError(onError.toString());
     });
   }
@@ -1200,7 +1243,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(false);
               deleteMessagesById(messageId, widget.groupId ?? 0);
             },
             child: new Text(

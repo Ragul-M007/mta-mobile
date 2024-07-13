@@ -100,4 +100,7 @@ mixin Strings {
   static bool fromTeamProjects = false;
 
   static int checkInRadius = 0;
+
+  static String messageSelectionWarning =
+      "You can only select upto 5 messages!";
 }

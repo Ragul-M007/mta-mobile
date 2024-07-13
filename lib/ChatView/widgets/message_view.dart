@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -17,26 +16,27 @@ import 'text_message_view.dart';
 import 'voice_message_view.dart';
 
 class MessageView extends StatefulWidget {
-  const MessageView({
-    Key? key,
-    required this.message,
-    required this.isMessageBySender,
-    required this.onLongPress,
-    required this.isLongPressEnable,
-    this.fileName,
-    this.chatBubbleMaxWidth,
-    this.inComingChatBubbleConfig,
-    this.outgoingChatBubbleConfig,
-    this.longPressAnimationDuration,
-    this.onDoubleTap,
-    this.highlightColor = Colors.grey,
-    this.shouldHighlight = false,
-    this.highlightScale = 1.2,
-    this.messageConfig,
-    this.onMaxDuration,
-    this.controller,
-    this.audioDownloadConfirmation
-  }) : super(key: key);
+  const MessageView(
+      {Key? key,
+      required this.message,
+      required this.isMessageBySender,
+      required this.onLongPress,
+      required this.onTap,
+      required this.isLongPressEnable,
+      this.fileName,
+      this.chatBubbleMaxWidth,
+      this.inComingChatBubbleConfig,
+      this.outgoingChatBubbleConfig,
+      this.longPressAnimationDuration,
+      this.onDoubleTap,
+      this.highlightColor = Colors.grey,
+      this.shouldHighlight = false,
+      this.highlightScale = 1.2,
+      this.messageConfig,
+      this.onMaxDuration,
+      this.controller,
+      this.audioDownloadConfirmation})
+      : super(key: key);
 
   /// Provides message instance of chat.
   final Message message;
@@ -46,6 +46,8 @@ class MessageView extends StatefulWidget {
 
   /// Give callback once user long press on chat bubble.
   final DoubleCallBack onLongPress;
+
+  final VoidCallBack onTap;
 
   /// Allow users to give max width of chat bubble.
   final double? chatBubbleMaxWidth;
@@ -83,9 +85,7 @@ class MessageView extends StatefulWidget {
   final Function(int)? onMaxDuration;
   final Function()? audioDownloadConfirmation;
 
-
   final String? fileName;
-
 
   @override
   State<MessageView> createState() => _MessageViewState();
@@ -125,15 +125,15 @@ class _MessageViewState extends State<MessageView>
     }
   }
 
-  downloadAudio()
-  {
-      downloadfile(widget.message.message,widget.message.fileName);
+  downloadAudio() {
+    downloadfile(widget.message.message, widget.message.fileName);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPressStart: isLongPressEnable ? _onLongPressStart : null,
+      onTap: widget.onTap,
       onDoubleTap: () {
         if (widget.onDoubleTap != null) widget.onDoubleTap!(widget.message);
       },
@@ -148,9 +148,7 @@ class _MessageViewState extends State<MessageView>
             },
             animation: _animationController!,
           );
-        } else {
-          
-        }
+        } else {}
       }()),
     );
   }
@@ -192,7 +190,6 @@ class _MessageViewState extends State<MessageView>
                           ),
                         ),
                       ),
-                      
                     ],
                   );
                 } else if (widget.message.messageType.isImage) {
@@ -215,9 +212,9 @@ class _MessageViewState extends State<MessageView>
                     highlightColor: widget.highlightColor,
                     highlightMessage: widget.shouldHighlight,
                   );
-                } else if (widget.message.messageType.isVoice) 
-                {
-                  print("message view11 $downloadStatus ${widget.message.createdAt}");
+                } else if (widget.message.messageType.isVoice) {
+                  print(
+                      "message view11 $downloadStatus ${widget.message.createdAt}");
                   return VoiceMessageView(
                     parentDownloadStatus: downloadStatus,
                     fileName: widget.fileName,
@@ -267,12 +264,13 @@ class _MessageViewState extends State<MessageView>
     );
   }
 
-
-  downloadfile(serverURL, filename,) async 
-  {
+  downloadfile(
+    serverURL,
+    filename,
+  ) async {
     // AppUtils.showprogress();
     // AppUtils.showToast('Downloading');
-    
+
     //var fileName = filename;//filenames[1];
     var extn = AppUtils.getFileExtension(serverURL);
     var nospace = filename.replaceAll(' ', '');
@@ -283,13 +281,12 @@ class _MessageViewState extends State<MessageView>
     String fullPath = "$basePath/$fileName";
     print("filepath $fullPath");
 
-   
     var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
-  
-  // setState(() {
-  //      initializePlayer(downloadedFile);
-  // });
- // initState();
+
+    // setState(() {
+    //      initializePlayer(downloadedFile);
+    // });
+    // initState();
     // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     //AppUtils.openFile(downloadedFile);
   }
@@ -320,11 +317,10 @@ class _MessageViewState extends State<MessageView>
         AppUtils.dismissprogress();
         filePath = savePath;
         file = File(filePath);
-      updateDownloadStatus(int.parse(widget.message.id), context);
-      
-        
+        updateDownloadStatus(int.parse(widget.message.id), context);
+
         setState(() {
-         downloadStatus = MessageStatus.downloaded;
+          downloadStatus = MessageStatus.downloaded;
         });
       } else if (response.statusCode == 404) {
         AppUtils.dismissprogress();
@@ -342,17 +338,13 @@ class _MessageViewState extends State<MessageView>
     }
   }
 
-
-  updateDownloadStatus(msgId,context) async
-  {
+  updateDownloadStatus(msgId, context) async {
     final api = Provider.of<ApiService>(context, listen: false);
-    api.updateDownloadStatus(msgId, 1).then((response) 
-    {
-
+    api.updateDownloadStatus(msgId, 1).then((response) {
       print("response ${response.status}");
       if (response.status == true) {
         print("truee downloaded");
-                  widget.audioDownloadConfirmation!();
+        widget.audioDownloadConfirmation!();
 
         // AppUtils.showToastError("update status successfully");
       } else {

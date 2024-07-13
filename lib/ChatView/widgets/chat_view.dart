@@ -9,45 +9,63 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mta/ChatView/widgets/chat_list_widget.dart';
 import 'package:mta/ChatView/widgets/chat_view_inherited_widget.dart';
 import 'package:mta/ChatView/widgets/chatview_state_widget.dart';
+import 'package:mta/screens/chat/ChatMedia.dart';
+import 'package:mta/screens/chat/ChatScreen.dart';
+import 'package:mta/screens/chat/theme.dart';
+import 'package:mta/screens/dashboard/teamsDashboard.dart';
+import 'package:mta/screens/projects/projects.dart';
+import 'package:mta/utilities/apputilities.dart';
+import 'package:mta/utilities/strings.dart';
 import 'package:timeago/timeago.dart';
 import '../chatview.dart';
 import '../values/custom_time_messages.dart';
 import 'send_message_widget.dart';
 
 class ChatView extends StatefulWidget {
-  const ChatView({
-    Key? key,
-    required this.chatController,
-    required this.currentUser,
-    this.onSendTap,
-    this.onForwardTap,
-    this.refreshCall,
-    this.profileCircleConfig,
-    this.chatBubbleConfig,
-    this.repliedMessageConfig,
-    this.swipeToReplyConfig,
-    this.replyPopupConfig,
-    this.reactionPopupConfig,
-    this.loadMoreData,
-    this.loadingWidget,
-    this.messageConfig,
-    this.isLastPage,
-    this.appBar,
-    this.userList,
-    ChatBackgroundConfiguration? chatBackgroundConfig,
-    this.typeIndicatorConfig,
-    this.sendMessageBuilder,
-    this.showTypingIndicator = false,
-    this.sendMessageConfig,
-    this.onChatListTap,
-    this.audioDownloadConfirmation,
-    required this.chatViewState,
-    ChatViewStateConfiguration? chatViewStateConfig,
-    this.featureActiveConfig = const FeatureActiveConfig(),
-  })  : chatBackgroundConfig =
+  const ChatView(
+      {Key? key,
+      required this.chatController,
+      required this.currentUser,
+      this.onSendTap,
+      this.onForwardTap,
+      this.onMoreTap,
+      this.refreshCall,
+      this.profileCircleConfig,
+      this.chatBubbleConfig,
+      this.repliedMessageConfig,
+      this.swipeToReplyConfig,
+      this.replyPopupConfig,
+      this.reactionPopupConfig,
+      this.loadMoreData,
+      this.loadingWidget,
+      this.messageConfig,
+      this.isLastPage,
+      this.userList,
+      ChatBackgroundConfiguration? chatBackgroundConfig,
+      this.typeIndicatorConfig,
+      this.sendMessageBuilder,
+      this.showTypingIndicator = false,
+      this.sendMessageConfig,
+      this.onChatListTap,
+      this.onDeleteTap,
+      this.onLongPressed,
+      this.onTap,
+      this.onBackPress,
+      this.audioDownloadConfirmation,
+      required this.msgList,
+      required this.chatViewState,
+      ChatViewStateConfiguration? chatViewStateConfig,
+      this.featureActiveConfig = const FeatureActiveConfig(),
+      this.groupId,
+      this.teamId,
+      this.projectId,
+      required this.teamName})
+      : chatBackgroundConfig =
             chatBackgroundConfig ?? const ChatBackgroundConfiguration(),
         chatViewStateConfig =
             chatViewStateConfig ?? const ChatViewStateConfiguration(),
@@ -97,7 +115,9 @@ class ChatView extends StatefulWidget {
 
   /// Provides call back when user tap on forward button. It returns
   /// message, reply message and message type.
-  final MessageCallBack? onForwardTap;
+  final ForwardCallBack? onForwardTap;
+
+  final VoidCallBack? onMoreTap;
 
   /// Provides builder which helps you to make custom text field and functionality.
   final ReplyMessageWithReturnWidget? sendMessageBuilder;
@@ -106,6 +126,7 @@ class ChatView extends StatefulWidget {
 
   final List<Map<String, dynamic>>? userList;
   final Function()? audioDownloadConfirmation;
+  final List<Message> msgList;
 
   @Deprecated('Use [ChatController.setTypingIndicator]  instead')
 
@@ -133,11 +154,19 @@ class ChatView extends StatefulWidget {
   /// Provides configuration for turn on/off specific features.
   final FeatureActiveConfig featureActiveConfig;
 
-  /// Provides parameter so user can assign ChatViewAppbar.
-  final Widget? appBar;
-
   /// Provides callback when user tap on chat list.
   final VoidCallBack? onChatListTap;
+
+  final VoidCallBack? onDeleteTap;
+
+  final MessageCallBack? onLongPressed;
+
+  final MessageCallBack? onTap;
+  final VoidCallBack? onBackPress;
+  final int? projectId;
+  final int? groupId;
+  final int? teamId;
+  final String teamName;
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -162,6 +191,9 @@ class _ChatViewState extends State<ChatView>
       widget.chatViewStateConfig;
 
   FeatureActiveConfig get featureActiveConfig => widget.featureActiveConfig;
+
+  AppTheme theme = LightTheme();
+  final GlobalKey _menuKey = GlobalKey();
 
   @override
   void initState() {
@@ -207,7 +239,62 @@ class _ChatViewState extends State<ChatView>
           margin: chatBackgroundConfig.margin,
           child: Column(
             children: [
-              if (widget.appBar != null) widget.appBar!,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatMedia(
+                        groupId: widget.groupId!,
+                        teamId: widget.teamId,
+                        projectId: widget.projectId,
+                      ),
+                    ),
+                  );
+                },
+                child: ChatViewAppBar(
+                  onBackPress: widget.onBackPress,
+                  actions: widget.msgList
+                              .where((element) => element.isSelected == true)
+                              .length ==
+                          0
+                      ? [Container()]
+                      : widget.msgList
+                                  .where(
+                                      (element) => element.isSelected == true)
+                                  .length >
+                              1
+                          ? [
+                              IconButton(
+                                  onPressed: () {
+                                    _onForwardTap();
+                                  },
+                                  icon: Icon(Icons.forward)),
+                            ]
+                          : appBarList(),
+                  elevation: theme.elevation,
+                  backGroundColor: theme.appBarColor,
+                  backArrowColor: theme.backArrowColor,
+                  chatTitle: widget.msgList
+                          .any((element) => element.isSelected == true)
+                      ? widget.msgList
+                          .where((element) => element.isSelected == true)
+                          .length
+                          .toString()
+                      : widget.teamName,
+                  userStatus: widget.msgList
+                          .any((element) => element.isSelected == true)
+                      ? null
+                      : "Click here for group info",
+                  chatTitleTextStyle: TextStyle(
+                    color: theme.appBarTitleTextStyle,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    letterSpacing: 0.25,
+                  ),
+                  userStatusTextStyle: const TextStyle(color: Colors.grey),
+                ),
+              ),
               Expanded(
                 child: Stack(
                   children: [
@@ -240,6 +327,7 @@ class _ChatViewState extends State<ChatView>
                           valueListenable: replyMessage,
                           builder: (_, state, child) {
                             return ChatListWidget(
+                              msgList: widget.msgList,
                               audioDownloadConfirmation:
                                   widget.audioDownloadConfirmation,
 
@@ -263,7 +351,9 @@ class _ChatViewState extends State<ChatView>
                               repliedMessageConfig: widget.repliedMessageConfig,
                               swipeToReplyConfig: widget.swipeToReplyConfig,
                               onChatListTap: widget.onChatListTap,
-                              onForwardTap: _onForwardTap,
+                              onLongPressed: _onLongPressed,
+                              onTap: _onLongPressed,
+                              // onForwardTap: _onForwardTap,
                               assignReplyMessage: (message) => _sendMessageKey
                                   .currentState
                                   ?.assignReplyMessage(message),
@@ -294,8 +384,70 @@ class _ChatViewState extends State<ChatView>
     );
   }
 
-  void _onForwardTap(message) {
-    widget.onForwardTap?.call(message);
+  List<Widget> appBarList() {
+    return [
+      IconButton(
+          onPressed: () {
+            _sendMessageKey.currentState?.assignReplyMessage(
+                msgList.where((item) => item.isSelected == true).first);
+
+            msgList
+                .where((item) => item.isSelected == true)
+                .forEach((item) => item.isSelected = false);
+            setState(() {});
+          },
+          icon: Icon(Icons.reply)),
+      IconButton(onPressed: widget.onDeleteTap, icon: Icon(Icons.delete)),
+      IconButton(
+          onPressed: () {
+            _onForwardTap();
+          },
+          icon: Icon(Icons.forward)),
+      PopupMenuButton(
+          key: _menuKey,
+          itemBuilder: (_) => (msgList
+                      .where((element) =>
+                          element.isSelected == true &&
+                          element.messageType == MessageType.text)
+                      .length >
+                  0)
+              ? const <PopupMenuItem<String>>[
+                  PopupMenuItem<String>(child: Text('Copy'), value: 'Copy'),
+                  PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
+                ]
+              : const <PopupMenuItem<String>>[
+                  PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
+                ],
+          onSelected: (_) async {
+            if (_ == "Copy") {
+              await Clipboard.setData(ClipboardData(
+                  text: msgList
+                      .where((item) => item.isSelected == true)
+                      .first
+                      .message));
+
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+              msgList
+                  .where((item) => item.isSelected == true)
+                  .forEach((item) => item.isSelected = false);
+              setState(() {});
+              AppUtils.showToastSuccess('Text copied to clipboard!');
+            } else {
+              widget.onMoreTap?.call();
+            }
+          })
+    ];
+  }
+
+  void _onForwardTap() {
+    List<Message> messageList =
+        msgList.where((item) => item.isSelected == true).toList();
+    widget.onForwardTap?.call(messageList);
+  }
+
+  void _onLongPressed(message) {
+    widget.onLongPressed?.call(message);
   }
 
   void _onSendTap(String message, ReplyMessage replyMessage,

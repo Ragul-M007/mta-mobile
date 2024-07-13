@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
@@ -40,6 +41,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
       if (response.status!) {
         setState(() {
           chatUsers = response.data!;
+          log(">>>>:${jsonEncode(chatUsers)}");
           for (int i = 0; i < chatUsers.length; i++) {
             if (chatUsers[i].alreadyLinked == true) {
               chatUsers[i].isSelected = true;
@@ -237,7 +239,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
                 itemCount: chatUsers.length,
                 itemBuilder: (context, index) {
                   return CheckboxListTile(
-                    // enabled: (!chatUsers[index].alreadyLinked!),
+                    enabled: (!chatUsers[index].alreadyLinked!),
                     title: Text('${chatUsers[index].userName}'),
                     value: chatUsers[index].isSelected,
                     onChanged: (value) {
