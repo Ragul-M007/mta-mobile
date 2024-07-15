@@ -273,7 +273,7 @@ class AppUtils {
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 2,
         backgroundColor: Colors.red,
-        gravity: ToastGravity.TOP,
+        gravity: ToastGravity.BOTTOM,
         fontSize: 16.0);
   }
 

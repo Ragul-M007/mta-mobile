@@ -531,6 +531,7 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (_, child) => Portal(child: child!),
               home: Scaffold(
                 body: ChatView(
+                  ctx: context,
                   msgList: msgList,
                   projectId: widget.projectId,
                   groupId: widget.groupId,

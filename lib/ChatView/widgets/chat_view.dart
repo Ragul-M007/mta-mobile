@@ -64,7 +64,8 @@ class ChatView extends StatefulWidget {
       this.groupId,
       this.teamId,
       this.projectId,
-      required this.teamName})
+      required this.teamName,
+      required this.ctx})
       : chatBackgroundConfig =
             chatBackgroundConfig ?? const ChatBackgroundConfiguration(),
         chatViewStateConfig =
@@ -167,6 +168,7 @@ class ChatView extends StatefulWidget {
   final int? groupId;
   final int? teamId;
   final String teamName;
+  final BuildContext ctx;
 
   @override
   State<ChatView> createState() => _ChatViewState();
@@ -242,9 +244,9 @@ class _ChatViewState extends State<ChatView>
               InkWell(
                 onTap: () {
                   Navigator.push(
-                    context,
+                    widget.ctx,
                     MaterialPageRoute(
-                      builder: (context) => ChatMedia(
+                      builder: (ctx) => ChatMedia(
                         groupId: widget.groupId!,
                         teamId: widget.teamId,
                         projectId: widget.projectId,
@@ -420,11 +422,11 @@ class _ChatViewState extends State<ChatView>
                 ],
           onSelected: (_) async {
             if (_ == "Copy") {
-              await Clipboard.setData(ClipboardData(
-                  text: msgList
-                      .where((item) => item.isSelected == true)
-                      .first
-                      .message));
+              var text = getCustomText(msgList
+                  .where((item) => item.isSelected == true)
+                  .first
+                  .message);
+              await Clipboard.setData(ClipboardData(text: text));
 
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -438,6 +440,30 @@ class _ChatViewState extends State<ChatView>
             }
           })
     ];
+  }
+
+  getCustomText(message) {
+    final regex = RegExp(r'##&&%(.*?)##&&%');
+    const placeholder = '{@}';
+    Iterable<Match> matches = regex.allMatches(message);
+    List<String> target = [];
+    List spans = [];
+    for (Match match in matches) {
+      target.add(match.group(1) ?? "");
+    }
+    final updatedString = message.replaceAll(regex, placeholder);
+    final tokens = updatedString.split(RegExp(' '));
+
+    var placeHolderindex = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == placeholder) {
+        spans.add(target[placeHolderindex] + ' ');
+        placeHolderindex = placeHolderindex + 1;
+      } else {
+        spans.add(tokens[i] + ' ');
+      }
+    }
+    return spans.join("");
   }
 
   void _onForwardTap() {

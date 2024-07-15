@@ -26,9 +26,9 @@ class Data {
   int? groupId;
   String? groupName;
   String? groupDescription;
-  Null? groupImage;
+  String? groupImage;
   String? groupType;
-  Null? projectId;
+  int? projectId;
   int? groupCreatedBy;
   String? createdAt;
   String? updatedAt;
@@ -56,7 +56,7 @@ class Data {
     groupCreatedBy = json['group_created_by'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    teamId = json['team_id'];
+    teamId = json['team_id'] != null ? json['team_id'] : 0;
   }
 
   Map<String, dynamic> toJson() {
