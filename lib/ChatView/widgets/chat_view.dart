@@ -1,24 +1,12 @@
-/*
- * Copyright (c) 2022 Simform Solutions
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- WARE.
- */
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mta/ChatView/widgets/chat_list_widget.dart';
 import 'package:mta/ChatView/widgets/chat_view_inherited_widget.dart';
 import 'package:mta/ChatView/widgets/chatview_state_widget.dart';
 import 'package:mta/screens/chat/ChatMedia.dart';
 import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/screens/chat/theme.dart';
-import 'package:mta/screens/dashboard/teamsDashboard.dart';
-import 'package:mta/screens/projects/projects.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:timeago/timeago.dart';
@@ -243,16 +231,19 @@ class _ChatViewState extends State<ChatView>
             children: [
               InkWell(
                 onTap: () {
-                  Navigator.push(
-                    widget.ctx,
-                    MaterialPageRoute(
-                      builder: (ctx) => ChatMedia(
-                        groupId: widget.groupId!,
-                        teamId: widget.teamId,
-                        projectId: widget.projectId,
+                  if (!widget.msgList
+                      .any((element) => element.isSelected == true)) {
+                    Navigator.push(
+                      widget.ctx,
+                      MaterialPageRoute(
+                        builder: (ctx) => ChatMedia(
+                          groupId: widget.groupId!,
+                          teamId: widget.teamId,
+                          projectId: widget.projectId,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 child: ChatViewAppBar(
                   onBackPress: widget.onBackPress,
@@ -396,6 +387,8 @@ class _ChatViewState extends State<ChatView>
             msgList
                 .where((item) => item.isSelected == true)
                 .forEach((item) => item.isSelected = false);
+
+            Strings.isSelectionEnabled = false;
             setState(() {});
           },
           icon: Icon(Icons.reply)),
@@ -433,9 +426,12 @@ class _ChatViewState extends State<ChatView>
               msgList
                   .where((item) => item.isSelected == true)
                   .forEach((item) => item.isSelected = false);
+
+              Strings.isSelectionEnabled = false;
               setState(() {});
               AppUtils.showToastSuccess('Text copied to clipboard!');
             } else {
+              Strings.isSelectionEnabled = false;
               widget.onMoreTap?.call();
             }
           })

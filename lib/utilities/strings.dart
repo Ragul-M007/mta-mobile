@@ -103,4 +103,6 @@ mixin Strings {
 
   static String messageSelectionWarning =
       "You can only select upto 5 messages!";
+
+  static bool isSelectionEnabled = false;
 }

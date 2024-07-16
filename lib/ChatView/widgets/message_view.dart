@@ -22,6 +22,7 @@ class MessageView extends StatefulWidget {
       required this.isMessageBySender,
       required this.onLongPress,
       required this.onTap,
+      required this.onSelectionTapped,
       required this.isLongPressEnable,
       this.fileName,
       this.chatBubbleMaxWidth,
@@ -48,6 +49,8 @@ class MessageView extends StatefulWidget {
   final DoubleCallBack onLongPress;
 
   final VoidCallBack onTap;
+
+  final VoidCallBack onSelectionTapped;
 
   /// Allow users to give max width of chat bubble.
   final double? chatBubbleMaxWidth;
@@ -200,6 +203,7 @@ class _MessageViewState extends State<MessageView>
                     messageReactionConfig: messageConfig?.messageReactionConfig,
                     highlightImage: widget.shouldHighlight,
                     highlightScale: widget.highlightScale,
+                    onSelectionTapped: widget.onSelectionTapped,
                   );
                 } else if (widget.message.messageType.isText) {
                   return TextMessageView(
@@ -227,6 +231,7 @@ class _MessageViewState extends State<MessageView>
                     inComingChatBubbleConfig: widget.inComingChatBubbleConfig,
                     outgoingChatBubbleConfig: widget.outgoingChatBubbleConfig,
                     downloadAudioRequest: downloadAudio,
+                    onSelectionTapped: widget.onSelectionTapped,
                   );
                 } else if (widget.message.messageType.isCustom &&
                     messageConfig?.customMessageBuilder != null) {

@@ -13,8 +13,7 @@ import '../../../../utilities/strings.dart';
 import '../chatview.dart';
 import '../models/voice_message_configuration.dart';
 
-class VoiceMessageView extends StatefulWidget 
-{
+class VoiceMessageView extends StatefulWidget {
   const VoiceMessageView({
     Key? key,
     required this.screenWidth,
@@ -27,7 +26,8 @@ class VoiceMessageView extends StatefulWidget
     this.messageReactionConfig,
     this.config,
     this.downloadAudioRequest,
-    this.parentDownloadStatus
+    this.parentDownloadStatus,
+    required this.onSelectionTapped,
   }) : super(key: key);
 
   /// Provides configuration related to voice message.
@@ -40,7 +40,6 @@ class VoiceMessageView extends StatefulWidget
   final Message message;
   final Function(int)? onMaxDuration;
   final Function()? downloadAudioRequest;
-
 
   /// Represents current message is sent by current user.
   final bool isMessageBySender;
@@ -58,6 +57,7 @@ class VoiceMessageView extends StatefulWidget
 
   final MessageStatus? parentDownloadStatus;
 
+  final VoidCallBack onSelectionTapped;
 
   @override
   State<VoiceMessageView> createState() => _VoiceMessageViewState();
@@ -79,87 +79,73 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
   var downloadStatus;
   var finalPath;
 
-
-
   @override
-  void initState() 
-  {
+  void initState() {
     super.initState();
 
-     finalPath =   Strings.basePath! + "/"+ (widget.message.fileName ?? "") +
-                                            AppUtils.getFileExtension(
-                                                widget.message.message);
-        print("message view33 ${widget.parentDownloadStatus}");
-        downloadStatus = widget.parentDownloadStatus;
+    finalPath = Strings.basePath! +
+        "/" +
+        (widget.message.fileName ?? "") +
+        AppUtils.getFileExtension(widget.message.message);
+    print("message view33 ${widget.parentDownloadStatus}");
+    downloadStatus = widget.parentDownloadStatus;
 
-        if(downloadStatus == MessageStatus.downloaded)
-        {
-          controller = PlayerController()
-                ..preparePlayer(
-                  path: finalPath,
-                  noOfSamples: widget.config?.playerWaveStyle
-                          ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
-                      playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
-                ).whenComplete(() => widget.onMaxDuration?.call(controller.maxDuration));
-              playerStateSubscription = controller.onPlayerStateChanged
-                  .listen((state) => _playerState.value = state);
+    if (downloadStatus == MessageStatus.downloaded) {
+      controller = PlayerController()
+        ..preparePlayer(
+          path: finalPath,
+          noOfSamples: widget.config?.playerWaveStyle
+                  ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
+              playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
+        ).whenComplete(
+            () => widget.onMaxDuration?.call(controller.maxDuration));
+      playerStateSubscription = controller.onPlayerStateChanged
+          .listen((state) => _playerState.value = state);
+    } else {
+      controller = PlayerController()
+        ..preparePlayer(
+          path: '',
+          noOfSamples: widget.config?.playerWaveStyle
+                  ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
+              playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
+        ).whenComplete(
+            () => widget.onMaxDuration?.call(controller.maxDuration));
+      playerStateSubscription = controller.onPlayerStateChanged
+          .listen((state) => _playerState.value = state);
+    }
 
-        }
-        else
-        {
-          controller = PlayerController()
-                ..preparePlayer(
-                  path: '',
-                  noOfSamples: widget.config?.playerWaveStyle
-                          ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
-                      playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
-                ).whenComplete(() => widget.onMaxDuration?.call(controller.maxDuration));
-              playerStateSubscription = controller.onPlayerStateChanged
-                  .listen((state) => _playerState.value = state);
-        }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) 
-        {
-          print("qqwweerr");
-  // executes after build
-        });
-
-     
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print("qqwweerr");
+      // executes after build
+    });
   }
 
-
-
-   
-
-  
-
-  initializePlayer(filePath)
-  {
+  initializePlayer(filePath) {
     setState(() {
       controller = PlayerController()
-      ..preparePlayer(
-        path: filePath,
-        noOfSamples: widget.config?.playerWaveStyle
-                ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
-            playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
-      ).whenComplete(() => widget.onMaxDuration?.call(controller.maxDuration));
-    playerStateSubscription = controller.onPlayerStateChanged
-        .listen((state) => _playerState.value = state);
+        ..preparePlayer(
+          path: filePath,
+          noOfSamples: widget.config?.playerWaveStyle
+                  ?.getSamplesForWidth(widget.screenWidth * 0.5) ??
+              playerWaveStyle.getSamplesForWidth(widget.screenWidth * 0.5),
+        ).whenComplete(
+            () => widget.onMaxDuration?.call(controller.maxDuration));
+      playerStateSubscription = controller.onPlayerStateChanged
+          .listen((state) => _playerState.value = state);
     });
 
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
-  downloadfile(serverURL, filename,) async 
-  {
+  downloadfile(
+    serverURL,
+    filename,
+  ) async {
     // AppUtils.showprogress();
     // AppUtils.showToast('Downloading');
 
     print("serverURL--> ${jsonEncode(serverURL)}  file $filename");
 
-    
     //var fileName = filename;//filenames[1];
     var extn = AppUtils.getFileExtension(serverURL);
     var nospace = filename.replaceAll(' ', '');
@@ -170,13 +156,12 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
     String fullPath = "$basePath/$fileName";
     print("filepath $fullPath");
 
-   
     var downloadedFile = await download2(dio, serverURL, '$basePath/$fileName');
-  
-  setState(() {
-       initializePlayer(downloadedFile);
-  });
- // initState();
+
+    setState(() {
+      initializePlayer(downloadedFile);
+    });
+    // initState();
     // var downloadedFile = await downloadFile(serverURL, fileName, path!);
     //AppUtils.openFile(downloadedFile);
   }
@@ -209,7 +194,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
         file = File(filePath);
         AppUtils.updateDownloadStatus(int.parse(widget.message.id), context);
         setState(() {
-         downloadStatus = MessageStatus.downloaded;
+          downloadStatus = MessageStatus.downloaded;
         });
       } else if (response.statusCode == 404) {
         AppUtils.dismissprogress();
@@ -242,8 +227,6 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     print("message view22 $downloadStatus  ${widget.parentDownloadStatus}");
@@ -254,10 +237,7 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
           decoration: widget.config?.decoration ??
               BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color:       
-        
-                
-                widget.isMessageBySender
+                color: widget.isMessageBySender
                     ? widget.outgoingChatBubbleConfig?.color
                     : widget.inComingChatBubbleConfig?.color,
               ),
@@ -274,61 +254,86 @@ class _VoiceMessageViewState extends State<VoiceMessageView> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  widget.parentDownloadStatus == MessageStatus.downloaded?
-                  ValueListenableBuilder<PlayerState>(
-                    builder: (context, state, child) {
-                      return IconButton(
-                        onPressed: _playOrPause,
-                      // onPressed: downloadfile(widget.message,widget.fileName),
-                        icon:
-                            state.isStopped || state.isPaused || state.isInitialised
-                                ? widget.config?.playIcon ??
-                                     Icon(
-                                      Icons.play_arrow,
-                                      color: widget.isMessageBySender? Colors.white:Colors.black,
-                                    )
-                                : widget.config?.pauseIcon ??
-                                     Icon(
-                                      Icons.stop,
-                                      color: widget.isMessageBySender? Colors.white:Colors.black,
-                                    ),
-                      );
-                    },
-                    valueListenable: _playerState,
-                  ):
-                  IconButton( onPressed: ()
-                  {
-                    widget.downloadAudioRequest!();
-                    // downloadfile(widget.message.message,widget.message.fileName);
-                  }, icon: Icon(Icons.download,
-                  color: widget.isMessageBySender?Colors.white:Colors.black,)),
+                  widget.parentDownloadStatus == MessageStatus.downloaded
+                      ? ValueListenableBuilder<PlayerState>(
+                          builder: (context, state, child) {
+                            return IconButton(
+                              onPressed: _playOrPause,
+                              // onPressed: downloadfile(widget.message,widget.fileName),
+                              icon: state.isStopped ||
+                                      state.isPaused ||
+                                      state.isInitialised
+                                  ? widget.config?.playIcon ??
+                                      Icon(
+                                        Icons.play_arrow,
+                                        color: widget.isMessageBySender
+                                            ? Colors.white
+                                            : Colors.black,
+                                      )
+                                  : widget.config?.pauseIcon ??
+                                      Icon(
+                                        Icons.stop,
+                                        color: widget.isMessageBySender
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                            );
+                          },
+                          valueListenable: _playerState,
+                        )
+                      : IconButton(
+                          onPressed: () {
+                            if (Strings.isSelectionEnabled) {
+                              widget.onSelectionTapped.call();
+                            } else {
+                              widget.downloadAudioRequest!();
+                            }
+                            // downloadfile(widget.message.message,widget.message.fileName);
+                          },
+                          icon: Icon(
+                            Icons.download,
+                            color: widget.isMessageBySender
+                                ? Colors.white
+                                : Colors.black,
+                          )),
                   AudioFileWaveforms(
-                    
                     size: Size(widget.screenWidth * 0.50, 60),
                     playerController: controller,
                     waveformType: WaveformType.fitWidth,
-                    playerWaveStyle:
-                    PlayerWaveStyle(scaleFactor: 70,liveWaveColor: widget.isMessageBySender?Colors.white:Colors.black,fixedWaveColor: widget.isMessageBySender?Colors.white70:Colors.grey),
-                      //  widget.config?.playerWaveStyle ?? playerWaveStyle,
+                    playerWaveStyle: PlayerWaveStyle(
+                        scaleFactor: 70,
+                        liveWaveColor: widget.isMessageBySender
+                            ? Colors.white
+                            : Colors.black,
+                        fixedWaveColor: widget.isMessageBySender
+                            ? Colors.white70
+                            : Colors.grey),
+                    //  widget.config?.playerWaveStyle ?? playerWaveStyle,
                     padding: widget.config?.waveformPadding ??
                         const EdgeInsets.only(right: 10),
                     margin: widget.config?.waveformMargin,
                     animationCurve: Curves.easeIn,
-                    
-                    animationDuration: 
-                        const Duration(milliseconds: 10),
+
+                    animationDuration: const Duration(milliseconds: 10),
                     enableSeekGesture: widget.config?.enableSeekGesture ?? true,
                   ),
                 ],
               ),
-              widget.isMessageBySender?
-                      Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color:  Color.fromARGB(255, 246, 242, 242),fontSize: 12)):                           
-                       Text(DateFormat('hh:mm a').format(widget.message.createdAt),style: TextStyle(color:Colors.black,fontSize: 12),),
-              SizedBox(height: 3,)
+              widget.isMessageBySender
+                  ? Text(DateFormat('hh:mm a').format(widget.message.createdAt),
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 246, 242, 242),
+                          fontSize: 12))
+                  : Text(
+                      DateFormat('hh:mm a').format(widget.message.createdAt),
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+              SizedBox(
+                height: 3,
+              )
             ],
           ),
         ),
-        
       ],
     );
   }

@@ -16,7 +16,6 @@ import 'package:provider/provider.dart';
 
 import '../chatview.dart';
 import 'reaction_popup.dart';
-import 'reply_popup_widget.dart';
 
 class ChatListWidget extends StatefulWidget {
   const ChatListWidget(
@@ -230,11 +229,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
                           showPopUp.value = true;
                         }
                         if (featureActiveConfig?.enableReplySnackBar ?? false) {
-                          // _showReplyPopup(
-                          //   message: message,
-                          //   sendByCurrentUser:
-                          //       message.sendBy == currentUser?.id,
-                          // );
                           if (widget.msgList
                                       .where((element) =>
                                           element.isSelected == true)
@@ -304,81 +298,6 @@ class _ChatListWidgetState extends State<ChatListWidget>
       widget.loadMoreData!()
           .whenComplete(() => _isNextPageLoading.value = false);
     }
-  }
-
-  void _showReplyPopup({
-    required Message message,
-    required bool sendByCurrentUser,
-  }) {
-    final replyPopup = widget.replyPopupConfig;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
-          SnackBar(
-            duration: const Duration(hours: 1),
-            backgroundColor: Colors.transparent,
-            content: replyPopup?.replyPopupBuilder != null
-                ? replyPopup!.replyPopupBuilder!(message, sendByCurrentUser)
-                : Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.0),
-                        topRight: Radius.circular(20.0),
-                      ),
-                    ),
-                    child: ReplyPopupWidget(
-                      buttonTextStyle: replyPopup?.buttonTextStyle,
-                      topBorderColor: replyPopup?.topBorderColor,
-                      onMoreTap: () {
-                        _onChatListTap();
-                        if (replyPopup?.onMoreTap != null) {
-                          replyPopup?.onMoreTap!(message);
-                        }
-                      },
-                      onReportTap: () {
-                        _onChatListTap();
-                        if (replyPopup?.onReportTap != null) {
-                          replyPopup?.onReportTap!();
-                        }
-                      },
-                      onUnsendTap: () {
-                        print("message id ${message.id}");
-                        _onChatListTap();
-                        if (replyPopup?.onUnsendTap != null) {
-                          replyPopup?.onUnsendTap!(message);
-                        }
-                      },
-                      onReplyTap: () {
-                        widget.assignReplyMessage(message);
-                        if (featureActiveConfig?.enableReactionPopup ?? false) {
-                          showPopUp.value = false;
-                        }
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        if (replyPopup?.onReplyTap != null) {
-                          replyPopup?.onReplyTap!(message);
-                        }
-                      },
-                      onForwardTap: () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        widget.onForwardTap?.call(message);
-                      },
-                      onCopyTap: () async {
-                        await Clipboard.setData(
-                            ClipboardData(text: message.message));
-
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-                        AppUtils.showToast('Text copied to clipboard!');
-                      },
-                      sendByCurrentUser: sendByCurrentUser,
-                      isCopyButtonEnabled:
-                          message.messageType == MessageType.text,
-                    ),
-                  ),
-            padding: EdgeInsets.zero,
-          ),
-        )
-        .closed;
   }
 
   void _onChatListTap() {

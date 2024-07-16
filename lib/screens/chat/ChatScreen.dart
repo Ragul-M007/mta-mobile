@@ -205,6 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
       } else {
         print('error');
       }
+      Strings.isSelectionEnabled = false;
     }).catchError((onError) {
       AppUtils.dismissprogress();
       unSelectList([]);
@@ -558,6 +559,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   onForwardTap: _onForwardTap,
                   onMoreTap: () {
+                    Strings.isSelectionEnabled = false;
                     print("morre");
                     int? id = int.tryParse(msgList
                         .where((item) => item.isSelected == true)
@@ -574,6 +576,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       msgList
                           .where((item) => item.isSelected == true)
                           .forEach((item) => item.isSelected = false);
+
+                      Strings.isSelectionEnabled = false;
                       setState(() {});
                     } else {
                       if (Strings.fromNotificationChat) {
@@ -776,6 +780,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _onLongPressed(Message message) async {
+    if (msgList.where((element) => element.isSelected == true).length > 0) {
+      Strings.isSelectionEnabled = true;
+    } else {
+      Strings.isSelectionEnabled = false;
+    }
     setState(() {});
   }
 
@@ -798,6 +807,8 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }).catchError((onError) {
       AppUtils.dismissprogress();
+
+      Strings.isSelectionEnabled = false;
       AppUtils.showToastError("Something went wrong!");
     });
   }
@@ -980,6 +991,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       .toList();
                   unSelectList(ids);
                   AppUtils.showToastSuccess("Message forwarded successfully!");
+                } else {
+                  AppUtils.showToastError("Please select any one group!");
                 }
               },
               child: Text('Send', style: TextStyle(fontSize: 16)),
@@ -1031,6 +1044,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .where((item) => item.isSelected == true)
           .forEach((item) => item.isSelected = false);
     }
+    Strings.isSelectionEnabled = false;
     Navigator.pop(context);
     setState(() {});
   }
@@ -1267,47 +1281,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
-  }
-
-  String getFileExt(String? fileName) {
-    print("Filename--> $fileName");
-    var file = fileName?.split("/");
-    var fileExttemp = file?[file.length - 1];
-
-    var finalSplit = fileExttemp?.split(".");
-    var fileExt = finalSplit?[finalSplit.length - 1];
-
-    print("exttt $fileExt");
-    if (fileExt == "png" || fileExt == "PNG") {
-      return "assets/icons/png.png";
-    } else if (fileExt == "jpg" ||
-        fileExt == "jepg" ||
-        fileExt == "jpeg" ||
-        fileExt == "JPG" ||
-        fileExt == "JEPG" ||
-        fileExt == "JPEG") {
-      return "assets/icons/jpg.png";
-    } else if (fileExt == "pdf" || fileExt == "PDF") {
-      return "assets/icons/pdf.png";
-    } else if (fileExt == "txt" || fileExt == "TXT") {
-      return "assets/icons/txt.png";
-    } else if (fileExt == "ppt" || fileExt == "PPT") {
-      return "assets/icons/ppt.png";
-    } else if (fileExt == "mpeg" || fileExt == "mpg") {
-      return "assets/icons/mpg.png";
-    } else if (fileExt == "mp4") {
-      return "assets/icons/mpg.png";
-    } else if (fileExt == "wav" || fileExt == "mp3") {
-      return "assets/icons/mp3.png";
-    } else if (fileExt == "xls" ||
-        fileExt == "xlsx" ||
-        fileExt == "xlsm" ||
-        fileExt == "xlsb" ||
-        fileExt == "xltx") {
-      return "assets/icons/xls.png";
-    } else {
-      return "assets/icons/doc.png";
-    }
   }
 
   updateChat(msg, parentMsgId) {
