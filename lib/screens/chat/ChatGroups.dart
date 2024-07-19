@@ -198,12 +198,9 @@ class _ChatGroupsState extends State<ChatGroups>
     req.projectId = widget.projectId;
     req.groupType = widget.projectId == null ? "team" : "project";
 
-    print("loqinrequest ---> ${jsonEncode(req)}}");
-    api.createGroup(req).then((response) {
+    api.checkGroupName(_groupNameFieldController.text).then((response) {
       AppUtils.dismissprogress();
       if (response.status!) {
-        AppUtils.showToastSuccess(response.message ?? "Error");
-        connectSocket();
         _groupNameFieldController.clear();
         _groupDescriptionFieldController.clear();
         Navigator.of(context).pop();
@@ -211,12 +208,14 @@ class _ChatGroupsState extends State<ChatGroups>
           context,
           MaterialPageRoute(
             builder: (context) => AddRemoveUsersIntoGroups(
-              groupId: response.data!.groupId ?? 0,
+              groupId: 0,
               teamId: widget.teamId,
               projectId: widget.projectId,
+              fromCreateGroup: true,
+              groupData: req,
             ),
           ),
-        );
+        ).whenComplete(() => connectSocket());
       } else {
         AppUtils.showToastError(response.message ?? "Error");
       }

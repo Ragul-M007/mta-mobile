@@ -264,7 +264,7 @@ class _ChatViewState extends State<ChatView>
                                   },
                                   icon: Icon(Icons.forward)),
                             ]
-                          : appBarList(),
+                          : appBarList(widget.currentUser),
                   elevation: theme.elevation,
                   backGroundColor: theme.appBarColor,
                   backArrowColor: theme.backArrowColor,
@@ -377,7 +377,7 @@ class _ChatViewState extends State<ChatView>
     );
   }
 
-  List<Widget> appBarList() {
+  List<Widget> appBarList(ChatUser currentUser) {
     return [
       IconButton(
           onPressed: () {
@@ -392,7 +392,13 @@ class _ChatViewState extends State<ChatView>
             setState(() {});
           },
           icon: Icon(Icons.reply)),
-      IconButton(onPressed: widget.onDeleteTap, icon: Icon(Icons.delete)),
+      if (msgList
+              .where((element) =>
+                  element.isSelected == true &&
+                  element.sendBy == currentUser.id)
+              .length >
+          0)
+        IconButton(onPressed: widget.onDeleteTap, icon: Icon(Icons.delete)),
       IconButton(
           onPressed: () {
             _onForwardTap();

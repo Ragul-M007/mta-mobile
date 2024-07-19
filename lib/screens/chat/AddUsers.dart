@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
+import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -12,12 +13,19 @@ import '../../utilities/apputilities.dart';
 import '../../utilities/strings.dart';
 
 class AddRemoveUsersIntoGroups extends StatefulWidget {
-  const AddRemoveUsersIntoGroups(
-      {super.key, required this.groupId, this.projectId, this.teamId});
+  AddRemoveUsersIntoGroups(
+      {super.key,
+      this.groupId,
+      this.projectId,
+      this.teamId,
+      this.fromCreateGroup,
+      this.groupData});
 
-  final int groupId;
+  int? groupId;
   final int? projectId;
   final int? teamId;
+  final bool? fromCreateGroup;
+  final GroupCreationReq? groupData;
 
   @override
   _AddRemoveUsersIntoGroupsState createState() =>
@@ -37,29 +45,55 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
   getUnlinkUsersByGroupId() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
-    api.getUnlinkedUsers(widget.groupId).then((response) {
-      if (response.status!) {
-        setState(() {
-          chatUsers = response.data!;
-          log(">>>>:${jsonEncode(chatUsers)}");
-          for (int i = 0; i < chatUsers.length; i++) {
-            if (chatUsers[i].alreadyLinked == true) {
-              chatUsers[i].isSelected = true;
-            } else {
-              chatUsers[i].isSelected = false;
+    if (widget.fromCreateGroup == true) {
+      (api.getUsers(widget.projectId == null ? "team" : "project",
+              widget.teamId!, widget.projectId))
+          .then((response) {
+        if (response.status!) {
+          setState(() {
+            chatUsers = response.data!;
+            for (int i = 0; i < chatUsers.length; i++) {
+              if (chatUsers[i].alreadyLinked == true) {
+                chatUsers[i].isSelected = true;
+              } else {
+                chatUsers[i].isSelected = false;
+              }
             }
-          }
-          AppUtils.dismissprogress();
-        });
-      } else {
-        AppUtils.showToastError("Unable to load users");
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError(onError.toString());
-      print(onError.toString());
-    });
+            AppUtils.dismissprogress();
+          });
+        } else {
+          AppUtils.showToastError("Unable to load users");
+          print('error');
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(onError.toString());
+        print(onError.toString());
+      });
+    } else {
+      api.getUnlinkedUsers(widget.groupId!).then((response) {
+        if (response.status!) {
+          setState(() {
+            chatUsers = response.data!;
+            for (int i = 0; i < chatUsers.length; i++) {
+              if (chatUsers[i].alreadyLinked == true) {
+                chatUsers[i].isSelected = true;
+              } else {
+                chatUsers[i].isSelected = false;
+              }
+            }
+            AppUtils.dismissprogress();
+          });
+        } else {
+          AppUtils.showToastError("Unable to load users");
+          print('error');
+        }
+      }).catchError((onError) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(onError.toString());
+        print(onError.toString());
+      });
+    }
   }
 
   selectUnselectUsers() {
@@ -78,13 +112,36 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
     });
   }
 
+  createGroup() {
+    print("dataaa ${widget.teamId}");
+    AppUtils.showprogress();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.createGroup(widget.groupData!).then((response) {
+      AppUtils.dismissprogress();
+      if (response.status!) {
+        widget.groupId = response.data!.groupId;
+        updateSelectedUsers();
+        AppUtils.showToastSuccess(response.message ?? "Error");
+      } else {
+        AppUtils.showToastError(response.message ?? "Error");
+      }
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(onError.toString());
+      print(onError.toString());
+    });
+  }
+
   updateSelectedUsers() {
     List<int> selectedUsers = [];
+
+    print(">>>>>2:${jsonEncode(chatUsers)}");
     chatUsers.forEach((element) {
       if (element.isSelected == true && element.alreadyLinked != true) {
         selectedUsers.add(element.userId!);
       }
     });
+    print(">>>>sel:$selectedUsers");
     AddRemoveUserReq req = AddRemoveUserReq();
     req.groupId = widget.groupId;
     req.userId = selectedUsers;
@@ -102,7 +159,9 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
     print("dddtt ${jsonEncode(req)}");
     _socket?.emit('add-users-into-group',
         json.encode({"group_id": widget.groupId, "user_id": req}));
-    AppUtils.showToastSuccess("Successfully Added the users");
+    if (widget.fromCreateGroup != true) {
+      AppUtils.showToastSuccess("Successfully Added the users");
+    }
     Navigator.pop(context);
 
     // final api = Provider.of<ApiService>(context, listen: false);
@@ -246,6 +305,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
                       setState(() {
                         //  var data = jsonEncode(chatUsers).to;
                         //  chatUsers[index]['isSelected'] = value;
+                        print(">>>>>:$value,${chatUsers[index].isSelected}");
                         chatUsers[index].isSelected = value!;
                         print("jsonn data ${jsonEncode(chatUsers)}");
                       });
@@ -259,7 +319,11 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
                 width: MediaQuery.of(context).size.width * 0.80,
                 child: ElevatedButton(
                   onPressed: () {
-                    updateSelectedUsers();
+                    if (widget.fromCreateGroup == true) {
+                      createGroup();
+                    } else {
+                      updateSelectedUsers();
+                    }
                   },
                   child: Text(
                     "Add",

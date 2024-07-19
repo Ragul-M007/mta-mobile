@@ -969,7 +969,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               )
                             : Center(
-                                child: Text("No assigned projects found",
+                                child: Text("No groups found",
                                     style: TextStyle(color: Colors.red))),
                   ),
                 ],
@@ -977,26 +977,29 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           }),
           actions: [
-            TextButton(
-              onPressed: () async {
-                if (_selectedItems.isNotEmpty) {
-                  // sendForwardMessage(messages);
-                  await updateForwardMessage(messages);
-                  var ids = messages
-                      .where((element) => element.isSelected == true)
-                      .map((element) {
-                        return int.tryParse(element.id);
-                      })
-                      .cast<int>()
-                      .toList();
-                  unSelectList(ids);
-                  AppUtils.showToastSuccess("Message forwarded successfully!");
-                } else {
-                  AppUtils.showToastError("Please select any one group!");
-                }
-              },
-              child: Text('Send', style: TextStyle(fontSize: 16)),
-            ),
+            groups.length != 0
+                ? TextButton(
+                    onPressed: () async {
+                      if (_selectedItems.isNotEmpty) {
+                        // sendForwardMessage(messages);
+                        await updateForwardMessage(messages);
+                        var ids = messages
+                            .where((element) => element.isSelected == true)
+                            .map((element) {
+                              return int.tryParse(element.id);
+                            })
+                            .cast<int>()
+                            .toList();
+                        unSelectList(ids);
+                        AppUtils.showToastSuccess(
+                            "Message forwarded successfully!");
+                      } else {
+                        AppUtils.showToastError("Please select any one group!");
+                      }
+                    },
+                    child: Text('Send', style: TextStyle(fontSize: 16)),
+                  )
+                : Container(),
           ],
         );
       },
@@ -1076,6 +1079,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       updateChat(message, replyMessage.messageId);
     }
+    Strings.isSelectionEnabled = false;
     print("reeeee ${files.length}");
 
     // final id = int.parse(Data.messageList.last.id) + 1;

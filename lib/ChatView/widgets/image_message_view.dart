@@ -152,7 +152,6 @@ class _ImageMessageViewState extends State<ImageMessageView> {
             GestureDetector(
               onTap: () async {
                 // check selection is enabled
-                print(">>>>>>>:${Strings.isSelectionEnabled}");
                 if (Strings.isSelectionEnabled) {
                   widget.onSelectionTapped.call();
                 } else {

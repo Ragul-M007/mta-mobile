@@ -540,6 +540,7 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
                                   groupId: widget.groupId,
                                   teamId: widget.teamId,
                                   projectId: widget.projectId,
+                                  fromCreateGroup: false,
                                 ),
                               ),
                             ).then((value) => {getUsersByGroupId()});

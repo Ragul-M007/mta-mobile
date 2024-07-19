@@ -1414,7 +1414,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                   fontWeight: FontWeight.w600),
             ),
             content: Text(
-              "You were not inside the selected project location.You are $distance mtrs far from the location. Please move closer to the Project location and try again. ",
+              "You were not inside the selected project location.You are ${distanceCalculation(distance!)} far from the location. Please move closer to the Project location and try again. ",
               style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,
@@ -1435,6 +1435,14 @@ class _AttendanceContentState extends State<AttendanceContent>
           ),
         )) ??
         false;
+  }
+
+  String distanceCalculation(double meters) {
+    if (meters > 1000) {
+      return "${(meters / 1000).toStringAsFixed(1)} kilometers"; // Convert to kilometers
+    } else {
+      return "${meters.toStringAsFixed(1)} meters"; // Return meters as it is
+    }
   }
 
   checkInOut(action) {

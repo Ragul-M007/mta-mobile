@@ -115,8 +115,8 @@ abstract class ApiService {
   @GET("/categories?project_id={project_id}&&type=mobile")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
 
-  @GET("/chat/unlinkedUsersInGroup?group_id={project_id}")
-  Future<AddUsersListRes> getUnlinkedUsers(@Path("project_id") int id);
+  @GET("/chat/unlinkedUsersInGroup?group_id={id}")
+  Future<AddUsersListRes> getUnlinkedUsers(@Path("id") int id);
 
   @POST("/projects/addDocument")
   Future<AddDocRes> addDoc(@Body() AddDocReq body);
@@ -236,6 +236,17 @@ abstract class ApiService {
 
   @GET("/chat/getGroupDetailsByGroupId?group_id={group_id}")
   Future<GroupDetailsRes> getGroupData(@Path("group_id") int id);
+
+  @GET(
+      "/chat/getTeamProjectUsers?group_type={group_type}&team_id={team_id}&project_id={project_id}")
+  Future<AddUsersListRes> getUsers(
+    @Path("group_type") String? groupType,
+    @Path("team_id") int teamId,
+    @Path("project_id") int? projectId,
+  );
+
+  @GET("/chat/checkGroupExists/{group_name}")
+  Future<CommonRes> checkGroupName(@Path("group_name") String groupName);
 
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
