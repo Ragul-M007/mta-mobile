@@ -991,8 +991,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             .cast<int>()
                             .toList();
                         unSelectList(ids);
-                        AppUtils.showToastSuccess(
-                            "Message forwarded successfully!");
+                        AppUtils.showToastSuccess("Sending Messages..");
+                        Timer(Duration(seconds: 2), () {
+                          AppUtils.showToastSuccess(
+                              "Message forwarded successfully!");
+                        });
                       } else {
                         AppUtils.showToastError("Please select any one group!");
                       }

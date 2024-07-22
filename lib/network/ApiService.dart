@@ -241,7 +241,7 @@ abstract class ApiService {
       "/chat/getTeamProjectUsers?group_type={group_type}&team_id={team_id}&project_id={project_id}")
   Future<AddUsersListRes> getUsers(
     @Path("group_type") String? groupType,
-    @Path("team_id") int teamId,
+    @Path("team_id") int? teamId,
     @Path("project_id") int? projectId,
   );
 

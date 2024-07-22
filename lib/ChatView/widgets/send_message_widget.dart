@@ -1,4 +1,3 @@
-
 import 'dart:io' if (kIsWeb) 'dart:html';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
@@ -50,9 +49,8 @@ class SendMessageWidget extends StatefulWidget {
 
   /// Provides controller for accessing few function for running chat.
   final ChatController chatController;
-  
-  final List<Map<String, dynamic>>? userList;
 
+  final List<Map<String, dynamic>>? userList;
 
   @override
   State<SendMessageWidget> createState() => SendMessageWidgetState();
@@ -194,15 +192,16 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
                                       else if (state.messageType.isImage)
                                         _imageReplyMessageView
                                       else
-                                      Text.rich(TextSpan(
-                                      children: customizeText(
-                                          state.message),    style:TextStyle(
+                                        Text.rich(TextSpan(
+                                          children:
+                                              customizeText(state.message),
+                                          style: TextStyle(
                                             fontSize: 12,
                                             color: widget.sendMessageConfig
                                                     ?.replyMessageColor ??
                                                 Colors.black,
-                                          ),)
-                            )
+                                          ),
+                                        ))
                                     ],
                                   ),
                                 ),
@@ -215,7 +214,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
                         ),
                         ChatUITextField(
                           userList: widget.userList,
-                          textEditingKey:_textEditingKey,
+                          textEditingKey: _textEditingKey,
                           focusNode: _focusNode,
                           textEditingController: _textEditingController,
                           onPressed: _onPressed,
@@ -232,8 +231,7 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
           );
   }
 
-  List<InlineSpan> customizeText(String text) 
-  {
+  List<InlineSpan> customizeText(String text) {
     // final regex = RegExp('\'.+\'');
     // final target = regex.stringMatch(testString)!;
     List<InlineSpan> spans = [];
@@ -314,17 +312,20 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
 
   void _onRecordingComplete(String? path) {
     if (path != null) {
-      widget.onSendTap.call(path, replyMessage, MessageType.voice,[]);
+      widget.onSendTap.call(path, replyMessage, MessageType.voice, []);
       _assignRepliedMessage();
     }
   }
 
-  void _onImageSelected(String error,ReplyMessage replyMsg,MessageType typ,List<MultipartFile> imagePath, ) 
-  {
+  void _onImageSelected(
+    String error,
+    ReplyMessage replyMsg,
+    MessageType typ,
+    List<MultipartFile> imagePath,
+  ) {
     debugPrint('Call in Send Message Widget');
-    if (imagePath.isNotEmpty) 
-    {
-      widget.onSendTap.call(error, replyMessage, MessageType.image,imagePath);
+    if (imagePath.isNotEmpty) {
+      widget.onSendTap.call(error, replyMessage, MessageType.image, imagePath);
       _assignRepliedMessage();
     }
   }
@@ -336,14 +337,15 @@ class SendMessageWidgetState extends State<SendMessageWidget> {
   }
 
   void _onPressed() {
-    print("typed valll ${_textEditingKey.currentState!.controller!.markupText}");
+    print(
+        "typed valll ${_textEditingKey.currentState!.controller!.markupText}");
     if (_textEditingKey.currentState!.controller!.markupText.isNotEmpty &&
-        !_textEditingKey.currentState!.controller!.markupText.startsWith('\n')) {
+        !_textEditingKey.currentState!.controller!.markupText
+            .startsWith('\n')) {
       widget.onSendTap.call(
-        _textEditingKey.currentState!.controller!.markupText.trim(),
-        replyMessage,
-        MessageType.text,[]
-      );
+          _textEditingKey.currentState!.controller!.markupText.trim(),
+          replyMessage,
+          MessageType.text, []);
       _assignRepliedMessage();
       _textEditingKey.currentState!.controller!.clear();
       _textEditingController.clear();

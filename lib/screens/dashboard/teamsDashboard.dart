@@ -15,7 +15,6 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/mapClickEvent.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:mappls_place_widget/mappls_place_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -837,28 +836,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
         ),
       ),
     );
-  }
-
-  openMapplsPlacePickerWidget() async {
-    ReverseGeocodePlace place;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      place = await openPlacePicker(PickerOption());
-    } on PlatformException {
-      place = ReverseGeocodePlace();
-    }
-    if (kDebugMode) {
-      print(jsonEncode(place.toJson()));
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-    print(">>>>>:${place.latitude}");
-    // setState(() {
-    //   _place = place;
-    // });
   }
 
   onTapProject(Data projectList) {

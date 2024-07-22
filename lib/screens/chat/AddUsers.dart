@@ -47,7 +47,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
     final api = Provider.of<ApiService>(context, listen: false);
     if (widget.fromCreateGroup == true) {
       (api.getUsers(widget.projectId == null ? "team" : "project",
-              widget.teamId!, widget.projectId))
+              widget.teamId, widget.projectId))
           .then((response) {
         if (response.status!) {
           setState(() {
@@ -294,25 +294,29 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
             //   ),
 
             Expanded(
-              child: ListView.builder(
-                itemCount: chatUsers.length,
-                itemBuilder: (context, index) {
-                  return CheckboxListTile(
-                    enabled: (!chatUsers[index].alreadyLinked!),
-                    title: Text('${chatUsers[index].userName}'),
-                    value: chatUsers[index].isSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        //  var data = jsonEncode(chatUsers).to;
-                        //  chatUsers[index]['isSelected'] = value;
-                        print(">>>>>:$value,${chatUsers[index].isSelected}");
-                        chatUsers[index].isSelected = value!;
-                        print("jsonn data ${jsonEncode(chatUsers)}");
-                      });
-                    },
-                  );
-                },
-              ),
+              child: chatUsers.length > 0
+                  ? ListView.builder(
+                      itemCount: chatUsers.length,
+                      itemBuilder: (context, index) {
+                        return CheckboxListTile(
+                          enabled: (!chatUsers[index].alreadyLinked!),
+                          title: Text('${chatUsers[index].userName}'),
+                          value: chatUsers[index].isSelected,
+                          onChanged: (value) {
+                            setState(() {
+                              chatUsers[index].isSelected = value!;
+                              print("jsonn data ${jsonEncode(chatUsers)}");
+                            });
+                          },
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text("No users found",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600))),
             ),
 
             Container(

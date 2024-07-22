@@ -1436,7 +1436,7 @@ class _ApiService implements ApiService {
 
   @override
   Future<AddUsersListRes> getUsers(
-      String? groupType, int teamId, int? projectId) async {
+      String? groupType, int? teamId, int? projectId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
