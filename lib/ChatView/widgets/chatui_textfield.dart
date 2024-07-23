@@ -451,8 +451,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
           final permissionStatus = await Permission.photos.status;
           if (permissionStatus.isPermanentlyDenied) {
             AppUtils.showToastError(
-                "Please enable photos from App permission Settings");
-            await openAppSettings();
+                "Please allow photos access from App permission Settings");
           }
         }
         final XFile? image = await _imagePicker.pickImage(
