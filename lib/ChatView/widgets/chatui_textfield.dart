@@ -447,6 +447,14 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     try {
       ReplyMessage msg = ReplyMessage();
       if (openGallery) {
+        if (Platform.isIOS) {
+          final permissionStatus = await Permission.photos.status;
+          if (permissionStatus.isPermanentlyDenied) {
+            AppUtils.showToastError(
+                "Please enable photos from App permission Settings");
+            await openAppSettings();
+          }
+        }
         final XFile? image = await _imagePicker.pickImage(
           source: imageSource,
           maxHeight: config?.maxHeight,

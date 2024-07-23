@@ -112,7 +112,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
     });
   }
 
-  createGroup() {
+  createGroup(List<int> selectedUsrs) {
     print("dataaa ${widget.teamId}");
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
@@ -120,7 +120,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
       AppUtils.dismissprogress();
       if (response.status!) {
         widget.groupId = response.data!.groupId;
-        updateSelectedUsers();
+        addUsersToGroupApiCall(selectedUsrs);
         AppUtils.showToastSuccess(response.message ?? "Error");
       } else {
         AppUtils.showToastError(response.message ?? "Error");
@@ -134,22 +134,21 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
 
   updateSelectedUsers() {
     List<int> selectedUsers = [];
-
-    print(">>>>>2:${jsonEncode(chatUsers)}");
     chatUsers.forEach((element) {
       if (element.isSelected == true && element.alreadyLinked != true) {
         selectedUsers.add(element.userId!);
       }
     });
-    print(">>>>sel:$selectedUsers");
     AddRemoveUserReq req = AddRemoveUserReq();
     req.groupId = widget.groupId;
     req.userId = selectedUsers;
 
-    print("jsone ${jsonEncode(req)}");
-
     if (selectedUsers.length > 0) {
-      addUsersToGroupApiCall(selectedUsers);
+      if (widget.fromCreateGroup == true) {
+        createGroup(selectedUsers);
+      } else {
+        addUsersToGroupApiCall(selectedUsers);
+      }
     } else {
       AppUtils.showToastError("Please select atleast one user");
     }
@@ -323,11 +322,7 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
                 width: MediaQuery.of(context).size.width * 0.80,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (widget.fromCreateGroup == true) {
-                      createGroup();
-                    } else {
-                      updateSelectedUsers();
-                    }
+                    updateSelectedUsers();
                   },
                   child: Text(
                     "Add",
