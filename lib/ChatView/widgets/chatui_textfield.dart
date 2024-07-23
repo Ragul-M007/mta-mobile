@@ -273,11 +273,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
                               true)
                             IconButton(
                               constraints: const BoxConstraints(),
-                              onPressed: () => _onIconPressed(
-                                ImageSource.gallery,
-                                config:
-                                    sendMessageConfig?.imagePickerConfiguration,
-                              ),
+                              onPressed: () => _showReplyPopup(),
                               icon: imagePickerIconsConfig
                                       ?.galleryImagePickerIcon ??
                                   Icon(
@@ -349,45 +345,153 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     }
   }
 
+  _showReplyPopup() {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    return ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(
+          duration: const Duration(hours: 1),
+          backgroundColor: Colors.transparent,
+          content: Container(
+            height: deviceWidth > 500 ? deviceWidth * 0.15 : deviceWidth * 0.33,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.0),
+                topRight: Radius.circular(20.0),
+              ),
+              border: Border(
+                  top: BorderSide(color: Colors.grey.shade400, width: 1)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 20, bottom: 0, top: 10, right: 20),
+                  child: InkWell(
+                    onTap: () {
+                      _onIconPressed(
+                        ImageSource.gallery,
+                        true,
+                        config: sendMessageConfig?.imagePickerConfiguration,
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.photo_library_outlined),
+                            SizedBox(width: 5),
+                            Text(
+                              "Gallery",
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.black),
+                            ),
+                          ],
+                        ),
+                        Transform.translate(
+                          offset: Offset(10, -17),
+                          child: IconButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, bottom: 10, top: 0),
+                  child: InkWell(
+                    onTap: () {
+                      _onIconPressed(
+                        ImageSource.gallery,
+                        false,
+                        config: sendMessageConfig?.imagePickerConfiguration,
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.description_outlined),
+                        SizedBox(width: 5),
+                        Text(
+                          "Files",
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          padding: EdgeInsets.zero,
+        ))
+        .closed;
+  }
+
   void _onIconPressed(
-    ImageSource imageSource, {
+    ImageSource imageSource,
+    bool openGallery, {
     ImagePickerConfiguration? config,
   }) async {
     try {
       ReplyMessage msg = ReplyMessage();
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3', 'mp4'],
-      );
-      if (result != null) {
-        List<MultipartFile> files = result.paths
-            .map((path) => MultipartFile.fromFileSync(
-                  path!,
-                  filename: getFileName(path),
-                  // contentType: MediaType(
-                  //     lookupMimeType(getFileName(path))?.split('/')[0],
-                  //     lookupMimeType(getFileName(path))?.split('/')[1],
-                  // ),
-                ))
-            .toList();
-        widget.onImageSelected('', msg, MessageType.image, files);
+      if (openGallery) {
+        final XFile? image = await _imagePicker.pickImage(
+          source: imageSource,
+          maxHeight: config?.maxHeight,
+          maxWidth: config?.maxWidth,
+          imageQuality: config?.imageQuality,
+          preferredCameraDevice:
+              config?.preferredCameraDevice ?? CameraDevice.rear,
+        );
+        String? imagePath = image?.path;
+        MultipartFile files = MultipartFile.fromFileSync(
+          imagePath!,
+          filename: getFileName(imagePath),
+          // contentType: MediaType(
+          //     lookupMimeType(getFileName(path))?.split('/')[0],
+          //     lookupMimeType(getFileName(path))?.split('/')[1],
+          // ),
+        );
+        if (config?.onImagePicked != null) {
+          String? updatedImagePath = await config?.onImagePicked!(imagePath);
+          if (updatedImagePath != null) imagePath = updatedImagePath;
+        }
+        widget
+            .onImageSelected(imagePath ?? '', msg, MessageType.image, [files]);
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3', 'mp4'],
+        );
+        if (result != null) {
+          List<MultipartFile> files = result.paths
+              .map((path) => MultipartFile.fromFileSync(
+                    path!,
+                    filename: getFileName(path),
+                    // contentType: MediaType(
+                    //     lookupMimeType(getFileName(path))?.split('/')[0],
+                    //     lookupMimeType(getFileName(path))?.split('/')[1],
+                    // ),
+                  ))
+              .toList();
+          widget.onImageSelected('', msg, MessageType.image, files);
+        }
       }
 
-      // final XFile? image = await _imagePicker.pickImage(
-      //   source: imageSource,
-      //   maxHeight: config?.maxHeight,
-      //   maxWidth: config?.maxWidth,
-      //   imageQuality: config?.imageQuality,
-      //   preferredCameraDevice:
-      //       config?.preferredCameraDevice ?? CameraDevice.rear,
-      // );
-      // String? imagePath = image?.path;
-      // if (config?.onImagePicked != null) {
-      //   String? updatedImagePath = await config?.onImagePicked!(imagePath);
-      //   if (updatedImagePath != null) imagePath = updatedImagePath;
-      // }
-      // widget.onImageSelected(imagePath ?? '', '');
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     } catch (e) {
       // widget.onImageSelected(, e.toString());
     }
