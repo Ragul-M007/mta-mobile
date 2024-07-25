@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mta/ChatView/widgets/chat_list_widget.dart';
 import 'package:mta/ChatView/widgets/chat_view_inherited_widget.dart';
 import 'package:mta/ChatView/widgets/chatview_state_widget.dart';
@@ -167,6 +168,8 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey<SendMessageWidgetState> _sendMessageKey = GlobalKey();
   ValueNotifier<ReplyMessage> replyMessage =
       ValueNotifier(const ReplyMessage());
+      
+        FocusNode focusNode=FocusNode();
 
   ChatController get chatController => widget.chatController;
 
@@ -366,6 +369,7 @@ class _ChatViewState extends State<ChatView>
                         onReplyCallback: (reply) => replyMessage.value = reply,
                         onReplyCloseCallback: () =>
                             replyMessage.value = const ReplyMessage(),
+                            focusNode:focusNode,
                       ),
                   ],
                 ),
@@ -401,6 +405,7 @@ class _ChatViewState extends State<ChatView>
         IconButton(onPressed: widget.onDeleteTap, icon: Icon(Icons.delete)),
       IconButton(
           onPressed: () {
+              focusNode.unfocus();
             _onForwardTap();
           },
           icon: Icon(Icons.forward)),
@@ -421,6 +426,7 @@ class _ChatViewState extends State<ChatView>
                 ],
           onSelected: (_) async {
             if (_ == "Copy") {
+              focusNode.unfocus();
               var text = getCustomText(msgList
                   .where((item) => item.isSelected == true)
                   .first
@@ -437,6 +443,7 @@ class _ChatViewState extends State<ChatView>
               setState(() {});
               AppUtils.showToastSuccess('Text copied to clipboard!');
             } else {
+              focusNode.unfocus();
               Strings.isSelectionEnabled = false;
               widget.onMoreTap?.call();
             }

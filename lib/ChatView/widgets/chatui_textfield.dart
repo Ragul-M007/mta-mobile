@@ -444,6 +444,8 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
     bool openGallery, {
     ImagePickerConfiguration? config,
   }) async {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
     try {
       ReplyMessage msg = ReplyMessage();
       if (openGallery) {
@@ -498,7 +500,6 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         }
       }
 
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     } catch (e) {
       // widget.onImageSelected(, e.toString());
     }
