@@ -1414,7 +1414,7 @@ class _AttendanceContentState extends State<AttendanceContent>
                   fontWeight: FontWeight.w600),
             ),
             content: Text(
-              "You were not inside the selected project location.You are ${distanceCalculation(distance!)} far from the location. Please move closer to the Project location and try again. ",
+              "You were not inside the selected project location.You are ${distanceCalculation(distance!)} far from the location. Your current coordinates are (latitude: $lat, longitude: $long). Please move closer to the Project location and try again. ",
               style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,
