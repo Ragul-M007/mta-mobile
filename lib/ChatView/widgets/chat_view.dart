@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -168,8 +170,8 @@ class _ChatViewState extends State<ChatView>
   final GlobalKey<SendMessageWidgetState> _sendMessageKey = GlobalKey();
   ValueNotifier<ReplyMessage> replyMessage =
       ValueNotifier(const ReplyMessage());
-      
-        FocusNode focusNode=FocusNode();
+
+  FocusNode focusNode = FocusNode();
 
   ChatController get chatController => widget.chatController;
 
@@ -369,7 +371,7 @@ class _ChatViewState extends State<ChatView>
                         onReplyCallback: (reply) => replyMessage.value = reply,
                         onReplyCloseCallback: () =>
                             replyMessage.value = const ReplyMessage(),
-                            focusNode:focusNode,
+                        focusNode: focusNode,
                       ),
                   ],
                 ),
@@ -382,6 +384,8 @@ class _ChatViewState extends State<ChatView>
   }
 
   List<Widget> appBarList(ChatUser currentUser) {
+    print(
+        ">>>>1234:${msgList.where((item) => item.isSelected == true).first.isSelected},${(msgList.where((element) => element.isSelected == true && element == MessageType.text).length > 0)}");
     return [
       IconButton(
           onPressed: () {
@@ -405,49 +409,57 @@ class _ChatViewState extends State<ChatView>
         IconButton(onPressed: widget.onDeleteTap, icon: Icon(Icons.delete)),
       IconButton(
           onPressed: () {
-              focusNode.unfocus();
+            focusNode.unfocus();
             _onForwardTap();
           },
           icon: Icon(Icons.forward)),
-      PopupMenuButton(
-          key: _menuKey,
-          itemBuilder: (_) => (msgList
-                      .where((element) =>
-                          element.isSelected == true &&
-                          element.messageType == MessageType.text)
-                      .length >
-                  0)
-              ? const <PopupMenuItem<String>>[
-                  PopupMenuItem<String>(child: Text('Copy'), value: 'Copy'),
-                  PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
-                ]
-              : const <PopupMenuItem<String>>[
-                  PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
-                ],
-          onSelected: (_) async {
-            if (_ == "Copy") {
-              focusNode.unfocus();
-              var text = getCustomText(msgList
-                  .where((item) => item.isSelected == true)
-                  .first
-                  .message);
-              await Clipboard.setData(ClipboardData(text: text));
+      (msgList
+                  .where((element) =>
+                      element.isSelected == true &&
+                      element.sendBy == Strings.userID.toString())
+                  .length >
+              0)
+          ? PopupMenuButton(
+              key: _menuKey,
+              itemBuilder: (_) => (msgList
+                          .where((element) =>
+                              element.isSelected == true &&
+                              element.messageType == MessageType.text &&
+                              element.sendBy == Strings.userID.toString())
+                          .length >
+                      0)
+                  ? const <PopupMenuItem<String>>[
+                      PopupMenuItem<String>(child: Text('Copy'), value: 'Copy'),
+                      PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
+                    ]
+                  : const <PopupMenuItem<String>>[
+                      PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
+                    ],
+              onSelected: (_) async {
+                if (_ == "Copy") {
+                  focusNode.unfocus();
+                  var text = getCustomText(msgList
+                      .where((item) => item.isSelected == true)
+                      .first
+                      .message);
+                  await Clipboard.setData(ClipboardData(text: text));
 
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-              msgList
-                  .where((item) => item.isSelected == true)
-                  .forEach((item) => item.isSelected = false);
+                  msgList
+                      .where((item) => item.isSelected == true)
+                      .forEach((item) => item.isSelected = false);
 
-              Strings.isSelectionEnabled = false;
-              setState(() {});
-              AppUtils.showToastSuccess('Text copied to clipboard!');
-            } else {
-              focusNode.unfocus();
-              Strings.isSelectionEnabled = false;
-              widget.onMoreTap?.call();
-            }
-          })
+                  Strings.isSelectionEnabled = false;
+                  setState(() {});
+                  AppUtils.showToastSuccess('Text copied to clipboard!');
+                } else {
+                  focusNode.unfocus();
+                  Strings.isSelectionEnabled = false;
+                  widget.onMoreTap?.call();
+                }
+              })
+          : Container()
     ];
   }
 
