@@ -49,7 +49,8 @@ class _ChatGroupsState extends State<ChatGroups>
       TextEditingController();
 
   List<GroupDetails> groupList = [];
-
+  FocusNode groupNameFocus = FocusNode();
+  FocusNode descriptionFocus = FocusNode();
   String? filepath;
   var dio = Dio();
 
@@ -669,6 +670,7 @@ class _ChatGroupsState extends State<ChatGroups>
                           padding: const EdgeInsets.all(5.0),
                           child: TextField(
                             controller: _groupNameFieldController,
+                            focusNode: groupNameFocus,
                             decoration: InputDecoration.collapsed(
                               hintText: ' Enter group name',
                             ),
@@ -696,6 +698,7 @@ class _ChatGroupsState extends State<ChatGroups>
                               decoration: InputDecoration.collapsed(
                                 hintText: ' Enter description',
                               ),
+                              focusNode: descriptionFocus,
                               onEditingComplete: () {
                                 FocusScope.of(context).unfocus();
                               },
@@ -722,6 +725,8 @@ class _ChatGroupsState extends State<ChatGroups>
                           Expanded(
                             child: TextButton(
                                 onPressed: () {
+                                  groupNameFocus.unfocus();
+                                  descriptionFocus.unfocus();
                                   if (_groupNameFieldController.text.isEmpty) {
                                     showValidationalert(
                                         "Please enter Group name");
