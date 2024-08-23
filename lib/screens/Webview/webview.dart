@@ -1,4 +1,3 @@
-
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,7 +14,6 @@ FancyDrawerController? _controller;
 FocusNode name = new FocusNode();
 ImagePicker _picker = ImagePicker();
 WebViewController controller = WebViewController();
-
 
 class WebpageView extends StatefulWidget {
   static const String routeName = "/webview";
@@ -38,27 +36,28 @@ class _WebpageViewState extends State<WebpageView>
         });
       });
 
-      configureWebview();
+    configureWebview();
   }
-configureWebview()
-  {
-controller = WebViewController()
-  ..setJavaScriptMode(JavaScriptMode.unrestricted)
-  ..setBackgroundColor(const Color(0x00000000))
-  ..setNavigationDelegate(
-    NavigationDelegate(
-      onProgress: (int progress) {
-        // Update loading bar.
-      },
-      onPageStarted: (String url) {},
-      onPageFinished: (String url) {
-        AppUtils.dismissprogress();
-      },
-      onWebResourceError: (WebResourceError error) {},
-    ),
-  )
-  ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
+
+  configureWebview() {
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            AppUtils.dismissprogress();
+          },
+          onWebResourceError: (WebResourceError error) {},
+        ),
+      )
+      ..loadRequest(Uri.parse('https://www.mtaarch.com/'));
   }
+
   @override
   void dispose() {
     _controller?.dispose(); // Dispose controller
@@ -101,54 +100,61 @@ controller = WebViewController()
                   ],
                 ),
               ),
-          if (Strings.roleId != 6)               
+              if (Strings.roleId != 6)
+                menuoption(
+                  ontab: () {
+                    Strings.fromProjects = false;
+                    menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
+                  },
+                  selectedmenuvalue: 1,
+                  menutitle: "Teams",
+                ),
               menuoption(
                 ontab: () {
-                  Strings.fromProjects = false;
-                  menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-                },
-                selectedmenuvalue: 1,
-                menutitle: "Teams",
-              ),
-              if(Strings.roleId != 7)
-              menuoption(
-                ontab: () {
-                    Strings.fromProjects = true;
-                    menuRedirect(routename: "/projects", currentmenu: 2);
+                  menuRedirect(routename: "/meetings", currentmenu: 2);
                 },
                 selectedmenuvalue: 2,
-                menutitle: "Projects",
+                menutitle: "Meetings",
               ),
+              if (Strings.roleId != 7)
+                menuoption(
+                  ontab: () {
+                    Strings.fromProjects = true;
+                    menuRedirect(routename: "/projects", currentmenu: 3);
+                  },
+                  selectedmenuvalue: 3,
+                  menutitle: "Projects",
+                ),
               (Strings.roleId == 1 ||
                       Strings.roleId == 2 ||
                       Strings.roleId == 5)
                   ? menuoption(
                       ontab: () {
-                        menuRedirect(routename: "/attendance", currentmenu:3);
+                        menuRedirect(routename: "/attendance", currentmenu: 4);
                       },
-                      selectedmenuvalue: 3,
+                      selectedmenuvalue: 4,
                       menutitle: "Attendance",
                     )
                   : SizedBox(),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/profile", currentmenu: 4);
+                  menuRedirect(routename: "/profile", currentmenu: 5);
                 },
-                selectedmenuvalue: 4,
+                selectedmenuvalue: 5,
                 menutitle: "Profile",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/notification", currentmenu: 5);
+                  menuRedirect(routename: "/notification", currentmenu: 6);
                 },
-                selectedmenuvalue: 5,
+                selectedmenuvalue: 6,
                 menutitle: "Notification",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/contactus", currentmenu: 6);
+                  menuRedirect(routename: "/contactus", currentmenu: 7);
                 },
-                selectedmenuvalue: 6,
+                selectedmenuvalue: 7,
                 menutitle: "Contact Us",
               ),
               // menuoption(
@@ -160,9 +166,9 @@ controller = WebViewController()
               // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/newshighlights", currentmenu: 7);
+                  menuRedirect(routename: "/newshighlights", currentmenu: 8);
                 },
-                selectedmenuvalue: 7,
+                selectedmenuvalue: 8,
                 menutitle: "News & Highlights",
               ),
               // menuoption(
@@ -203,8 +209,7 @@ controller = WebViewController()
                           ),
                         ),
                         TextButton(
-                          onPressed: () 
-                          {
+                          onPressed: () {
                             menuRedirect(routename: "/login", currentmenu: 9);
                             AppUtils.savePreferences("easyAccess", "N");
                             AppUtils.removeDeviceId(context);
@@ -381,9 +386,7 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   @override
-  Widget build(BuildContext context) 
-  {
-    return Container(
-        child: WebViewWidget(controller: controller));
+  Widget build(BuildContext context) {
+    return Container(child: WebViewWidget(controller: controller));
   }
 }

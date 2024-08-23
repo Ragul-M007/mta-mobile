@@ -87,13 +87,20 @@ class _ContactusState extends State<Contactus>
                   selectedmenuvalue: 1,
                   menutitle: Strings.roleId == 7 ? "Home" : "Teams",
                 ),
+              menuoption(
+                ontab: () {
+                  menuRedirect(routename: "/meetings", currentmenu: 2);
+                },
+                selectedmenuvalue: 2,
+                menutitle: "Meetings",
+              ),
               if (Strings.roleId != 7)
                 menuoption(
                   ontab: () {
                     Strings.fromProjects = true;
-                    menuRedirect(routename: "/projects", currentmenu: 2);
+                    menuRedirect(routename: "/projects", currentmenu: 3);
                   },
-                  selectedmenuvalue: 2,
+                  selectedmenuvalue: 3,
                   menutitle: "Projects",
                 ),
               if (Strings.roleId == 1 ||
@@ -101,30 +108,30 @@ class _ContactusState extends State<Contactus>
                   Strings.roleId == 5)
                 menuoption(
                   ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 3);
+                    menuRedirect(routename: "/attendance", currentmenu: 4);
                   },
-                  selectedmenuvalue: 3,
+                  selectedmenuvalue: 4,
                   menutitle: "Attendance",
                 ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/profile", currentmenu: 4);
+                  menuRedirect(routename: "/profile", currentmenu: 5);
                 },
-                selectedmenuvalue: 4,
+                selectedmenuvalue: 5,
                 menutitle: "Profile",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/notification", currentmenu: 5);
+                  menuRedirect(routename: "/notification", currentmenu: 6);
                 },
-                selectedmenuvalue: 5,
+                selectedmenuvalue: 6,
                 menutitle: "Notification",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/contactus", currentmenu: 6);
+                  menuRedirect(routename: "/contactus", currentmenu: 7);
                 },
-                selectedmenuvalue: 6,
+                selectedmenuvalue: 7,
                 menutitle: "Contact Us",
               ),
               // menuoption(
@@ -136,9 +143,9 @@ class _ContactusState extends State<Contactus>
               // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/newshighlights", currentmenu: 7);
+                  menuRedirect(routename: "/newshighlights", currentmenu: 8);
                 },
-                selectedmenuvalue: 7,
+                selectedmenuvalue: 8,
                 menutitle: "News & Highlights",
               ),
               // menuoption(

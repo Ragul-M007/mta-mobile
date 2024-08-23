@@ -89,54 +89,60 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                   ],
                 ),
               ),
-          if (Strings.roleId != 6)
-              menuoption(
-                ontab: () 
-                {
-                  Strings.fromProjects = false;
-                  menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-                },
-                selectedmenuvalue: 1,
-                menutitle: Strings.roleId == 7 ? "Home" : "Teams",
-              ),
-              if(Strings.roleId != 7)
+              if (Strings.roleId != 6)
+                menuoption(
+                  ontab: () {
+                    Strings.fromProjects = false;
+                    menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
+                  },
+                  selectedmenuvalue: 1,
+                  menutitle: Strings.roleId == 7 ? "Home" : "Teams",
+                ),
               menuoption(
                 ontab: () {
-                    Strings.fromProjects = true;
-                    menuRedirect(routename: "/projects", currentmenu: 2);
+                  menuRedirect(routename: "/meetings", currentmenu: 2);
                 },
                 selectedmenuvalue: 2,
-                menutitle: "Projects",
+                menutitle: "Meetings",
               ),
+              if (Strings.roleId != 7)
+                menuoption(
+                  ontab: () {
+                    Strings.fromProjects = true;
+                    menuRedirect(routename: "/projects", currentmenu: 3);
+                  },
+                  selectedmenuvalue: 3,
+                  menutitle: "Projects",
+                ),
               if (Strings.roleId == 1 ||
                   Strings.roleId == 2 ||
                   Strings.roleId == 5)
                 menuoption(
                   ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 3);
+                    menuRedirect(routename: "/attendance", currentmenu: 4);
                   },
-                  selectedmenuvalue: 3,
+                  selectedmenuvalue: 4,
                   menutitle: "Attendance",
                 ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/profile", currentmenu: 4);
+                  menuRedirect(routename: "/profile", currentmenu: 5);
                 },
-                selectedmenuvalue: 4,
+                selectedmenuvalue: 5,
                 menutitle: "Profile",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/notification", currentmenu: 5);
+                  menuRedirect(routename: "/notification", currentmenu: 6);
                 },
-                selectedmenuvalue: 5,
+                selectedmenuvalue: 6,
                 menutitle: "Notification",
               ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/contactus", currentmenu: 6);
+                  menuRedirect(routename: "/contactus", currentmenu: 7);
                 },
-                selectedmenuvalue: 6,
+                selectedmenuvalue: 7,
                 menutitle: "Contact Us",
               ),
               // menuoption(
@@ -148,9 +154,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               // ),
               menuoption(
                 ontab: () {
-                  menuRedirect(routename: "/newshighlights", currentmenu: 7);
+                  menuRedirect(routename: "/newshighlights", currentmenu: 8);
                 },
-                selectedmenuvalue: 7,
+                selectedmenuvalue: 8,
                 menutitle: "News & Highlights",
               ),
               // menuoption(
@@ -414,31 +420,36 @@ class _ProfileContentState extends State<ProfileContent> {
                         ),
                       ),
                     ),
-                    (_profileData[0].city! != "" && _profileData[0].state! != "")?
-                    Container(
-                      margin: EdgeInsets.fromLTRB(
-                          20, MediaQuery.of(context).size.height * .25, 20, 10),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Padding(
-                          padding: EdgeInsets.all(30),
-                          child: Row(
-                            children: [
-                              Icon(Icons.pin_drop),
-                              SizedBox(
-                                width: 2,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  address,
-                                  overflow: TextOverflow.clip,
-                                ),
-                              )
-                            ],
-                          )),
-                    ):SizedBox(),
+                    (_profileData[0].city! != "" &&
+                            _profileData[0].state! != "")
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(
+                                20,
+                                MediaQuery.of(context).size.height * .25,
+                                20,
+                                10),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15)),
+                            child: Padding(
+                                padding: EdgeInsets.all(30),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.pin_drop),
+                                    SizedBox(
+                                      width: 2,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        address,
+                                        overflow: TextOverflow.clip,
+                                      ),
+                                    )
+                                  ],
+                                )),
+                          )
+                        : SizedBox(),
                     Container(
                         width: double.infinity,
                         margin: EdgeInsets.fromLTRB(10,
@@ -545,53 +556,53 @@ class _ProfileContentState extends State<ProfileContent> {
                                 ],
                               ),
                             ),
-                            SizedBox(height:40),
+                            SizedBox(height: 40),
                             GestureDetector(
                               onTap: () {
                                 showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure want to delete the account?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Deleting the account will remove all your data.',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  removeUser(context);
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );
+                                  context: context,
+                                  builder: (context) => new AlertDialog(
+                                    title: Text(
+                                      "Are you sure want to delete the account?",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Color(0xFF0061b0),
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    content: Text(
+                                      'Deleting the account will remove all your data.',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: new Text(
+                                          'No',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          removeUser(context);
+                                        },
+                                        child: new Text(
+                                          'Yes',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                               child: Row(
                                 children: [
@@ -634,21 +645,20 @@ class _ProfileContentState extends State<ProfileContent> {
     threeT.text = " ";
     fourT.text = " ";
   }
-  static void removeUser(ctx) 
-  {
+
+  static void removeUser(ctx) {
     final api = Provider.of<ApiService>(ctx!, listen: false);
     AppUtils.getIntPreferences('userId').then((value) {
       if (value != null) {
-        api.deleteUser(value).then((response) 
-        {
-            if (response.status!) {
-          AppUtils.showToastSuccess(response.message!);
-          AppUtils.clearAllPreferences();
-          Strings.isLogin = false;
-          Navigator.popAndPushNamed(ctx!, "/login");
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
+        api.deleteUser(value).then((response) {
+          if (response.status!) {
+            AppUtils.showToastSuccess(response.message!);
+            AppUtils.clearAllPreferences();
+            Strings.isLogin = false;
+            Navigator.popAndPushNamed(ctx!, "/login");
+          } else {
+            AppUtils.showToastError(response.message!);
+          }
         }).catchError((onError) {
           AppUtils.dismissprogress();
           print(onError.toString());
@@ -670,12 +680,9 @@ class _ProfileContentState extends State<ProfileContent> {
         _profileData = response.data!;
         mobileField.text = _profileData[0].mobileNo!;
         userType.text = _profileData[0].role!;
-        if (Strings.roleId == 7) 
-        {
+        if (Strings.roleId == 7) {
           address = _profileData[0].city! + " , " + _profileData[0].state!;
-        } 
-        else 
-        {
+        } else {
           address = _profileData[0].area! +
               " , " +
               _profileData[0].city! +
@@ -835,8 +842,7 @@ class _ProfileContentState extends State<ProfileContent> {
     );
   }
 
-  Future<void> _changePin() async 
-  {
+  Future<void> _changePin() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -903,7 +909,7 @@ class _ProfileContentState extends State<ProfileContent> {
                       InkWell(
                         onTap: () {
                           codeVerifyField =
-                            oneT.text + twoT.text + threeT.text + fourT.text;
+                              oneT.text + twoT.text + threeT.text + fourT.text;
                           print(codeVerifyField);
                           if (codeVerifyField!.length < 4) {
                             AppUtils.showToastError("Please enter 4 digit Pin");
@@ -938,8 +944,6 @@ class _ProfileContentState extends State<ProfileContent> {
       },
     );
   }
-
-  
 
   Widget _boxBuilder(contextResetPin) {
     return Row(
@@ -1049,8 +1053,6 @@ class _ProfileContentState extends State<ProfileContent> {
     }
   }
 
-  
-
   Future<void> _editProfile() async {
     return showDialog<void>(
       context: context,
@@ -1148,8 +1150,8 @@ class _ProfileContentState extends State<ProfileContent> {
                                 GestureDetector(
                                   onTap: () {
                                     //changeProPic();
-                                   // takePhoto(ImageSource.gallery);
-                                   pickImage(ImageSource.gallery);
+                                    // takePhoto(ImageSource.gallery);
+                                    pickImage(ImageSource.gallery);
                                   },
                                   child: Container(
                                     child: Row(
@@ -1223,8 +1225,9 @@ class _ProfileContentState extends State<ProfileContent> {
                         TextField(
                           focusNode: name,
                           controller: editName,
-                           inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]")),
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(
+                                RegExp("[a-zA-Z]")),
                           ],
                           decoration: InputDecoration(
                               prefixIcon: Icon(Icons.person,
@@ -1413,45 +1416,37 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   void takePhoto(ImageSource source) async {
-        
-    if(Platform.isIOS)
-    {
-    var status = await Permission.camera.status;
-    if (!status.isGranted) {
-      getPermission();
-    } else 
-    { 
+    if (Platform.isIOS) {
+      var status = await Permission.camera.status;
+      if (!status.isGranted) {
+        getPermission();
+      } else {
+        final pickedFile = await _picker.pickImage(source: source);
+        final bytes = await Io.File(pickedFile!.path).readAsBytes();
+        setState(() {
+          editProfilePictureBase64 =
+              "data:image/jpeg;base64," + base64Encode(bytes);
+          editProfilePicture = base64.decode(base64Encode(bytes));
+          editPicTap = true;
+          _imageAsyncWidget = new MemoryImage(editProfilePicture!);
+          name.requestFocus();
+        });
+      }
+    } else {
       final pickedFile = await _picker.pickImage(source: source);
-    final bytes = await Io.File(pickedFile!.path).readAsBytes();
-    setState(() {
-      editProfilePictureBase64 =
-          "data:image/jpeg;base64," + base64Encode(bytes);
-      editProfilePicture = base64.decode(base64Encode(bytes));
-      editPicTap = true;
-      _imageAsyncWidget = new MemoryImage(editProfilePicture!);
-      name.requestFocus();
-    });
+      final bytes = await Io.File(pickedFile!.path).readAsBytes();
+      setState(() {
+        editProfilePictureBase64 =
+            "data:image/jpeg;base64," + base64Encode(bytes);
+        editProfilePicture = base64.decode(base64Encode(bytes));
+        editPicTap = true;
+        _imageAsyncWidget = new MemoryImage(editProfilePicture!);
+        name.requestFocus();
+      });
     }
-    }
-    else
-    {
-      final pickedFile = await _picker.pickImage(source: source);
-    final bytes = await Io.File(pickedFile!.path).readAsBytes();
-    setState(() {
-      editProfilePictureBase64 =
-          "data:image/jpeg;base64," + base64Encode(bytes);
-      editProfilePicture = base64.decode(base64Encode(bytes));
-      editPicTap = true;
-      _imageAsyncWidget = new MemoryImage(editProfilePicture!);
-      name.requestFocus();
-    });
-    }
-    
-    
   }
 
-  void pickImage(ImageSource source) async 
-  {
+  void pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
     final bytes = await Io.File(pickedFile!.path).readAsBytes();
     setState(() {
@@ -1463,24 +1458,22 @@ class _ProfileContentState extends State<ProfileContent> {
       name.requestFocus();
     });
   }
-  void getPermission() async 
-{
-  var status = await Permission.camera.status;
-  if (status.isDenied) {
-    await Permission.camera.request();
-    var updatedStatus = await Permission.camera.status;
-    if(updatedStatus.isGranted)
-    {
-      takePhoto(ImageSource.camera);
-    }
 
-  } else if (status.isPermanentlyDenied) {
-    AppUtils.showToastError(
-        "Please enable Camera from App permission Settings");
-  } else {
-    await Permission.camera.request();
+  void getPermission() async {
+    var status = await Permission.camera.status;
+    if (status.isDenied) {
+      await Permission.camera.request();
+      var updatedStatus = await Permission.camera.status;
+      if (updatedStatus.isGranted) {
+        takePhoto(ImageSource.camera);
+      }
+    } else if (status.isPermanentlyDenied) {
+      AppUtils.showToastError(
+          "Please enable Camera from App permission Settings");
+    } else {
+      await Permission.camera.request();
+    }
   }
-}
 
   resetPin(contextpin) {
     AppUtils.showprogress();

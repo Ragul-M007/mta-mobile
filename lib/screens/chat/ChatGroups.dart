@@ -337,7 +337,6 @@ class _ChatGroupsState extends State<ChatGroups>
                         color: const Color(0xFF979797),
                       ),
                       onPressed: () {
-                        print(">>>>>lll");
                         if (widget.projectId == null) {
                           Navigator.pushNamed(context, "/teamsDashboard");
                         } else if (widget.fromTeamProjects == true ||

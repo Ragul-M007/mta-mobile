@@ -10,6 +10,7 @@ import 'package:mta/screens/comments/adddocComments.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
 import 'package:mta/screens/dashboard/teamsDashboard.dart';
+import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/screens/others/contactus.dart';
 import 'package:mta/screens/dashboard/dashboard.dart';
 import 'package:mta/screens/doucument/adddoc.dart';
@@ -73,6 +74,9 @@ class RoutesGenerator {
         break;
       case '/adddoc':
         return MaterialPageRoute(builder: (_) => AddDoc());
+        break;
+      case '/meetings':
+        return MaterialPageRoute(builder: (_) => Meetings());
         break;
       case '/attendance':
         return MaterialPageRoute(builder: (_) => Attendance());

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
@@ -60,8 +59,9 @@ PreferredSizeWidget appbar(String title) {
 }
 
 PreferredSizeWidget mainappbar(
-    {@required Function? ontab, @required String? title, @required controller}) 
-{
+    {@required Function? ontab,
+    @required String? title,
+    @required controller}) {
   return AppBar(
     iconTheme: IconThemeData(color: Colors.black),
     backgroundColor: Colors.white,
@@ -89,7 +89,8 @@ PreferredSizeWidget mainappbar(
   );
 }
 
-Widget button({@required VoidCallback? ontab, @required String? buttoncontent}) {
+Widget button(
+    {@required VoidCallback? ontab, @required String? buttoncontent}) {
   return GestureDetector(
     onTap: ontab,
     child: Container(

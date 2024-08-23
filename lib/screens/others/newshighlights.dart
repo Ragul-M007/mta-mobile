@@ -1,4 +1,3 @@
-
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/NewsRes.dart';
@@ -88,51 +87,58 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
               ],
             ),
           ),
-      if (Strings.roleId != 6)               
+          if (Strings.roleId != 6)
+            menuoption(
+              ontab: () {
+                Strings.fromProjects = false;
+                menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
+              },
+              selectedmenuvalue: 1,
+              menutitle: Strings.roleId == 7 ? "Home" : "Teams",
+            ),
           menuoption(
             ontab: () {
-                  Strings.fromProjects = false;
-                  menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
+              menuRedirect(routename: "/meetings", currentmenu: 2);
             },
-            selectedmenuvalue: 1,
-            menutitle: Strings.roleId == 7 ? "Home":"Teams",
+            selectedmenuvalue: 2,
+            menutitle: "Meetings",
           ),
-          if(Strings.roleId != 7)
-              menuoption(
-                ontab: () {
-                    Strings.fromProjects = true;
-                    menuRedirect(routename: "/projects", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Projects",
-              ),
+          if (Strings.roleId != 7)
+            menuoption(
+              ontab: () {
+                Strings.fromProjects = true;
+                menuRedirect(routename: "/projects", currentmenu: 3);
+              },
+              selectedmenuvalue: 3,
+              menutitle: "Projects",
+            ),
           if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
-               menuoption(
-                  ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 3);
-                  },
-                  selectedmenuvalue: 3,
-                  menutitle: "Attendance",
-                ),
+            menuoption(
+              ontab: () {
+                menuRedirect(routename: "/attendance", currentmenu: 4);
+              },
+              selectedmenuvalue: 4,
+              menutitle: "Attendance",
+            ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/profile", currentmenu: 4);
+              menuRedirect(routename: "/profile", currentmenu: 5);
             },
-            selectedmenuvalue: 4,
+            selectedmenuvalue: 5,
             menutitle: "Profile",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/notification", currentmenu: 5);
+              menuRedirect(routename: "/notification", currentmenu: 6);
             },
-            selectedmenuvalue: 5,
+            selectedmenuvalue: 6,
             menutitle: "Notification",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/contactus", currentmenu: 6);
+              menuRedirect(routename: "/contactus", currentmenu: 7);
             },
-            selectedmenuvalue: 6,
+            selectedmenuvalue: 7,
             menutitle: "Contact Us",
           ),
           // menuoption(
@@ -144,9 +150,9 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
           // ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/newshighlights", currentmenu: 7);
+              menuRedirect(routename: "/newshighlights", currentmenu: 8);
             },
-            selectedmenuvalue: 7,
+            selectedmenuvalue: 8,
             menutitle: "News & Highlights",
           ),
           // menuoption(
@@ -158,80 +164,80 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
           // ),
           menuoption(
             ontab: () {
-showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
-              style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
-            ),
-            content: Text(
-              'Do you want to logout from the App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
+              showDialog(
+                context: context,
+                builder: (context) => new AlertDialog(
+                  title: Text(
+                    "Are you sure ?",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF0061b0),
+                        fontWeight: FontWeight.w600),
+                  ),
+                  content: Text(
+                    'Do you want to logout from the App',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: new Text(
+                        'No',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        menuRedirect(routename: "/login", currentmenu: 9);
+                        AppUtils.savePreferences("easyAccess", "N");
+                        AppUtils.removeDeviceId(context);
+                      },
+                      child: new Text(
+                        'Yes',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              TextButton(
-                onPressed: (){
-                  menuRedirect(routename: "/login", currentmenu: 9);
-                  AppUtils.savePreferences("easyAccess", "N");
-                  AppUtils.removeDeviceId(context);
-                }
-,
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        );            },
+              );
+            },
             selectedmenuvalue: 9,
             menutitle: "Logout",
           ),
         ],
         child: Scaffold(
-            appBar: mainappbar(ontab: menuopen, title: "News & Highlights", controller: _controller),
+            appBar: mainappbar(
+                ontab: menuopen,
+                title: "News & Highlights",
+                controller: _controller),
             // mainappbar(
             //     ontab: menuopen,
             //     title: "News & Heighlights",
             //     controller: _controller),
-          
+
             body: tabbarwidget()),
       ),
     ));
   }
 
-  menuRedirect({@required String? routename, int? currentmenu}) 
-  {
+  menuRedirect({@required String? routename, int? currentmenu}) {
     setState(() {
       Strings.currentmenuvalue = currentmenu!;
     });
-    if (routename == "/login") 
-    {
+    if (routename == "/login") {
       //AppUtils.clearAllPreferences();
       // Navigator.popAndPushNamed(context, routename);
       Navigator.popAndPushNamed(context, "/login");
-    } else 
-    {
+    } else {
       Navigator.pushNamed(context, routename!);
     }
   }
@@ -315,23 +321,29 @@ showDialog(
                                     child: FittedBox(
                                       fit: BoxFit.fill,
                                       child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                              Strings.baseImageUrl +
-                                                     (_newsLists?[index].imgUrl ?? ""),
-                                              width: 80, // Adjust the width as needed
-                                              height: 80, // Adjust the height as needed
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          Strings.baseImageUrl +
+                                              (_newsLists?[index].imgUrl ?? ""),
+                                          width:
+                                              80, // Adjust the width as needed
+                                          height:
+                                              80, // Adjust the height as needed
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Image.asset(
+                                              "assets/images/background1.png",
+                                              width:
+                                                  80, // Adjust the width as needed
+                                              height:
+                                                  80, // Adjust the height as needed
                                               fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  "assets/images/background1.png",
-                                                  width: 80, // Adjust the width as needed
-                                                  height: 80, // Adjust the height as needed
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            ),
-                                  ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     )),
                                 SizedBox(
                                   width: 20,

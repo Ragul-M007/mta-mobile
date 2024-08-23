@@ -10,6 +10,8 @@ mixin CustomColors {
     Color(0xFFa37af4),
   ]);
 
+  static final Color fontColor = Color.fromARGB(255, 110, 112, 113);
+
   static final Gradient gradientappthemecolor = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,

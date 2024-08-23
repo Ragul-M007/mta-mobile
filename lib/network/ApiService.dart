@@ -56,9 +56,9 @@ part 'ApiService.g.dart';
 // Run this code in termial to generate ApiService.g.dart file
 // flutter packages pub run build_runner watch --delete-conflicting-outputs
 
-// @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
+@RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
-@RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
+// @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
 // @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
 
 abstract class ApiService {
@@ -150,7 +150,10 @@ abstract class ApiService {
   Future<FetchMapedUsersRes> getReadedUsers(@Path("message_id") int id);
 
   @GET("/teams")
-  Future<TeamsModel> fetchTeams(@Path("project_id") int id);
+  Future<TeamsModel> fetchTeams();
+
+  @GET("/teams/{team_id}")
+  Future<TeamsModel> fetchTeamUsers(@Path("team_id") int id);
 
   @GET("/projects/getProjectsByTeam/{team_id}")
   Future<DashboardRes> fetchProjectByTeams(@Path("team_id") int id);

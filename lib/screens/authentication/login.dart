@@ -36,20 +36,18 @@ final fiveT = TextEditingController();
 final changePassConfirm = TextEditingController();
 final changePassNew = TextEditingController();
 
-
 final mobileField = TextEditingController();
-  final userType = TextEditingController();
-  final password = TextEditingController();
-  // final changePassConfirm = TextEditingController();
-  // final changePassNew = TextEditingController();
-  final changePassOld = TextEditingController();
-  final editNumber = TextEditingController();
-  final editAddress = TextEditingController();
-  final editName = TextEditingController();
-  final editState = TextEditingController();
-  final editCity = TextEditingController();
-  final editEmail = TextEditingController();
-
+final userType = TextEditingController();
+final password = TextEditingController();
+// final changePassConfirm = TextEditingController();
+// final changePassNew = TextEditingController();
+final changePassOld = TextEditingController();
+final editNumber = TextEditingController();
+final editAddress = TextEditingController();
+final editName = TextEditingController();
+final editState = TextEditingController();
+final editCity = TextEditingController();
+final editEmail = TextEditingController();
 
 final forgotPassEmailID = TextEditingController();
 
@@ -66,65 +64,59 @@ class _LoginState extends State<Login> {
     // return Container(child: LoginContent());
 
     return Scaffold(
-        
         body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: WillPopScope(
+          onWillPop: () async {
+            _onWillPop();
+            return false;
           },
-          child: WillPopScope(
-              onWillPop: () async {
-                _onWillPop();
-                return false;
-              },
-              child: Provider<ApiService>(
-                  create: (context) => ApiService.create(),
-                  child: LoginContent())),
-        ));
+          child: Provider<ApiService>(
+              create: (context) => ApiService.create(), child: LoginContent())),
+    ));
     // child: Scaffold(appBar: EmptyAppBar(), body: LoginContent())));
   }
 
   Future<bool> _onWillPop() async {
     return await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text(
-              "Are you sure ?",
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: Text(
+          "Are you sure ?",
+          style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFF0061b0),
+              fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Do you want to exit an App',
+          style: TextStyle(
+              fontSize: 14, color: Colors.black, fontWeight: FontWeight.w600),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text(
+              'No',
               style: TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF0061b0),
-                  fontWeight: FontWeight.w600),
+                  fontSize: 16, color: Colors.red, fontWeight: FontWeight.w600),
             ),
-            content: Text(
-              'Do you want to exit an App',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text(
-                  'No',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-              TextButton(
-                onPressed: () => exit(0),
-                child: new Text(
-                  'Yes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
           ),
-        );
+          TextButton(
+            onPressed: () => exit(0),
+            child: new Text(
+              'Yes',
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -172,21 +164,18 @@ class _LoginContentState extends State<LoginContent>
       AppUtils.showToastErrorTop("Please enter Your Password");
     } else if (_passwordController.text.trim() == "") {
       AppUtils.showToastErrorTop("Please enter Your Password");
-    }else if(_emailIdController.text.trim() == "accounts@multitechcorp.in")
-    {
-        AppUtils.showToastError("Sorry! You doesn't have access on Mobile App. Kindly Login from the Web Application.");
-    }
-     else {
+    } else if (_emailIdController.text.trim() == "accounts@multitechcorp.in") {
+      AppUtils.showToastError(
+          "Sorry! You doesn't have access on Mobile App. Kindly Login from the Web Application.");
+    } else {
       bool network = await Validators.networkconnectvitiy();
-      if (network) 
-      {
+      if (network) {
         loginreq();
       }
     }
   }
 
-  loginreq() 
-  {
+  loginreq() {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     print("api--->  {$api}");
@@ -196,42 +185,28 @@ class _LoginContentState extends State<LoginContent>
     loginreq.token = Strings.fcmToken;
     Strings.authToken = '';
     print("loqinrequest ---> ${jsonEncode(loginreq)}");
-    api.login(loginreq).then((response) 
-    {
+    api.login(loginreq).then((response) {
       AppUtils.dismissprogress();
       print('loginResponse status ${response.toJson()}');
-      assignroles()
-      {
-        if (response.data?.role == "ADMIN")
-        {
-            Strings.roleId = 1;
-        }
-        else if(response.data?.role == "STAFF")
-        {
-            Strings.roleId = 2;
-        }
-        else if(response.data?.role == "VENDOR")
-        {
-            Strings.roleId = 3;
-        }else if(response.data?.role == "CONSULTANTS")
-        {
-            Strings.roleId = 4;
-        }
-        else if(response.data?.role == "CONTRACTORS")
-        {
-            Strings.roleId = 5;
-        }
-        else if(response.data?.role == "CLIENT")
-        {
-            Strings.roleId = 6;
-        }
-        else if (response.data?.role == "PUBLICUSER")
-        {
-            Strings.roleId = 7;
+      assignroles() {
+        if (response.data?.role == "ADMIN") {
+          Strings.roleId = 1;
+        } else if (response.data?.role == "STAFF") {
+          Strings.roleId = 2;
+        } else if (response.data?.role == "VENDOR") {
+          Strings.roleId = 3;
+        } else if (response.data?.role == "CONSULTANTS") {
+          Strings.roleId = 4;
+        } else if (response.data?.role == "CONTRACTORS") {
+          Strings.roleId = 5;
+        } else if (response.data?.role == "CLIENT") {
+          Strings.roleId = 6;
+        } else if (response.data?.role == "PUBLICUSER") {
+          Strings.roleId = 7;
         }
       }
-      if (response.status!) 
-      {
+
+      if (response.status!) {
         print("inside status");
         AppUtils.savePreferences("emailId", response.data?.emailId);
         AppUtils.savePreferences("userId", response.data?.userId);
@@ -251,26 +226,27 @@ class _LoginContentState extends State<LoginContent>
         Strings.authToken = response.token!;
         print("role${Strings.roleId}");
         Navigator.pushNamed(context, "/setpin");
-      } else 
-      {
+      } else {
         showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text("Login Failed",style: TextStyle(color: Colors.red),),
-                  content: Text(response.message ?? "Unknown Error"),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                      child: Text("OK"),
-                    ),
-                  ],
-                ),
-              );
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(
+              "Login Failed",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Text(response.message ?? "Unknown Error"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
         //AppUtils.showToastErrorTop(response.message!);
       }
-      
     }).catchError((onError) {
       AppUtils.dismissprogress();
       print(onError.toString());
@@ -321,8 +297,8 @@ class _LoginContentState extends State<LoginContent>
                     ),
                     Text(
                       "Login",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 20),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     SizedBox(
                       height: 10,
@@ -349,16 +325,15 @@ class _LoginContentState extends State<LoginContent>
                         decoration: InputDecoration(
                             hintText: "Email ID",
                             contentPadding: EdgeInsets.all(10),
-                            hintStyle: TextStyle(
-                                fontSize: 14.0, color: Colors.black),
+                            hintStyle:
+                                TextStyle(fontSize: 14.0, color: Colors.black),
                             // border: OutlineInputBorder(),
                             border: InputBorder.none),
                         keyboardType: TextInputType.emailAddress,
                       ),
                       decoration: BoxDecoration(
                           color: const Color(0xFFf2f3f4),
-                          border:
-                              Border.all(color: const Color(0xFFf2f3f4)),
+                          border: Border.all(color: const Color(0xFFf2f3f4)),
                           borderRadius: BorderRadius.circular(25)),
                     ),
                     SizedBox(height: 5.0),
@@ -392,8 +367,7 @@ class _LoginContentState extends State<LoginContent>
                           obscureText: true),
                       decoration: BoxDecoration(
                           color: const Color(0xFFf2f3f4),
-                          border:
-                              Border.all(color: const Color(0xFFf2f3f4)),
+                          border: Border.all(color: const Color(0xFFf2f3f4)),
                           borderRadius: BorderRadius.circular(25)),
                     ),
                     SizedBox(
@@ -425,27 +399,25 @@ class _LoginContentState extends State<LoginContent>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        
                         Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
-                        child: GestureDetector(
-                          onTap: () 
-                          {
-                            _signUp();
-                          },
-                          child: Text(    
-                            "SignUp",
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600),
+                          alignment: Alignment.bottomLeft,
+                          child: Container(
+                            margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
+                            child: GestureDetector(
+                              onTap: () {
+                                _signUp();
+                              },
+                              child: Text(
+                                "SignUp",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Align(
+                        Align(
                           alignment: Alignment.bottomRight,
                           child: Container(
                             margin: EdgeInsets.fromLTRB(10, 10, 20, 2),
@@ -465,7 +437,6 @@ class _LoginContentState extends State<LoginContent>
                         ),
                       ],
                     ),
-                     
                   ],
                 ),
               ),
@@ -556,45 +527,46 @@ class _LoginContentState extends State<LoginContent>
                               crossAxisAlignment: CrossAxisAlignment.center,
                               textDirection: TextDirection.ltr,
                               children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                              Strings.baseImageUrl +
-                                                     (_newsLists?[index].imgUrl ?? ""),
-                                              width: 80, // Adjust the width as needed
-                                              height: 80, // Adjust the height as needed
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  "assets/images/background1.png",
-                                                  width: 80, // Adjust the width as needed
-                                                  height: 80, // Adjust the height as needed
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                    Strings.baseImageUrl +
+                                        (_newsLists?[index].imgUrl ?? ""),
+                                    width: 80, // Adjust the width as needed
+                                    height: 80, // Adjust the height as needed
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        "assets/images/background1.png",
+                                        width: 80, // Adjust the width as needed
+                                        height:
+                                            80, // Adjust the height as needed
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
                                   ),
-          //                       Container(
-          //                           width:
-          //                               MediaQuery.of(context).size.width * 0.3,
-          //                           height: 80,
-          //                           child: FittedBox(
-          //                             fit: BoxFit.fill,
-          //                             child: ClipRRect(
-          //                                 borderRadius:
-          //                                     BorderRadius.circular(80.0),
-          //                                 child: Image.network(
-          //                                     Strings.baseImageUrl +
-          //                                         (_newsLists?[index].imgUrl ?? ""),
-          //                                         errorBuilder: (context, error, stackTrace) {
-          //   return Image.asset(
-          //     "assets/images/background1.png",
-          //     width: 50, // Adjust the width as needed
-          //     height: 50, // Adjust the height as needed
-          //     fit: BoxFit.cover,
-          //   );
-          // },)),
-          //                           )),
+                                ),
+                                //                       Container(
+                                //                           width:
+                                //                               MediaQuery.of(context).size.width * 0.3,
+                                //                           height: 80,
+                                //                           child: FittedBox(
+                                //                             fit: BoxFit.fill,
+                                //                             child: ClipRRect(
+                                //                                 borderRadius:
+                                //                                     BorderRadius.circular(80.0),
+                                //                                 child: Image.network(
+                                //                                     Strings.baseImageUrl +
+                                //                                         (_newsLists?[index].imgUrl ?? ""),
+                                //                                         errorBuilder: (context, error, stackTrace) {
+                                //   return Image.asset(
+                                //     "assets/images/background1.png",
+                                //     width: 50, // Adjust the width as needed
+                                //     height: 50, // Adjust the height as needed
+                                //     fit: BoxFit.cover,
+                                //   );
+                                // },)),
+                                //                           )),
                                 SizedBox(
                                   width: 20,
                                 ),
@@ -773,15 +745,15 @@ class _LoginContentState extends State<LoginContent>
           )
         : SizedBox();
   }
-  certifcatecheck()
-  {
+
+  certifcatecheck() {
     Dio _dio = Dio();
     (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-             (HttpClient dioClient) {
-           dioClient.badCertificateCallback =
-               ((X509Certificate cert, String host, int port) => true);
-           return dioClient;
-         };
+        (HttpClient dioClient) {
+      dioClient.badCertificateCallback =
+          ((X509Certificate cert, String host, int port) => true);
+      return dioClient;
+    };
   }
 
   getNewsFeeds() {
@@ -789,8 +761,7 @@ class _LoginContentState extends State<LoginContent>
     Dio _dio = Dio();
     final api = Provider.of<ApiService>(context, listen: false);
     print(api);
-    api.news().then((response) 
-    {
+    api.news().then((response) {
       AppUtils.dismissprogress();
       print('NewsResponse status ${response.toJson()}');
 
@@ -847,8 +818,12 @@ class _LoginContentState extends State<LoginContent>
                                   size: 22.0, color: Colors.black),
                             ]),
                         Container(
-                          child: CircleImageFromNetwork(imageUrl:imgurl
-                                                   , width: 100, height: 100, defaultImageUrl: "assets/images/background1.png", radius: 40),
+                          child: CircleImageFromNetwork(
+                              imageUrl: imgurl,
+                              width: 100,
+                              height: 100,
+                              defaultImageUrl: "assets/images/background1.png",
+                              radius: 40),
                         ),
                         SizedBox(
                           height: 20,
@@ -892,8 +867,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  Future<void> _otpVerify() async 
-  {
+  Future<void> _otpVerify() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1079,7 +1053,7 @@ class _LoginContentState extends State<LoginContent>
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           new Icon(Icons.close,
-                              size: 22.0, color: Colors.black),       
+                              size: 22.0, color: Colors.black),
                         ],
                       ),
                     ),
@@ -1159,8 +1133,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  Future<void> _forgotPass() async 
-  {
+  Future<void> _forgotPass() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1241,8 +1214,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  Future<void> _signUp() async 
-  {
+  Future<void> _signUp() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -1275,60 +1247,62 @@ class _LoginContentState extends State<LoginContent>
                           fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Name",
-                          style: TextStyle(
-                              color: Color(0xFF0061b0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        TextField(
-                          // focusNode: name,
-                          controller: editName,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.person,
-                                  )),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Phone Number",
-                          style: TextStyle(
-                              color: Color(0xFF0061b0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        TextField(
-                           keyboardType: TextInputType.numberWithOptions(signed: true,decimal:true),
-          textInputAction: TextInputAction.done,  
-          maxLength: 10,        
-                          controller: editNumber,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.call,
-                                  size: 14, color: Color(0xFF0061b0))),
-                        ),
-                         SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Email",
-                          style: TextStyle(
-                              color: Color(0xFF0061b0),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        TextField(
-                          controller: editEmail,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.mail,
-                                  size: 14, color: Color(0xFF0061b0))),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                      height: 20,
+                    ),
+                    Text(
+                      "Name",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      // focusNode: name,
+                      controller: editName,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(
+                        Icons.person,
+                      )),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Phone Number",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      keyboardType: TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
+                      textInputAction: TextInputAction.done,
+                      maxLength: 10,
+                      controller: editNumber,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.call,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Email",
+                      style: TextStyle(
+                          color: Color(0xFF0061b0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: editEmail,
+                      decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.mail,
+                              size: 14, color: Color(0xFF0061b0))),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
                     //     Text(
                     //       "State",
                     //       style: TextStyle(
@@ -1358,7 +1332,7 @@ class _LoginContentState extends State<LoginContent>
                     //           prefixIcon: Icon(Icons.location_city,
                     //               size: 14, color: Color(0xFF0061b0))),
                     //     ),
-                       
+
                     // SizedBox(
                     //   height: 20,
                     // ),
@@ -1393,8 +1367,7 @@ class _LoginContentState extends State<LoginContent>
     );
   }
 
-  _generateOtp(ctx) 
-  {
+  _generateOtp(ctx) {
     if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
       AppUtils.showToastErrorTop("Please enter your registered Email Id");
     } else {
@@ -1421,30 +1394,22 @@ class _LoginContentState extends State<LoginContent>
     }
   }
 
-   _signupRequest(ctx) {
-    final bool emailValid = 
-    RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-      .hasMatch(editEmail.text);
-    if (editName.text == "" || editName.text.isEmpty) 
-    {
+  _signupRequest(ctx) {
+    final bool emailValid = RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(editEmail.text);
+    if (editName.text == "" || editName.text.isEmpty) {
       AppUtils.showToastErrorTop("Please enter your Name");
-    }
-    else if (editNumber.text == "" || editNumber.text.isEmpty || editNumber.text.length != 10) 
-    {
+    } else if (editNumber.text == "" ||
+        editNumber.text.isEmpty ||
+        editNumber.text.length != 10) {
       AppUtils.showToastErrorTop("Please enter valid Phone number");
-    }
-    else if (editEmail.text == "" || editEmail.text.isEmpty) 
-    {
+    } else if (editEmail.text == "" || editEmail.text.isEmpty) {
       print("editmaIL ${editEmail.text}");
       AppUtils.showToastErrorTop("Please enter your Email Id");
-    }
-    else if(!emailValid)
-    {
+    } else if (!emailValid) {
       AppUtils.showToastErrorTop("Please enter valid Email Id");
-    }
-     else 
-     {
-      
+    } else {
       AppUtils.showprogress();
       final api = Provider.of<ApiService>(context, listen: false);
       SignUpReq request = new SignUpReq();
@@ -1458,38 +1423,37 @@ class _LoginContentState extends State<LoginContent>
       request.roleId = 7;
       print("check ${jsonEncode(request)}");
 
-      api.signUp(request).then((response) 
-      {
+      api.signUp(request).then((response) {
         AppUtils.dismissprogress();
         print('Response status ${response.toJson()}');
-        if (response.status!) 
-        {
+        if (response.status!) {
           Navigator.of(ctx).pop();
           showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text("Success",style: TextStyle(color: Colors.green),),
-                  content: Text("User created successfully! Please check your email for the credentials."),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () 
-                      {
-                        Navigator.of(ctx).pop();
-                        editEmail.text = "";
-                        editName.text = "";
-                        editNumber.text = "";
-                      },
-                      child: Text("OK"),
-                    ),
-                  ],
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text(
+                "Success",
+                style: TextStyle(color: Colors.green),
+              ),
+              content: Text(
+                  "User created successfully! Please check your email for the credentials."),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    editEmail.text = "";
+                    editName.text = "";
+                    editNumber.text = "";
+                  },
+                  child: Text("OK"),
                 ),
-              );
-        } else 
-        {
+              ],
+            ),
+          );
+        } else {
           AppUtils.showToastError(response.message!);
         }
-      }).catchError((onError) 
-      {
+      }).catchError((onError) {
         AppUtils.dismissprogress();
         print(onError.toString());
       });

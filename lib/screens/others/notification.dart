@@ -39,8 +39,7 @@ class NotificationContent extends StatefulWidget {
 
 class _NotificationContentState extends State<NotificationContent>
     with TickerProviderStateMixin {
-  void initState() 
-  {
+  void initState() {
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
@@ -103,42 +102,49 @@ class _NotificationContentState extends State<NotificationContent>
               selectedmenuvalue: 1,
               menutitle: Strings.roleId == 7 ? "Home" : "Teams",
             ),
+          menuoption(
+            ontab: () {
+              menuRedirect(routename: "/meetings", currentmenu: 2);
+            },
+            selectedmenuvalue: 2,
+            menutitle: "Meetings",
+          ),
           if (Strings.roleId != 7)
             menuoption(
               ontab: () {
                 Strings.fromProjects = true;
-                menuRedirect(routename: "/projects", currentmenu: 2);
+                menuRedirect(routename: "/projects", currentmenu: 3);
               },
-              selectedmenuvalue: 2,
+              selectedmenuvalue: 4,
               menutitle: "Projects",
             ),
           if (Strings.roleId == 1 || Strings.roleId == 2 || Strings.roleId == 5)
             menuoption(
               ontab: () {
-                menuRedirect(routename: "/attendance", currentmenu: 3);
+                menuRedirect(routename: "/attendance", currentmenu: 4);
               },
-              selectedmenuvalue: 3,
+              selectedmenuvalue: 4,
               menutitle: "Attendance",
             ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/profile", currentmenu: 4);
+              menuRedirect(routename: "/profile", currentmenu: 5);
             },
-            selectedmenuvalue: 4,
+            selectedmenuvalue: 5,
             menutitle: "Profile",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/notification", currentmenu: 5);
+              menuRedirect(routename: "/notification", currentmenu: 6);
             },
-            selectedmenuvalue: 5,
+            selectedmenuvalue: 6,
             menutitle: "Notification",
           ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/contactus", currentmenu: 6);
+              menuRedirect(routename: "/contactus", currentmenu: 7);
             },
-            selectedmenuvalue: 6,
+            selectedmenuvalue: 7,
             menutitle: "Contact Us",
           ),
           // menuoption(
@@ -150,9 +156,9 @@ class _NotificationContentState extends State<NotificationContent>
           // ),
           menuoption(
             ontab: () {
-              menuRedirect(routename: "/newshighlights", currentmenu: 7);
+              menuRedirect(routename: "/newshighlights", currentmenu: 8);
             },
-            selectedmenuvalue: 7,
+            selectedmenuvalue: 8,
             menutitle: "News & Highlights",
           ),
           // menuoption(
@@ -272,8 +278,7 @@ class _NotificationContentState extends State<NotificationContent>
                               Strings.fromNotificationScren = true;
                               if (_msgList[index]
                                   .title!
-                                  .contains("Commented")) 
-                              {
+                                  .contains("Commented")) {
                                 Strings.selectedProDocument.clear();
                                 var dat = jsonEncode(_msgList[index].docDetail);
                                 print("qwerty $dat");
@@ -283,20 +288,21 @@ class _NotificationContentState extends State<NotificationContent>
                                 print(jsonEncode(peo));
                                 Strings.selectedProDocument.add(peo);
 
-                                if(_msgList[index].docDetail?.projectComments == true)
-                                {
-                                    Strings.projectId = _msgList[index].docDetail?.projectId!;
-                                    updateNotification(_msgList[index].notiId, "projectComments");
+                                if (_msgList[index]
+                                        .docDetail
+                                        ?.projectComments ==
+                                    true) {
+                                  Strings.projectId =
+                                      _msgList[index].docDetail?.projectId!;
+                                  updateNotification(_msgList[index].notiId,
+                                      "projectComments");
+                                } else {
+                                  updateNotification(
+                                      _msgList[index].notiId, "comments");
                                 }
-                                else
-                                {
-                                      updateNotification(_msgList[index].notiId, "comments");
-                                }
-                               
                               } else if (_msgList[index]
                                   .title!
-                                  .contains("Replied")) 
-                              {
+                                  .contains("Replied")) {
                                 Strings.selectedProDocument.clear();
                                 var dat = jsonEncode(_msgList[index].docDetail);
                                 print("uiiii");
@@ -306,19 +312,19 @@ class _NotificationContentState extends State<NotificationContent>
                                 print(jsonEncode(peo));
                                 Strings.selectedProDocument.add(peo);
 
-
-                                if(_msgList[index].docDetail?.projectComments == "true")
-                                {
-                                    Strings.projectId = _msgList[index].docDetail?.projectId!;
-                                    updateNotification(_msgList[index].notiId, "projectReplies");
+                                if (_msgList[index]
+                                        .docDetail
+                                        ?.projectComments ==
+                                    "true") {
+                                  Strings.projectId =
+                                      _msgList[index].docDetail?.projectId!;
+                                  updateNotification(
+                                      _msgList[index].notiId, "projectReplies");
+                                } else {
+                                  updateNotification(
+                                      _msgList[index].notiId, "replies");
                                 }
-                                else
-                                {
-                                    updateNotification(_msgList[index].notiId, "replies");
-                                }
-                                
-                              } else 
-                              {
+                              } else {
                                 var dat = jsonEncode(_msgList[index].docDetail);
                                 var decoded = jsonDecode(dat);
                                 ProjectDocData peo =
@@ -335,32 +341,26 @@ class _NotificationContentState extends State<NotificationContent>
 
                                 print("peoo ${jsonEncode(peo)}");
 
-                                
-                              
-
                                 if (peo.categoryId != "null" &&
-                                    peo.categoryId != null) 
-                                    {
-                                      Strings.selectedCategory.clear();
-                                Strings.selectedCategory
-                                    .add(FectchCatsData.fromJson(
-                                      {
-                                  "category_id": (peo.categoryId != "null" &&
-                                          peo.categoryId != null)
-                                      ? peo.categoryId
-                                      : null,
-                                  "category_name": peo.categoryName,
-                                  "project_id": (peo.projectId != "null" &&
-                                          peo.projectId != null)
-                                      ? int.parse(peo.projectId ?? "0")
-                                      : null
-                                }));
+                                    peo.categoryId != null) {
+                                  Strings.selectedCategory.clear();
+                                  Strings.selectedCategory
+                                      .add(FectchCatsData.fromJson({
+                                    "category_id": (peo.categoryId != "null" &&
+                                            peo.categoryId != null)
+                                        ? peo.categoryId
+                                        : null,
+                                    "category_name": peo.categoryName,
+                                    "project_id": (peo.projectId != "null" &&
+                                            peo.projectId != null)
+                                        ? int.parse(peo.projectId ?? "0")
+                                        : null
+                                  }));
                                   Strings.category = true;
                                 } else {
                                   Strings.category = false;
-                                    
                                 }
-                               // Strings.fromNotificationDocuments = true;
+                                // Strings.fromNotificationDocuments = true;
                                 updateNotification(
                                     _msgList[index].notiId, "docs");
                               }
@@ -551,8 +551,7 @@ class _NotificationContentState extends State<NotificationContent>
     });
   }
 
-  updateNotification(notificationId, toComments) 
-  {
+  updateNotification(notificationId, toComments) {
     AppUtils.showprogress();
     final api = Provider.of<ApiService>(context, listen: false);
     api.updateNotificationStatus(notificationId).then((response) {
@@ -564,19 +563,14 @@ class _NotificationContentState extends State<NotificationContent>
         } else if (toComments == "replies") {
           Strings.fromNotificationReply = true;
           Navigator.of(context).pushReplacementNamed('/replies');
-        }else if(toComments == "projectComments") 
-        {
+        } else if (toComments == "projectComments") {
           Navigator.of(context).pushReplacementNamed('/projectComments');
-        }
-        else if(toComments == "projectReplies"){
+        } else if (toComments == "projectReplies") {
           Strings.fromNotificationReply = true;
           Navigator.of(context).pushReplacementNamed('/projectCommentReplies');
-      }
-        
-        else {
-         // Strings.fromNotificationDocuments = true;
-          Navigator.of(context)
-                    .pushReplacementNamed('/viewdoclist');
+        } else {
+          // Strings.fromNotificationDocuments = true;
+          Navigator.of(context).pushReplacementNamed('/viewdoclist');
         }
       } else {
         AppUtils.dismissprogress();

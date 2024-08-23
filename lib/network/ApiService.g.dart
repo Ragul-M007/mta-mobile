@@ -6,14 +6,14 @@ part of 'ApiService.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers
 
 class _ApiService implements ApiService {
   _ApiService(
     this._dio, {
     this.baseUrl,
   }) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    baseUrl ??= 'https://demo.emeetify.com:81/mta';
   }
 
   final Dio _dio;
@@ -22,7 +22,7 @@ class _ApiService implements ApiService {
 
   @override
   Future<LoginRes> login(LoginReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -44,13 +44,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> signUp(SignUpReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -72,8 +72,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -81,7 +81,7 @@ class _ApiService implements ApiService {
     int id,
     SetPinReq body,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -103,8 +103,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -112,7 +112,7 @@ class _ApiService implements ApiService {
     int id,
     SetPinReq body,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -134,13 +134,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<LoginRes> setCurrentProject(CurrentProjectReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -162,8 +162,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -171,7 +171,7 @@ class _ApiService implements ApiService {
     String id,
     UserAccessReq body,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -193,16 +193,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<DashboardRes> projects(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<DashboardRes>(Options(
       method: 'GET',
@@ -220,16 +220,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = DashboardRes.fromJson(_result.data!);
-    return _value;
+    final value = DashboardRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<NewsRes> news() async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result =
         await _dio.fetch<Map<String, dynamic>>(_setStreamType<NewsRes>(Options(
       method: 'GET',
@@ -247,16 +247,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = NewsRes.fromJson(_result.data!);
-    return _value;
+    final value = NewsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<ProfileRes> profile(int userId) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<ProfileRes>(Options(
       method: 'GET',
@@ -274,16 +274,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = ProfileRes.fromJson(_result.data!);
-    return _value;
+    final value = ProfileRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<GroupUsersRes> getChatUsers(int groupid) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<GroupUsersRes>(Options(
       method: 'GET',
@@ -301,16 +301,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = GroupUsersRes.fromJson(_result.data!);
-    return _value;
+    final value = GroupUsersRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<LoginStatusRes> fetchLoginHours(int userId) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<LoginStatusRes>(Options(
       method: 'GET',
@@ -328,8 +328,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = LoginStatusRes.fromJson(_result.data!);
-    return _value;
+    final value = LoginStatusRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -338,10 +338,10 @@ class _ApiService implements ApiService {
     int pid,
     int userid,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FetchCategoryDocRes>(Options(
       method: 'GET',
@@ -359,8 +359,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchCategoryDocRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchCategoryDocRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -368,10 +368,10 @@ class _ApiService implements ApiService {
     int id,
     int userid,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FectchProjectDocRes>(Options(
       method: 'GET',
@@ -389,16 +389,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FectchProjectDocRes.fromJson(_result.data!);
-    return _value;
+    final value = FectchProjectDocRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<FectchCatsRes> getCats(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<FectchCatsRes>(Options(
       method: 'GET',
@@ -416,16 +416,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FectchCatsRes.fromJson(_result.data!);
-    return _value;
+    final value = FectchCatsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddUsersListRes> getUnlinkedUsers(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<AddUsersListRes>(Options(
       method: 'GET',
@@ -443,13 +443,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddUsersListRes.fromJson(_result.data!);
-    return _value;
+    final value = AddUsersListRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddDocRes> addDoc(AddDocReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -471,13 +471,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddDocRes.fromJson(_result.data!);
-    return _value;
+    final value = AddDocRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddAttendanceRes> addAttendance(AddAttendanceReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -499,14 +499,14 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddAttendanceRes.fromJson(_result.data!);
-    return _value;
+    final value = AddAttendanceRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddAttendanceRes> addRemoveUsersintoGroup(
       AddRemoveUserReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -528,13 +528,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddAttendanceRes.fromJson(_result.data!);
-    return _value;
+    final value = AddAttendanceRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddAttendanceRes> removeUsersintoGroup(AddRemoveUserReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -556,8 +556,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddAttendanceRes.fromJson(_result.data!);
-    return _value;
+    final value = AddAttendanceRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -565,10 +565,10 @@ class _ApiService implements ApiService {
     int id,
     String date,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<FetchAttendanceRes>(Options(
       method: 'GET',
@@ -586,16 +586,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchAttendanceRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchAttendanceRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<FetchMapedCatRes> fetchCats(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedCatRes>(Options(
       method: 'GET',
@@ -613,8 +613,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchMapedCatRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchMapedCatRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -622,10 +622,10 @@ class _ApiService implements ApiService {
     int id,
     int catid,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<FetchCategoryUsersRes>(Options(
       method: 'GET',
@@ -643,16 +643,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchCategoryUsersRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchCategoryUsersRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<FetchMapedUsersRes> fetchUsers(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedUsersRes>(Options(
       method: 'GET',
@@ -670,16 +670,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchMapedUsersRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchMapedUsersRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<FetchMapedUsersRes> getReadedUsers(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<FetchMapedUsersRes>(Options(
       method: 'GET',
@@ -697,16 +697,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = FetchMapedUsersRes.fromJson(_result.data!);
-    return _value;
+    final value = FetchMapedUsersRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
-  Future<TeamsModel> fetchTeams(int id) async {
-    final _extra = <String, dynamic>{};
+  Future<TeamsModel> fetchTeams() async {
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<TeamsModel>(Options(
       method: 'GET',
@@ -724,16 +724,43 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = TeamsModel.fromJson(_result.data!);
-    return _value;
+    final value = TeamsModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<TeamsModel> fetchTeamUsers(int id) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<TeamsModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/teams/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = TeamsModel.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<DashboardRes> fetchProjectByTeams(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<DashboardRes>(Options(
       method: 'GET',
@@ -751,16 +778,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = DashboardRes.fromJson(_result.data!);
-    return _value;
+    final value = DashboardRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<ProjectDetailsRes> getProjectName(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<ProjectDetailsRes>(Options(
       method: 'GET',
@@ -778,8 +805,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = ProjectDetailsRes.fromJson(_result.data!);
-    return _value;
+    final value = ProjectDetailsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -787,10 +814,10 @@ class _ApiService implements ApiService {
     int id,
     String type,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<MediaDetailsRes>(Options(
       method: 'GET',
@@ -808,16 +835,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = MediaDetailsRes.fromJson(_result.data!);
-    return _value;
+    final value = MediaDetailsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<NotificationRes> notification() async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<NotificationRes>(Options(
       method: 'GET',
@@ -835,16 +862,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = NotificationRes.fromJson(_result.data!);
-    return _value;
+    final value = NotificationRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AccessDetailsRes> getAccessDetails() async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<AccessDetailsRes>(Options(
       method: 'GET',
@@ -862,8 +889,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AccessDetailsRes.fromJson(_result.data!);
-    return _value;
+    final value = AccessDetailsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -875,11 +902,11 @@ class _ApiService implements ApiService {
     String? type,
     int? grpId,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<ChatMessageWithPageCountRes>(Options(
       method: 'GET',
@@ -897,8 +924,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = ChatMessageWithPageCountRes.fromJson(_result.data!);
-    return _value;
+    final value = ChatMessageWithPageCountRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -906,10 +933,10 @@ class _ApiService implements ApiService {
     int id,
     int pageNo,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<ChatMessageWithPageCountRes>(Options(
       method: 'GET',
@@ -927,13 +954,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = ChatMessageWithPageCountRes.fromJson(_result.data!);
-    return _value;
+    final value = ChatMessageWithPageCountRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> changePass(ChangePassReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -955,13 +982,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<GroupCreationRes> createGroup(GroupCreationReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -983,13 +1010,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = GroupCreationRes.fromJson(_result.data!);
-    return _value;
+    final value = GroupCreationRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> forgotPass(ForgotPassReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1011,13 +1038,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> otpVerify(ValidateOTPReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1039,8 +1066,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -1048,7 +1075,7 @@ class _ApiService implements ApiService {
     int id,
     EditProfileReq body,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1070,16 +1097,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> updateNotificationStatus(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'PUT',
@@ -1097,8 +1124,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -1106,10 +1133,10 @@ class _ApiService implements ApiService {
     int id,
     int status,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'PUT',
@@ -1127,16 +1154,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> removeProPic(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
@@ -1154,8 +1181,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
@@ -1163,10 +1190,10 @@ class _ApiService implements ApiService {
     int id,
     int grpId,
   ) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
@@ -1184,16 +1211,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> deleteUser(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'DELETE',
@@ -1211,16 +1238,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommentsRes> removeDeviceId(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommentsRes>(Options(
       method: 'DELETE',
@@ -1238,16 +1265,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommentsRes.fromJson(_result.data!);
-    return _value;
+    final value = CommentsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommentsRes> removeComment(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommentsRes>(Options(
       method: 'DELETE',
@@ -1265,13 +1292,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommentsRes.fromJson(_result.data!);
-    return _value;
+    final value = CommentsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AudioRes> uploadAudio(AudioReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1293,16 +1320,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AudioRes.fromJson(_result.data!);
-    return _value;
+    final value = AudioRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<BackLinkRes> getSocialsBackLink() async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<BackLinkRes>(Options(
       method: 'GET',
@@ -1320,13 +1347,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = BackLinkRes.fromJson(_result.data!);
-    return _value;
+    final value = BackLinkRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<GroupRes> fetchGroupList(GroupReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1348,13 +1375,13 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = GroupRes.fromJson(_result.data!);
-    return _value;
+    final value = GroupRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AudioRes> sendForwadMessage(ForwadMessageReq body) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -1376,16 +1403,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AudioRes.fromJson(_result.data!);
-    return _value;
+    final value = AudioRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommentsRes> deleteGroup(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommentsRes>(Options(
       method: 'DELETE',
@@ -1403,16 +1430,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommentsRes.fromJson(_result.data!);
-    return _value;
+    final value = CommentsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<GroupDetailsRes> getGroupData(int id) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<GroupDetailsRes>(Options(
       method: 'GET',
@@ -1430,17 +1457,21 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = GroupDetailsRes.fromJson(_result.data!);
-    return _value;
+    final value = GroupDetailsRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<AddUsersListRes> getUsers(
-      String? groupType, int? teamId, int? projectId) async {
-    final _extra = <String, dynamic>{};
+    String? groupType,
+    int? teamId,
+    int? projectId,
+  ) async {
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<AddUsersListRes>(Options(
       method: 'GET',
@@ -1449,7 +1480,7 @@ class _ApiService implements ApiService {
     )
             .compose(
               _dio.options,
-              '/chat/getTeamProjectUsers?group_type=$groupType&team_id=$teamId&project_id=$projectId',
+              '/chat/getTeamProjectUsers?group_type=${groupType}&team_id=${teamId}&project_id=${projectId}',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -1458,16 +1489,16 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = AddUsersListRes.fromJson(_result.data!);
-    return _value;
+    final value = AddUsersListRes.fromJson(_result.data!);
+    return value;
   }
 
   @override
   Future<CommonRes> checkGroupName(String groupName) async {
-    final _extra = <String, dynamic>{};
+    const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
+    final Map<String, dynamic>? _data = null;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<CommonRes>(Options(
       method: 'GET',
@@ -1485,8 +1516,8 @@ class _ApiService implements ApiService {
               _dio.options.baseUrl,
               baseUrl,
             ))));
-    final _value = CommonRes.fromJson(_result.data!);
-    return _value;
+    final value = CommonRes.fromJson(_result.data!);
+    return value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
