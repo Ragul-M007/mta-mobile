@@ -37,6 +37,7 @@ import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/ProjectDetails.dart';
 import 'package:mta/models/SetPinReq.dart';
+import 'package:mta/models/TeamUsersRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/models/UserAccessreq.dart';
 import 'package:mta/models/validateOTPReq.dart';
@@ -152,8 +153,8 @@ abstract class ApiService {
   @GET("/teams")
   Future<TeamsModel> fetchTeams();
 
-  @GET("/teams/{team_id}")
-  Future<TeamsModel> fetchTeamUsers(@Path("team_id") int id);
+  @GET("/teams/getTeamUsers/{team_id}")
+  Future<TeamUsersRes> fetchTeamUsers(@Path("team_id") int id);
 
   @GET("/projects/getProjectsByTeam/{team_id}")
   Future<DashboardRes> fetchProjectByTeams(@Path("team_id") int id);

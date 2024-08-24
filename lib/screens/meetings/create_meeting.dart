@@ -589,9 +589,9 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
     AppUtils.dismissprogress();
     // api.login(loginreq).then((response) {});
-
-    // Navigator.of(context).push(MaterialPageRoute(
-    //     builder: (context) => MembersSelection(addMeetingReq: addMeetingReq)));
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => MembersSelection(
+            addMeetingReq: addMeetingReq, selectedTeams: selectedTeams)));
   }
 
   clearDataWarning(bool isTeamSelection) async {
