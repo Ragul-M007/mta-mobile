@@ -44,7 +44,7 @@ class _NotificationContentState extends State<NotificationContent>
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
         setState(() {
-          Strings.currentmenuvalue = 5;
+          Strings.currentmenuvalue = 6;
         });
       });
     _msgList.clear();

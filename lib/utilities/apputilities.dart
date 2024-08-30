@@ -90,6 +90,14 @@ class AppUtils {
         fontSize: 16.0);
   }
 
+  static void showErrorSnackBar(context, String msg) {
+    var snackBar = SnackBar(
+      content: Text(msg),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   static String getFileExtension(String fileName) {
     var file = fileName.split(".");
     var fileExt = file[file.length - 1];
@@ -339,5 +347,27 @@ class AppUtils {
         });
       }
     });
+  }
+
+  String getMeetingDateFormat(start, end) {
+    final startDate = DateTime.parse(start);
+    final endDate = DateTime.parse(end);
+
+    final formatter = DateFormat('MMMM dd, yyyy | hh:mm a');
+    final formattedStartDate = formatter.format(startDate);
+
+    final timeFormatter = DateFormat('hh:mm a');
+    final formattedEndTime = timeFormatter.format(endDate);
+
+    final result = '$formattedStartDate - $formattedEndTime';
+    return result;
+  }
+
+  String getMeetingType(type) {
+    return type == "1"
+        ? "Inperson Meeting"
+        : type == "2"
+            ? "Virtual Meeting"
+            : "Phone Call";
   }
 }

@@ -38,7 +38,7 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
         setState(() {
-          Strings.currentmenuvalue = 7;
+          Strings.currentmenuvalue = 8;
         });
       });
 

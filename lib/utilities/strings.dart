@@ -105,4 +105,6 @@ mixin Strings {
       "You can only select upto 5 messages!";
 
   static bool isSelectionEnabled = false;
+
+  static String locationLink = "https://www.google.com/maps?q=";
 }

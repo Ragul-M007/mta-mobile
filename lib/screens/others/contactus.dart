@@ -31,7 +31,7 @@ class _ContactusState extends State<Contactus>
       ..addListener(() {
         setState(() {
           // print(Strings.authToken);
-          Strings.currentmenuvalue = 6;
+          Strings.currentmenuvalue = 7;
         });
       });
   }

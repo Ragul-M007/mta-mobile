@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mta/models/AddMeetingReq.dart';
@@ -10,6 +11,8 @@ import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/members_selection.dart';
+import 'package:mta/screens/meetings/members_selection_2.dart';
+import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/chips_widget.dart';
 import 'package:mta/utilities/customcolor.dart';
@@ -40,10 +43,10 @@ class CreateMeetingContent extends StatefulWidget {
 }
 
 class _CreateMeetingContentState extends State<CreateMeetingContent> {
-  final startTimeController = TextEditingController();
-  final endTimeController = TextEditingController();
+  TextEditingController endTimeController = TextEditingController();
+  TextEditingController startTimeController = TextEditingController();
   final titleController = TextEditingController();
-  final emailController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   TextEditingController teamController = TextEditingController();
   TextEditingController projectController = TextEditingController();
   final typeController = TextEditingController();
@@ -54,22 +57,48 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
   FocusNode teamFocusNode = FocusNode();
   FocusNode projectFocusNode = FocusNode();
+  FocusNode mailsFocusNode = FocusNode();
   List<TeamsData> teamLists = [];
   List<TeamsData> selectedTeams = [];
   List<Data> projectsList = [];
   List<Data> selectedProjects = [];
+  List<String> invitedMails = [];
 
   String? selectedType;
-  final List<String> meetingTypes = ["In Person Meeting", "Virtual Meeting"];
+  String? selectedProvider;
+  String? providerType;
+  final List<Map> meetingTypes = [
+    {"id": "1", "name": "In Person Meeting"},
+    {"id": "2", "name": "Virtual Meeting"}
+  ];
+  final List<Map> providerTypes = [
+    {"id": "1", "name": "Zoom"},
+    {"id": "2", "name": "Google Meet"}
+  ];
 
   DateTime? selectedDate;
 
-  String? startTime;
-  String? endTime;
+  DateTime? startTime;
+  DateTime? endTime;
+
+  var _suggestions;
+
+  TimeOfDay? choosenFromTime;
+  final now = DateTime.now();
+  TimeOfDay? choosenToTime;
+  void clearSelection() {
+    setState(() {
+      startTimeController.text = "";
+      endTimeController.text = "";
+      choosenFromTime = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     getTeams();
+    print(">>>>token:${Strings.authToken}");
   }
 
   void _scrollToBottom() {
@@ -121,42 +150,13 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.only(bottomLeft: Radius.circular(30.0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey,
-                  offset: Offset(0.1, 1.0),
-                  blurRadius: 6.0,
-                ),
-              ]),
-          child: AppBar(
-            iconTheme: IconThemeData(color: Colors.black),
-            shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-            elevation: 0,
-            title: Text(
-              "Create Meetings",
-              style: Drawables.adddoccontentstyle(
-                  Colors.black, 16.0, FontWeight.bold),
-            ),
-            leading: SizedBox(
-                height: 25.0,
-                width: 25.0,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 25.0,
-                    color: const Color(0xFF979797),
-                  ),
-                  onPressed: () {},
-                )),
-          ),
-        ),
         preferredSize: Size.fromHeight(kToolbarHeight),
+        child: AppBarWidget(
+            backButtonfunction: () {
+              Navigator.pop(context);
+            },
+            title: "Create Meetings",
+            actionWidget: []),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 30.0, right: 30, top: 30),
@@ -171,11 +171,15 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                 child: Column(
                   children: [
                     formFields("  Meeting Title", "meetingTitle",
-                        "eg: Site meeting", titleController),
+                        "eg: Site meeting", titleController, false),
                     formFields("  Type of Meetings", "meetingType",
-                        "Select type", typeController),
+                        "Select type", typeController, false),
+                    selectedType == "2"
+                        ? formFields("  Provider", "providerType",
+                            "Select a provider", typeController, false)
+                        : Container(),
                     formFields("  Invite Teams or Projects", "inviteTeams",
-                        "Select a team", teamController),
+                        "Select a team", teamController, false),
                     Padding(
                       padding: const EdgeInsets.only(top: 15.0),
                       child: Row(
@@ -206,18 +210,15 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                       ),
                     ),
                     formFields("", "inviteProjects", "Select a project",
-                        projectController),
-                    formFields("  Meeting Date*", "meetingDate", "Select date",
-                        dateController),
-                    formFields(
-                        "", "meetingTime", "Select Time", timeController),
+                        projectController, false),
+                    formFields("  Invite via Email (Optional)", "inviteMails",
+                        "eg: email@address.com", emailController, false),
+                    formFields("  Meeting Date", "meetingDate", "Select date",
+                        dateController, false),
+                    formFields("", "meetingTime", "Select Time", timeController,
+                        false),
                     formFields("  Meeting Description", "meetingDescription",
-                        "Type message..", descriptionController),
-                    formFields(
-                        "  Invite Others By Name or Email",
-                        "inviteMails",
-                        "eg: email@address.com",
-                        emailController),
+                        "Type message..", descriptionController, false),
                     SizedBox(
                       height: 10,
                     ),
@@ -240,7 +241,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
     );
   }
 
-  formFields(title, fieldType, hintText, controller) {
+  formFields(title, fieldType, hintText, controller, isMandatory) {
     return Padding(
       padding: EdgeInsets.only(top: fieldType != "inviteProjects" ? 15.0 : 0),
       child: Column(
@@ -248,21 +249,64 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
         children: [
           // Field Heading
           fieldType != "meetingTime"
-              ? Text(title)
-              : fieldType != "inviteProjects"
+              ? RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                          text: title,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'MyriadPro',
+                              fontSize: 12)),
+                      isMandatory
+                          ? TextSpan(
+                              text: ' *', style: TextStyle(color: Colors.red))
+                          : TextSpan(),
+                    ],
+                  ),
+                )
+              : fieldType == "meetingTime"
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.4,
-                          child: Text(
-                            "  Start Time",
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: "  Start Time",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'MyriadPro',
+                                        fontSize: 12)),
+                                isMandatory
+                                    ? TextSpan(
+                                        text: ' *',
+                                        style: TextStyle(color: Colors.red))
+                                    : TextSpan(),
+                              ],
+                            ),
                           ),
                         ),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.4,
-                          child: Text(
-                            "  End Time",
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: "  End Time",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'MyriadPro',
+                                        fontSize: 12)),
+                                isMandatory
+                                    ? TextSpan(
+                                        text: ' *',
+                                        style: TextStyle(color: Colors.red))
+                                    : TextSpan(),
+                              ],
+                            ),
                           ),
                         )
                       ],
@@ -273,32 +317,36 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
             padding:
                 EdgeInsets.only(top: fieldType != "inviteProjects" ? 8.0 : 0),
             child: SizedBox(
-                height: 45,
-                child: fieldType != "meetingTime" &&
-                        fieldType != "meetingDate" &&
-                        fieldType != "inviteTeams" &&
-                        fieldType != "inviteProjects" &&
-                        fieldType != "meetingType"
+                height: fieldType == "meetingDescription"
+                    ? MediaQuery.of(context).size.height * 0.12
+                    : 45,
+                child: fieldType == "meetingTitle" ||
+                        fieldType == "meetingDescription"
                     ? TextField(
                         controller: controller,
                         decoration: new InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 1.0),
-                          ),
-                          hintText: hintText,
-                        ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey, width: 1.0),
+                            ),
+                            hintText: hintText,
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 10)),
+                        inputFormatters: fieldType == "meetingTitle"
+                            ? [LengthLimitingTextInputFormatter(250)]
+                            : null,
+                        maxLines: fieldType == "meetingDescription" ? 5 : 1,
                       )
                     : fieldType == "meetingDate"
                         ? DatePickerWidget(
                             hintText: hintText,
                             onDateSelected: (date) {
-                              print(">>>>>:${date.day}");
                               selectedDate = date;
+                              clearTimeSelection();
                               setState(() {});
                             },
                           )
@@ -311,25 +359,14 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                                     ? hintText
                                     : "No projects found")
                                 : fieldType == "meetingType"
-                                    ? meetingType(hintText)
-                                    : TimerPickerWidget(
-                                        selectedDate:
-                                            selectedDate ?? DateTime.now(),
-                                        isDateSelected: selectedDate != null,
-                                        onSelectedFromTime: (fromTime) {
-                                          DateTime dateTime = DateTime.parse(
-                                              fromTime.toString());
-                                          startTime = dateTime
-                                              .toString()
-                                              .substring(0, 19);
-                                        },
-                                        onSelectedToTime: (toTime) {
-                                          DateTime dateTime =
-                                              DateTime.parse(toTime.toString());
-                                          endTime = dateTime
-                                              .toString()
-                                              .substring(0, 19);
-                                        })),
+                                    ? dropdownType(true, hintText)
+                                    : fieldType == "providerType"
+                                        ? dropdownType(false, hintText)
+                                        : fieldType == "meetingTime"
+                                            ? timerPickerWidget()
+                                            : fieldType == "inviteMails"
+                                                ? inviteMails(hintText)
+                                                : Container()),
           ),
           fieldType == "inviteTeams"
               ? ChipsWidget(
@@ -345,6 +382,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                   },
                   projects: [],
                   onDeletedProject: (val) {},
+                  mails: [],
+                  onDeletedMail: (val) {},
                 )
               : fieldType == "inviteProjects"
                   ? ChipsWidget(
@@ -360,8 +399,26 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                       },
                       teams: [],
                       onDeleted: (val) {},
+                      mails: [],
+                      onDeletedMail: (val) {},
                     )
-                  : Container()
+                  : fieldType == "inviteMails"
+                      ? ChipsWidget(
+                          mails: invitedMails,
+                          onDeletedMail: (data) {
+                            setState(() {
+                              invitedMails
+                                  .removeWhere((element) => element == data);
+                              // to reload deleted data in autocomplete list
+                              emailController.clear();
+                            });
+                          },
+                          teams: [],
+                          onDeleted: (val) {},
+                          projects: [],
+                          onDeletedProject: (val) {},
+                        )
+                      : Container()
         ],
       ),
     );
@@ -399,7 +456,12 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
               if (isTrue) {
                 selectedTeams.add(team);
                 selectedProjects.clear();
+                // to refresh auto complete field
+                projectController.text = "a";
+                projectController.clear();
                 setState(() {});
+                teamController.clear();
+              } else {
                 teamController.clear();
               }
             }
@@ -465,14 +527,19 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
           } else {
             if (selectedTeams.isEmpty) {
               selectedProjects.add(project);
-              setState(() {});
               projectController.clear();
+              setState(() {});
             } else {
               var isTrue = await clearDataWarning(true);
               if (isTrue) {
                 selectedProjects.add(project);
                 selectedTeams.clear();
+                // to refresh auto complete field
+                teamController.text = "a";
+                teamController.clear();
+                projectController.clear();
                 setState(() {});
+              } else {
                 projectController.clear();
               }
             }
@@ -512,7 +579,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
         });
   }
 
-  meetingType(hintText) {
+  dropdownType(isTypeofMeeting, hintText) {
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
         isExpanded: true,
@@ -521,20 +588,36 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
           style: TextStyle(color: CustomColors.fontColor),
           overflow: TextOverflow.ellipsis,
         ),
-        items: meetingTypes
-            .map((String item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ))
-            .toList(),
-        value: selectedType,
+        items: isTypeofMeeting
+            ? meetingTypes
+                .map((Map item) => DropdownMenuItem<String>(
+                      value: item['id'],
+                      child: Text(
+                        item['name'],
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ))
+                .toList()
+            : providerTypes
+                .map((Map item) => DropdownMenuItem<String>(
+                      value: item['id'],
+                      child: Text(
+                        item['name'],
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ))
+                .toList(),
+        value: isTypeofMeeting ? selectedType : selectedProvider,
         onChanged: (String? value) {
-          setState(() {
+          if (isTypeofMeeting) {
             selectedType = value;
-          });
+            if (value == "1") {
+              selectedProvider == null;
+            }
+          } else {
+            selectedProvider = value;
+          }
+          setState(() {});
         },
         buttonStyleData: ButtonStyleData(
           padding: const EdgeInsets.only(left: 0, right: 14),
@@ -571,27 +654,42 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
     );
   }
 
-  void submitData() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    AddMeetingReq addMeetingReq = AddMeetingReq();
-    addMeetingReq.title = titleController.text;
-    addMeetingReq.inviteeEmail = emailController.text;
-    addMeetingReq.description = descriptionController.text;
-    addMeetingReq.end = endTime;
-    addMeetingReq.start = startTime;
-    addMeetingReq.type = selectedType;
-    addMeetingReq.meetingType = selectedTeams.isNotEmpty ? "Team" : "Project";
-    addMeetingReq.meetingTypeId = selectedTeams.isNotEmpty
-        ? selectedTeams.map((item) => item.teamId!).toList()
-        : selectedProjects.map((item) => item.projectId!).toList();
-    print("loqinrequest ---> ${jsonEncode(addMeetingReq)}");
+  Future<void> submitData() async {
+    bool isValid = await meetingValidation();
+    if (isValid) {
+      AddMeetingReq addMeetingReq = AddMeetingReq();
+      addMeetingReq.inviteeTimezone = "Asia/Kolkata";
 
-    AppUtils.dismissprogress();
-    // api.login(loginreq).then((response) {});
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => MembersSelection(
-            addMeetingReq: addMeetingReq, selectedTeams: selectedTeams)));
+      addMeetingReq.title = titleController.text;
+      addMeetingReq.description = descriptionController.text;
+      addMeetingReq.end = DateTime(selectedDate!.year, selectedDate!.month,
+              selectedDate!.day, endTime!.hour, endTime!.minute)
+          .toString()
+          .substring(0, 19);
+      ;
+      addMeetingReq.start = DateTime(selectedDate!.year, selectedDate!.month,
+              selectedDate!.day, startTime!.hour, startTime!.minute)
+          .toString()
+          .substring(0, 19);
+      ;
+      addMeetingReq.type = selectedType;
+      addMeetingReq.provider =
+          selectedType == "1" ? "2" : selectedProvider ?? "";
+      addMeetingReq.meetingType = selectedTeams.isNotEmpty ? "Team" : "Project";
+      print("loqinrequest --->${invitedMails}, ${jsonEncode(addMeetingReq)}");
+      addMeetingReq.guestEmail = [];
+      addMeetingReq.meetingTypeId = selectedTeams.isNotEmpty
+          ? selectedTeams.map((item) => item.teamId!).toList()
+          : selectedProjects.map((item) => item.projectId!).toList();
+      print("loqinrequest ---> ${jsonEncode(addMeetingReq)}");
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MembersSelection(
+                addMeetingData: addMeetingReq,
+                selectedTeams: selectedTeams,
+                invitedMails: invitedMails,
+                selectedProjects: selectedProjects,
+              )));
+    }
   }
 
   clearDataWarning(bool isTeamSelection) async {
@@ -606,7 +704,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
               fontWeight: FontWeight.w600),
         ),
         content: Text(
-          isTeamSelection
+          !isTeamSelection
               ? "Please make sure you have selected either a project or a team. Clicking 'Yes' will confirm your team selection and remove any project selections."
               : "Please make sure you have selected either a project or a team. Clicking 'Yes' will confirm your project selection and remove any team selections.",
           style: TextStyle(
@@ -635,5 +733,296 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       ),
     );
     return data;
+  }
+
+  bool meetingValidation() {
+    if (titleController.text.isEmpty) {
+      AppUtils.showToastError("Please provide meeting title.");
+      return false;
+    } else if (descriptionController.text.isEmpty) {
+      AppUtils.showToastError("Please provide meeting description.");
+      return false;
+    } else if (selectedType == null) {
+      AppUtils.showToastError("Please select a meeting type.");
+      return false;
+    } else if (selectedType == "2" &&
+        providerType == null &&
+        selectedProvider == null) {
+      AppUtils.showToastError("Please select a provider type.");
+      return false;
+    } else if (selectedDate == null) {
+      AppUtils.showToastError("Please enter a date.");
+      return false;
+    } else if (startTime == null) {
+      AppUtils.showToastError("Please enter a start time.");
+      return false;
+    } else if (endTime == null) {
+      AppUtils.showToastError("Please enter an end time.");
+      return false;
+    } else if (invitedMails.isEmpty &&
+        selectedProjects.isEmpty &&
+        selectedTeams.isEmpty) {
+      AppUtils.showToastError(
+          "Please provide at least one email from the team, project, or member emails.");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  inviteMails(hintText) {
+    final RegExp _emailRegExp = RegExp(
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?");
+    return Autocomplete<String>(
+        optionsBuilder: (TextEditingValue textEditingValue) async {
+          if (textEditingValue.text.isNotEmpty) {
+            return _emailRegExp.hasMatch(textEditingValue.text)
+                ? [textEditingValue.text]
+                : [];
+          } else {
+            return [];
+          }
+        },
+        onSelected: (mail) async {
+          if (!invitedMails.contains(mail)) {
+            invitedMails.add(mail);
+            setState(() {});
+            emailController.clear();
+          } else {
+            AppUtils.showToastError("Already existing mail.");
+          }
+          mailsFocusNode.unfocus();
+        },
+        displayStringForOption: (option) => option,
+        fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+          emailController = controller;
+          mailsFocusNode = focusNode;
+          return TextField(
+            enabled: teamLists.isNotEmpty,
+            controller: emailController,
+            focusNode: mailsFocusNode,
+            onEditingComplete: () {
+              mailsFocusNode.unfocus();
+            },
+            onSubmitted: (String value) {
+              onFieldSubmitted();
+              emailController.clear();
+              focusNode.unfocus();
+            },
+            decoration: new InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey, width: 1.0),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey, width: 1.0),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey, width: 1.0),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              hintText: hintText,
+            ),
+          );
+        });
+  }
+
+  timerPickerWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.4,
+          child: GestureDetector(
+            onTap: () {
+              if (selectedDate != null) {
+                _selectFromTime();
+              } else {
+                AppUtils.showToastError("Date should be select before time");
+              }
+            },
+            child: TextField(
+              controller: startTimeController,
+              enabled: false,
+              style: TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                contentPadding: EdgeInsets.all(15),
+                hintText: "Select Time",
+                hintStyle: TextStyle(color: CustomColors.fontColor),
+                suffixIcon: Icon(
+                  Icons.schedule,
+                  color: Colors.grey,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.4,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                if (choosenFromTime != null) {
+                  _selecttoTime();
+                } else {
+                  AppUtils.showToastError("Please select the start time");
+                }
+              });
+            },
+            child: TextField(
+              controller: endTimeController,
+              enabled: false,
+              style: TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                contentPadding: EdgeInsets.all(15),
+                hintText: "Select Time",
+                hintStyle: TextStyle(color: CustomColors.fontColor),
+                suffixIcon: Icon(
+                  Icons.schedule,
+                  color: Colors.grey,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  _selectFromTime() async {
+    choosenFromTime = await showTimePicker(
+      context: context,
+      initialTime: choosenFromTime != null ? choosenFromTime! : TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.dial,
+      confirmText: "CONFIRM",
+      helpText: "SELECT TIME",
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false, textScaler: TextScaler.linear(1)),
+          child: child!,
+        );
+      },
+    );
+
+    if (choosenFromTime != null) {
+      setState(() {
+        var currDate = DateTime.now();
+        var currDateTime = "${currDate.day}-${currDate.month}-${currDate.year}";
+
+        var date1 =
+            "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}";
+        var startShift = DateTime(selectedDate!.year, selectedDate!.month,
+            selectedDate!.day, choosenFromTime!.hour, choosenFromTime!.minute);
+        final endShift =
+            DateTime(now.year, now.month, now.day, now.hour, now.minute);
+        if (selectedDate != null && date1 == currDateTime) {
+          if (endTimeController.text == "") {
+            if (startShift.isAfter(endShift)) {
+              startTimeController.text = choosenFromTime!.format(context);
+              startTime = startShift;
+              endTimeController.text = "";
+              choosenToTime = null;
+              endTime = null;
+            } else {
+              AppUtils.showToastError(
+                "Meetings can only be scheduled for future dates and times",
+              );
+              startTimeController.text = "";
+            }
+          } else {
+            ///To check selected time is greater than the current time
+            if (startShift.isAfter(endShift)) {
+              startTimeController.text = choosenFromTime!.format(context);
+              startTime = startShift;
+              endTimeController.text = "";
+              choosenToTime = null;
+              endTime = null;
+            } else if (!startShift.isAfter(endShift)) {
+              AppUtils.showToastError(
+                "Meetings can only be scheduled for future dates and timese",
+              );
+            } else {
+              AppUtils.showToastError("Time should not be above the to time");
+              startTimeController.text = "";
+            }
+          }
+        } else {
+          startTimeController.text = choosenFromTime!.format(context);
+          startTime = startShift;
+          endTimeController.text = "";
+          choosenToTime = null;
+          endTime = null;
+        }
+      });
+    }
+  }
+
+  _selecttoTime() async {
+    choosenToTime = await showTimePicker(
+      context: context,
+      initialTime: choosenToTime != null ? choosenToTime! : TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.dial,
+      confirmText: "CONFIRM",
+      // cancelText: "NOT NOW",
+      helpText: "SELECT TIME",
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+              alwaysUse24HourFormat: false, textScaler: TextScaler.linear(1)),
+          child: child!,
+        );
+      },
+    );
+    if (choosenFromTime == null) {
+      AppUtils.showToastError("Select start time");
+      return;
+    }
+    if (choosenToTime != null) {
+      setState(() {
+        var time = DateTime.now();
+        var startShift = DateTime(selectedDate!.year, selectedDate!.month,
+            selectedDate!.day, choosenToTime!.hour, choosenToTime!.minute);
+        if (choosenFromTime == null) {
+          choosenFromTime = TimeOfDay.fromDateTime(DateTime(
+              time.year,
+              time.month,
+              time.day,
+              choosenFromTime!.hour,
+              choosenFromTime!.minute));
+        }
+        var t2 = choosenFromTime;
+        final endShift = DateTime(selectedDate!.year, selectedDate!.month,
+            selectedDate!.day, t2!.hour, t2.minute + 29);
+        if (choosenFromTime!.format(context) ==
+            choosenToTime!.format(context)) {
+          AppUtils.showToastError("The from and to time should not be same.");
+          endTimeController.text = "";
+        } else if (startShift.isAfter(endShift)) {
+          endTimeController.text = choosenToTime!.format(context);
+          endTime = startShift;
+        } else {
+          AppUtils.showToastError(
+              "The end time must be at least 30 minutes ahead of the start time.");
+          endTimeController.text = "";
+        }
+      });
+    }
+  }
+
+  void clearTimeSelection() {
+    setState(() {
+      startTimeController.text = "";
+      endTimeController.text = "";
+      choosenFromTime = null;
+      choosenToTime = null;
+    });
   }
 }

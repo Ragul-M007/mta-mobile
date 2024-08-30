@@ -42,7 +42,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       ..addListener(() {
         setState(() {
           // print(Strings.authToken);
-          Strings.currentmenuvalue = 4;
+          Strings.currentmenuvalue = 5;
         });
       });
   }

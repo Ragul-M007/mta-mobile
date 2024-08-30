@@ -1,13 +1,20 @@
+import 'dart:convert';
+
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/create_meeting.dart';
+import 'package:mta/screens/meetings/meeting_details.dart';
+import 'package:mta/screens/meetings/meeting_history.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 FancyDrawerController? _controller;
 
@@ -33,6 +40,10 @@ class Meetingscontent extends StatefulWidget {
 
 class _MeetingscontentState extends State<Meetingscontent>
     with SingleTickerProviderStateMixin {
+  List<MeetingsData> meetingsData = [];
+
+  bool meetingCraetionAccess = false;
+
   void initState() {
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
@@ -41,11 +52,44 @@ class _MeetingscontentState extends State<Meetingscontent>
           Strings.currentmenuvalue = 2;
         });
       });
-    //_calendarController = CalendarController();
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback(
-    //     (_) => getAttendance(day + "-" + month + "-" + year));
-    // getProjects();
+    WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
+  }
+
+  getProfile() {
+    AppUtils.showprogress();
+
+    getMeetings();
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.getMeetingAccess(Strings.userID!).then((response) {
+      AppUtils.dismissprogress();
+      print('profileResponse status ${response.data}');
+      meetingCraetionAccess = response.data!.access!;
+      setState(() {});
+    }).catchError((onError) {
+      AppUtils.dismissprogress();
+      print(onError.toString());
+    });
+  }
+
+  getMeetings() {
+    final now = DateTime.now();
+    final formatter = DateFormat('yyyy-MM-dd');
+    final formattedDate = formatter.format(now);
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.getUpcomingMeeting(formattedDate).then((response) {
+      // AppUtils.dismissprogress();
+      if (response.status!) {
+        setState(() {
+          meetingsData = response.data ?? [];
+        });
+        print(">>>>:${jsonEncode(meetingsData)}");
+      }
+    }).catchError((onError) {
+      // AppUtils.dismissprogress();
+      print(onError.toString());
+      //getProjects();
+    });
   }
 
   @override
@@ -236,108 +280,172 @@ class _MeetingscontentState extends State<Meetingscontent>
                         },
                       ),
                     ),
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: IconButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => MeetingHistory()));
+                            },
+                            icon: Icon(
+                              Icons.history,
+                              size: 25.0,
+                              // color: const Color(0xFF979797),
+                            )),
+                      )
+                    ],
                   ),
-                  floatingActionButton: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => CreateMeeting(),
-                        ),
-                      );
-                    },
-                    child: CircleAvatar(
-                      radius: 20,
-                      child: Image.asset(
-                        "assets/icons/gridicons_create.png",
-                        height: 20,
-                      ),
-                      backgroundColor: Colors.grey.withOpacity(0.8),
-                    ),
-                  ),
-                  body: ListView.builder(
-                      itemCount: 2,
-                      padding: EdgeInsets.all(20),
-                      itemBuilder: (BuildContext ctx, int index) {
-                        return Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Container(
-                            height: 60,
-                            child: Padding(
-                                padding: EdgeInsets.fromLTRB(14, 4, 15, 4),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.5,
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                  floatingActionButton: meetingCraetionAccess
+                      ? InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => CreateMeeting(),
+                              ),
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 20,
+                            child: Image.asset(
+                              "assets/icons/gridicons_create.png",
+                              height: 20,
+                            ),
+                            backgroundColor: Colors.grey.withOpacity(0.8),
+                          ),
+                        )
+                      : Container(),
+                  body: meetingsData.length > 0
+                      ? ListView.builder(
+                          itemCount: meetingsData.length,
+                          padding: EdgeInsets.all(20),
+                          itemBuilder: (BuildContext ctx, int index) {
+                            return Padding(
+                              padding: EdgeInsets.all(10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(
+                                          builder: (context) => MeetingDetails(
+                                              fromHistory: false,
+                                              imeetifyMeetingId:
+                                                  meetingsData[index]
+                                                      .imeetifyMeetingId!,
+                                              meeting_id: meetingsData[index]
+                                                  .meetingId!)))
+                                      .whenComplete(() => getMeetings());
+                                },
+                                child: Container(
+                                  height: 60,
+                                  child: Padding(
+                                      padding:
+                                          EdgeInsets.fromLTRB(14, 4, 15, 4),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.center,
                                             children: [
-                                              Text("Request for qualification",
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: Drawables
-                                                      .adddoccontentstyle(
-                                                          Colors.black87,
-                                                          14.0,
-                                                          FontWeight.w500)),
-                                              SizedBox(
-                                                width: 2,
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.5,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        meetingsData[index]
+                                                            .title!,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: Drawables
+                                                            .adddoccontentstyle(
+                                                                Colors.black87,
+                                                                14.0,
+                                                                FontWeight
+                                                                    .w500)),
+                                                    SizedBox(
+                                                      width: 2,
+                                                    ),
+                                                    Text(
+                                                        AppUtils()
+                                                            .getMeetingDateFormat(
+                                                                meetingsData[
+                                                                        index]
+                                                                    .start!,
+                                                                meetingsData[
+                                                                        index]
+                                                                    .end!),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: Drawables
+                                                            .adddoccontentstyle(
+                                                                Colors.grey,
+                                                                12.0,
+                                                                FontWeight
+                                                                    .w300)),
+                                                  ],
+                                                ),
                                               ),
-                                              Text(
-                                                  "June 26,2024 | 10:30 am-11:30 am",
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: Drawables
-                                                      .adddoccontentstyle(
-                                                          Colors.grey,
-                                                          12.0,
-                                                          FontWeight.w300)),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      width: 75,
-                                      height: 30,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              CustomColors.primarycolor,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
+                                          Container(
+                                            width: 75,
+                                            height: 30,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    CustomColors.primarycolor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                if (meetingsData[index]
+                                                        .meetingLink !=
+                                                    null) {
+                                                  launchLink(meetingsData[index]
+                                                      .meetingLink!);
+                                                } else {
+                                                  AppUtils.showToastError(
+                                                      "Invalid URL!");
+                                                }
+                                              },
+                                              child: meetingsData[index].type !=
+                                                      "1"
+                                                  ? Text(
+                                                      'JOIN',
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    )
+                                                  : Icon(
+                                                      Icons.directions_outlined,
+                                                      color: Colors.white,
+                                                    ),
+                                            ),
                                           ),
-                                        ),
-                                        onPressed: () {},
-                                        child: Text(
-                                          'JOIN',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      }),
+                                        ],
+                                      )),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          })
+                      : Center(child: Text("No Meetings Found")),
                 ))));
   }
 
@@ -352,6 +460,12 @@ class _MeetingscontentState extends State<Meetingscontent>
       // Navigator.popAndPushNamed(context, routename);
     } else {
       Navigator.pushNamed(context, routename!);
+    }
+  }
+
+  launchLink(String url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
     }
   }
 }

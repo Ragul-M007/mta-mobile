@@ -263,30 +263,36 @@ class _SetpinState extends State<Setpin> {
                 child: ButtonTheme(
                   minWidth: double.infinity,
                   child: ElevatedButton(
-              
-                       style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Color(0xFF0061b0)),foregroundColor: MaterialStateProperty.all(Colors.white), shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0),),
-                                ),),
-                      onPressed: () {
-                        codeVerifyField =
-                            oneT.text + twoT.text + threeT.text + fourT.text;
-                        print(codeVerifyField);
-                        if (codeVerifyField!.length < 4) {
-                          AppUtils.showToastError("Please Enter Pin");
-                        } else {
-                          if (Strings.fromForgotPassword == true) {
-                            forgotPin();
-                          } else {
-                            signin();
-                          }
-                        }
-                      },
-                      child: Text("SUBMIT",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Colors.white)),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Color(0xFF0061b0)),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
                       ),
+                    ),
+                    onPressed: () {
+                      codeVerifyField =
+                          oneT.text + twoT.text + threeT.text + fourT.text;
+                      print(codeVerifyField);
+                      if (codeVerifyField!.length < 4) {
+                        AppUtils.showToastError("Please Enter Pin");
+                      } else {
+                        if (Strings.fromForgotPassword == true) {
+                          forgotPin();
+                        } else {
+                          signin();
+                        }
+                      }
+                    },
+                    child: Text("SUBMIT",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Colors.white)),
+                  ),
                 ),
               ),
             ),

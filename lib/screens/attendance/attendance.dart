@@ -87,7 +87,7 @@ class _AttendanceContentState extends State<AttendanceContent>
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
         setState(() {
-          Strings.currentmenuvalue = 3;
+          Strings.currentmenuvalue = 4;
         });
       });
     //_calendarController = CalendarController();

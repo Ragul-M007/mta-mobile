@@ -26,6 +26,8 @@
         android:label="MTA Konnect"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/launcher_icon"> 
+            <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyBGzK5REYl1icyJd-Bgu4A6Af9vbH-y1FM"/>
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileProvider"

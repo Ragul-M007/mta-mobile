@@ -4,6 +4,7 @@ import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
+import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/BackLinkRes.dart';
@@ -27,6 +28,9 @@ import 'package:mta/models/ForwardMessageReq.dart';
 import 'package:mta/models/GroupDetailsRes.dart';
 import 'package:mta/models/GroupReq.dart';
 import 'package:mta/models/GroupRes.dart';
+import 'package:mta/models/MeetingAccessRes.dart';
+import 'package:mta/models/MeetingDetails.dart';
+import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/ForgotPassReq.dart';
@@ -39,7 +43,9 @@ import 'package:mta/models/ProjectDetails.dart';
 import 'package:mta/models/SetPinReq.dart';
 import 'package:mta/models/TeamUsersRes.dart';
 import 'package:mta/models/TeamsModel.dart';
+import 'package:mta/models/UpdateMeetingReq.dart';
 import 'package:mta/models/UserAccessreq.dart';
+import 'package:mta/models/cancelMeetingReq.dart';
 import 'package:mta/models/validateOTPReq.dart';
 import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -251,6 +257,27 @@ abstract class ApiService {
 
   @GET("/chat/checkGroupExists/{group_name}")
   Future<CommonRes> checkGroupName(@Path("group_name") String groupName);
+
+  @GET("/meeting/getupcomingmeeting?dates={date}")
+  Future<MeetingsDataRes> getUpcomingMeeting(@Path("date") String date);
+
+  @GET("/meeting/getupcomingmeeting?date={date}")
+  Future<MeetingsDataRes> getMeetingHistory(@Path("date") String date);
+
+  @GET("/meeting/getmeeting/{meeting_id}")
+  Future<MeetingDetailsRes> getMeetingById(@Path("meeting_id") int meeting_id);
+
+  @GET("/meeting/accessdetails/{user_id}")
+  Future<MeetingAccessRes> getMeetingAccess(@Path("user_id") int user_id);
+
+  @POST("/meeting/createmeeting")
+  Future<CommonRes> createMeeting(@Body() AddMeetingReq body);
+
+  @PUT("/meeting/updatemeeting")
+  Future<CommonRes> updateMeeting(@Body() UpdateMeetingReq body);
+
+  @DELETE("/meeting/deletemeeting")
+  Future<CommonRes> deleteMeeting(@Body() CancelMeetingReq body);
 
 /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
