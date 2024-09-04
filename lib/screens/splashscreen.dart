@@ -8,6 +8,7 @@ import 'package:mta/models/Chat/ChatNotificationRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/meetings/meeting_details.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/router.dart';
@@ -18,7 +19,6 @@ import 'package:notification_permissions/notification_permissions.dart';
 
 import '../models/FetchCatsRes.dart';
 import 'attendance/attendance.dart';
-import 'chat/ChatGroups.dart';
 import 'chat/ChatScreen.dart';
 import 'comments/comments.dart';
 import 'comments/replies.dart';
@@ -85,6 +85,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   redirectFromNotification() {
+    print(">>>>>>1");
     if (Strings.FromNotification) {
       Strings.FromNotification = false;
       navigatorKey.currentState
@@ -124,6 +125,15 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         ),
         (route) => false,
       );
+    } else if (Strings.fromNotificationNewMeeting) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) => MeetingDetails(
+                  meeting_id: Strings.meetingID!,
+                  fromHistory: false,
+                )),
+        (route) => false,
+      );
     } else {
       if (Strings.roleId == 6) {
         navigatorKey.currentState?.pushNamed("/projects");
@@ -134,6 +144,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   checkLoginTime() {
+    print(">>>>>>2");
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchLoginHours(Strings.userID ?? 0).then((response) {
       if (response.status!) {
@@ -190,6 +201,15 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
                         Strings.chatNotificationResponse?.projectId ?? "0"),
                   ),
                 ),
+                (route) => false,
+              );
+            } else if (Strings.fromNotificationNewMeeting) {
+              navigatorKey.currentState?.pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => MeetingDetails(
+                          meeting_id: Strings.meetingID!,
+                          fromHistory: false,
+                        )),
                 (route) => false,
               );
             } else {
@@ -372,9 +392,9 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print("message recieved inside get");
       // print("data received ---  ${message.notification!.body}");
       // //  _showMyDialog("", message.notification!.title ?? "", message.notification!.body ?? "", "doc");
-      // print(message.data);
-      // print("Direct data data -->${jsonEncode(message.data)}");
-      // ProjectDocData peo = ProjectDocData.fromJson(message.data);
+      // print(notificationData);
+      // print("Direct data data -->${jsonEncode(notificationData)}");
+      // ProjectDocData peo = ProjectDocData.fromJson(notificationData);
       // var check = jsonEncode(peo);
 
       // print("Check--> $check");
@@ -383,7 +403,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       // print(message.notification?.body);
 
       AppUtils.showToastSuccess("You have a new notification!");
-      print("dataaa ${jsonEncode(message.data)}");
+      // print("dataaa ${jsonEncode(notificationData)}");
 
       if (Strings.pushNotify == true) {
         print("inside if listen message-----> $message");
@@ -392,13 +412,17 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
-      if (message?.notification?.title != null) {
-        if (message!.notification!.title!.contains("Signed")) {
+      Map<String, dynamic> notificationData =
+          message!.notification!.title!.contains("meeting")
+              ? jsonDecode(message.data['data'])
+              : {};
+      if (message.notification?.title != null) {
+        if (message.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
         } else if (message.notification!.title!.contains("Commented") ||
             message.notification!.title!.contains("Replied")) {
           print("inside");
-          ProjectDocData peo = ProjectDocData.fromJson(message.data);
+          ProjectDocData peo = ProjectDocData.fromJson(notificationData);
           Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
           print(jsonEncode(peo));
@@ -406,7 +430,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.notificationID = id;
           Strings.projectId = int.parse(peo.projectId ?? "000");
         } else if (message.notification!.title!.contains("Documents")) {
-          DocumentData peo = DocumentData.fromJson(message.data);
+          DocumentData peo = DocumentData.fromJson(notificationData);
           Strings.selectedProject.clear();
           Strings.selectedProject.add(Data.fromJson({
             "project_img": "",
@@ -437,82 +461,25 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.notificationID = id;
         } else if (message.notification!.title!.contains("message")) {
           print("oneee11");
-          ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
+          ChatNotificationRes res =
+              ChatNotificationRes.fromJson(notificationData);
           print("oneee eee ${jsonEncode(res)}");
           Strings.chatNotificationResponse = res;
           Strings.fromNotificationChat = true;
-        }
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-      if (message.notification?.body != null) {
-        print(message.notification?.body);
-        if (message.notification!.title!.contains("logout")) {
-          Strings.FromNotification = true;
-          await checkLoginTime();
-        } else if (message.notification!.title!.contains("Commented") ||
-            message.notification!.title!.contains("Replied")) {
-          print("test inside");
-          print(message.data);
-          ProjectDocData peo = ProjectDocData.fromJson(message.data);
-          Strings.selectedProDocument.clear();
-          Strings.selectedProDocument.add(peo);
-          Strings.fromNotificationComments = true;
-          print(jsonEncode(peo));
-          await checkLoginTime();
-          int id = int.parse(peo.notiId!);
-          Strings.projectId = int.parse(peo.projectId ?? "000");
-          Strings.notificationID = id;
-        } else if (message.notification!.title!.contains("Documents")) {
-          DocumentData peo = DocumentData.fromJson(message.data);
-          Strings.selectedProject.clear();
-
-          Strings.selectedProject.add(Data.fromJson({
-            "project_img": "",
-            "project_name": peo.projectName,
-            "project_id": (peo.projectId != "null" && peo.projectId != null)
-                ? int.parse(peo.projectId ?? "0")
-                : null
-          }));
-          Strings.selectedCategory.clear();
-          Strings.selectedCategory.add(FectchCatsData.fromJson({
-            "category_id": (peo.categoryId != "null" && peo.categoryId != null)
-                ? int.parse(peo.categoryId ?? "0")
-                : null,
-            "category_name": peo.categoryName,
-            "project_id": (peo.projectId != "null" && peo.projectId != null)
-                ? int.parse(peo.projectId ?? "0")
-                : null
-          }));
-
-          if (peo.categoryId != "null" && peo.categoryId != null) {
-            Strings.category = true;
-          } else {
-            Strings.category = false;
-          }
-          Strings.fromNotificationDocuments = true;
-          checkLoginTime();
-          int id = int.parse(peo.notiId!);
-          Strings.notificationID = id;
-        } else if (message.notification!.title!.contains("message")) {
-          ChatNotificationRes res = ChatNotificationRes.fromJson(message.data);
-          print("oneee eee ${jsonEncode(res)}");
-          Strings.chatNotificationResponse = res;
-          Strings.fromNotificationChat = true;
-
-          if (mounted) {
-            print("qqww");
-          } else {
-            print("qq else");
-            // SplashScreenContent();
-          }
-          redirectFromNotification();
-          // checkLoginTime();
+        } else if (message.notification!.title!.contains("meeting") &&
+            notificationData['action'] != "delete") {
+          Strings.fromNotificationNewMeeting = true;
+          Strings.meetingID =
+              int.tryParse(notificationData['meeting_id'].toString());
         }
       }
     });
 
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onMessageOpenedApp
+        .listen(_firebaseMessagingBackgroundHandler);
+
+    await _firebaseMessaging.requestPermission(
       alert: true,
       announcement: false,
       badge: true,
@@ -781,6 +748,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     timer = new Timer(const Duration(milliseconds: 500), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
         if (value == "Y") {
+          print(">>>>>>3");
           checkLoginTime();
           // Navigator.popAndPushNamed(context, "/comments");
         } else {
@@ -887,6 +855,97 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       AppUtils.dismissprogress();
       print(onError.toString());
     });
+  }
+
+  Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
+    // print(">>>>>>0:${message.notification?.body}");
+    // if (message.notification?.body != null) {
+    Map<String, dynamic> notificationData =
+        message.notification!.title!.contains("meeting")
+            ? jsonDecode(message.data['data'])
+            : {};
+    // print(message.notification?.body);
+    print(">>>>>3:${message.notification!.title!}");
+    if (message.notification!.title!.contains("logout")) {
+      Strings.FromNotification = true;
+      print(">>>>>>4");
+      await checkLoginTime();
+    } else if (message.notification!.title!.contains("Commented") ||
+        message.notification!.title!.contains("Replied")) {
+      print("test inside");
+      print(notificationData);
+      ProjectDocData peo = ProjectDocData.fromJson(notificationData);
+      Strings.selectedProDocument.clear();
+      Strings.selectedProDocument.add(peo);
+      Strings.fromNotificationComments = true;
+      print(jsonEncode(peo));
+      print(">>>>>>5");
+      await checkLoginTime();
+      int id = int.parse(peo.notiId!);
+      Strings.projectId = int.parse(peo.projectId ?? "000");
+      Strings.notificationID = id;
+    } else if (message.notification!.title!.contains("Documents")) {
+      DocumentData peo = DocumentData.fromJson(notificationData);
+      Strings.selectedProject.clear();
+
+      Strings.selectedProject.add(Data.fromJson({
+        "project_img": "",
+        "project_name": peo.projectName,
+        "project_id": (peo.projectId != "null" && peo.projectId != null)
+            ? int.parse(peo.projectId ?? "0")
+            : null
+      }));
+      Strings.selectedCategory.clear();
+      Strings.selectedCategory.add(FectchCatsData.fromJson({
+        "category_id": (peo.categoryId != "null" && peo.categoryId != null)
+            ? int.parse(peo.categoryId ?? "0")
+            : null,
+        "category_name": peo.categoryName,
+        "project_id": (peo.projectId != "null" && peo.projectId != null)
+            ? int.parse(peo.projectId ?? "0")
+            : null
+      }));
+
+      if (peo.categoryId != "null" && peo.categoryId != null) {
+        Strings.category = true;
+      } else {
+        Strings.category = false;
+      }
+      Strings.fromNotificationDocuments = true;
+      print(">>>>>>6");
+      checkLoginTime();
+      int id = int.parse(peo.notiId!);
+      Strings.notificationID = id;
+    } else if (message.notification!.title!.contains("message")) {
+      ChatNotificationRes res = ChatNotificationRes.fromJson(notificationData);
+      print("oneee eee ${jsonEncode(res)}");
+      Strings.chatNotificationResponse = res;
+      Strings.fromNotificationChat = true;
+
+      if (mounted) {
+        print("qqww");
+      } else {
+        print("qq else");
+        // SplashScreenContent();
+      }
+      redirectFromNotification();
+      // checkLoginTime();
+    } else if (message.notification!.title!.contains("meeting") &&
+        notificationData['action'] != "delete") {
+      Strings.fromNotificationNewMeeting = true;
+      Strings.meetingID =
+          int.tryParse(notificationData['meeting_id'].toString());
+      print(">>>>>>7");
+      if (mounted) {
+        print("qqww");
+        await checkLoginTime();
+      } else {
+        print("qq else");
+        redirectFromNotification();
+      }
+    }
+    // }
   }
 }
 

@@ -1,12 +1,12 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
-import 'package:mta/models/TeamsModel.dart';
 
 class ChipsWidget extends StatefulWidget {
-  List<TeamsData>? teams;
-  final void Function(TeamsData) onDeleted;
+  List<AllTeamsData>? teams;
+  final void Function(AllTeamsData) onDeleted;
   List<Data>? projects;
   final void Function(Data) onDeletedProject;
   List<String>? mails;

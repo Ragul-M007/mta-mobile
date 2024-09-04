@@ -1,26 +1,20 @@
 import 'dart:convert';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:mta/models/AddMeetingReq.dart';
+import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
-import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/members_selection.dart';
-import 'package:mta/screens/meetings/members_selection_2.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/chips_widget.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/date_picker_widget.dart';
-import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:mta/utilities/theme_button.dart';
-import 'package:mta/utilities/time_picker_widget.dart';
 import 'package:provider/provider.dart';
 
 class CreateMeeting extends StatelessWidget {
@@ -58,8 +52,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   FocusNode teamFocusNode = FocusNode();
   FocusNode projectFocusNode = FocusNode();
   FocusNode mailsFocusNode = FocusNode();
-  List<TeamsData> teamLists = [];
-  List<TeamsData> selectedTeams = [];
+  List<AllTeamsData> teamLists = [];
+  List<AllTeamsData> selectedTeams = [];
   List<Data> projectsList = [];
   List<Data> selectedProjects = [];
   List<String> invitedMails = [];
@@ -81,8 +75,6 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   DateTime? startTime;
   DateTime? endTime;
 
-  var _suggestions;
-
   TimeOfDay? choosenFromTime;
   final now = DateTime.now();
   TimeOfDay? choosenToTime;
@@ -103,9 +95,10 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
   void _scrollToBottom() {
     // Scroll to the bottom of the scroll view
+    print(">>>>sc:${_scrollController.position.maxScrollExtent}");
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 50),
       curve: Curves.easeInOut,
     );
   }
@@ -115,7 +108,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
     if (teamLists.isEmpty) {
       final api = Provider.of<ApiService>(context, listen: false);
 
-      api.fetchTeams().then((response) {
+      api.fetchAllTeams().then((response) {
         // AppUtils.dismissprogress();
         if (response.status!) {
           teamLists = response.data!;
@@ -133,7 +126,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
     if (projectsList.isEmpty) {
       final api = Provider.of<ApiService>(context, listen: false);
 
-      api.projects(4).then((response) {
+      api.fetchAllProjects().then((response) {
         if (response.status!) {
           projectsList = response.data!;
           setState(() {});
@@ -158,84 +151,81 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
             title: "Create Meetings",
             actionWidget: []),
       ),
+      floatingActionButton: Padding(
+        padding:
+            const EdgeInsets.only(left: 30.0, right: 30, top: 0, bottom: 20),
+        child: ThemeButton(title: "NEXT", buttonfunction: submitData),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Padding(
-        padding: const EdgeInsets.only(left: 30.0, right: 30, top: 30),
-        child: Stack(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.9,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).size.height * 0.1),
-                child: Column(
-                  children: [
-                    formFields("  Meeting Title", "meetingTitle",
-                        "eg: Site meeting", titleController, false),
-                    formFields("  Type of Meetings", "meetingType",
-                        "Select type", typeController, false),
-                    selectedType == "2"
-                        ? formFields("  Provider", "providerType",
-                            "Select a provider", typeController, false)
-                        : Container(),
-                    formFields("  Invite Teams or Projects", "inviteTeams",
-                        "Select a team", teamController, false),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.37,
-                              child: Divider(
-                                color: Colors.grey.withOpacity(0.8),
-                                height: 1,
-                              ),
-                            ),
+        padding: EdgeInsets.only(
+            left: 30.0,
+            right: 30,
+            top: 30,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 80 : 0),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.9,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height * 0.1),
+            child: Column(
+              children: [
+                formFields("  Meeting Title", "meetingTitle",
+                    "eg: Site meeting", titleController, false),
+                formFields("  Type of Meetings", "meetingType", "Select type",
+                    typeController, false),
+                selectedType == "2"
+                    ? formFields("  Provider", "providerType",
+                        "Select a provider", typeController, false)
+                    : Container(),
+                formFields("  Invite Teams or Projects", "inviteTeams",
+                    "Select a team", teamController, false),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.37,
+                          child: Divider(
+                            color: Colors.grey.withOpacity(0.8),
+                            height: 1,
                           ),
-                          Text("or"),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.37,
-                              child: Divider(
-                                color: Colors.grey.withOpacity(0.8),
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    formFields("", "inviteProjects", "Select a project",
-                        projectController, false),
-                    formFields("  Invite via Email (Optional)", "inviteMails",
-                        "eg: email@address.com", emailController, false),
-                    formFields("  Meeting Date", "meetingDate", "Select date",
-                        dateController, false),
-                    formFields("", "meetingTime", "Select Time", timeController,
-                        false),
-                    formFields("  Meeting Description", "meetingDescription",
-                        "Type message..", descriptionController, false),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
+                      Text("or"),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.37,
+                          child: Divider(
+                            color: Colors.grey.withOpacity(0.8),
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                formFields("", "inviteProjects", "Select a project",
+                    projectController, false),
+                formFields("  Invite via Email (Optional)", "inviteMails",
+                    "eg: email@address.com", emailController, false),
+                formFields("  Meeting Date", "meetingDate", "Select date",
+                    dateController, false),
+                formFields(
+                    "", "meetingTime", "Select Time", timeController, false),
+                formFields("  Meeting Description", "meetingDescription",
+                    "Type message..", descriptionController, false),
+                SizedBox(
+                  height: MediaQuery.of(context).viewInsets.bottom,
+                ),
+              ],
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 20,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 0.0, right: 0, top: 10),
-                child: ThemeButton(title: "NEXT", buttonfunction: submitData),
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );
@@ -323,6 +313,11 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                 child: fieldType == "meetingTitle" ||
                         fieldType == "meetingDescription"
                     ? TextField(
+                        onTap: () {
+                          // if (fieldType == "meetingDescription") {
+                          //   _scrollToBottom();
+                          // }
+                        },
                         controller: controller,
                         decoration: new InputDecoration(
                             focusedBorder: OutlineInputBorder(
@@ -425,80 +420,85 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   }
 
   teamField(hintText) {
-    return Autocomplete<TeamsData>(
-        optionsBuilder: (TextEditingValue textEditingValue) async {
-          if (textEditingValue.text.isEmpty) {
-            return teamLists
-                .where((team) => !selectedTeams
-                    .any((selectedTeam) => selectedTeam.teamId == team.teamId))
-                .toList();
-          } else {
-            // Return filtered teams that are not in selectedTeams
-            return teamLists.where((teamData) {
-              final isNotSelected = !selectedTeams.any(
-                  (selectedTeam) => selectedTeam.teamId == teamData.teamId);
-              return isNotSelected &&
-                  teamData.teamName!
-                      .toLowerCase()
-                      .contains(textEditingValue.text.toLowerCase());
-            }).toList();
-          }
-        },
-        onSelected: (team) async {
-          if (selectedTeams.any((element) => element.teamId == team.teamId)) {
-          } else {
-            if (selectedProjects.isEmpty) {
-              selectedTeams.add(team);
-              setState(() {});
-              teamController.clear();
+    return Container(
+      child: Autocomplete<AllTeamsData>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            if (textEditingValue.text.isEmpty) {
+              // Return teams that are not in selectedTeams
+              return teamLists
+                  .where((team) => !selectedTeams.any(
+                      (selectedTeam) => selectedTeam.teamId == team.teamId))
+                  .toList();
             } else {
-              var isTrue = await clearDataWarning(false);
-              if (isTrue) {
+              // Return filtered teams that are not in selectedTeams
+              return teamLists.where((teamData) {
+                final isNotSelected = !selectedTeams.any(
+                    (selectedTeam) => selectedTeam.teamId == teamData.teamId);
+                return isNotSelected &&
+                    teamData.teamName!
+                        .toLowerCase()
+                        .contains(textEditingValue.text.toLowerCase());
+              }).toList();
+            }
+          },
+          onSelected: (team) async {
+            if (selectedTeams.any((element) => element.teamId == team.teamId)) {
+            } else {
+              if (selectedProjects.isEmpty) {
                 selectedTeams.add(team);
-                selectedProjects.clear();
-                // to refresh auto complete field
-                projectController.text = "a";
-                projectController.clear();
                 setState(() {});
                 teamController.clear();
               } else {
-                teamController.clear();
+                var isTrue = await clearDataWarning(false);
+                if (isTrue) {
+                  selectedTeams.add(team);
+                  selectedProjects.clear();
+                  // to refresh auto complete field
+                  projectController.text = "a";
+                  projectController.clear();
+                  setState(() {});
+                  teamController.clear();
+                } else {
+                  teamController.clear();
+                }
               }
             }
-          }
-          teamFocusNode.unfocus();
-        },
-        displayStringForOption: (TeamsData option) => option.teamName ?? '',
-        fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-          teamController = controller;
-          teamFocusNode = focusNode;
-          return TextField(
-            enabled: teamLists.isNotEmpty,
-            controller: teamController,
-            focusNode: teamFocusNode,
-            onEditingComplete: () {
-              teamFocusNode.unfocus();
-            },
-            onSubmitted: (String value) {
-              onFieldSubmitted();
-              teamController.clear();
-              focusNode.unfocus();
-            },
-            decoration: new InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey, width: 1.0),
+            teamFocusNode.unfocus();
+          },
+          displayStringForOption: (AllTeamsData option) =>
+              option.teamName ?? '',
+          fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+            teamController = controller;
+            teamFocusNode = focusNode;
+            return TextField(
+              enabled: teamLists.isNotEmpty,
+              controller: teamController,
+              focusNode: teamFocusNode,
+              onEditingComplete: () {
+                teamFocusNode.unfocus();
+              },
+              onSubmitted: (String value) {
+                onFieldSubmitted();
+                teamController.clear();
+                focusNode.unfocus();
+              },
+              decoration: new InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                hintText: hintText,
               ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey, width: 1.0),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey, width: 1.0),
-              ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              hintText: hintText,
-            ),
-          );
-        });
+            );
+          }),
+    );
   }
 
   projectField(hintText) {
@@ -705,8 +705,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
         ),
         content: Text(
           !isTeamSelection
-              ? "Please make sure you have selected either a project or a team. Clicking 'Yes' will confirm your team selection and remove any project selections."
-              : "Please make sure you have selected either a project or a team. Clicking 'Yes' will confirm your project selection and remove any team selections.",
+              ? "Please choose either a project or a team. Clicking 'Yes' will confirm your team choice and cancel any project selections."
+              : "Please choose either a project or a team. Clicking 'Yes' will confirm your project choice and cancel any team selections.",
           style: TextStyle(
               fontSize: 14, color: Colors.black, fontWeight: FontWeight.w600),
         ),
@@ -763,7 +763,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
         selectedProjects.isEmpty &&
         selectedTeams.isEmpty) {
       AppUtils.showToastError(
-          "Please provide at least one email from the team, project, or member emails.");
+          "Please select at least one team, project, or add a member's email");
       return false;
     } else {
       return true;

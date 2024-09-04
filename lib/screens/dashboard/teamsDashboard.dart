@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:mappls_gl/mappls_gl.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
@@ -13,7 +10,6 @@ import 'package:mta/screens/chat/ChatGroups.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
-import 'package:mta/utilities/mapClickEvent.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -33,8 +29,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
   WebViewController controller = WebViewController();
 
   BuildContext? ctx;
-
-  List<Data> _projectLists = [];
   List<TeamsData> _teamLists = [];
   List<TeamsData> _searchLists = [];
   FocusNode searchField = new FocusNode();
@@ -45,13 +39,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
   String _errText = "";
   void initState() {
     super.initState();
-
-    MapplsAccountManager.setMapSDKKey("d9edcb4cf5ee2ec1548f976fc4df6613");
-    MapplsAccountManager.setRestAPIKey("d9edcb4cf5ee2ec1548f976fc4df6613");
-    MapplsAccountManager.setAtlasClientId(
-        "96dHZVzsAusjeW22xqjQGtIpq2xN-9K4_c6YSj7N8RFgC9U0wzDlsqNl-E7bYG5HtfoTXI4WU-3TxCgvi2KJIw==");
-    MapplsAccountManager.setAtlasClientSecret(
-        "lrFxI-iSEg94zjTjoqrw-1s9kHOGP2LgG535AnqzVbWN4jb07CJ0l0kQijWK9nK-jHpW0wlRt-YMGaQUitSTE52XYUIadCyk");
     if (Strings.roleId == 7) {
       AppUtils.showprogress();
     }
@@ -734,31 +721,6 @@ class _TeamsDashboardState extends State<TeamsDashboard>
                                                         ),
                                                         Row(
                                                           children: [
-                                                            // IconButton(
-                                                            //     icon: (_teamLists[index].unReadedUserId !=
-                                                            //                 null &&
-                                                            //             _teamLists[index].unReadedUserId!.contains(Strings
-                                                            //                 .userID
-                                                            //                 .toString()))
-                                                            //         ? Image
-                                                            //             .asset(
-                                                            //             'assets/images/chat.png',
-                                                            //             width:
-                                                            //                 25,
-                                                            //             height:
-                                                            //                 25,
-                                                            //           )
-                                                            //         : Image
-                                                            //             .asset(
-                                                            //             'assets/images/zerochat.png',
-                                                            //             width:
-                                                            //                 25,
-                                                            //             height:
-                                                            //                 25,
-                                                            //           ),
-                                                            //     onPressed: () {
-                                                            //       openMapplsPlacePickerWidget();
-                                                            //     }),
                                                             IconButton(
                                                                 icon: (_teamLists[index].unReadedUserId !=
                                                                             null &&
@@ -1068,7 +1030,7 @@ class _TeamsDashboardState extends State<TeamsDashboard>
 
   Future<void> openFile(filePath) async {
     print(filePath);
-    final _result = await OpenFilex.open(filePath);
+    await OpenFilex.open(filePath);
   }
 
   Future<String> downloadFile(String url, String fileName, String dir) async {

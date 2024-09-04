@@ -1,26 +1,22 @@
-import 'dart:convert';
-import 'dart:developer';
-
+// ignore_for_file: must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:mta/models/AddMeetingReq.dart';
+import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/TeamUsersRes.dart';
-import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/location_selection.dart';
 import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
-import 'package:mta/utilities/drawables.dart';
-import 'package:mta/utilities/strings.dart';
 import 'package:mta/utilities/theme_button.dart';
 import 'package:provider/provider.dart';
 
 class MembersSelection extends StatefulWidget {
   AddMeetingReq? addMeetingData;
   List<String>? invitedMails;
-  List<TeamsData>? selectedTeams;
+  List<AllTeamsData>? selectedTeams;
   List<Data>? selectedProjects;
   MembersSelection(
       {super.key,
@@ -50,10 +46,13 @@ class _MembersSelectionState extends State<MembersSelection> {
 
   bool isButtonEnabled = false;
 
+  int totalUserCount = 0;
+
+  List totalUser = [];
+
   @override
   void initState() {
     super.initState();
-    print(">>>>kk:${Strings.authToken}");
     configData();
   }
 
@@ -79,6 +78,16 @@ class _MembersSelectionState extends State<MembersSelection> {
         setState(() {
           teamUsersLists["$team_id"] = response.data!;
         });
+
+        for (var user in response.data!) {
+          if (!totalUser.contains(user.email)) {
+            totalUser.add(user.email!);
+          }
+        }
+      } else {
+        setState(() {
+          teamUsersLists["$team_id"] = [];
+        });
       }
     }).catchError((onError) {
       print(onError.toString());
@@ -92,9 +101,18 @@ class _MembersSelectionState extends State<MembersSelection> {
       // AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
-          projectUsersLists["$project_id"] = response.data!;
+          projectUsersLists["$project_id"] = response.data ?? [];
         });
-        log(">>>>data:${jsonEncode(projectUsersLists)}");
+
+        for (var user in response.data!) {
+          if (!totalUser.contains(user.email)) {
+            totalUser.add(user.email!);
+          }
+        }
+      } else {
+        setState(() {
+          projectUsersLists["$project_id"] = [];
+        });
       }
     }).catchError((onError) {
       // AppUtils.dismissprogress();
@@ -148,7 +166,7 @@ class _MembersSelectionState extends State<MembersSelection> {
         padding: EdgeInsets.only(left: 20.0, right: 20, bottom: 10),
         child: ThemeButton(
             title:
-                widget.addMeetingData!.type == "2" ? "CREATE MEATING" : "NEXT",
+                widget.addMeetingData!.type == "2" ? "CREATE MEETING" : "NEXT",
             buttonfunction: submitData),
       ),
       body: SingleChildScrollView(
@@ -208,62 +226,67 @@ class _MembersSelectionState extends State<MembersSelection> {
                       )
                     : SizedBox(),
                 widget.invitedMails!.isNotEmpty ? inviteList() : SizedBox(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.addMeetingData!.meetingType == "Team"
-                          ? "Teams"
-                          : "Projects",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "Select all",
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                        Theme(
-                          data: ThemeData(useMaterial3: false),
-                          child: Switch(
-                            activeColor: Colors.blue,
-                            value: _switchValue,
-                            onChanged: (value) {
-                              setState(() {
-                                _switchValue = value;
-                              });
-                              if (_switchValue == true) {
-                                if (widget.addMeetingData!.meetingType ==
-                                    "Team") {
-                                  print(">>>>>2");
-                                  teamUsersLists.forEach((groupName, users) {
-                                    for (var user in users) {
-                                      if (!selectedUsers.contains(user.email)) {
-                                        selectedUsers.add(user.email!);
-                                      }
-                                    }
-                                  });
-                                } else {
-                                  projectUsersLists.forEach((groupName, users) {
-                                    for (var user in users) {
-                                      if (!selectedUsers.contains(user.email)) {
-                                        selectedUsers.add(user.email!);
-                                      }
-                                    }
-                                  });
-                                }
-                              } else {
-                                selectedUsers = [];
-                              }
-                              setState(() {});
-                            },
+                widget.addMeetingData!.meetingTypeId!.isNotEmpty
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.addMeetingData!.meetingType == "Team"
+                                ? "Teams"
+                                : "Projects",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
                           ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
+                          Row(
+                            children: [
+                              Text(
+                                "Select all",
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                              Theme(
+                                data: ThemeData(useMaterial3: false),
+                                child: Switch(
+                                  activeColor: Colors.blue,
+                                  value: _switchValue,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _switchValue = value;
+                                    });
+                                    if (_switchValue == true) {
+                                      if (widget.addMeetingData!.meetingType ==
+                                          "Team") {
+                                        teamUsersLists
+                                            .forEach((groupName, users) {
+                                          for (var user in users) {
+                                            if (!selectedUsers
+                                                .contains(user.email)) {
+                                              selectedUsers.add(user.email!);
+                                            }
+                                          }
+                                        });
+                                      } else {
+                                        projectUsersLists
+                                            .forEach((groupName, users) {
+                                          for (var user in users) {
+                                            if (!selectedUsers
+                                                .contains(user.email)) {
+                                              selectedUsers.add(user.email!);
+                                            }
+                                          }
+                                        });
+                                      }
+                                    } else {
+                                      selectedUsers = [];
+                                    }
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                    : Container(),
                 SizedBox(height: 10),
                 Theme(
                     data: Theme.of(context).copyWith(
@@ -272,7 +295,9 @@ class _MembersSelectionState extends State<MembersSelection> {
                     ),
                     child: widget.addMeetingData!.meetingType == "Team"
                         ? teamList()
-                        : projectList()),
+                        : widget.addMeetingData!.meetingTypeId!.isNotEmpty
+                            ? projectList()
+                            : Container()),
                 SizedBox(
                   height: 70,
                 )
@@ -332,25 +357,34 @@ class _MembersSelectionState extends State<MembersSelection> {
                     : Icon(Icons.keyboard_arrow_down),
               ),
               if (expandedStatus[groupName] ?? false)
-                Column(
-                  children: users.map((user) {
-                    return ListTile(
-                      title: Text(user.name!),
-                      trailing: Checkbox(
-                        onChanged: (val) {
-                          if (val!) {
-                            selectedUsers.add(user.email!);
-                          } else {
-                            selectedUsers.remove(user.email);
-                          }
-                          setState(() {});
-                        },
-                        value: selectedUsers.any((element) =>
-                            element.toLowerCase() == user.email!.toLowerCase()),
+                users.isEmpty
+                    ? ListTile(title: Center(child: Text("No users found")))
+                    : Column(
+                        children: users.map((user) {
+                          return ListTile(
+                            title: Text(user.name!),
+                            trailing: Checkbox(
+                              onChanged: (val) {
+                                if (val!) {
+                                  selectedUsers.add(user.email!);
+
+                                  if (totalUser.length ==
+                                      selectedUsers.length) {
+                                    _switchValue = true;
+                                  }
+                                } else {
+                                  selectedUsers.remove(user.email);
+                                  _switchValue = false;
+                                }
+                                setState(() {});
+                              },
+                              value: selectedUsers.any((element) =>
+                                  element.toLowerCase() ==
+                                  user.email!.toLowerCase()),
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
-                ),
             ],
           ),
         );
@@ -360,6 +394,8 @@ class _MembersSelectionState extends State<MembersSelection> {
 
   projectList() {
     return ListView(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       children: projectUsersLists.entries.map((entry) {
         String groupName = getProjectNameById(entry.key);
         List<FetchMapedUsersData> users = entry.value;
@@ -404,25 +440,33 @@ class _MembersSelectionState extends State<MembersSelection> {
                     : Icon(Icons.keyboard_arrow_down),
               ),
               if (expandedStatus[groupName] ?? false)
-                Column(
-                  children: users.map((user) {
-                    return ListTile(
-                      title: Text(user.name!),
-                      trailing: Checkbox(
-                        onChanged: (val) {
-                          if (val!) {
-                            selectedUsers.add(user.email!);
-                          } else {
-                            selectedUsers.remove(user.email);
-                          }
-                          setState(() {});
-                        },
-                        value: selectedUsers.any((element) =>
-                            element.toLowerCase() == user.email!.toLowerCase()),
+                users.isEmpty
+                    ? ListTile(title: Center(child: Text("No users found")))
+                    : Column(
+                        children: users.map((user) {
+                          return ListTile(
+                            title: Text(user.name!),
+                            trailing: Checkbox(
+                              onChanged: (val) {
+                                if (val!) {
+                                  selectedUsers.add(user.email!);
+                                  if (totalUser.length ==
+                                      selectedUsers.length) {
+                                    _switchValue = true;
+                                  }
+                                } else {
+                                  selectedUsers.remove(user.email);
+                                  _switchValue = false;
+                                }
+                                setState(() {});
+                              },
+                              value: selectedUsers.any((element) =>
+                                  element.toLowerCase() ==
+                                  user.email!.toLowerCase()),
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
-                ),
             ],
           ),
         );
@@ -445,9 +489,9 @@ class _MembersSelectionState extends State<MembersSelection> {
             addMeetingReq!.guestEmail!.add(element);
           }
         });
-        print(">AddMeeting:${jsonEncode(addMeetingReq)}");
         if (addMeetingReq!.type == "2") {
           addMeetingReq!.location = null;
+          AppUtils.showprogress();
           final api = Provider.of<ApiService>(context, listen: false);
           api.createMeeting(addMeetingReq!).then((response) {
             if (response.status!) {
@@ -465,7 +509,9 @@ class _MembersSelectionState extends State<MembersSelection> {
               AppUtils.showErrorSnackBar(context, response.message!);
               isButtonEnabled = false;
             }
+            AppUtils.dismissprogress();
           }).catchError((onError) {
+            AppUtils.dismissprogress();
             isButtonEnabled = false;
             AppUtils.showToastError("Something went wrong!");
           });

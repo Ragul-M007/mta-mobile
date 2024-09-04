@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:convert';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/dashboard/teamsDashboard.dart';
 import 'package:mta/screens/meetings/create_meeting.dart';
 import 'package:mta/screens/meetings/meeting_details.dart';
 import 'package:mta/screens/meetings/meeting_history.dart';
@@ -44,6 +47,10 @@ class _MeetingscontentState extends State<Meetingscontent>
 
   bool meetingCraetionAccess = false;
 
+  List<MeetingsData> _searchLists = [];
+  FocusNode searchField = new FocusNode();
+  TextEditingController _searchFieldController = TextEditingController();
+
   void initState() {
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
@@ -78,14 +85,17 @@ class _MeetingscontentState extends State<Meetingscontent>
     final formattedDate = formatter.format(now);
     final api = Provider.of<ApiService>(context, listen: false);
     api.getUpcomingMeeting(formattedDate).then((response) {
-      // AppUtils.dismissprogress();
+      AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
           meetingsData = response.data ?? [];
         });
         print(">>>>:${jsonEncode(meetingsData)}");
+      } else {
+        meetingsData = [];
       }
     }).catchError((onError) {
+      meetingsData = [];
       // AppUtils.dismissprogress();
       print(onError.toString());
       //getProjects();
@@ -252,200 +262,315 @@ class _MeetingscontentState extends State<Meetingscontent>
                     menutitle: "Logout",
                   ),
                 ],
-                child: Scaffold(
-                  backgroundColor: Colors.grey[300],
-                  appBar: AppBar(
-                    iconTheme: IconThemeData(color: Colors.black),
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(30.0))),
-                    elevation: 3,
-                    title: Text(
-                      "Meetings",
-                      style: Drawables.adddoccontentstyle(
-                          Colors.black, 16.0, FontWeight.bold),
-                    ),
-                    leading: SizedBox(
-                      height: 25.0,
-                      width: 25.0,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.menu,
-                          size: 25.0,
-                          color: const Color(0xFF979797),
+                child: WillPopScope(
+                  onWillPop: () {
+                    if (Strings.fromNotificationNewMeeting) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeamsDashboard(),
                         ),
-                        onPressed: () {
-                          _controller?.toggle();
-                        },
+                        (route) => false,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                    throw '';
+                  },
+                  child: Scaffold(
+                    backgroundColor: Colors.grey[300],
+                    appBar: AppBar(
+                      iconTheme: IconThemeData(color: Colors.black),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(30.0))),
+                      elevation: 3,
+                      title: Text(
+                        "Meetings",
+                        style: Drawables.adddoccontentstyle(
+                            Colors.black, 16.0, FontWeight.bold),
                       ),
-                    ),
-                    actions: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
+                      leading: SizedBox(
+                        height: 25.0,
+                        width: 25.0,
                         child: IconButton(
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => MeetingHistory()));
-                            },
-                            icon: Icon(
-                              Icons.history,
-                              size: 25.0,
-                              // color: const Color(0xFF979797),
-                            )),
-                      )
-                    ],
-                  ),
-                  floatingActionButton: meetingCraetionAccess
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (ctx) => CreateMeeting(),
-                              ),
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 20,
-                            child: Image.asset(
-                              "assets/icons/gridicons_create.png",
-                              height: 20,
-                            ),
-                            backgroundColor: Colors.grey.withOpacity(0.8),
+                          icon: Icon(
+                            Icons.menu,
+                            size: 25.0,
+                            color: const Color(0xFF979797),
                           ),
+                          onPressed: () {
+                            _controller?.toggle();
+                          },
+                        ),
+                      ),
+                      actions: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => MeetingHistory()));
+                              },
+                              icon: Icon(
+                                Icons.history,
+                                size: 25.0,
+                                // color: const Color(0xFF979797),
+                              )),
                         )
-                      : Container(),
-                  body: meetingsData.length > 0
-                      ? ListView.builder(
-                          itemCount: meetingsData.length,
-                          padding: EdgeInsets.all(20),
-                          itemBuilder: (BuildContext ctx, int index) {
-                            return Padding(
-                              padding: EdgeInsets.all(10),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(
-                                          builder: (context) => MeetingDetails(
-                                              fromHistory: false,
-                                              imeetifyMeetingId:
-                                                  meetingsData[index]
-                                                      .imeetifyMeetingId!,
-                                              meeting_id: meetingsData[index]
-                                                  .meetingId!)))
-                                      .whenComplete(() => getMeetings());
-                                },
-                                child: Container(
-                                  height: 60,
-                                  child: Padding(
-                                      padding:
-                                          EdgeInsets.fromLTRB(14, 4, 15, 4),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.5,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                        meetingsData[index]
-                                                            .title!,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors.black87,
-                                                                14.0,
-                                                                FontWeight
-                                                                    .w500)),
-                                                    SizedBox(
-                                                      width: 2,
-                                                    ),
-                                                    Text(
-                                                        AppUtils()
-                                                            .getMeetingDateFormat(
-                                                                meetingsData[
-                                                                        index]
-                                                                    .start!,
-                                                                meetingsData[
-                                                                        index]
-                                                                    .end!),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors.grey,
-                                                                12.0,
-                                                                FontWeight
-                                                                    .w300)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                      ],
+                      bottom: PreferredSize(
+                          preferredSize: Size.fromHeight(kToolbarHeight),
+                          child: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Container(
+                              //  padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25),
+                                color: const Color(0xFFeceeef),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Material(
+                                  color: const Color(0xFFeceeef),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: TextField(
+                                          focusNode: searchField,
+                                          controller: _searchFieldController,
+                                          decoration: InputDecoration.collapsed(
+                                            hintText: ' Search',
                                           ),
-                                          Container(
-                                            width: 75,
-                                            height: 30,
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    CustomColors.primarycolor,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                if (meetingsData[index]
-                                                        .meetingLink !=
-                                                    null) {
-                                                  launchLink(meetingsData[index]
-                                                      .meetingLink!);
-                                                } else {
-                                                  AppUtils.showToastError(
-                                                      "Invalid URL!");
-                                                }
-                                              },
-                                              child: meetingsData[index].type !=
-                                                      "1"
-                                                  ? Text(
-                                                      'JOIN',
-                                                      style: TextStyle(
-                                                          color: Colors.white),
-                                                    )
-                                                  : Icon(
-                                                      Icons.directions_outlined,
-                                                      color: Colors.white,
-                                                    ),
-                                            ),
-                                          ),
-                                        ],
-                                      )),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.white,
+                                          onChanged: (value) {
+                                            if (value.isEmpty) {
+                                              setState(() {
+                                                _searchLists = [];
+                                              });
+                                              return;
+                                            }
+                                            _searchLists = [];
+                                            meetingsData
+                                                .forEach((projectDetail) {
+                                              if (projectDetail.title!
+                                                  .toLowerCase()
+                                                  .startsWith(
+                                                      value.toLowerCase()))
+                                                _searchLists.add(projectDetail);
+                                            });
+                                            print(
+                                                "dataaaa ${_searchLists.length}");
+                                            setState(() {});
+                                          },
+                                        ),
+                                      ),
+                                      InkWell(
+                                        child: Icon(
+                                          Icons.search,
+                                          color: Colors.black,
+                                        ),
+                                        onTap: () {},
+                                      )
+                                    ],
                                   ),
                                 ),
                               ),
-                            );
-                          })
-                      : Center(child: Text("No Meetings Found")),
+                            ),
+                          )),
+                    ),
+                    floatingActionButton: meetingCraetionAccess
+                        ? InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) => CreateMeeting(),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 20,
+                              child: Image.asset(
+                                "assets/icons/gridicons_create.png",
+                                height: 20,
+                              ),
+                              backgroundColor:
+                                  CustomColors.appthemecolor.withOpacity(0.8),
+                            ),
+                          )
+                        : Container(),
+                    body: meetingsData.length > 0
+                        ? ListView.builder(
+                            itemCount: _searchLists.isNotEmpty
+                                ? _searchLists.length
+                                : meetingsData.length,
+                            padding: EdgeInsets.all(20),
+                            itemBuilder: (BuildContext ctx, int index) {
+                              return Padding(
+                                padding: EdgeInsets.all(10),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: (context) =>
+                                                MeetingDetails(
+                                                    fromHistory: false,
+                                                    meeting_id: _searchLists
+                                                            .isNotEmpty
+                                                        ? _searchLists[index]
+                                                            .meetingId!
+                                                        : meetingsData[index]
+                                                            .meetingId!)))
+                                        .whenComplete(() => getMeetings());
+                                  },
+                                  child: Container(
+                                    height: 60,
+                                    child: Padding(
+                                        padding:
+                                            EdgeInsets.fromLTRB(14, 4, 15, 4),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.5,
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                          _searchLists.isNotEmpty
+                                                              ? _searchLists[
+                                                                      index]
+                                                                  .title!
+                                                              : meetingsData[
+                                                                      index]
+                                                                  .title!,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors
+                                                                      .black87,
+                                                                  14.0,
+                                                                  FontWeight
+                                                                      .w500)),
+                                                      SizedBox(
+                                                        width: 2,
+                                                      ),
+                                                      Text(
+                                                          _searchLists
+                                                                  .isNotEmpty
+                                                              ? AppUtils().getMeetingDateFormat(
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .start!,
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .end!)
+                                                              : AppUtils().getMeetingDateFormat(
+                                                                  meetingsData[
+                                                                          index]
+                                                                      .start!,
+                                                                  meetingsData[
+                                                                          index]
+                                                                      .end!),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.grey,
+                                                                  12.0,
+                                                                  FontWeight
+                                                                      .w300)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Container(
+                                              width: 75,
+                                              height: 30,
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      CustomColors.primarycolor,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  if (_searchLists.isNotEmpty) {
+                                                    launchLink(_searchLists[
+                                                                    index]
+                                                                .type ==
+                                                            "1"
+                                                        ? _searchLists[index]
+                                                            .location!
+                                                        : _searchLists[index]
+                                                            .meetingLink!);
+                                                  } else {
+                                                    launchLink(meetingsData[
+                                                                    index]
+                                                                .type ==
+                                                            "1"
+                                                        ? meetingsData[index]
+                                                            .location!
+                                                        : meetingsData[index]
+                                                            .meetingLink!);
+                                                  }
+                                                },
+                                                child: (_searchLists
+                                                                .isNotEmpty &&
+                                                            _searchLists[index]
+                                                                    .type !=
+                                                                "1") ||
+                                                        (_searchLists.isEmpty &&
+                                                            meetingsData[index]
+                                                                    .type !=
+                                                                "1")
+                                                    ? Text(
+                                                        'JOIN',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white),
+                                                      )
+                                                    : Icon(
+                                                        Icons
+                                                            .directions_outlined,
+                                                        color: Colors.white,
+                                                      ),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            })
+                        : Center(child: Text("No Meetings Found")),
+                  ),
                 ))));
   }
 
@@ -464,8 +589,12 @@ class _MeetingscontentState extends State<Meetingscontent>
   }
 
   launchLink(String url) async {
-    if (!await launchUrl(Uri.parse(url))) {
-      throw Exception('Could not launch $url');
+    if (url != null && Strings.urlRegex.hasMatch(url)) {
+      if (!await launchUrl(Uri.parse(url))) {
+        throw Exception('Could not launch $url');
+      }
+    } else {
+      AppUtils.showToastError("Invalid URL");
     }
   }
 }

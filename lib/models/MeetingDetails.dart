@@ -1,19 +1,15 @@
 class MeetingDetailsRes {
   bool? status;
   String? message;
-  List<MeetingDetail>? data;
+  MeetingDetail? data;
 
   MeetingDetailsRes({this.status, this.message, this.data});
 
   MeetingDetailsRes.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    if (json['data'] != null) {
-      data = <MeetingDetail>[];
-      json['data'].forEach((v) {
-        data!.add(new MeetingDetail.fromJson(v));
-      });
-    }
+    data =
+        json['data'] != null ? new MeetingDetail.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -21,7 +17,7 @@ class MeetingDetailsRes {
     data['status'] = this.status;
     data['message'] = this.message;
     if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+      data['data'] = this.data!.toJson();
     }
     return data;
   }

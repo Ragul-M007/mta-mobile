@@ -1629,6 +1629,60 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<AllTeamsRes> fetchAllTeams() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AllTeamsRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/meeting/allteams',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AllTeamsRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<DashboardRes> fetchAllProjects() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<DashboardRes>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/meeting/allprojects',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = DashboardRes.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<CommonRes> createMeeting(AddMeetingReq body) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};

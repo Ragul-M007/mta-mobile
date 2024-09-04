@@ -2,17 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:google_places_flutter/model/place_details.dart';
 import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
-import 'package:mta/utilities/drawables.dart';
+import 'package:mta/utilities/strings.dart';
 import 'package:mta/utilities/theme_button.dart';
 import 'package:provider/provider.dart';
 
@@ -28,11 +26,8 @@ class _LocationSelectionState extends State<LocationSelection> {
   BuildContext? ctx;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-  LatLng _initialPosition =
-      LatLng(0.0, 0.0); // Default to 0,0 if location is not available
 
   CameraPosition initialLocation = CameraPosition(target: LatLng(28.0, 77.0));
-  bool _locationFetched = false;
 
   double? height;
 
@@ -62,11 +57,7 @@ class _LocationSelectionState extends State<LocationSelection> {
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        _initialPosition = LatLng(position.latitude, position.longitude);
-        print(">>>>>lat:$_initialPosition,$_markedLocation");
-        _locationFetched = true;
-      });
+      setState(() {});
       if (_markedLocation == null) {
         // Move the camera to the user's location
         final GoogleMapController controller = await _controller.future;
@@ -126,7 +117,7 @@ class _LocationSelectionState extends State<LocationSelection> {
               child: Container(
                 // height: 35,
                 child: GooglePlaceAutoCompleteTextField(
-                  googleAPIKey: "AIzaSyBGzK5REYl1icyJd-Bgu4A6Af9vbH-y1FM",
+                  googleAPIKey: Strings.googleAPIKey,
                   itemClick: (prediction) async {
                     _searchFieldController.text = prediction.description!;
                     _searchFieldController.selection =
@@ -134,6 +125,7 @@ class _LocationSelectionState extends State<LocationSelection> {
                             offset: prediction.description!.length));
                     // Update the map to display the new marker
                     setState(() {});
+                    FocusManager.instance.primaryFocus?.unfocus();
                   },
                   getPlaceDetailWithLatLng: (postalCodeResponse) async {
                     _markedLocation = LatLng(
@@ -149,6 +141,7 @@ class _LocationSelectionState extends State<LocationSelection> {
                       ),
                     ));
                     setState(() {});
+                    FocusManager.instance.primaryFocus?.unfocus();
                     // Add a marker to the selected place
                   },
                   inputDecoration: InputDecoration(
@@ -179,6 +172,7 @@ class _LocationSelectionState extends State<LocationSelection> {
                 onTap: (LatLng point) {
                   _markedLocation = point;
                   setState(() {});
+                  FocusManager.instance.primaryFocus?.unfocus();
                 },
                 markers: _markedLocation != null
                     ? {

@@ -1,35 +1,31 @@
+// ignore_for_file: unnecessary_null_comparison, must_be_immutable
+
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingDetails.dart';
-import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/models/UpdateMeetingReq.dart';
 import 'package:mta/models/cancelMeetingReq.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:mta/utilities/theme_button.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MeetingDetails extends StatefulWidget {
   int meeting_id;
-  String imeetifyMeetingId;
   bool fromHistory;
   MeetingDetails(
-      {super.key,
-      required this.meeting_id,
-      required this.imeetifyMeetingId,
-      required this.fromHistory});
+      {super.key, required this.meeting_id, required this.fromHistory});
 
   @override
   State<MeetingDetails> createState() => _MeetingDetailsState();
@@ -69,6 +65,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
 
   void dispose() {
     super.dispose();
+    Strings.fromNotificationNewMeeting = false;
   }
 
   getMeetings() {
@@ -77,11 +74,13 @@ class _MeetingDetailsState extends State<MeetingDetails> {
     final api = Provider.of<ApiService>(context, listen: false);
     api.getMeetingById(widget.meeting_id).then((response) async {
       AppUtils.dismissprogress();
+      print(">>>>>>11:${response.status!}");
       if (response.status!) {
         setState(() {
-          meetingsData = response.data![0];
+          meetingsData = response.data!;
         });
-        if (meetingsData!.type == "1") {
+        if (meetingsData!.type == "1" &&
+            Strings.urlRegex.hasMatch(meetingsData!.location!)) {
           _getAddressFromLink(meetingsData!.location!);
         }
       }
@@ -97,10 +96,28 @@ class _MeetingDetailsState extends State<MeetingDetails> {
       create: (context) => ApiService.create(),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Builder(
-          builder: (BuildContext newContext) {
-            return meetingDetailsWidget(newContext);
+        body: WillPopScope(
+          onWillPop: () {
+            if (Strings.fromNotificationNewMeeting) {
+              Strings.fromNotificationNewMeeting = false;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Meetings(),
+                ),
+                (route) => false,
+              );
+            } else {
+              Navigator.pop(context);
+            }
+
+            throw '';
           },
+          child: Builder(
+            builder: (BuildContext newContext) {
+              return meetingDetailsWidget(newContext);
+            },
+          ),
         ),
       ),
     );
@@ -118,7 +135,18 @@ class _MeetingDetailsState extends State<MeetingDetails> {
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: AppBarWidget(
                   backButtonfunction: () {
-                    Navigator.pop(context);
+                    if (Strings.fromNotificationNewMeeting) {
+                      Strings.fromNotificationNewMeeting = false;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Meetings(),
+                        ),
+                        (route) => false,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
                   },
                   title: "Meeting Details",
                   actionWidget: [
@@ -301,28 +329,31 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                   TextStyle(fontSize: 16, color: Colors.grey),
                             )),
                       ),
-                      ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: meetingsData!.guestEmail!
-                            .length, // Adjust the item count as needed
-                        itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              ListTile(
-                                title: Text(meetingsData!.guestEmail![index]),
-                              ),
-                              const Divider(
-                                height:
-                                    1, // Adjust the divider height if necessary
-                                color: Colors.grey,
-                                thickness:
-                                    1, // Adjust the divider thickness if necessary
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                      meetingsData!.guestEmail!.isNotEmpty
+                          ? ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: meetingsData!.guestEmail!
+                                  .length, // Adjust the item count as needed
+                              itemBuilder: (context, index) {
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(
+                                          meetingsData!.guestEmail![index]),
+                                    ),
+                                    const Divider(
+                                      height:
+                                          1, // Adjust the divider height if necessary
+                                      color: Colors.grey,
+                                      thickness:
+                                          1, // Adjust the divider thickness if necessary
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
+                          : Container(),
                     ],
                   ),
                 ),
@@ -362,8 +393,12 @@ class _MeetingDetailsState extends State<MeetingDetails> {
   }
 
   launchLink(String url) async {
-    if (!await launchUrl(Uri.parse(url))) {
-      throw Exception('Could not launch $url');
+    if (url != null && Strings.urlRegex.hasMatch(url)) {
+      if (!await launchUrl(Uri.parse(url))) {
+        throw Exception('Could not launch $url');
+      }
+    } else {
+      AppUtils.showToastError("Invalid URL");
     }
   }
 
@@ -565,8 +600,8 @@ class _MeetingDetailsState extends State<MeetingDetails> {
       var date1 =
           "${startDateTime.day}-${startDateTime.month}-${startDateTime.year}";
 
-      var startShift = DateTime(startDateTime!.year, startDateTime!.month,
-          startDateTime!.day, choosenFromTime!.hour, choosenFromTime!.minute);
+      var startShift = DateTime(startDateTime.year, startDateTime.month,
+          startDateTime.day, choosenFromTime!.hour, choosenFromTime!.minute);
 
       final endShift = DateTime(currDate.year, currDate.month, currDate.day,
           currDate.hour, currDate.minute);
@@ -660,6 +695,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
       return;
     }
     Navigator.of(context).pop();
+    AppUtils.showprogress();
     UpdateMeetingReq updateMeetingReq = UpdateMeetingReq();
     final DateFormat inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
     DateTime dateTime = inputFormat.parse(meetingsData!.end!);
@@ -677,8 +713,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
         : meetingsData!.end!;
     updateMeetingReq.meetingId = meetingsData!.meetingId.toString();
     updateMeetingReq.type = meetingsData!.type!;
-    updateMeetingReq.meeting =
-        meetingsData!.imeetifyMeetingId ?? widget.imeetifyMeetingId;
+    updateMeetingReq.meeting = meetingsData!.imeetifyMeetingId;
     final api = Provider.of<ApiService>(context, listen: false);
     print(">>>>:${Strings.authToken}");
     print(">>>>:${jsonEncode(updateMeetingReq)}");
@@ -689,7 +724,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
       } else {
         AppUtils.showToastError(response.message!);
       }
+      AppUtils.dismissprogress();
     }).catchError((onError) {
+      AppUtils.dismissprogress();
       AppUtils.showToastError("Something went wrong!");
     });
   }
@@ -755,13 +792,20 @@ class _MeetingDetailsState extends State<MeetingDetails> {
   }
 
   Future<void> shareFile() async {
-    await FlutterShare.share(
-      title: "Share link",
-      text: meetingsData!.title!,
-      linkUrl: meetingsData!.type == "1"
-          ? meetingsData!.location
-          : meetingsData!.meetingLink,
-    );
+    if ((meetingsData!.type == "1" &&
+            Strings.urlRegex.hasMatch(meetingsData!.location!)) ||
+        (meetingsData!.type == "2" &&
+            Strings.urlRegex.hasMatch(meetingsData!.meetingLink!))) {
+      await FlutterShare.share(
+        title: "Share link",
+        text: meetingsData!.title!,
+        linkUrl: meetingsData!.type == "1"
+            ? meetingsData!.location
+            : meetingsData!.meetingLink,
+      );
+    } else {
+      AppUtils.showToastError("Invalid URL");
+    }
   }
 
   themeButton(

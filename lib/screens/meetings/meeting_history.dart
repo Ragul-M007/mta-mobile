@@ -5,7 +5,6 @@ import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/meeting_details.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
-import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:provider/provider.dart';
 
@@ -100,7 +99,6 @@ class _MeetingHistoryState extends State<MeetingHistory> {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => MeetingDetails(
                               fromHistory: true,
-                              imeetifyMeetingId: "",
                               meeting_id: meetingsData[index].meetingId!)));
                     },
                     child: Card(

@@ -113,7 +113,6 @@ dependencies:
   geocoder:
     git: https://github.com/pranavskeintech/skein_geocoder
   flutter_portal: ^0.4.0
-  mappls_gl: ^1.0.2
   location: ^6.0.2
   dropdown_button2: ^2.3.9
   google_maps_flutter: ^2.6.1

@@ -1073,22 +1073,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  mappls_gl:
-    dependency: "direct main"
-    description:
-      name: mappls_gl
-      sha256: "989bbd5c3a507fc0feae2e1f06442314b6f676fb4df320218d336a8f8bdc5393"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
-  mappls_gl_platform_interface:
-    dependency: transitive
-    description:
-      name: mappls_gl_platform_interface
-      sha256: "89d21747f5dfb0e2a4b74931390351d2ac6d56d81edd14c101b4e81d4b7a53b6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   matcher:
     dependency: transitive
     description:

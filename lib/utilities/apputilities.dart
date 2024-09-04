@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:io';
 
 import 'package:external_path/external_path.dart';
@@ -230,7 +232,7 @@ class AppUtils {
     }
   }
 
-  static Future<String?> findFilePath() async {
+  static findFilePath() async {
     String? basePath;
     if (Platform.isAndroid) {
       basePath = await ExternalPath.getExternalStoragePublicDirectory(

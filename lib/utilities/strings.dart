@@ -13,6 +13,7 @@ mixin Strings {
   static bool fromNotificationComments = false;
   static bool fromNotificationDocuments = false;
   static bool fromNotificationChat = false;
+  static bool fromNotificationNewMeeting = false;
 
   static bool fromForgotPassword = false;
   static String authToken = '';
@@ -90,6 +91,7 @@ mixin Strings {
   static bool fromNotificationScren = false;
 
   static int? notificationID;
+  static int? meetingID;
 
   static bool categoriesforReply = false;
 
@@ -107,4 +109,9 @@ mixin Strings {
   static bool isSelectionEnabled = false;
 
   static String locationLink = "https://www.google.com/maps?q=";
+
+  static RegExp urlRegex = RegExp(
+      r'^(?:http(s)?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)');
+
+  static String googleAPIKey = "AIzaSyBGzK5REYl1icyJd-Bgu4A6Af9vbH-y1FM";
 }

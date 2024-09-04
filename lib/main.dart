@@ -4,18 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mta/firebase_options.dart';
-import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/screens/splashscreen.dart';
 
-
 Future<void> _messageHandler(RemoteMessage message) async {
-  print('background message ${message.notification!.body}');
+  print('background message ${message.data}');
 }
+
 Future<void> main() async {
   //_setupLogging();
   // runApp(SplashScreen());
   WidgetsFlutterBinding.ensureInitialized();
-  final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(

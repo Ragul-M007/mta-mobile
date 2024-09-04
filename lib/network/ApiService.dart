@@ -5,6 +5,7 @@ import 'package:mta/models/AddAttendanceRes.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/AddDocRes.dart';
 import 'package:mta/models/AddMeetingReq.dart';
+import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/BackLinkRes.dart';
@@ -269,6 +270,12 @@ abstract class ApiService {
 
   @GET("/meeting/accessdetails/{user_id}")
   Future<MeetingAccessRes> getMeetingAccess(@Path("user_id") int user_id);
+
+  @GET("/meeting/allteams")
+  Future<AllTeamsRes> fetchAllTeams();
+
+  @GET("/meeting/allprojects")
+  Future<DashboardRes> fetchAllProjects();
 
   @POST("/meeting/createmeeting")
   Future<CommonRes> createMeeting(@Body() AddMeetingReq body);
