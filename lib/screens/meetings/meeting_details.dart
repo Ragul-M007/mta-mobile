@@ -158,9 +158,10 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                             },
                             icon: Icon(
                               Icons.delete_outline,
-                              size: 20,
+                              size: 22,
                             ))
                         : Container()
+                        
                   ]),
             ),
             body: Padding(
@@ -183,7 +184,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                           children: [
                             Text(
                               AppUtils().getMeetingDateFormat(
-                                  meetingsData!.start!, meetingsData!.end!),
+                                  meetingsData!.start!, meetingsData!.end!,MediaQuery.of(context)
+                                                          .size
+                                                          .width),
                               style: TextStyle(
                                   color: CustomColors.meetingSubtitleFontColor,
                                   fontSize: 16),
@@ -203,7 +206,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                     ))
                                 : Icon(
                                     Icons.schedule,
-                                    size: 14,
+                                    size: 16,
                                     color:
                                         CustomColors.meetingSubtitleFontColor,
                                   ),
@@ -533,14 +536,14 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                 child: TextField(
                   controller: startTimeController,
                   enabled: false,
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black, fontSize: 12),
                   decoration: InputDecoration(
                     disabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     contentPadding: EdgeInsets.all(15),
                     hintText: "Select Time",
-                    hintStyle: TextStyle(color: CustomColors.fontColor),
+                    hintStyle: TextStyle(color: CustomColors.fontColor,fontSize: 12),
                     suffixIcon: Icon(
                       Icons.schedule,
                       color: Colors.grey,
@@ -564,14 +567,14 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                 child: TextField(
                   controller: endTimeController,
                   enabled: false,
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black,fontSize: 12),
                   decoration: InputDecoration(
                     disabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     contentPadding: EdgeInsets.all(15),
                     hintText: "Select Time",
-                    hintStyle: TextStyle(color: CustomColors.fontColor),
+                    hintStyle: TextStyle(color: CustomColors.fontColor,fontSize: 12),
                     suffixIcon: Icon(
                       Icons.schedule,
                       color: Colors.grey,

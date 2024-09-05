@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_null_comparison
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
@@ -465,7 +466,9 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                                       .start!,
                                                                   meetingsData[
                                                                           index]
-                                                                      .end!),
+                                                                      .end!,MediaQuery.of(context)
+                                                          .size
+                                                          .width),
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
@@ -477,9 +480,11 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                                       FontWeight
                                                                           .w400)),
                                                           SizedBox(
-                                                            width: 5,
+                                                            width: 2,
                                                           ),
-                                                          Icon(
+                                                        MediaQuery.of(context)
+                                                          .size
+                                                          .width<376?Container():  Icon(
                                                             Icons.schedule,
                                                             size: 14,
                                                             color: CustomColors
@@ -520,8 +525,9 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                     ? Text(
                                                         'JOIN',
                                                         style: TextStyle(
-                                                            fontWeight:
+                                                            fontWeight:Platform.isIOS?FontWeight.bold:
                                                                 FontWeight.w700,
+                                                                fontSize: 12,
                                                             color:
                                                                 Colors.white),
                                                       )

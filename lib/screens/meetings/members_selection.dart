@@ -169,139 +169,141 @@ class _MembersSelectionState extends State<MembersSelection> {
                 widget.addMeetingData!.type == "2" ? "CREATE MEETING" : "NEXT",
             buttonfunction: submitData),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 30.0, right: 30, top: 30),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                widget.invitedMails!.isNotEmpty
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Invited Members",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          // Row(
-                          //   children: [
-                          //     Text(
-                          //       "Select all",
-                          //       style: TextStyle(color: Colors.blue),
-                          //     ),
-                          //     Theme(
-                          //       data: ThemeData(useMaterial3: false),
-                          //       child: Switch(
-                          //         activeColor: Colors.blue,
-                          //         value: _inviteSwitchValue,
-                          //         onChanged: (value) {
-                          //           setState(() {
-                          //             _inviteSwitchValue = value;
-                          //           });
-                          //           if (_inviteSwitchValue == true) {
-                          //             print(">>>>>2");
-                          //             for (var user in tempList) {
-                          //               if (!selectedInviteUsers
-                          //                   .contains(user)) {
-                          //                 selectedInviteUsers.add(user);
-                          //               }
-                          //             }
-                          //           } else {
-                          //             selectedInviteUsers.clear();
-                          //           }
-                          //           setState(() {});
-                          //         },
-                          //       ),
-                          //     ),
-                          //   ],
-                          // )
-                        ],
-                      )
-                    : Container(),
-                widget.invitedMails!.isNotEmpty
-                    ? SizedBox(
-                        height: 10,
-                      )
-                    : SizedBox(),
-                widget.invitedMails!.isNotEmpty ? inviteList() : SizedBox(),
-                widget.addMeetingData!.meetingTypeId!.isNotEmpty
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.addMeetingData!.meetingType == "Team"
-                                ? "Teams"
-                                : "Projects",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                "Select all",
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                              Theme(
-                                data: ThemeData(useMaterial3: false),
-                                child: Switch(
-                                  activeColor: Colors.blue,
-                                  value: _switchValue,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _switchValue = value;
-                                    });
-                                    if (_switchValue == true) {
-                                      if (widget.addMeetingData!.meetingType ==
-                                          "Team") {
-                                        teamUsersLists
-                                            .forEach((groupName, users) {
-                                          for (var user in users) {
-                                            if (!selectedUsers
-                                                .contains(user.email)) {
-                                              selectedUsers.add(user.email!);
-                                            }
-                                          }
-                                        });
-                                      } else {
-                                        projectUsersLists
-                                            .forEach((groupName, users) {
-                                          for (var user in users) {
-                                            if (!selectedUsers
-                                                .contains(user.email)) {
-                                              selectedUsers.add(user.email!);
-                                            }
-                                          }
-                                        });
-                                      }
-                                    } else {
-                                      selectedUsers = [];
-                                    }
-                                    setState(() {});
-                                  },
+      body: Container(height: MediaQuery.of(context).size.height * 0.76,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 30.0, right: 30, top: 30),
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.invitedMails!.isNotEmpty
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Invited Members",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            // Row(
+                            //   children: [
+                            //     Text(
+                            //       "Select all",
+                            //       style: TextStyle(color: Colors.blue),
+                            //     ),
+                            //     Theme(
+                            //       data: ThemeData(useMaterial3: false),
+                            //       child: Switch(
+                            //         activeColor: Colors.blue,
+                            //         value: _inviteSwitchValue,
+                            //         onChanged: (value) {
+                            //           setState(() {
+                            //             _inviteSwitchValue = value;
+                            //           });
+                            //           if (_inviteSwitchValue == true) {
+                            //             print(">>>>>2");
+                            //             for (var user in tempList) {
+                            //               if (!selectedInviteUsers
+                            //                   .contains(user)) {
+                            //                 selectedInviteUsers.add(user);
+                            //               }
+                            //             }
+                            //           } else {
+                            //             selectedInviteUsers.clear();
+                            //           }
+                            //           setState(() {});
+                            //         },
+                            //       ),
+                            //     ),
+                            //   ],
+                            // )
+                          ],
+                        )
+                      : Container(),
+                  widget.invitedMails!.isNotEmpty
+                      ? SizedBox(
+                          height: 10,
+                        )
+                      : SizedBox(),
+                  widget.invitedMails!.isNotEmpty ? inviteList() : SizedBox(),
+                  widget.addMeetingData!.meetingTypeId!.isNotEmpty
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.addMeetingData!.meetingType == "Team"
+                                  ? "Teams"
+                                  : "Projects",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "Select all",
+                                  style: TextStyle(color: Colors.blue),
                                 ),
-                              ),
-                            ],
-                          )
-                        ],
-                      )
-                    : Container(),
-                SizedBox(height: 10),
-                Theme(
-                    data: Theme.of(context).copyWith(
-                      colorScheme: ColorScheme.fromSwatch()
-                          .copyWith(secondary: Colors.white),
-                    ),
-                    child: widget.addMeetingData!.meetingType == "Team"
-                        ? teamList()
-                        : widget.addMeetingData!.meetingTypeId!.isNotEmpty
-                            ? projectList()
-                            : Container()),
-                SizedBox(
-                  height: 70,
-                )
-              ],
+                                Theme(
+                                  data: ThemeData(useMaterial3: false),
+                                  child: Switch(
+                                    activeColor: Colors.blue,
+                                    value: _switchValue,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _switchValue = value;
+                                      });
+                                      if (_switchValue == true) {
+                                        if (widget.addMeetingData!.meetingType ==
+                                            "Team") {
+                                          teamUsersLists
+                                              .forEach((groupName, users) {
+                                            for (var user in users) {
+                                              if (!selectedUsers
+                                                  .contains(user.email)) {
+                                                selectedUsers.add(user.email!);
+                                              }
+                                            }
+                                          });
+                                        } else {
+                                          projectUsersLists
+                                              .forEach((groupName, users) {
+                                            for (var user in users) {
+                                              if (!selectedUsers
+                                                  .contains(user.email)) {
+                                                selectedUsers.add(user.email!);
+                                              }
+                                            }
+                                          });
+                                        }
+                                      } else {
+                                        selectedUsers = [];
+                                      }
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        )
+                      : Container(),
+                  SizedBox(height: 10),
+                  Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.fromSwatch()
+                            .copyWith(secondary: Colors.white),
+                      ),
+                      child: widget.addMeetingData!.meetingType == "Team"
+                          ? teamList()
+                          : widget.addMeetingData!.meetingTypeId!.isNotEmpty
+                              ? projectList()
+                              : Container()),
+                  SizedBox(
+                    height: 70,
+                  )
+                ],
+              ),
             ),
           ),
         ),

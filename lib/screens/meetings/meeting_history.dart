@@ -136,7 +136,9 @@ class _MeetingHistoryState extends State<MeetingHistory> {
                                           Text(
                                               AppUtils().getMeetingDateFormat(
                                                   meetingsData[index].start!,
-                                                  meetingsData[index].end!),
+                                                  meetingsData[index].end!,MediaQuery.of(context)
+                                                          .size
+                                                          .width),
                                               overflow: TextOverflow.ellipsis,
                                               style:
                                                   Drawables.adddoccontentstyle(

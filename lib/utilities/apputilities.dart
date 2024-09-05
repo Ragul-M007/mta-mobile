@@ -360,11 +360,11 @@ class AppUtils {
     });
   }
 
-  String getMeetingDateFormat(start, end) {
+  String getMeetingDateFormat(start, end,width) {
     final startDate = DateTime.parse(start);
     final endDate = DateTime.parse(end);
 
-    final formatter = DateFormat('MMMM dd, yyyy | hh:mm a');
+    final formatter =width<376?DateFormat('MMM dd, yyyy | hh:mm a'): DateFormat('MMMM dd, yyyy | hh:mm a');
     final formattedStartDate = formatter.format(startDate);
 
     final timeFormatter = DateFormat('hh:mm a');

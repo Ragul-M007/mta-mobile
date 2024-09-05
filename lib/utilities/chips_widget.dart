@@ -78,7 +78,7 @@ class _ChipsWidgetState extends State<ChipsWidget> {
                                       fontSize: 12.5))))
                           .toList(),
                     )
-                  : Wrap(
+                  :Wrap(
                       spacing: 10.0, // Adjust spacing between chips
                       children: widget.mails!
                           .map((chipText) => Chip(

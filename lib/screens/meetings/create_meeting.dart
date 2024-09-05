@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -139,36 +140,38 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: AppBarWidget(
-            backButtonfunction: () {
-              Navigator.pop(context);
-            },
-            title: "Create Meetings",
-            actionWidget: []),
-      ),
-      floatingActionButton: Padding(
-        padding:
-            const EdgeInsets.only(left: 30.0, right: 30, top: 0, bottom: 20),
-        child: ThemeButton(title: "NEXT", buttonfunction: submitData),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: Padding(
-        padding: EdgeInsets.only(
-            left: 30.0,
-            right: 30,
-            top: 30,
-            bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 80 : 0),
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.9,
+    return GestureDetector(onTap: (){
+                FocusManager.instance.primaryFocus?.unfocus();},
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: AppBarWidget(
+              backButtonfunction: () {
+                
+                Navigator.pop(context);
+              },
+              title: "Create Meetings",
+              actionWidget: []),
+        ),
+        floatingActionButton: Padding(
+          padding:
+              const EdgeInsets.only(left: 30.0, right: 30, top: 0, bottom: 20),
+          child: ThemeButton(title: "NEXT", buttonfunction: submitData),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        body: Container(
+          padding: EdgeInsets.only(
+              left: 30.0,
+              right: 30,
+              top: 30,
+              bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 70 : 0),
+          height: MediaQuery.of(context).size.height * 0.75,
           child: SingleChildScrollView(
             controller: _scrollController,
             padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.1),
+                bottom: MediaQuery.of(context).size.height * 0.03),
             child: Column(
               children: [
                 formFields("  Meeting Title", "meetingTitle",
@@ -182,7 +185,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                 formFields("  Invite Teams or Projects", "inviteTeams",
                     "Select a team", teamController, false),
                 Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
+                  padding:  EdgeInsets.only(top:15.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -220,9 +223,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                     "", "meetingTime", "Select Time", timeController, false),
                 formFields("  Meeting Description", "meetingDescription",
                     "Type message..", descriptionController, false),
-                SizedBox(
-                  height: MediaQuery.of(context).viewInsets.bottom,
-                ),
+               
               ],
             ),
           ),
@@ -234,187 +235,189 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   formFields(title, fieldType, hintText, controller, isMandatory) {
     return Padding(
       padding: EdgeInsets.only(top: fieldType != "inviteProjects" ? 15.0 : 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Field Heading
-          fieldType != "meetingTime"
-              ? RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                          text: title,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'MyriadPro',
-                              fontSize: 12)),
-                      isMandatory
-                          ? TextSpan(
-                              text: ' *', style: TextStyle(color: Colors.red))
-                          : TextSpan(),
-                    ],
-                  ),
-                )
-              : fieldType == "meetingTime"
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Field Heading
+            fieldType != "meetingTime"
+                ? RichText(
+                    text: TextSpan(
                       children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                    text: "  Start Time",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'MyriadPro',
-                                        fontSize: 12)),
-                                isMandatory
-                                    ? TextSpan(
-                                        text: ' *',
-                                        style: TextStyle(color: Colors.red))
-                                    : TextSpan(),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                    text: "  End Time",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'MyriadPro',
-                                        fontSize: 12)),
-                                isMandatory
-                                    ? TextSpan(
-                                        text: ' *',
-                                        style: TextStyle(color: Colors.red))
-                                    : TextSpan(),
-                              ],
-                            ),
-                          ),
-                        )
+                        TextSpan(
+                            text: title,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'MyriadPro',
+                                fontSize: 12)),
+                        isMandatory
+                            ? TextSpan(
+                                text: ' *', style: TextStyle(color: Colors.red))
+                            : TextSpan(),
                       ],
-                    )
-                  : Container(),
-          // Form Input Fields
-          Padding(
-            padding:
-                EdgeInsets.only(top: fieldType != "inviteProjects" ? 8.0 : 0),
-            child: SizedBox(
-                height: fieldType == "meetingDescription"
-                    ? MediaQuery.of(context).size.height * 0.12
-                    : 45,
-                child: fieldType == "meetingTitle" ||
-                        fieldType == "meetingDescription"
-                    ? TextField(
-                        onTap: () {
-                          // if (fieldType == "meetingDescription") {
-                          //   _scrollToBottom();
-                          // }
-                        },
-                        controller: controller,
-                        decoration: new InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.0),
+                    ),
+                  )
+                : fieldType == "meetingTime"
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: "  Start Time",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'MyriadPro',
+                                          fontSize: 12)),
+                                  isMandatory
+                                      ? TextSpan(
+                                          text: ' *',
+                                          style: TextStyle(color: Colors.red))
+                                      : TextSpan(),
+                                ],
+                              ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.0),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: "  End Time",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'MyriadPro',
+                                          fontSize: 12)),
+                                  isMandatory
+                                      ? TextSpan(
+                                          text: ' *',
+                                          style: TextStyle(color: Colors.red))
+                                      : TextSpan(),
+                                ],
+                              ),
                             ),
-                            hintText: hintText,
-                            contentPadding: EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 10)),
-                        inputFormatters: fieldType == "meetingTitle"
-                            ? [LengthLimitingTextInputFormatter(250)]
-                            : null,
-                        maxLines: fieldType == "meetingDescription" ? 5 : 1,
-                      )
-                    : fieldType == "meetingDate"
-                        ? DatePickerWidget(
-                            hintText: hintText,
-                            onDateSelected: (date) {
-                              selectedDate = date;
-                              clearTimeSelection();
-                              setState(() {});
-                            },
                           )
-                        : fieldType == "inviteTeams"
-                            ? teamField(teamLists.isNotEmpty
-                                ? hintText
-                                : "No teams found")
-                            : fieldType == "inviteProjects"
-                                ? projectField(projectsList.isNotEmpty
-                                    ? hintText
-                                    : "No projects found")
-                                : fieldType == "meetingType"
-                                    ? dropdownType(true, hintText)
-                                    : fieldType == "providerType"
-                                        ? dropdownType(false, hintText)
-                                        : fieldType == "meetingTime"
-                                            ? timerPickerWidget()
-                                            : fieldType == "inviteMails"
-                                                ? inviteMails(hintText)
-                                                : Container()),
-          ),
-          fieldType == "inviteTeams"
-              ? ChipsWidget(
-                  teams: selectedTeams,
-                  onDeleted: (data) {
-                    setState(() {
-                      selectedTeams.removeWhere(
-                          (element) => element.teamId == data.teamId);
-                      // to reload deleted data in autocomplete list
-                      teamController.text = "a";
-                      teamController.clear();
-                    });
-                  },
-                  projects: [],
-                  onDeletedProject: (val) {},
-                  mails: [],
-                  onDeletedMail: (val) {},
-                )
-              : fieldType == "inviteProjects"
-                  ? ChipsWidget(
-                      projects: selectedProjects,
-                      onDeletedProject: (data) {
-                        setState(() {
-                          selectedProjects.removeWhere(
-                              (element) => element.projectId == data.projectId);
-                          // to reload deleted data in autocomplete list
-                          projectController.text = "a";
-                          projectController.clear();
-                        });
-                      },
-                      teams: [],
-                      onDeleted: (val) {},
-                      mails: [],
-                      onDeletedMail: (val) {},
-                    )
-                  : fieldType == "inviteMails"
-                      ? ChipsWidget(
-                          mails: invitedMails,
-                          onDeletedMail: (data) {
-                            setState(() {
-                              invitedMails
-                                  .removeWhere((element) => element == data);
-                              // to reload deleted data in autocomplete list
-                              emailController.clear();
-                            });
+                        ],
+                      )
+                    : Container(),
+            // Form Input Fields
+            Padding(
+              padding:
+                  EdgeInsets.only(top: fieldType != "inviteProjects" ? 8.0 : 0),
+              child: SizedBox(
+                  height: fieldType == "meetingDescription"
+                      ? MediaQuery.of(context).size.height * 0.15
+                      : 45,
+                  child: fieldType == "meetingTitle" ||
+                          fieldType == "meetingDescription"
+                      ? TextField(
+                          onTap: () {
+                            // if (fieldType == "meetingDescription") {
+                            //   _scrollToBottom();
+                            // }
                           },
-                          teams: [],
-                          onDeleted: (val) {},
-                          projects: [],
-                          onDeletedProject: (val) {},
+                          controller: controller,
+                          decoration: new InputDecoration(
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.0),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 1.0),
+                              ),
+                              hintText: hintText,
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 10)),
+                          inputFormatters: fieldType == "meetingTitle"
+                              ? [LengthLimitingTextInputFormatter(250)]
+                              : null,
+                          maxLines: fieldType == "meetingDescription" ? 5 : 1,
                         )
-                      : Container()
-        ],
+                      : fieldType == "meetingDate"
+                          ? DatePickerWidget(
+                              hintText: hintText,
+                              onDateSelected: (date) {
+                                selectedDate = date;
+                                clearTimeSelection();
+                                setState(() {});
+                              },
+                            )
+                          : fieldType == "inviteTeams"
+                              ? teamField(teamLists.isNotEmpty
+                                  ? hintText
+                                  : "No teams found")
+                              : fieldType == "inviteProjects"
+                                  ? projectField(projectsList.isNotEmpty
+                                      ? hintText
+                                      : "No projects found")
+                                  : fieldType == "meetingType"
+                                      ? dropdownType(true, hintText)
+                                      : fieldType == "providerType"
+                                          ? dropdownType(false, hintText)
+                                          : fieldType == "meetingTime"
+                                              ? timerPickerWidget()
+                                              : fieldType == "inviteMails"
+                                                  ? inviteMails(hintText)
+                                                  : Container()),
+            ),
+            fieldType == "inviteTeams"&& selectedTeams.isNotEmpty
+                ?  ChipsWidget(
+                    teams: selectedTeams,
+                    onDeleted: (data) {
+                      setState(() {
+                        selectedTeams.removeWhere(
+                            (element) => element.teamId == data.teamId);
+                        // to reload deleted data in autocomplete list
+                        teamController.text = "a";
+                        teamController.clear();
+                      });
+                    },
+                    projects: [],
+                    onDeletedProject: (val) {},
+                    mails: [],
+                    onDeletedMail: (val) {},
+                  )
+                : fieldType == "inviteProjects"&&selectedProjects.isNotEmpty
+                    ? ChipsWidget(
+                        projects: selectedProjects,
+                        onDeletedProject: (data) {
+                          setState(() {
+                            selectedProjects.removeWhere(
+                                (element) => element.projectId == data.projectId);
+                            // to reload deleted data in autocomplete list
+                            projectController.text = "a";
+                            projectController.clear();
+                          });
+                        },
+                        teams: [],
+                        onDeleted: (val) {},
+                        mails: [],
+                        onDeletedMail: (val) {},
+                      )
+                    : fieldType == "inviteMails"&&invitedMails.isNotEmpty
+                        ? ChipsWidget(
+                            mails: invitedMails,
+                            onDeletedMail: (data) {
+                              setState(() {
+                                invitedMails
+                                    .removeWhere((element) => element == data);
+                                // to reload deleted data in autocomplete list
+                                emailController.clear();
+                              });
+                            },
+                            teams: [],
+                            onDeleted: (val) {},
+                            projects: [],
+                            onDeletedProject: (val) {},
+                          )
+                        : Container()
+          ],
+        ),
       ),
     );
   }
