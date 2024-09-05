@@ -31,7 +31,6 @@ final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return Container(child: SplashScreenContent());
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
         child: MaterialApp(
@@ -80,150 +79,22 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       print(value);
     });
     requestNotificationPermissions();
-
-    // getConnectivity();
-  }
-
-  redirectFromNotification() {
-    print(">>>>>>1");
-    if (Strings.FromNotification) {
-      Strings.FromNotification = false;
-      navigatorKey.currentState
-          ?.push(MaterialPageRoute(builder: (context) => Attendance()));
-    } else if (Strings.fromNotificationComments) {
-      if (Strings.selectedProDocument[0].projectComments == "true") {
-        if (Strings.selectedProDocument[0].commentId == null) {
-          navigatorKey.currentState?.push(
-              MaterialPageRoute(builder: (context) => ProjectComments()));
-        } else {
-          navigatorKey.currentState?.push(MaterialPageRoute(
-              builder: (context) => ProjectCommentsReplies()));
-        }
-      } else {
-        if (Strings.selectedProDocument[0].commentId == null) {
-          navigatorKey.currentState
-              ?.push(MaterialPageRoute(builder: (context) => Comments()));
-        } else {
-          navigatorKey.currentState
-              ?.push(MaterialPageRoute(builder: (context) => Replies()));
-        }
-      }
-    } else if (Strings.fromNotificationDocuments) {
-      navigatorKey.currentState
-          ?.push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
-    } else if (Strings.fromNotificationChat) {
-      navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(
-            teamName: Strings.chatNotificationResponse?.groupName ?? "0",
-            groupId:
-                int.parse(Strings.chatNotificationResponse?.groupId ?? "0"),
-            teamId: int.parse(Strings.chatNotificationResponse?.teamId ?? "0"),
-            projectId:
-                int.parse(Strings.chatNotificationResponse?.projectId ?? "0"),
-          ),
-        ),
-        (route) => false,
-      );
-    } else if (Strings.fromNotificationNewMeeting) {
-      navigatorKey.currentState?.pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (context) => MeetingDetails(
-                  meeting_id: Strings.meetingID!,
-                  fromHistory: false,
-                )),
-        (route) => false,
-      );
-    } else {
-      if (Strings.roleId == 6) {
-        navigatorKey.currentState?.pushNamed("/projects");
-      } else {
-        navigatorKey.currentState?.pushNamed("/teamsDashboard");
-      }
-    }
   }
 
   checkLoginTime() {
-    print(">>>>>>2");
     final api = Provider.of<ApiService>(context, listen: false);
     api.fetchLoginHours(Strings.userID ?? 0).then((response) {
       if (response.status!) {
         if (response.data == 0) {
           AppUtils.getStringPreferences('authToken').then((value) {
-            print("rolee token");
             Strings.authToken = value;
             AppUtils.getStringPreferences('roleId').then((value) {
-              print("rolee id ${value}");
               Strings.roleId = int.parse(value);
             });
-
             AppUtils.getStringPreferences('profilePic').then((value) {
               Strings.profilePic = value;
             });
-
-            if (Strings.FromNotification) {
-              Strings.FromNotification = false;
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => Attendance()));
-            } else if (Strings.fromNotificationComments) {
-              if (Strings.selectedProDocument[0].projectComments == "true") {
-                if (Strings.selectedProDocument[0].commentId == null) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProjectComments()));
-                } else {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProjectCommentsReplies()));
-                }
-              } else {
-                if (Strings.selectedProDocument[0].commentId == null) {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Comments()));
-                } else {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => Replies()));
-                }
-              }
-            } else if (Strings.fromNotificationDocuments) {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ViewDocScreen()));
-            } else if (Strings.fromNotificationChat) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    teamName:
-                        Strings.chatNotificationResponse?.groupName ?? "0",
-                    groupId: int.parse(
-                        Strings.chatNotificationResponse?.groupId ?? "0"),
-                    teamId: int.parse(
-                        Strings.chatNotificationResponse?.teamId ?? "0"),
-                    projectId: int.parse(
-                        Strings.chatNotificationResponse?.projectId ?? "0"),
-                  ),
-                ),
-                (route) => false,
-              );
-            } else if (Strings.fromNotificationNewMeeting) {
-              navigatorKey.currentState?.pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => MeetingDetails(
-                          meeting_id: Strings.meetingID!,
-                          fromHistory: false,
-                        )),
-                (route) => false,
-              );
-            } else {
-              if (Strings.roleId == 6) {
-                Navigator.pushNamed(context, "/projects");
-              } else {
-                Navigator.pushNamed(context, "/teamsDashboard");
-              }
-            }
-            // if (Strings.roleId == 6) {
-            //     Navigator.pushNamed(context, "/projects");
-            //   } else {
-            //     Navigator.pushNamed(context, "/teamsDashboard");
-            //   }
+            AppUtils().redirectFromNotification();
           }).onError((error, stackTrace) {
             Navigator.popAndPushNamed(context, "/verifypin");
           });
@@ -240,7 +111,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
   }
 
   Future<void> requestNotificationPermissions() async {
-    print("inside request");
     await Permission.notification.request();
     await Permission.notification.isDenied.then((value) {
       if (value) {
@@ -412,16 +282,12 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
-      Map<String, dynamic> notificationData =
-          message!.notification!.title!.contains("meeting")
-              ? jsonDecode(message.data['data'])
-              : {};
+      Map<String, dynamic> notificationData = jsonDecode(message!.data['data']);
       if (message.notification?.title != null) {
         if (message.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
         } else if (message.notification!.title!.contains("Commented") ||
             message.notification!.title!.contains("Replied")) {
-          print("inside");
           ProjectDocData peo = ProjectDocData.fromJson(notificationData);
           Strings.selectedProDocument.add(peo);
           Strings.fromNotificationComments = true;
@@ -460,14 +326,14 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           int id = int.parse(peo.notiId!);
           Strings.notificationID = id;
         } else if (message.notification!.title!.contains("message")) {
-          print("oneee11");
+          // To navigate chat page for chat notifications
           ChatNotificationRes res =
               ChatNotificationRes.fromJson(notificationData);
-          print("oneee eee ${jsonEncode(res)}");
           Strings.chatNotificationResponse = res;
           Strings.fromNotificationChat = true;
         } else if (message.notification!.title!.contains("meeting") &&
             notificationData['action'] != "delete") {
+          // To navigate meetings page for meetings related notifications
           Strings.fromNotificationNewMeeting = true;
           Strings.meetingID =
               int.tryParse(notificationData['meeting_id'].toString());
@@ -748,7 +614,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     timer = new Timer(const Duration(milliseconds: 500), () {
       AppUtils.getStringPreferences('easyAccess').then((value) {
         if (value == "Y") {
-          print(">>>>>>3");
           checkLoginTime();
           // Navigator.popAndPushNamed(context, "/comments");
         } else {
@@ -859,17 +724,11 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
 
   Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
-    // print(">>>>>>0:${message.notification?.body}");
     // if (message.notification?.body != null) {
-    Map<String, dynamic> notificationData =
-        message.notification!.title!.contains("meeting")
-            ? jsonDecode(message.data['data'])
-            : {};
+    Map<String, dynamic> notificationData = jsonDecode(message.data['data']);
     // print(message.notification?.body);
-    print(">>>>>3:${message.notification!.title!}");
     if (message.notification!.title!.contains("logout")) {
       Strings.FromNotification = true;
-      print(">>>>>>4");
       await checkLoginTime();
     } else if (message.notification!.title!.contains("Commented") ||
         message.notification!.title!.contains("Replied")) {
@@ -880,7 +739,6 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
       Strings.selectedProDocument.add(peo);
       Strings.fromNotificationComments = true;
       print(jsonEncode(peo));
-      print(">>>>>>5");
       await checkLoginTime();
       int id = int.parse(peo.notiId!);
       Strings.projectId = int.parse(peo.projectId ?? "000");
@@ -913,36 +771,30 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
         Strings.category = false;
       }
       Strings.fromNotificationDocuments = true;
-      print(">>>>>>6");
       checkLoginTime();
       int id = int.parse(peo.notiId!);
       Strings.notificationID = id;
     } else if (message.notification!.title!.contains("message")) {
+      // To navigate chat page for chat notifications
       ChatNotificationRes res = ChatNotificationRes.fromJson(notificationData);
       print("oneee eee ${jsonEncode(res)}");
       Strings.chatNotificationResponse = res;
       Strings.fromNotificationChat = true;
 
-      if (mounted) {
-        print("qqww");
-      } else {
-        print("qq else");
-        // SplashScreenContent();
-      }
-      redirectFromNotification();
-      // checkLoginTime();
+      print(">>>>>02");
+      AppUtils().redirectFromNotification();
     } else if (message.notification!.title!.contains("meeting") &&
         notificationData['action'] != "delete") {
+      // To navigate meetings page for meetings related notifications
       Strings.fromNotificationNewMeeting = true;
       Strings.meetingID =
           int.tryParse(notificationData['meeting_id'].toString());
-      print(">>>>>>7");
+      // to check context available api call,
       if (mounted) {
-        print("qqww");
         await checkLoginTime();
       } else {
-        print("qq else");
-        redirectFromNotification();
+        print(">>>>>03");
+        AppUtils().redirectFromNotification();
       }
     }
     // }

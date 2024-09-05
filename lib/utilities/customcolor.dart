@@ -12,6 +12,9 @@ mixin CustomColors {
 
   static final Color fontColor = Color.fromARGB(255, 110, 112, 113);
 
+  static final Color meetingSubtitleFontColor =
+      Color.fromARGB(255, 98, 100, 101);
+
   static final Gradient gradientappthemecolor = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,

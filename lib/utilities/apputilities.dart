@@ -7,6 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:mta/screens/attendance/attendance.dart';
+import 'package:mta/screens/chat/ChatScreen.dart';
+import 'package:mta/screens/comments/comments.dart';
+import 'package:mta/screens/doucument/viewdoclist.dart';
+import 'package:mta/screens/meetings/meeting_details.dart';
+import 'package:mta/screens/projectcomments/projectComments.dart';
+import 'package:mta/screens/projectcomments/projectCommentsReplies.dart';
+import 'package:mta/screens/splashscreen.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,6 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/ApiService.dart';
+import '../screens/comments/replies.dart';
 
 class AppUtils {
   // Field Focus
@@ -371,5 +380,63 @@ class AppUtils {
         : type == "2"
             ? "Virtual Meeting"
             : "Phone Call";
+  }
+
+  redirectFromNotification() {
+    if (Strings.FromNotification) {
+      Strings.FromNotification = false;
+      navigatorKey.currentState
+          ?.push(MaterialPageRoute(builder: (context) => Attendance()));
+    } else if (Strings.fromNotificationComments) {
+      if (Strings.selectedProDocument[0].projectComments == "true") {
+        if (Strings.selectedProDocument[0].commentId == null) {
+          navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (context) => ProjectComments()));
+        } else {
+          navigatorKey.currentState?.push(MaterialPageRoute(
+              builder: (context) => ProjectCommentsReplies()));
+        }
+      } else {
+        if (Strings.selectedProDocument[0].commentId == null) {
+          navigatorKey.currentState
+              ?.push(MaterialPageRoute(builder: (context) => Comments()));
+        } else {
+          navigatorKey.currentState
+              ?.push(MaterialPageRoute(builder: (context) => Replies()));
+        }
+      }
+    } else if (Strings.fromNotificationDocuments) {
+      navigatorKey.currentState
+          ?.push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
+    } else if (Strings.fromNotificationChat) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(
+            teamName: Strings.chatNotificationResponse?.groupName ?? "0",
+            groupId:
+                int.parse(Strings.chatNotificationResponse?.groupId ?? "0"),
+            teamId: int.parse(Strings.chatNotificationResponse?.teamId ?? "0"),
+            projectId:
+                int.parse(Strings.chatNotificationResponse?.projectId ?? "0"),
+          ),
+        ),
+        (route) => false,
+      );
+    } else if (Strings.fromNotificationNewMeeting) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) => MeetingDetails(
+                  meeting_id: Strings.meetingID!,
+                  fromHistory: false,
+                )),
+        (route) => false,
+      );
+    } else {
+      if (Strings.roleId == 6) {
+        navigatorKey.currentState?.pushNamed("/projects");
+      } else {
+        navigatorKey.currentState?.pushNamed("/teamsDashboard");
+      }
+    }
   }
 }

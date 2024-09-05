@@ -181,8 +181,16 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(AppUtils().getMeetingDateFormat(
-                                meetingsData!.start!, meetingsData!.end!)),
+                            Text(
+                              AppUtils().getMeetingDateFormat(
+                                  meetingsData!.start!, meetingsData!.end!),
+                              style: TextStyle(
+                                  color: CustomColors.meetingSubtitleFontColor,
+                                  fontSize: 16),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
                             meetingsData!.userId == Strings.userID &&
                                     !widget.fromHistory
                                 ? IconButton(
@@ -193,7 +201,12 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                       Icons.edit_outlined,
                                       size: 20,
                                     ))
-                                : Container(),
+                                : Icon(
+                                    Icons.schedule,
+                                    size: 14,
+                                    color:
+                                        CustomColors.meetingSubtitleFontColor,
+                                  ),
                           ],
                         ),
                       ),
@@ -247,8 +260,8 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                   ),
                                 ),
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                                  // mainAxisAlignment:
+                                  //     MainAxisAlignment.spaceAround,
                                   children: [
                                     TextButton(
                                         onPressed: () {
@@ -270,23 +283,24 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                           ],
                                         )),
                                     Container(
-                                      margin: const EdgeInsets.only(left: 5.0),
+                                      margin: const EdgeInsets.only(right: 2.0),
                                       height: 20,
                                       width: 1, // Adjust the width as needed
                                       color: Colors.black,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 0.0),
-                                      child: IconButton(
-                                          onPressed: () {
-                                            shareFile();
-                                          },
-                                          icon: Icon(
+                                    InkWell(
+                                        onTap: () {
+                                          shareFile();
+                                        },
+                                        child: Container(
+                                          width: 30.0,
+                                          height: 30.0,
+                                          child: Icon(
                                             Icons.share_outlined,
                                             size: 16,
                                             color: CustomColors.primarycolor,
-                                          )),
-                                    )
+                                          ),
+                                        ))
                                   ],
                                 ),
                               ],

@@ -678,9 +678,10 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       addMeetingReq.meetingType = selectedTeams.isNotEmpty ? "Team" : "Project";
       print("loqinrequest --->${invitedMails}, ${jsonEncode(addMeetingReq)}");
       addMeetingReq.guestEmail = [];
-      addMeetingReq.meetingTypeId = selectedTeams.isNotEmpty
-          ? selectedTeams.map((item) => item.teamId!).toList()
-          : selectedProjects.map((item) => item.projectId!).toList();
+      addMeetingReq.meetingTypeId = (selectedTeams.isNotEmpty
+              ? selectedTeams.map((item) => item.teamId).toList()
+              : selectedProjects.map((item) => item.projectId).toList())
+          .cast<int>();
       print("loqinrequest ---> ${jsonEncode(addMeetingReq)}");
       Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => MembersSelection(

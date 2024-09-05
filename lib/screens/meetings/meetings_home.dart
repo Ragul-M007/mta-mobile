@@ -43,11 +43,11 @@ class Meetingscontent extends StatefulWidget {
 
 class _MeetingscontentState extends State<Meetingscontent>
     with SingleTickerProviderStateMixin {
+  List<MeetingsData> tempLists = [];
   List<MeetingsData> meetingsData = [];
 
   bool meetingCraetionAccess = false;
 
-  List<MeetingsData> _searchLists = [];
   FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
 
@@ -88,14 +88,12 @@ class _MeetingscontentState extends State<Meetingscontent>
       AppUtils.dismissprogress();
       if (response.status!) {
         setState(() {
-          meetingsData = response.data ?? [];
+          tempLists = response.data ?? [];
         });
-        print(">>>>:${jsonEncode(meetingsData)}");
-      } else {
-        meetingsData = [];
       }
+      meetingsData = tempLists;
+      setState(() {});
     }).catchError((onError) {
-      meetingsData = [];
       // AppUtils.dismissprogress();
       print(onError.toString());
       //getProjects();
@@ -344,25 +342,17 @@ class _MeetingscontentState extends State<Meetingscontent>
                                           decoration: InputDecoration.collapsed(
                                             hintText: ' Search',
                                           ),
-                                          onChanged: (value) {
-                                            if (value.isEmpty) {
+                                          onChanged: (search) {
+                                            if (tempLists.isNotEmpty) {
                                               setState(() {
-                                                _searchLists = [];
+                                                meetingsData = tempLists
+                                                    .where((user) => user.title!
+                                                        .toLowerCase()
+                                                        .contains(search
+                                                            .toLowerCase()))
+                                                    .toList();
                                               });
-                                              return;
                                             }
-                                            _searchLists = [];
-                                            meetingsData
-                                                .forEach((projectDetail) {
-                                              if (projectDetail.title!
-                                                  .toLowerCase()
-                                                  .startsWith(
-                                                      value.toLowerCase()))
-                                                _searchLists.add(projectDetail);
-                                            });
-                                            print(
-                                                "dataaaa ${_searchLists.length}");
-                                            setState(() {});
                                           },
                                         ),
                                       ),
@@ -403,9 +393,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                         : Container(),
                     body: meetingsData.length > 0
                         ? ListView.builder(
-                            itemCount: _searchLists.isNotEmpty
-                                ? _searchLists.length
-                                : meetingsData.length,
+                            itemCount: meetingsData.length,
                             padding: EdgeInsets.all(20),
                             itemBuilder: (BuildContext ctx, int index) {
                               return Padding(
@@ -417,11 +405,8 @@ class _MeetingscontentState extends State<Meetingscontent>
                                             builder: (context) =>
                                                 MeetingDetails(
                                                     fromHistory: false,
-                                                    meeting_id: _searchLists
-                                                            .isNotEmpty
-                                                        ? _searchLists[index]
-                                                            .meetingId!
-                                                        : meetingsData[index]
+                                                    meeting_id:
+                                                        meetingsData[index]
                                                             .meetingId!)))
                                         .whenComplete(() => getMeetings());
                                   },
@@ -444,7 +429,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                   width: MediaQuery.of(context)
                                                           .size
                                                           .width *
-                                                      0.5,
+                                                      0.53,
                                                   child: Column(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -454,13 +439,8 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                             .start,
                                                     children: [
                                                       Text(
-                                                          _searchLists.isNotEmpty
-                                                              ? _searchLists[
-                                                                      index]
-                                                                  .title!
-                                                              : meetingsData[
-                                                                      index]
-                                                                  .title!,
+                                                          meetingsData[index]
+                                                              .title!,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                           style: Drawables
@@ -469,35 +449,44 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                                       .black87,
                                                                   14.0,
                                                                   FontWeight
-                                                                      .w500)),
+                                                                      .w400)),
                                                       SizedBox(
                                                         width: 2,
                                                       ),
-                                                      Text(
-                                                          _searchLists
-                                                                  .isNotEmpty
-                                                              ? AppUtils().getMeetingDateFormat(
-                                                                  _searchLists[
-                                                                          index]
-                                                                      .start!,
-                                                                  _searchLists[
-                                                                          index]
-                                                                      .end!)
-                                                              : AppUtils().getMeetingDateFormat(
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                              AppUtils().getMeetingDateFormat(
                                                                   meetingsData[
                                                                           index]
                                                                       .start!,
                                                                   meetingsData[
                                                                           index]
                                                                       .end!),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: Drawables
-                                                              .adddoccontentstyle(
-                                                                  Colors.grey,
-                                                                  12.0,
-                                                                  FontWeight
-                                                                      .w300)),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: Drawables
+                                                                  .adddoccontentstyle(
+                                                                      CustomColors
+                                                                          .meetingSubtitleFontColor,
+                                                                      12.0,
+                                                                      FontWeight
+                                                                          .w400)),
+                                                          SizedBox(
+                                                            width: 5,
+                                                          ),
+                                                          Icon(
+                                                            Icons.schedule,
+                                                            size: 14,
+                                                            color: CustomColors
+                                                                .meetingSubtitleFontColor,
+                                                          )
+                                                        ],
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -517,38 +506,22 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                   ),
                                                 ),
                                                 onPressed: () {
-                                                  if (_searchLists.isNotEmpty) {
-                                                    launchLink(_searchLists[
-                                                                    index]
-                                                                .type ==
-                                                            "1"
-                                                        ? _searchLists[index]
-                                                            .location!
-                                                        : _searchLists[index]
-                                                            .meetingLink!);
-                                                  } else {
-                                                    launchLink(meetingsData[
-                                                                    index]
-                                                                .type ==
-                                                            "1"
-                                                        ? meetingsData[index]
-                                                            .location!
-                                                        : meetingsData[index]
-                                                            .meetingLink!);
-                                                  }
+                                                  launchLink(meetingsData[index]
+                                                              .type ==
+                                                          "1"
+                                                      ? meetingsData[index]
+                                                          .location!
+                                                      : meetingsData[index]
+                                                          .meetingLink!);
                                                 },
-                                                child: (_searchLists
-                                                                .isNotEmpty &&
-                                                            _searchLists[index]
-                                                                    .type !=
-                                                                "1") ||
-                                                        (_searchLists.isEmpty &&
-                                                            meetingsData[index]
-                                                                    .type !=
-                                                                "1")
+                                                child: (meetingsData[index]
+                                                            .type !=
+                                                        "1")
                                                     ? Text(
                                                         'JOIN',
                                                         style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w700,
                                                             color:
                                                                 Colors.white),
                                                       )
@@ -556,6 +529,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                         Icons
                                                             .directions_outlined,
                                                         color: Colors.white,
+                                                        size: 18,
                                                       ),
                                               ),
                                             ),

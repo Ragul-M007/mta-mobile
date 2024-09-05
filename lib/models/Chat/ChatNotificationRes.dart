@@ -6,7 +6,11 @@ class ChatNotificationRes {
   String? groupName;
 
   ChatNotificationRes(
-      {this.projectId, this.groupId, this.groupType, this.teamId,this.groupName});
+      {this.projectId,
+      this.groupId,
+      this.groupType,
+      this.teamId,
+      this.groupName});
 
   ChatNotificationRes.fromJson(Map<String, dynamic> json) {
     projectId = json['project_id'];
