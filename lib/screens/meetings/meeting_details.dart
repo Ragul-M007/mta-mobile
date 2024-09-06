@@ -63,11 +63,6 @@ class _MeetingDetailsState extends State<MeetingDetails> {
     WidgetsBinding.instance.addPostFrameCallback((_) => getMeetings());
   }
 
-  void dispose() {
-    super.dispose();
-    Strings.fromNotificationNewMeeting = false;
-  }
-
   getMeetings() {
     print(">>>>:${widget.meeting_id}");
     AppUtils.showprogress();
@@ -99,7 +94,6 @@ class _MeetingDetailsState extends State<MeetingDetails> {
         body: WillPopScope(
           onWillPop: () {
             if (Strings.fromNotificationNewMeeting) {
-              Strings.fromNotificationNewMeeting = false;
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
@@ -136,7 +130,6 @@ class _MeetingDetailsState extends State<MeetingDetails> {
               child: AppBarWidget(
                   backButtonfunction: () {
                     if (Strings.fromNotificationNewMeeting) {
-                      Strings.fromNotificationNewMeeting = false;
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -161,7 +154,6 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                               size: 22,
                             ))
                         : Container()
-                        
                   ]),
             ),
             body: Padding(
@@ -184,9 +176,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                           children: [
                             Text(
                               AppUtils().getMeetingDateFormat(
-                                  meetingsData!.start!, meetingsData!.end!,MediaQuery.of(context)
-                                                          .size
-                                                          .width),
+                                  meetingsData!.start!,
+                                  meetingsData!.end!,
+                                  MediaQuery.of(context).size.width),
                               style: TextStyle(
                                   color: CustomColors.meetingSubtitleFontColor,
                                   fontSize: 16),
@@ -543,7 +535,8 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                     ),
                     contentPadding: EdgeInsets.all(15),
                     hintText: "Select Time",
-                    hintStyle: TextStyle(color: CustomColors.fontColor,fontSize: 12),
+                    hintStyle:
+                        TextStyle(color: CustomColors.fontColor, fontSize: 12),
                     suffixIcon: Icon(
                       Icons.schedule,
                       color: Colors.grey,
@@ -567,14 +560,15 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                 child: TextField(
                   controller: endTimeController,
                   enabled: false,
-                  style: TextStyle(color: Colors.black,fontSize: 12),
+                  style: TextStyle(color: Colors.black, fontSize: 12),
                   decoration: InputDecoration(
                     disabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey, width: 1.0),
                     ),
                     contentPadding: EdgeInsets.all(15),
                     hintText: "Select Time",
-                    hintStyle: TextStyle(color: CustomColors.fontColor,fontSize: 12),
+                    hintStyle:
+                        TextStyle(color: CustomColors.fontColor, fontSize: 12),
                     suffixIcon: Icon(
                       Icons.schedule,
                       color: Colors.grey,

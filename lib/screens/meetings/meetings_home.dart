@@ -101,6 +101,11 @@ class _MeetingscontentState extends State<Meetingscontent>
     });
   }
 
+  void dispose() {
+    super.dispose();
+    Strings.fromNotificationNewMeeting = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -264,6 +269,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                 child: WillPopScope(
                   onWillPop: () {
                     if (Strings.fromNotificationNewMeeting) {
+                      Strings.fromNotificationNewMeeting = false;
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
@@ -466,9 +472,11 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                                       .start!,
                                                                   meetingsData[
                                                                           index]
-                                                                      .end!,MediaQuery.of(context)
-                                                          .size
-                                                          .width),
+                                                                      .end!,
+                                                                  MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width),
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
@@ -482,14 +490,18 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                           SizedBox(
                                                             width: 2,
                                                           ),
-                                                        MediaQuery.of(context)
-                                                          .size
-                                                          .width<376?Container():  Icon(
-                                                            Icons.schedule,
-                                                            size: 14,
-                                                            color: CustomColors
-                                                                .meetingSubtitleFontColor,
-                                                          )
+                                                          MediaQuery.of(context)
+                                                                      .size
+                                                                      .width <
+                                                                  376
+                                                              ? Container()
+                                                              : Icon(
+                                                                  Icons
+                                                                      .schedule,
+                                                                  size: 14,
+                                                                  color: CustomColors
+                                                                      .meetingSubtitleFontColor,
+                                                                )
                                                         ],
                                                       ),
                                                     ],
@@ -525,9 +537,13 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                     ? Text(
                                                         'JOIN',
                                                         style: TextStyle(
-                                                            fontWeight:Platform.isIOS?FontWeight.bold:
-                                                                FontWeight.w700,
-                                                                fontSize: 12,
+                                                            fontWeight:
+                                                                Platform.isIOS
+                                                                    ? FontWeight
+                                                                        .bold
+                                                                    : FontWeight
+                                                                        .w700,
+                                                            fontSize: 12,
                                                             color:
                                                                 Colors.white),
                                                       )

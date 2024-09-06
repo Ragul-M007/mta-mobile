@@ -140,8 +140,10 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(onTap: (){
-                FocusManager.instance.primaryFocus?.unfocus();},
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
@@ -149,7 +151,6 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
           preferredSize: Size.fromHeight(kToolbarHeight),
           child: AppBarWidget(
               backButtonfunction: () {
-                
                 Navigator.pop(context);
               },
               title: "Create Meetings",
@@ -167,7 +168,9 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
               right: 30,
               top: 30,
               bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 70 : 0),
-          height: MediaQuery.of(context).size.height * 0.75,
+          height: MediaQuery.of(context).size.height < 872
+              ? MediaQuery.of(context).size.height * 0.75
+              : MediaQuery.of(context).size.height * 0.82,
           child: SingleChildScrollView(
             controller: _scrollController,
             padding: EdgeInsets.only(
@@ -185,7 +188,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                 formFields("  Invite Teams or Projects", "inviteTeams",
                     "Select a team", teamController, false),
                 Padding(
-                  padding:  EdgeInsets.only(top:15.0),
+                  padding: EdgeInsets.only(top: 15.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -223,7 +226,6 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                     "", "meetingTime", "Select Time", timeController, false),
                 formFields("  Meeting Description", "meetingDescription",
                     "Type message..", descriptionController, false),
-               
               ],
             ),
           ),
@@ -365,8 +367,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                                                   ? inviteMails(hintText)
                                                   : Container()),
             ),
-            fieldType == "inviteTeams"&& selectedTeams.isNotEmpty
-                ?  ChipsWidget(
+            fieldType == "inviteTeams" && selectedTeams.isNotEmpty
+                ? ChipsWidget(
                     teams: selectedTeams,
                     onDeleted: (data) {
                       setState(() {
@@ -382,13 +384,13 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                     mails: [],
                     onDeletedMail: (val) {},
                   )
-                : fieldType == "inviteProjects"&&selectedProjects.isNotEmpty
+                : fieldType == "inviteProjects" && selectedProjects.isNotEmpty
                     ? ChipsWidget(
                         projects: selectedProjects,
                         onDeletedProject: (data) {
                           setState(() {
-                            selectedProjects.removeWhere(
-                                (element) => element.projectId == data.projectId);
+                            selectedProjects.removeWhere((element) =>
+                                element.projectId == data.projectId);
                             // to reload deleted data in autocomplete list
                             projectController.text = "a";
                             projectController.clear();
@@ -399,7 +401,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                         mails: [],
                         onDeletedMail: (val) {},
                       )
-                    : fieldType == "inviteMails"&&invitedMails.isNotEmpty
+                    : fieldType == "inviteMails" && invitedMails.isNotEmpty
                         ? ChipsWidget(
                             mails: invitedMails,
                             onDeletedMail: (data) {
