@@ -660,6 +660,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   }
 
   Future<void> submitData() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     bool isValid = await meetingValidation();
     if (isValid) {
       AddMeetingReq addMeetingReq = AddMeetingReq();
@@ -757,13 +758,13 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       AppUtils.showToastError("Please select a provider type.");
       return false;
     } else if (selectedDate == null) {
-      AppUtils.showToastError("Please enter a date.");
+      AppUtils.showToastError("Please select a date.");
       return false;
     } else if (startTime == null) {
-      AppUtils.showToastError("Please enter a start time.");
+      AppUtils.showToastError("Please select a start time.");
       return false;
     } else if (endTime == null) {
-      AppUtils.showToastError("Please enter an end time.");
+      AppUtils.showToastError("Please select an end time.");
       return false;
     } else if (invitedMails.isEmpty &&
         selectedProjects.isEmpty &&

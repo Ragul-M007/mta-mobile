@@ -515,7 +515,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeamsDashboard(),
+                         builder: (context) => TeamsDashboard(),
                       ),
                       (route) => false,
                     );

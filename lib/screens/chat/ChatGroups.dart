@@ -143,44 +143,6 @@ class _ChatGroupsState extends State<ChatGroups>
     });
   }
 
-  upload() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'pdf', 'doc'],
-    );
-    if (result != null) {
-      List files = result.paths
-          .map((path) => MultipartFile.fromFileSync(
-                path!,
-                filename: getFileName(path),
-                // contentType: MediaType(
-                //     lookupMimeType(getFileName(path))?.split('/')[0],
-                //     lookupMimeType(getFileName(path))?.split('/')[1],
-                // ),
-              ))
-          .toList();
-      var dio = Dio();
-      var formData = FormData.fromMap({
-        'user_id': Strings.userID, // other parameter may you need to send
-        'group_id': 52, // other parameter may you need to send
-        'groupImage': files,
-      });
-
-      var response = await dio.post(
-          'https://demo.emeetify.com:81/mta/chat/createMessage',
-          data: formData);
-      // check response status code
-
-      print("response ${response}");
-      if (response.statusCode == 200) {
-        // it's uploaded
-      }
-    } else {
-      // User canceled the picker
-    }
-  }
-
   String getFileName(String _path) {
     return path.basename(_path);
   }

@@ -282,8 +282,9 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? message) {
-      Map<String, dynamic> notificationData = jsonDecode(message!.data['data']);
-      if (message.notification?.title != null) {
+          if(message!=null){
+      Map<String, dynamic> notificationData = jsonDecode(message?.data['data']);
+      if (message!.notification?.title != null) {
         if (message.notification!.title!.contains("Signed")) {
           Strings.FromNotification = true;
         } else if (message.notification!.title!.contains("Commented") ||
@@ -338,7 +339,7 @@ class _SplashScreenContentState extends State<SplashScreenContent> {
           Strings.meetingID =
               int.tryParse(notificationData['meeting_id'].toString());
         }
-      }
+      }}
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

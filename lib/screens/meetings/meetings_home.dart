@@ -101,10 +101,10 @@ class _MeetingscontentState extends State<Meetingscontent>
     });
   }
 
-  void dispose() {
-    super.dispose();
-    Strings.fromNotificationNewMeeting = false;
-  }
+  // void dispose() {
+  //   super.dispose();
+  //   Strings.fromNotificationNewMeeting = false;
+  // }
 
   @override
   Widget build(BuildContext context) {
