@@ -91,7 +91,12 @@ class _MeetingscontentState extends State<Meetingscontent>
         setState(() {
           tempLists = response.data ?? [];
         });
+      }else{
+       setState(() {
+          tempLists = [];
+        });
       }
+      print(">>>:${tempLists}");
       meetingsData = tempLists;
       setState(() {});
     }).catchError((onError) {
