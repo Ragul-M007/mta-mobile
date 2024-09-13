@@ -1,14 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/meetings/members_selection.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/chips_widget.dart';
@@ -17,6 +14,10 @@ import 'package:mta/utilities/date_picker_widget.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:mta/utilities/theme_button.dart';
 import 'package:provider/provider.dart';
+
+import '../../models/AddMeetingReq.dart';
+import '../../models/IntegratedMeetingsData.dart';
+import 'members_selection.dart';
 
 class CreateMeeting extends StatelessWidget {
   const CreateMeeting({super.key});
@@ -53,6 +54,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   FocusNode teamFocusNode = FocusNode();
   FocusNode projectFocusNode = FocusNode();
   FocusNode mailsFocusNode = FocusNode();
+  List<IntegratedMeetings> integratedMeetingsList = [];
   List<AllTeamsData> teamLists = [];
   List<AllTeamsData> selectedTeams = [];
   List<Data> projectsList = [];
@@ -66,10 +68,10 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
     {"id": "1", "name": "In Person Meeting"},
     {"id": "2", "name": "Virtual Meeting"}
   ];
-  final List<Map> providerTypes = [
-    {"id": "1", "name": "Zoom"},
-    {"id": "2", "name": "Google Meet"}
-  ];
+  // final List<Map> providerTypes = [
+  //   {"id": "1", "name": "Zoom"},
+  //   {"id": "2", "name": "Google Meet"}
+  // ];
 
   DateTime? selectedDate;
 
@@ -90,7 +92,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   @override
   void initState() {
     super.initState();
-    getTeams();
+
+    getIntegratedMeetings();
     print(">>>>token:${Strings.authToken}");
   }
 
@@ -102,6 +105,18 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       duration: Duration(milliseconds: 50),
       curve: Curves.easeInOut,
     );
+  }
+
+  getIntegratedMeetings() {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api.fetchIntegratedMeetings().then((response) {
+      if (response.status!) {
+        integratedMeetingsList = response.data!;
+      }
+      getTeams();
+    }).catchError((onError) {
+      print(onError.toString());
+    });
   }
 
   getTeams() {
@@ -603,15 +618,15 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                       ),
                     ))
                 .toList()
-            : providerTypes
-                .map((Map item) => DropdownMenuItem<String>(
-                      value: item['id'],
-                      child: Text(
-                        item['name'],
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ))
-                .toList(),
+            : integratedMeetingsList
+                .map<DropdownMenuItem<String>>((IntegratedMeetings provider) {
+                return DropdownMenuItem<String>(
+                  value: provider.provider
+                      .toString(), // Use the provider's ID as the value
+                  child: Text(
+                      provider.providerName!), // Display the provider's name
+                );
+              }).toList(),
         value: isTypeofMeeting ? selectedType : selectedProvider,
         onChanged: (String? value) {
           if (isTypeofMeeting) {
@@ -662,6 +677,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   Future<void> submitData() async {
     FocusManager.instance.primaryFocus?.unfocus();
     bool isValid = await meetingValidation();
+
     if (isValid) {
       AddMeetingReq addMeetingReq = AddMeetingReq();
       addMeetingReq.inviteeTimezone = "Asia/Kolkata";

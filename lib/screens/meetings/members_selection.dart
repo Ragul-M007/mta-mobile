@@ -7,7 +7,6 @@ import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/TeamUsersRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/location_selection.dart';
-import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/theme_button.dart';
@@ -54,6 +53,13 @@ class _MembersSelectionState extends State<MembersSelection> {
   void initState() {
     super.initState();
     configData();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    AppUtils.dismissprogress();
   }
 
   void configData() {
@@ -169,7 +175,8 @@ class _MembersSelectionState extends State<MembersSelection> {
                 widget.addMeetingData!.type == "2" ? "CREATE MEETING" : "NEXT",
             buttonfunction: submitData),
       ),
-      body: Container(height: MediaQuery.of(context).size.height * 0.76,
+      body: Container(
+        height: MediaQuery.of(context).size.height * 0.76,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(left: 30.0, right: 30, top: 30),
@@ -254,7 +261,8 @@ class _MembersSelectionState extends State<MembersSelection> {
                                         _switchValue = value;
                                       });
                                       if (_switchValue == true) {
-                                        if (widget.addMeetingData!.meetingType ==
+                                        if (widget
+                                                .addMeetingData!.meetingType ==
                                             "Team") {
                                           teamUsersLists
                                               .forEach((groupName, users) {
@@ -500,13 +508,15 @@ class _MembersSelectionState extends State<MembersSelection> {
               AppUtils.showToastSuccess("Meeting created successfully!");
 
               isButtonEnabled = false;
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Meetings(),
-                ),
-                (route) => false,
-              );
+              Navigator.pop(context);
+              Navigator.pop(context);
+              // Navigator.pushAndRemoveUntil(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => Meetings(),
+              //   ),
+              //   (route) => false,
+              // );
             } else {
               AppUtils.showErrorSnackBar(context, response.message!);
               isButtonEnabled = false;

@@ -7,7 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/meetings/meetings_home.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
@@ -38,8 +37,8 @@ class _LocationSelectionState extends State<LocationSelection> {
   TextEditingController _searchFieldController = TextEditingController();
 
   LatLng? _markedLocation;
-  
-  FocusNode searchFocus=FocusNode();
+
+  FocusNode searchFocus = FocusNode();
 
   @override
   void initState() {
@@ -93,8 +92,10 @@ class _LocationSelectionState extends State<LocationSelection> {
     ctx = newContext;
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
-    return GestureDetector(onTap: (){
-                  searchFocus.unfocus();},
+    return GestureDetector(
+      onTap: () {
+        searchFocus.unfocus();
+      },
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: Colors.white,
@@ -107,11 +108,12 @@ class _LocationSelectionState extends State<LocationSelection> {
                 title: "Add Location",
                 actionWidget: []),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(bottom: 20, left: 30, right: 30),
-            child:
-                ThemeButton(title: "CREATE MEETING", buttonfunction: submitData),
+            child: ThemeButton(
+                title: "CREATE MEETING", buttonfunction: submitData),
           ),
           body: Column(
             children: [
@@ -121,14 +123,14 @@ class _LocationSelectionState extends State<LocationSelection> {
                 child: Container(
                   // height: 35,
                   child: GooglePlaceAutoCompleteTextField(
-                    focusNode:searchFocus,
+                    focusNode: searchFocus,
                     googleAPIKey: Strings.googleAPIKey,
                     itemClick: (prediction) async {
                       _searchFieldController.text = prediction.description!;
                       _searchFieldController.selection =
                           TextSelection.fromPosition(TextPosition(
                               offset: prediction.description!.length));
-                    searchFocus.unfocus();
+                      searchFocus.unfocus();
                       // Update the map to display the new marker
                       setState(() {});
                       // FocusManager.instance.primaryFocus?.unfocus();
@@ -146,7 +148,7 @@ class _LocationSelectionState extends State<LocationSelection> {
                           zoom: 18.0,
                         ),
                       ));
-                    searchFocus.unfocus();
+                      searchFocus.unfocus();
                       setState(() {});
                       // FocusManager.instance.primaryFocus?.unfocus();
                       // Add a marker to the selected place
@@ -211,13 +213,16 @@ class _LocationSelectionState extends State<LocationSelection> {
         if (response.status!) {
           AppUtils.showToastSuccess("Meeting created successfully!");
 
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Meetings(),
-            ),
-            (route) => false,
-          );
+          Navigator.pop(context);
+          Navigator.pop(context);
+          Navigator.pop(context);
+          // Navigator.pushAndRemoveUntil(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => Meetings(),
+          //   ),
+          //   (route) => false,
+          // );
         } else {
           AppUtils.showErrorSnackBar(context, response.message!);
         }

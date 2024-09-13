@@ -10,13 +10,13 @@ import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/AudioRes.dart';
 import 'package:mta/models/BackLinkRes.dart';
 import 'package:mta/models/ChangePassReq.dart';
-import 'package:mta/models/CommonRes.dart';
 import 'package:mta/models/Chat/AddRemoveUserListRes.dart';
 import 'package:mta/models/Chat/ChatMessageWithPageCountRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/models/Chat/GroupCreationRes.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
 import 'package:mta/models/CommentsRes.dart';
+import 'package:mta/models/CommonRes.dart';
 import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/EditProfileReq.dart';
@@ -25,23 +25,24 @@ import 'package:mta/models/FetchAttendanceRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
+import 'package:mta/models/FetchMapedUsersRes.dart';
+import 'package:mta/models/ForgotPassReq.dart';
 import 'package:mta/models/ForwardMessageReq.dart';
 import 'package:mta/models/GroupDetailsRes.dart';
 import 'package:mta/models/GroupReq.dart';
 import 'package:mta/models/GroupRes.dart';
+import 'package:mta/models/IntegratedMeetingsData.dart';
+import 'package:mta/models/LoginReq.dart';
+import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/MeetingAccessRes.dart';
 import 'package:mta/models/MeetingDetails.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
-import 'package:mta/models/SignupReq.dart';
-import 'package:mta/models/FetchMapedUsersRes.dart';
-import 'package:mta/models/ForgotPassReq.dart';
-import 'package:mta/models/LoginReq.dart';
-import 'package:mta/models/LoginRes.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/models/NotificationRes.dart';
 import 'package:mta/models/ProfileRes.dart';
 import 'package:mta/models/ProjectDetails.dart';
 import 'package:mta/models/SetPinReq.dart';
+import 'package:mta/models/SignupReq.dart';
 import 'package:mta/models/TeamUsersRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/models/UpdateMeetingReq.dart';
@@ -59,6 +60,7 @@ import '../models/AccessDetailsRes.dart';
 import '../models/Chat/GroupUsersRes.dart';
 import '../models/FetchCategoryUsersRes.dart';
 import '../models/LoginStatusRes.dart';
+
 part 'ApiService.g.dart';
 
 // Run this code in termial to generate ApiService.g.dart file
@@ -276,6 +278,9 @@ abstract class ApiService {
 
   @GET("/meeting/allprojects")
   Future<DashboardRes> fetchAllProjects();
+
+  @GET("/meeting/imeetifyIntegrationList")
+  Future<IntegratedMeetingsData> fetchIntegratedMeetings();
 
   @POST("/meeting/createmeeting")
   Future<CommonRes> createMeeting(@Body() AddMeetingReq body);

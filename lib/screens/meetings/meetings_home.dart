@@ -1,6 +1,5 @@
 // ignore_for_file: unnecessary_null_comparison
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:fancy_drawer/fancy_drawer.dart';
@@ -81,6 +80,7 @@ class _MeetingscontentState extends State<Meetingscontent>
   }
 
   getMeetings() {
+    print(">>>>>>");
     final now = DateTime.now();
     final formatter = DateFormat('yyyy-MM-dd');
     final formattedDate = formatter.format(now);
@@ -91,12 +91,11 @@ class _MeetingscontentState extends State<Meetingscontent>
         setState(() {
           tempLists = response.data ?? [];
         });
-      }else{
-       setState(() {
+      } else {
+        setState(() {
           tempLists = [];
         });
       }
-      print(">>>:${tempLists}");
       meetingsData = tempLists;
       setState(() {});
     }).catchError((onError) {
@@ -384,13 +383,13 @@ class _MeetingscontentState extends State<Meetingscontent>
                     ),
                     floatingActionButton: meetingCraetionAccess
                         ? InkWell(
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (ctx) => CreateMeeting(),
                                 ),
-                              );
+                              ).whenComplete(() => getMeetings());
                             },
                             child: CircleAvatar(
                               radius: 20,
