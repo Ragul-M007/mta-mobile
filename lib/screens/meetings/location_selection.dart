@@ -206,31 +206,34 @@ class _LocationSelectionState extends State<LocationSelection> {
     if (_markedLocation != null) {
       widget.addMeetingData.location =
           'https://www.google.com/maps?q=${_markedLocation!.latitude},${_markedLocation!.longitude}';
-      final api = Provider.of<ApiService>(context, listen: false);
-
-      print(">AddMeeting:${jsonEncode(widget.addMeetingData)}");
-      api.createMeeting(widget.addMeetingData).then((response) {
-        if (response.status!) {
-          AppUtils.showToastSuccess("Meeting created successfully!");
-
-          Navigator.pop(context);
-          Navigator.pop(context);
-          Navigator.pop(context);
-          // Navigator.pushAndRemoveUntil(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => Meetings(),
-          //   ),
-          //   (route) => false,
-          // );
-        } else {
-          AppUtils.showErrorSnackBar(context, response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.showToastError("Something went wrong!");
-      });
     } else {
-      AppUtils.showToastError("Please mark meeting location!");
+      widget.addMeetingData.location = 'Location Not Mentioned!';
     }
+    final api = Provider.of<ApiService>(context, listen: false);
+
+    print(">AddMeeting:${jsonEncode(widget.addMeetingData)}");
+    api.createMeeting(widget.addMeetingData).then((response) {
+      if (response.status!) {
+        AppUtils.showToastSuccess("Meeting created successfully!");
+
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pop(context);
+        // Navigator.pushAndRemoveUntil(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => Meetings(),
+        //   ),
+        //   (route) => false,
+        // );
+      } else {
+        AppUtils.showErrorSnackBar(context, response.message!);
+      }
+    }).catchError((onError) {
+      AppUtils.showToastError("Something went wrong!");
+    });
+    // } else {
+    //   AppUtils.showToastError("Please mark meeting location!");
+    // }
   }
 }

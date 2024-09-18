@@ -4,9 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingDetails.dart';
@@ -77,6 +75,8 @@ class _MeetingDetailsState extends State<MeetingDetails> {
         if (meetingsData!.type == "1" &&
             Strings.urlRegex.hasMatch(meetingsData!.location!)) {
           _getAddressFromLink(meetingsData!.location!);
+        } else if (meetingsData!.type == "1") {
+          locationData = meetingsData!.location!;
         }
       }
     }).catchError((onError) {
@@ -254,50 +254,60 @@ class _MeetingDetailsState extends State<MeetingDetails> {
                                     overflow: TextOverflow.clip,
                                   ),
                                 ),
-                                Row(
-                                  // mainAxisAlignment:
-                                  //     MainAxisAlignment.spaceAround,
-                                  children: [
-                                    TextButton(
-                                        onPressed: () {
-                                          launchLink(meetingsData!.location!);
-                                        },
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              "Direction ",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Color(0xFF0061b0)),
-                                            ),
-                                            Icon(
-                                              Icons.directions_outlined,
-                                              size: 18,
-                                              color: Color(0xFF0061b0),
-                                            )
-                                          ],
-                                        )),
-                                    Container(
-                                      margin: const EdgeInsets.only(right: 2.0),
-                                      height: 20,
-                                      width: 1, // Adjust the width as needed
-                                      color: Colors.black,
-                                    ),
-                                    InkWell(
-                                        onTap: () {
-                                          shareFile();
-                                        },
-                                        child: Container(
-                                          width: 30.0,
-                                          height: 30.0,
-                                          child: Icon(
-                                            Icons.share_outlined,
-                                            size: 16,
-                                            color: CustomColors.primarycolor,
+                                meetingsData!.location != null &&
+                                        meetingsData!.location!.isNotEmpty &&
+                                        !meetingsData!.location!
+                                            .contains("Location Not Mentioned")
+                                    ? Row(
+                                        // mainAxisAlignment:
+                                        //     MainAxisAlignment.spaceAround,
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                launchLink(
+                                                    meetingsData!.location!);
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    "Direction ",
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        color:
+                                                            Color(0xFF0061b0)),
+                                                  ),
+                                                  Icon(
+                                                    Icons.directions_outlined,
+                                                    size: 18,
+                                                    color: Color(0xFF0061b0),
+                                                  )
+                                                ],
+                                              )),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                right: 2.0),
+                                            height: 20,
+                                            width:
+                                                1, // Adjust the width as needed
+                                            color: Colors.black,
                                           ),
-                                        ))
-                                  ],
-                                ),
+                                          InkWell(
+                                              onTap: () {
+                                                shareFile();
+                                              },
+                                              child: Container(
+                                                width: 30.0,
+                                                height: 30.0,
+                                                child: Icon(
+                                                  Icons.share_outlined,
+                                                  size: 16,
+                                                  color:
+                                                      CustomColors.primarycolor,
+                                                ),
+                                              ))
+                                        ],
+                                      )
+                                    : Container(),
                               ],
                             )
                           : Container(),

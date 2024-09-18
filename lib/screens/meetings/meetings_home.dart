@@ -513,52 +513,75 @@ class _MeetingscontentState extends State<Meetingscontent>
                                                 ),
                                               ],
                                             ),
-                                            Container(
-                                              width: 75,
-                                              height: 30,
-                                              child: ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      CustomColors.primarycolor,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  launchLink(meetingsData[index]
-                                                              .type ==
-                                                          "1"
-                                                      ? meetingsData[index]
-                                                          .location!
-                                                      : meetingsData[index]
-                                                          .meetingLink!);
-                                                },
-                                                child: (meetingsData[index]
-                                                            .type !=
-                                                        "1")
-                                                    ? Text(
-                                                        'JOIN',
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                Platform.isIOS
-                                                                    ? FontWeight
-                                                                        .bold
-                                                                    : FontWeight
-                                                                        .w700,
-                                                            fontSize: 12,
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    : Icon(
-                                                        Icons
-                                                            .directions_outlined,
-                                                        color: Colors.white,
-                                                        size: 18,
+                                            (meetingsData[index].type != "1") ||
+                                                    meetingsData[index].type ==
+                                                            "1" &&
+                                                        meetingsData[index]
+                                                                .location !=
+                                                            null &&
+                                                        meetingsData[index]
+                                                            .location!
+                                                            .isNotEmpty &&
+                                                        !meetingsData[index]
+                                                            .location!
+                                                            .contains(
+                                                                "Location Not Mentioned")
+                                                ? Container(
+                                                    width: 75,
+                                                    height: 30,
+                                                    child: ElevatedButton(
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            CustomColors
+                                                                .primarycolor,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.0),
+                                                        ),
                                                       ),
-                                              ),
-                                            ),
+                                                      onPressed: () {
+                                                        launchLink(meetingsData[
+                                                                        index]
+                                                                    .type ==
+                                                                "1"
+                                                            ? meetingsData[
+                                                                    index]
+                                                                .location!
+                                                            : meetingsData[
+                                                                    index]
+                                                                .meetingLink!);
+                                                      },
+                                                      child:
+                                                          (meetingsData[index]
+                                                                      .type !=
+                                                                  "1")
+                                                              ? Text(
+                                                                  'JOIN',
+                                                                  style: TextStyle(
+                                                                      fontWeight: Platform.isIOS
+                                                                          ? FontWeight
+                                                                              .bold
+                                                                          : FontWeight
+                                                                              .w700,
+                                                                      fontSize:
+                                                                          12,
+                                                                      color: Colors
+                                                                          .white),
+                                                                )
+                                                              : Icon(
+                                                                  Icons
+                                                                      .directions_outlined,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 18,
+                                                                ),
+                                                    ),
+                                                  )
+                                                : Container(),
                                           ],
                                         )),
                                     decoration: BoxDecoration(

@@ -32,9 +32,7 @@ class _MeetingHistoryState extends State<MeetingHistory> {
   }
 
   getMeetings() {
-    final now = picked != null
-        ? picked!
-        : DateTime.now().subtract(const Duration(days: 1));
+    final now = picked != null ? picked! : DateTime.now();
     final formatter = DateFormat('yyyy-MM-dd');
     final formattedDate = formatter.format(now);
     final api = Provider.of<ApiService>(context, listen: false);
@@ -136,9 +134,10 @@ class _MeetingHistoryState extends State<MeetingHistory> {
                                           Text(
                                               AppUtils().getMeetingDateFormat(
                                                   meetingsData[index].start!,
-                                                  meetingsData[index].end!,MediaQuery.of(context)
-                                                          .size
-                                                          .width),
+                                                  meetingsData[index].end!,
+                                                  MediaQuery.of(context)
+                                                      .size
+                                                      .width),
                                               overflow: TextOverflow.ellipsis,
                                               style:
                                                   Drawables.adddoccontentstyle(
@@ -211,11 +210,9 @@ class _MeetingHistoryState extends State<MeetingHistory> {
     picked = await showDatePicker(
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       context: context,
-      initialDate: picked != null
-          ? picked!
-          : DateTime.now().subtract(const Duration(days: 1)),
+      initialDate: picked != null ? picked! : DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 3650)),
-      lastDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now(),
     );
     if (picked != null) {
       getMeetings();
@@ -224,9 +221,7 @@ class _MeetingHistoryState extends State<MeetingHistory> {
   }
 
   CurrentDateWidget() {
-    final now = picked != null
-        ? picked!
-        : DateTime.now().subtract(const Duration(days: 1));
+    final now = picked != null ? picked! : DateTime.now();
     final formatter = DateFormat('MMM dd, yyyy');
     return formatter.format(now);
   }

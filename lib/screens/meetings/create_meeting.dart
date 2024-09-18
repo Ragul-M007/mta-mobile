@@ -198,7 +198,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                     typeController, false),
                 selectedType == "2"
                     ? formFields("  Provider", "providerType",
-                        "Select a provider", typeController, false)
+                       integratedMeetingsList.isNotEmpty? "Select a provider":"No Data Found", typeController, false)
                     : Container(),
                 formFields("  Invite Teams or Projects", "inviteTeams",
                     "Select a team", teamController, false),
