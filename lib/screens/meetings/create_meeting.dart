@@ -197,8 +197,14 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
                 formFields("  Type of Meetings", "meetingType", "Select type",
                     typeController, false),
                 selectedType == "2"
-                    ? formFields("  Provider", "providerType",
-                       integratedMeetingsList.isNotEmpty? "Select a provider":"No Data Found", typeController, false)
+                    ? formFields(
+                        "  Provider",
+                        "providerType",
+                        integratedMeetingsList.isNotEmpty
+                            ? "Select a provider"
+                            : "No Data Found",
+                        typeController,
+                        false)
                     : Container(),
                 formFields("  Invite Teams or Projects", "inviteTeams",
                     "Select a team", teamController, false),
@@ -684,8 +690,13 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
 
       addMeetingReq.title = titleController.text;
       addMeetingReq.description = descriptionController.text;
-      addMeetingReq.end = DateTime(selectedDate!.year, selectedDate!.month,
-              selectedDate!.day, endTime!.hour, endTime!.minute)
+      addMeetingReq.end = DateTime(
+              selectedDate!.year,
+              selectedDate!.month,
+              selectedDate!.day,
+              endTime!.hour,
+              endTime!.minute,
+              endTime!.second)
           .toString()
           .substring(0, 19);
       ;
@@ -1012,7 +1023,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       setState(() {
         var time = DateTime.now();
         var startShift = DateTime(selectedDate!.year, selectedDate!.month,
-            selectedDate!.day, choosenToTime!.hour, choosenToTime!.minute);
+            selectedDate!.day, choosenToTime!.hour, choosenToTime!.minute, 59);
         if (choosenFromTime == null) {
           choosenFromTime = TimeOfDay.fromDateTime(DateTime(
               time.year,

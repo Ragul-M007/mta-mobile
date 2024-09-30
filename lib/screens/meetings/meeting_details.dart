@@ -728,7 +728,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
         : meetingsData!.start!;
     updateMeetingReq.end = choosenToTime != null
         ? DateTime(dateTime.year, dateTime.month, dateTime.day,
-                choosenToTime!.hour, choosenToTime!.minute)
+                choosenToTime!.hour, choosenToTime!.minute, 59)
             .toString()
             .substring(0, 19)
         : meetingsData!.end!;
