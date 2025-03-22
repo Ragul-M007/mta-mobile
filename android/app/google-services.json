@@ -2,9 +2,45 @@
   "project_info": {
     "project_number": "98448819873",
     "project_id": "mtaapp-c9ed6",
-    "storage_bucket": "mtaapp-c9ed6.appspot.com"
+    "storage_bucket": "mtaapp-c9ed6.firebasestorage.app"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98448819873:android:3a03192ea409a09c4252e0",
+        "android_client_info": {
+          "package_name": "com.multicorp.mta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "98448819873-qmi0uf0q82762prbscpnluvsajgbi936.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABgNJ0zZSzJ6nmsJNvY4yygc16k0lXVkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "98448819873-qmi0uf0q82762prbscpnluvsajgbi936.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "98448819873-5jqj1a23q53auimcj0kvvus92i0n8db6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.skein.applicationmta"
+              }
+            }
+          ]
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:98448819873:android:432784ce22ff41184252e0",
