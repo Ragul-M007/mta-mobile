@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/models/Chat/GroupChatListRes.dart';
@@ -31,9 +30,7 @@ class ChatGroups extends StatefulWidget {
   _ChatGroupsState createState() => _ChatGroupsState();
 }
 
-class _ChatGroupsState extends State<ChatGroups>
-    with SingleTickerProviderStateMixin {
-  FancyDrawerController? _controller;
+class _ChatGroupsState extends State<ChatGroups> {
   WebViewController controller = WebViewController();
 
   IO.Socket? _socket;
@@ -64,7 +61,6 @@ class _ChatGroupsState extends State<ChatGroups>
 
   @override
   void dispose() {
-    _controller?.dispose();
     super.dispose();
   }
 
@@ -309,7 +305,6 @@ class _ChatGroupsState extends State<ChatGroups>
                           Navigator.pushNamed(context, "/projects");
                         }
                         searchField.unfocus();
-                        _controller?.toggle();
                       },
                     ),
                   ),

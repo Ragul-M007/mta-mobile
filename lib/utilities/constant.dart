@@ -15,9 +15,9 @@ Widget menuoption({
         borderRadius: BorderRadius.circular(20),
         color: Strings.currentmenuvalue == selectedmenuvalue
             ? const Color(0XFF1c72b9)
-            : const Color(0xFF0061b0),
+            : Colors.transparent,
       ),
-      padding: EdgeInsets.fromLTRB(30, 4, 0, 4),
+      padding: EdgeInsets.fromLTRB(30, 16, 0, 16),
       child: Text(
         menutitle!,
         style: TextStyle(
@@ -59,31 +59,29 @@ PreferredSizeWidget appbar(String title) {
 }
 
 PreferredSizeWidget mainappbar(
-    {@required Function? ontab,
-    @required String? title,
-    @required controller}) {
+    {@required Function? ontab, @required String? title}) {
   return AppBar(
-    iconTheme: IconThemeData(color: Colors.black),
+    iconTheme: const IconThemeData(color: Colors.black),
     backgroundColor: Colors.white,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0))),
     elevation: 3,
     title: Text(
       title!,
       style: Drawables.adddoccontentstyle(Colors.black, 16.0, FontWeight.bold),
     ),
-    leading: SizedBox(
-      height: 25.0,
-      width: 25.0,
-      child: IconButton(
-        icon: Icon(
-          Icons.menu,
-          size: 25.0,
-          color: const Color(0xFF979797),
+    leading: Builder(
+      builder: (context) => SizedBox(
+        height: 25.0,
+        width: 25.0,
+        child: IconButton(
+          icon: const Icon(
+            Icons.menu,
+            size: 25.0,
+            color: Color(0xFF979797),
+          ),
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
-        onPressed: () {
-          controller.toggle();
-        },
       ),
     ),
   );

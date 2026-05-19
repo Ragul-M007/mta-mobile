@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dio/dio.dart';
-import 'package:external_path/external_path.dart';
+import 'package:mta/utilities/external_path_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
@@ -168,41 +168,31 @@ class _ViewDocContentState extends State<ViewDocContent> {
     openFile(downloadedFile);
   }
 
-  Future<void> openFile(filePath) async {
-    await OpenFilex.open(filePath);
+  Future<void> openFile(String filePath) async {
+    try {
+      final file = File(filePath);
+
+      // Check file exists
+      if (!await file.exists()) {
+        debugPrint("File does not exist: $filePath");
+        return;
+      }
+
+      debugPrint("Opening file: $filePath");
+
+      final result = await OpenFilex.open(filePath);
+
+      debugPrint("Result type: ${result.type}");
+      debugPrint("Result message: ${result.message}");
+
+      if (result.type != ResultType.done) {
+        debugPrint("Unable to open file");
+      }
+    } catch (e) {
+      debugPrint("Open file error: $e");
+    }
   }
 
-  // Future<String> downloadFile(String url, String fileName, String dir) async
-  // {
-  //   HttpClient httpClient = new HttpClient();
-  //   File file;
-  //   String filePath = '';
-  //   String myUrl = '';
-
-  //   try {
-  //     myUrl = Strings.baseImageUrl + url;
-  //     var request = await httpClient.getUrl(Uri.parse(myUrl));
-  //     var response = await request.close();
-  //     print(myUrl);
-  //     if (response.statusCode == 200) {
-  //       var bytes = await consolidateHttpClientResponseBytes(response);
-  //       filePath = '$dir/$fileName';
-  //       file = File(filePath);
-  //       await file.writeAsBytes(bytes);
-  //     } else if (response.statusCode == 404) {
-  //       AppUtils.dismissprogress();
-  //       AppUtils.showToastError("Sorry, File  not Found !");
-  //     } else {
-  //       AppUtils.dismissprogress();
-  //       filePath = 'Error code: ' + response.statusCode.toString();
-  //     }
-  //   } catch (ex) {
-  //     AppUtils.dismissprogress();
-  //     filePath = 'Can not fetch url';
-  //   }
-  //   AppUtils.dismissprogress();
-  //   return filePath;
-  // }
   Future download2(Dio dio, String url, String savePath) async {
     try {
       var myUrl = Strings.baseImageUrl + url;

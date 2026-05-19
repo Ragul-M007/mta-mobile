@@ -5,7 +5,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_share/flutter_share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingDetails.dart';
 import 'package:mta/models/UpdateMeetingReq.dart';
@@ -817,12 +817,8 @@ class _MeetingDetailsState extends State<MeetingDetails> {
             Strings.urlRegex.hasMatch(meetingsData!.location!)) ||
         (meetingsData!.type == "2" &&
             Strings.urlRegex.hasMatch(meetingsData!.meetingLink!))) {
-      await FlutterShare.share(
-        title: "Share link",
-        text: meetingsData!.title!,
-        linkUrl: meetingsData!.type == "1"
-            ? meetingsData!.location
-            : meetingsData!.meetingLink,
+      await Share.share(
+        '${meetingsData!.title!}\n${meetingsData!.type == "1" ? meetingsData!.location : meetingsData!.meetingLink}',
       );
     } else {
       AppUtils.showToastError("Invalid URL");

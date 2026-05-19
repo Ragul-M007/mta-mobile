@@ -1,45 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:advance_pdf_viewer_fork/advance_pdf_viewer_fork.dart';
-
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class Pdfviewer extends StatefulWidget {
-  const Pdfviewer({ Key? key }) : super(key: key);
+  const Pdfviewer({Key? key}) : super(key: key);
 
   @override
   State<Pdfviewer> createState() => _PdfviewerState();
 }
 
 class _PdfviewerState extends State<Pdfviewer> {
+  bool _isLoading = true;
+  String? localPath;
 
-
-   bool _isLoading = true;
-  PDFDocument? document;
-  
-   loadDocument() async {
-     
-    document = await PDFDocument.fromURL(Strings.pdfDoc!);
-
-    setState(() => _isLoading = false);
+  Future<void> loadDocument() async {
+    final response = await http.get(Uri.parse(Strings.pdfDoc!));
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/temp.pdf');
+    await file.writeAsBytes(response.bodyBytes);
+    setState(() {
+      localPath = file.path;
+      _isLoading = false;
+    });
   }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadDocument();
   }
+
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF0061b0),
         title: Text('MTA Konnect'),
       ),
-      body: Center(
-          child: _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : PDFViewer(document: document!)),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : PDFView(filePath: localPath!),
     );
   }
 }

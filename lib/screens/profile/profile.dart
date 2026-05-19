@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/utilities/app_drawer.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mta/models/ChangePassReq.dart';
@@ -22,7 +22,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:io' as Io;
 
-FancyDrawerController? _controller;
 FocusNode name = new FocusNode();
 ImagePicker _picker = ImagePicker();
 
@@ -33,23 +32,14 @@ class Profile extends StatefulWidget {
   _ProfileState createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
+class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    _controller = FancyDrawerController(
-        vsync: this, duration: Duration(milliseconds: 100))
-      ..addListener(() {
-        setState(() {
-          // print(Strings.authToken);
-          Strings.currentmenuvalue = 5;
-        });
-      });
   }
 
   @override
   void dispose() {
-    _controller?.dispose(); // Dispose controller
     super.dispose();
   }
 
@@ -58,173 +48,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     // return Container(child: LoginContent());
 
     return Provider<ApiService>(
-        create: (context) => ApiService.create(),
-        child: Container(
-          decoration:
-              Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
-          child: FancyDrawerWrapper(
-            backgroundColor: Colors.transparent,
-            controller: _controller!,
-            drawerItems: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: 30),
-                margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                child: Row(
-                  children: [
-                    new Container(
-                        width: 60.0,
-                        height: 60.0,
-                        decoration: Drawables.menudecorationImage(
-                            "assets/images/logo.jpg", 50.0)),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "MTA Konnect",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
-                    )
-                  ],
-                ),
-              ),
-              if (Strings.roleId != 6)
-                menuoption(
-                  ontab: () {
-                    Strings.fromProjects = false;
-                    menuRedirect(routename: "/teamsDashboard", currentmenu: 1);
-                  },
-                  selectedmenuvalue: 1,
-                  menutitle: Strings.roleId == 7 ? "Home" : "Teams",
-                ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/meetings", currentmenu: 2);
-                },
-                selectedmenuvalue: 2,
-                menutitle: "Meetings",
-              ),
-              if (Strings.roleId != 7)
-                menuoption(
-                  ontab: () {
-                    Strings.fromProjects = true;
-                    menuRedirect(routename: "/projects", currentmenu: 3);
-                  },
-                  selectedmenuvalue: 3,
-                  menutitle: "Projects",
-                ),
-              if (Strings.roleId == 1 ||
-                  Strings.roleId == 2 ||
-                  Strings.roleId == 5)
-                menuoption(
-                  ontab: () {
-                    menuRedirect(routename: "/attendance", currentmenu: 4);
-                  },
-                  selectedmenuvalue: 4,
-                  menutitle: "Attendance",
-                ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/profile", currentmenu: 5);
-                },
-                selectedmenuvalue: 5,
-                menutitle: "Profile",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/notification", currentmenu: 6);
-                },
-                selectedmenuvalue: 6,
-                menutitle: "Notification",
-              ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/contactus", currentmenu: 7);
-                },
-                selectedmenuvalue: 7,
-                menutitle: "Contact Us",
-              ),
-              // menuoption(
-              //   ontab: () {
-              //     menuRedirect(routename: "/privacypolicy", currentmenu: 6);
-              //   },
-              //   selectedmenuvalue: 6,
-              //   menutitle: "Privacy Policy",
-              // ),
-              menuoption(
-                ontab: () {
-                  menuRedirect(routename: "/newshighlights", currentmenu: 8);
-                },
-                selectedmenuvalue: 8,
-                menutitle: "News & Highlights",
-              ),
-              // menuoption(
-              //   ontab: () {
-              //     menuRedirect(routename: "/settings", currentmenu: 8);
-              //   },
-              //   selectedmenuvalue: 8,
-              //   menutitle: "Settings",
-              // ),
-              menuoption(
-                ontab: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => new AlertDialog(
-                      title: Text(
-                        "Are you sure ?",
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFF0061b0),
-                            fontWeight: FontWeight.w600),
-                      ),
-                      content: Text(
-                        'Do you want to logout from the App',
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: new Text(
-                            'No',
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            menuRedirect(routename: "/login", currentmenu: 9);
-                            AppUtils.savePreferences("easyAccess", "N");
-                            AppUtils.removeDeviceId(context);
-                          },
-                          child: new Text(
-                            'Yes',
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                selectedmenuvalue: 9,
-                menutitle: "Logout",
-              ),
-            ],
-            child: Scaffold(
-              backgroundColor: Colors.grey[300],
-              appBar: EmptyAppBar(),
-              body: ProfileContent(),
-            ),
-          ),
-        ));
+      create: (context) => ApiService.create(),
+      child: Scaffold(
+        drawer: AppDrawer(),
+        backgroundColor: Colors.grey[300],
+        appBar: EmptyAppBar(),
+        body: ProfileContent(),
+      ),
+    );
   }
 
   menuRedirect({@required String? routename, int? currentmenu}) {
@@ -397,13 +228,13 @@ class _ProfileContentState extends State<ProfileContent> {
                         padding: EdgeInsets.all(20),
                         child: Row(
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                _controller?.toggle();
-                              },
-                              child: Icon(
-                                Icons.menu,
-                                color: Colors.white,
+                            Builder(
+                              builder: (ctx) => GestureDetector(
+                                onTap: () => Scaffold.of(ctx).openDrawer(),
+                                child: Icon(
+                                  Icons.menu,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             SizedBox(

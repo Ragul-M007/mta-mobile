@@ -2,8 +2,8 @@
 
 import 'dart:io';
 
-import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/utilities/app_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -18,8 +18,6 @@ import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-FancyDrawerController? _controller;
 
 class Meetings extends StatelessWidget {
   const Meetings({super.key});
@@ -41,8 +39,7 @@ class Meetingscontent extends StatefulWidget {
   State<Meetingscontent> createState() => _MeetingscontentState();
 }
 
-class _MeetingscontentState extends State<Meetingscontent>
-    with SingleTickerProviderStateMixin {
+class _MeetingscontentState extends State<Meetingscontent> {
   List<MeetingsData> tempLists = [];
   List<MeetingsData> meetingsData = [];
 
@@ -52,13 +49,7 @@ class _MeetingscontentState extends State<Meetingscontent>
   TextEditingController _searchFieldController = TextEditingController();
 
   void initState() {
-    _controller = FancyDrawerController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(() {
-        setState(() {
-          Strings.currentmenuvalue = 2;
-        });
-      });
+
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
   }
@@ -112,165 +103,7 @@ class _MeetingscontentState extends State<Meetingscontent>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: Container(
-            decoration:
-                Drawables.menudecorationImage("assets/images/Menubg.png", 0.0),
-            child: FancyDrawerWrapper(
-                backgroundColor: Colors.transparent,
-                controller: _controller!,
-                drawerItems: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(bottom: 30),
-                    margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: Row(
-                      children: [
-                        new Container(
-                            width: 60.0,
-                            height: 60.0,
-                            decoration: Drawables.menudecorationImage(
-                                "assets/images/logo.jpg", 50.0)),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          "MTA Konnect",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18),
-                        )
-                      ],
-                    ),
-                  ),
-                  menuoption(
-                    ontab: () {
-                      Strings.fromProjects = false;
-                      menuRedirect(
-                          routename: "/teamsDashboard", currentmenu: 1);
-                    },
-                    selectedmenuvalue: 1,
-                    menutitle: "Teams",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(routename: "/meetings", currentmenu: 2);
-                    },
-                    selectedmenuvalue: 2,
-                    menutitle: "Meetings",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      Strings.fromProjects = true;
-                      menuRedirect(routename: "/projects", currentmenu: 3);
-                    },
-                    selectedmenuvalue: 3,
-                    menutitle: "Projects",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(routename: "/attendance", currentmenu: 4);
-                    },
-                    selectedmenuvalue: 4,
-                    menutitle: "Attendance",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(routename: "/profile", currentmenu: 5);
-                    },
-                    selectedmenuvalue: 5,
-                    menutitle: "Profile",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(routename: "/notification", currentmenu: 6);
-                    },
-                    selectedmenuvalue: 6,
-                    menutitle: "Notification",
-                  ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(routename: "/contactus", currentmenu: 7);
-                    },
-                    selectedmenuvalue: 7,
-                    menutitle: "Contact Us",
-                  ),
-                  // menuoption(
-                  //   ontab: () {
-                  //     menuRedirect(routename: "/privacypolicy", currentmenu: 6);
-                  //   },
-                  //   selectedmenuvalue: 6,
-                  //   menutitle: "Privacy Policy",
-                  // ),
-                  menuoption(
-                    ontab: () {
-                      menuRedirect(
-                          routename: "/newshighlights", currentmenu: 8);
-                    },
-                    selectedmenuvalue: 8,
-                    menutitle: "News & Highlights",
-                  ),
-                  // menuoption(
-                  //   ontab: () {
-                  //     menuRedirect(routename: "/settings", currentmenu: 8);
-                  //   },
-                  //   selectedmenuvalue: 8,
-                  //   menutitle: "Settings",
-                  // ),
-                  menuoption(
-                    ontab: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => new AlertDialog(
-                          title: Text(
-                            "Are you sure ?",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Color(0xFF0061b0),
-                                fontWeight: FontWeight.w600),
-                          ),
-                          content: Text(
-                            'Do you want to logout from the App',
-                            style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: new Text(
-                                'No',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                AppUtils.savePreferences("easyAccess", "N");
-                                menuRedirect(
-                                    routename: "/login", currentmenu: 9);
-                                AppUtils.removeDeviceId(context);
-                              },
-                              child: new Text(
-                                'Yes',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    selectedmenuvalue: 9,
-                    menutitle: "Logout",
-                  ),
-                ],
-                child: WillPopScope(
+    return WillPopScope(
                   onWillPop: () {
                     if (Strings.fromNotificationNewMeeting) {
                       Strings.fromNotificationNewMeeting = false;
@@ -287,6 +120,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                     throw '';
                   },
                   child: Scaffold(
+                    drawer: AppDrawer(),
                     backgroundColor: Colors.grey[300],
                     appBar: AppBar(
                       iconTheme: IconThemeData(color: Colors.black),
@@ -300,17 +134,15 @@ class _MeetingscontentState extends State<Meetingscontent>
                         style: Drawables.adddoccontentstyle(
                             Colors.black, 16.0, FontWeight.bold),
                       ),
-                      leading: SizedBox(
-                        height: 25.0,
-                        width: 25.0,
-                        child: IconButton(
+                      leading: Builder(
+                        builder: (ctx) => IconButton(
                           icon: Icon(
                             Icons.menu,
                             size: 25.0,
                             color: const Color(0xFF979797),
                           ),
                           onPressed: () {
-                            _controller?.toggle();
+                            Scaffold.of(ctx).openDrawer();
                           },
                         ),
                       ),
@@ -594,7 +426,7 @@ class _MeetingscontentState extends State<Meetingscontent>
                             })
                         : Center(child: Text("No Meetings Found")),
                   ),
-                ))));
+                );
   }
 
   menuRedirect({@required String? routename, int? currentmenu}) {

@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:external_path/external_path.dart';
+import 'package:mta/utilities/external_path_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -360,11 +360,13 @@ class AppUtils {
     });
   }
 
-  String getMeetingDateFormat(start, end,width) {
+  String getMeetingDateFormat(start, end, width) {
     final startDate = DateTime.parse(start);
     final endDate = DateTime.parse(end);
 
-    final formatter =width<376?DateFormat('MMM dd, yyyy | hh:mm a'): DateFormat('MMMM dd, yyyy | hh:mm a');
+    final formatter = width < 376
+        ? DateFormat('MMM dd, yyyy | hh:mm a')
+        : DateFormat('MMMM dd, yyyy | hh:mm a');
     final formattedStartDate = formatter.format(startDate);
 
     final timeFormatter = DateFormat('hh:mm a');
