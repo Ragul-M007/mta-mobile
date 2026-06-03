@@ -435,8 +435,8 @@ class _ChatViewState extends State<ChatView>
                   : const <PopupMenuItem<String>>[
                       PopupMenuItem<String>(child: Text('Info'), value: 'Info'),
                     ],
-              onSelected: (_) async {
-                if (_ == "Copy") {
+              onSelected: (selectedAction) async {
+                if (selectedAction == "Copy") {
                   focusNode.unfocus();
                   var text = getCustomText(msgList
                       .where((item) => item.isSelected == true)

@@ -1348,7 +1348,7 @@ class _CommentsContentState extends State<CommentsContent>
   }
 
   getDocuments() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.pickFiles();
     if (result != null) {
       PlatformFile file = result.files.first;
       final bytes = await Io.File(file.path!).readAsBytes();

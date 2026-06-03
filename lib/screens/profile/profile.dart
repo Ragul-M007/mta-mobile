@@ -1222,7 +1222,7 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   Future<void> changeProPic() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'JPG', 'jepg', 'png', 'PNG'],
     );

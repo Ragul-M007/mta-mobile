@@ -357,7 +357,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
         //     'xls'
         //   ],
         // );
-        FilePickerResult? result = await FilePicker.platform.pickFiles();
+        FilePickerResult? result = await FilePicker.pickFiles();
         if (result != null) {
           PlatformFile file = result.files.first;
           final bytes = await Io.File(file.path!).readAsBytes();

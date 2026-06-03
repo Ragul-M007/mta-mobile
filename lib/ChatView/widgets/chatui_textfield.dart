@@ -480,7 +480,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         widget
             .onImageSelected(imagePath ?? '', msg, MessageType.image, [files]);
       } else {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
+        FilePickerResult? result = await FilePicker.pickFiles(
           allowMultiple: true,
           type: FileType.custom,
           allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3', 'mp4'],

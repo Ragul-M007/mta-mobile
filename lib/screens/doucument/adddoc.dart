@@ -293,7 +293,7 @@ class _AddDocContentState extends State<AddDocContent>
         //     'xls'
         //   ],
         // );
-        FilePickerResult? result = await FilePicker.platform.pickFiles();
+        FilePickerResult? result = await FilePicker.pickFiles();
         if (result != null) 
         {
           PlatformFile file = result.files.first;

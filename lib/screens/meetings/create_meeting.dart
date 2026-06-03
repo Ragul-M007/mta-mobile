@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:dropdown_button2/dropdown_button2.dart' as db2;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mta/models/AllTeamsRes.dart';
@@ -606,34 +606,38 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   }
 
   dropdownType(isTypeofMeeting, hintText) {
+    final List<db2.DropdownItem<String>> dropdownItems =
+        <db2.DropdownItem<String>>[
+      if (isTypeofMeeting)
+        ...meetingTypes.map(
+          (Map item) => db2.DropdownItem<String>(
+            value: item['id'],
+            child: Text(
+              item['name'],
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        )
+      else
+        ...integratedMeetingsList.map(
+          (IntegratedMeetings provider) => db2.DropdownItem<String>(
+            value: provider.provider.toString(),
+            child: Text(provider.providerName!),
+          ),
+        ),
+    ];
+
     return DropdownButtonHideUnderline(
-      child: DropdownButton2<String>(
+      child: db2.DropdownButton2<String>(
         isExpanded: true,
         hint: Text(
           hintText,
           style: TextStyle(color: CustomColors.fontColor),
           overflow: TextOverflow.ellipsis,
         ),
-        items: isTypeofMeeting
-            ? meetingTypes
-                .map((Map item) => DropdownMenuItem<String>(
-                      value: item['id'],
-                      child: Text(
-                        item['name'],
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ))
-                .toList()
-            : integratedMeetingsList
-                .map<DropdownMenuItem<String>>((IntegratedMeetings provider) {
-                return DropdownMenuItem<String>(
-                  value: provider.provider
-                      .toString(), // Use the provider's ID as the value
-                  child: Text(
-                      provider.providerName!), // Display the provider's name
-                );
-              }).toList(),
-        value: isTypeofMeeting ? selectedType : selectedProvider,
+        items: dropdownItems,
+        valueListenable:
+            ValueNotifier<String?>(isTypeofMeeting ? selectedType : selectedProvider),
         onChanged: (String? value) {
           if (isTypeofMeeting) {
             selectedType = value;
@@ -645,7 +649,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
           }
           setState(() {});
         },
-        buttonStyleData: ButtonStyleData(
+        buttonStyleData: db2.ButtonStyleData(
           padding: const EdgeInsets.only(left: 0, right: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
@@ -654,13 +658,13 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
             ),
           ),
         ),
-        iconStyleData: const IconStyleData(
+        iconStyleData: const db2.IconStyleData(
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             color: Colors.grey,
           ),
         ),
-        dropdownStyleData: DropdownStyleData(
+        dropdownStyleData: db2.DropdownStyleData(
           maxHeight: 200,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
@@ -672,8 +676,7 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
             thumbVisibility: MaterialStateProperty.all<bool>(true),
           ),
         ),
-        menuItemStyleData: const MenuItemStyleData(
-          height: 40,
+        menuItemStyleData: const db2.MenuItemStyleData(
           padding: EdgeInsets.only(left: 14, right: 14),
         ),
       ),
