@@ -89,28 +89,30 @@ class _MeetingDetailsState extends State<MeetingDetails> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: WillPopScope(
-          onWillPop: () {
-            if (Strings.fromNotificationNewMeeting) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Meetings(),
-                ),
-                (route) => false,
-              );
-            } else {
-              Navigator.pop(context);
-            }
-
-            throw '';
-          },
-          child: Builder(
-            builder: (BuildContext newContext) {
-              return meetingDetailsWidget(newContext);
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: WillPopScope(
+            onWillPop: () {
+              if (Strings.fromNotificationNewMeeting) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Meetings(),
+                  ),
+                  (route) => false,
+                );
+              } else {
+                Navigator.pop(context);
+              }
+        
+              throw '';
             },
+            child: Builder(
+              builder: (BuildContext newContext) {
+                return meetingDetailsWidget(newContext);
+              },
+            ),
           ),
         ),
       ),

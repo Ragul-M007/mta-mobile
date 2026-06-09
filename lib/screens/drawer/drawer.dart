@@ -7,18 +7,20 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: AppDrawer(),
-      appBar: AppBar(
-        elevation: 4.0,
-        title: const Text(
-          "MTA Konnect",
-          style: TextStyle(color: Colors.black),
+    return SafeArea(
+      child: Scaffold(
+        drawer: AppDrawer(),
+        appBar: AppBar(
+          elevation: 4.0,
+          title: const Text(
+            "MTA Konnect",
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.white,
         ),
-        backgroundColor: Colors.white,
-      ),
-      body: const Center(
-        child: Text("Home"),
+        body: const Center(
+          child: Text("Home"),
+        ),
       ),
     );
   }

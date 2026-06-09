@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dio/dio.dart';
-import 'package:mta/utilities/external_path_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
@@ -10,13 +7,12 @@ import 'package:mta/models/FectchProjectDocReq.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/network/ApiService.dart';
+import 'package:mta/services/document_download_service.dart';
+import 'package:mta/services/permission_service.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:open_filex/open_filex.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../../utilities/checkResponsive.dart';
@@ -28,28 +24,30 @@ class ViewDocScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
-        child: Scaffold(
-          appBar: appbar("Documents"),
-          backgroundColor: Colors.grey[300],
-          body: WillPopScope(
-              child: ViewDocContent(),
-              onWillPop: () {
-                Strings.category = false;
+        child: SafeArea(
+          child: Scaffold(
+            appBar: appbar("Documents"),
+            backgroundColor: Colors.grey[300],
+            body: WillPopScope(
+                child: ViewDocContent(),
+                onWillPop: () {
+                  Strings.category = false;
 
-                if (Strings.fromNotificationScren) {
-                  Strings.fromNotificationScren = false;
-                  Navigator.of(context).pushReplacementNamed('/notification');
-                } else {
-                  if (Strings.fromNotificationDocuments) {
-                    Strings.fromNotificationDocuments = false;
-                    Navigator.pushNamed(context, '/projects');
+                  if (Strings.fromNotificationScren) {
+                    Strings.fromNotificationScren = false;
+                    Navigator.of(context).pushReplacementNamed('/notification');
                   } else {
-                    Navigator.pushNamed(context, '/categories');
+                    if (Strings.fromNotificationDocuments) {
+                      Strings.fromNotificationDocuments = false;
+                      Navigator.pushNamed(context, '/projects');
+                    } else {
+                      Navigator.pushNamed(context, '/categories');
+                    }
                   }
-                }
 
-                throw 'Screen Change';
-              }),
+                  throw 'Screen Change';
+                }),
+          ),
         ));
   }
 }
@@ -72,24 +70,19 @@ class _ViewDocContentState extends State<ViewDocContent> {
   TextEditingController _searchFieldController = TextEditingController();
   String? filepath;
   var dio = Dio();
+  final Map<String, Future<String?>> _activeDownloads = {};
+  final DocumentDownloadService _documentDownloadService =
+      DocumentDownloadService();
+  final PermissionService _permissionService = PermissionService();
 
   String _errText = "";
 
   void initState() {
     super.initState();
-    getPermission();
     if (Strings.fromNotificationDocuments) {
       updateNotification(Strings.notificationID);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => getDocs());
-  }
-
-  //get storage permission
-  void getPermission() async {
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
-      await Permission.storage.request();
-    }
   }
 
   updateNotification(notificationId) {
@@ -132,108 +125,81 @@ class _ViewDocContentState extends State<ViewDocContent> {
   }
 
   void _downloadfile(serverURL, filename) async {
-    String? path;
-    if (Platform.isAndroid) {
-      path = await ExternalPath.getExternalStoragePublicDirectory(
-          ExternalPath.DIRECTORY_DOWNLOADS);
-    } else if (Platform.isIOS) {
-      print("ios");
-      var vpath = await getApplicationDocumentsDirectory();
-      String pathStr = vpath.toString();
-      if (pathStr.length >= 5) {
-        path = pathStr.substring(12, pathStr.length);
-      }
-      if (path != null && path.length >= 1) {
-        path = path.substring(0, path.length - 1);
-      }
-    }
-    // AppUtils.showprogress();
-    // AppUtils.showToast('Downloading');
+    final String fileUrl = serverURL?.toString() ?? "";
+    final String displayName = filename?.toString() ?? "document";
+    final String initialExtension = _documentDownloadService.resolvePreferredExtension(
+      urlPath: fileUrl,
+      displayName: displayName,
+    );
+    final String expectedPath = await _documentDownloadService.buildExpectedLocalPath(
+      displayName,
+      initialExtension,
+    );
 
-    print("serverURL--> $serverURL");
-    //var fileName = filename;//filenames[1];
-    var extn = getFileExtension(serverURL);
-    var nospace = filename.replaceAll(' ', '');
-    var fileName = nospace + extn;
-    print("filename--> $fileName");
-    String fullPath = "$path/$fileName";
-    setState(() {
-      filepath = fullPath;
+    final String? cachedPath =
+        await _documentDownloadService.getCachedPathIfExists(expectedPath);
+    if (cachedPath != null) {
+      setState(() {
+        filepath = cachedPath;
+      });
+      await _documentDownloadService.openFile(cachedPath, context: context);
+      return;
+    }
+
+    final bool canWrite = await _permissionService.ensureDownloadWriteAccess();
+    if (!canWrite) {
+      AppUtils.showToastError("Storage permission is required to save file");
+      return;
+    }
+
+    final String cacheKey = _buildCacheKey(fileUrl, displayName);
+    final String downloadUrl = Strings.baseImageUrl + fileUrl;
+    final Future<String?> ongoing = _activeDownloads[cacheKey] ??
+        _documentDownloadService.downloadAndCacheFile(
+          dio: dio,
+          downloadUrl: downloadUrl,
+          urlPath: fileUrl,
+          displayName: displayName,
+          savePath: expectedPath,
+          onReceiveProgress: showDownloadProgress,
+        );
+    _activeDownloads[cacheKey] = ongoing;
+
+    final String? downloadedFile = await ongoing.whenComplete(() {
+      _activeDownloads.remove(cacheKey);
     });
-    var downloadedFile = await download2(dio, serverURL, '$path/$fileName');
-    print("filepath");
 
-    // var downloadedFile = await downloadFile(serverURL, fileName, path!);
-    print("downloaded file $downloadedFile");
-    openFile(downloadedFile);
-  }
-
-  Future<void> openFile(String filePath) async {
-    try {
-      final file = File(filePath);
-
-      // Check file exists
-      if (!await file.exists()) {
-        debugPrint("File does not exist: $filePath");
-        return;
-      }
-
-      debugPrint("Opening file: $filePath");
-
-      final result = await OpenFilex.open(filePath);
-
-      debugPrint("Result type: ${result.type}");
-      debugPrint("Result message: ${result.message}");
-
-      if (result.type != ResultType.done) {
-        debugPrint("Unable to open file");
-      }
-    } catch (e) {
-      debugPrint("Open file error: $e");
+    if (downloadedFile == null) {
+      return;
     }
+
+    setState(() {
+      filepath = downloadedFile;
+    });
+    await _documentDownloadService.openFile(downloadedFile, context: context);
   }
 
-  Future download2(Dio dio, String url, String savePath) async {
-    try {
-      var myUrl = Strings.baseImageUrl + url;
-      Response response = await dio.get(
-        myUrl,
-        onReceiveProgress: showDownloadProgress,
-        //Received data with List<int>
-        options: Options(
-            responseType: ResponseType.bytes,
-            followRedirects: false,
-            validateStatus: (status) {
-              return status! < 500;
-            }),
-      );
+  String _buildCacheKey(String url, String filename) {
+    return "${url.trim().toLowerCase()}|${filename.trim().toLowerCase()}";
+  }
 
-      print(response.headers);
-      File file = File(savePath);
-      var raf = file.openSync(mode: FileMode.write);
-      // response.data is List<int> type
-      raf.writeFromSync(response.data);
-      await raf.close();
-      var filePath;
-      if (response.statusCode == 200) {
-        AppUtils.dismissprogress();
-        filePath = savePath;
-        file = File(filePath);
-      } else if (response.statusCode == 404) {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError("Sorry, File  not Found !");
-      } else {
-        AppUtils.dismissprogress();
-        filePath = 'Error code: ' + response.statusCode.toString();
-      }
-      return filePath;
-    } catch (e) {
-      AppUtils.dismissprogress();
-      var filePath = 'Error $e';
-      print(e);
-      return filePath;
+  String _extractExtension(String value) {
+    if (value.isEmpty) {
+      return "";
     }
+
+    final String clean = value.split("?").first.split("#").first;
+    final String decoded = Uri.decodeComponent(clean);
+    final int dotIndex = decoded.lastIndexOf(".");
+    if (dotIndex < 0 || dotIndex == decoded.length - 1) {
+      return "";
+    }
+
+    final String ext = decoded.substring(dotIndex).toLowerCase();
+    final bool valid = RegExp(r'^\.[a-z0-9]{1,8}$').hasMatch(ext);
+    return valid ? ext : "";
   }
+
 
   void showDownloadProgress(received, total) {
     if (total != -1) {
@@ -956,8 +922,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
   }
 
   String getFileExt(String fileName) {
-    var file = fileName.split(".");
-    var fileExt = file[1];
+    final String fileExt = _extractExtension(fileName).replaceFirst(".", "");
     if (fileExt == "png" || fileExt == "PNG") {
       return "assets/icons/png.png";
     } else if (fileExt == "jpg" ||
@@ -989,8 +954,10 @@ class _ViewDocContentState extends State<ViewDocContent> {
   }
 
   String getFileExtension(String fileName) {
-    var file = fileName.split(".");
-    var fileExt = file[1];
+    final String fileExt = _extractExtension(fileName).replaceFirst(".", "");
+    if (fileExt.isEmpty) {
+      return ".doc";
+    }
     if (fileExt == "png" || fileExt == "PNG") {
       return ".png";
     } else if (fileExt == "jpg" ||

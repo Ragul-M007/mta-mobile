@@ -530,248 +530,250 @@ class _ChatScreenState extends State<ChatScreen> {
             },
             child: MaterialApp(
               builder: (_, child) => Portal(child: child!),
-              home: Scaffold(
-                body: ChatView(
-                  ctx: context,
-                  msgList: msgList,
-                  projectId: widget.projectId,
-                  groupId: widget.groupId,
-                  teamId: widget.teamId,
-                  teamName: widget.teamName,
-                  refreshCall: () {},
-                  audioDownloadConfirmation: () {
-                    joinGroup();
-                  },
-                  userList: flutterMentionUserList,
-                  isLastPage: !nextPageAvailable,
-                  loadMoreData: getMessagesWithPageCount,
-                  currentUser: currentUser,
-                  chatController: _chatController,
-                  onSendTap: _onSendTap,
-                  onLongPressed: _onLongPressed,
-                  onTap: _onLongPressed,
-                  onDeleteTap: () {
-                    String id = msgList
-                        .where((item) => item.isSelected == true)
-                        .first
-                        .id;
-                    showDeleteDialog(context, int.tryParse(id));
-                  },
-                  onForwardTap: _onForwardTap,
-                  onMoreTap: () {
-                    Strings.isSelectionEnabled = false;
-                    print("morre");
-                    int? id = int.tryParse(msgList
-                        .where((item) => item.isSelected == true)
-                        .first
-                        .id);
-                    showLoading(context);
-                    getReadUsers(id);
-                  },
-                  onBackPress: () {
-                    if (msgList
-                            .where((element) => element.isSelected == true)
-                            .length >
-                        0) {
-                      msgList
+              home: SafeArea(
+                child: Scaffold(
+                  body: ChatView(
+                    ctx: context,
+                    msgList: msgList,
+                    projectId: widget.projectId,
+                    groupId: widget.groupId,
+                    teamId: widget.teamId,
+                    teamName: widget.teamName,
+                    refreshCall: () {},
+                    audioDownloadConfirmation: () {
+                      joinGroup();
+                    },
+                    userList: flutterMentionUserList,
+                    isLastPage: !nextPageAvailable,
+                    loadMoreData: getMessagesWithPageCount,
+                    currentUser: currentUser,
+                    chatController: _chatController,
+                    onSendTap: _onSendTap,
+                    onLongPressed: _onLongPressed,
+                    onTap: _onLongPressed,
+                    onDeleteTap: () {
+                      String id = msgList
                           .where((item) => item.isSelected == true)
-                          .forEach((item) => item.isSelected = false);
-
+                          .first
+                          .id;
+                      showDeleteDialog(context, int.tryParse(id));
+                    },
+                    onForwardTap: _onForwardTap,
+                    onMoreTap: () {
                       Strings.isSelectionEnabled = false;
-                      setState(() {});
-                    } else {
-                      if (Strings.fromNotificationChat) {
-                        Strings.fromNotificationChat = false;
-                        if (Strings.roleId == 6) {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Projects(),
-                            ),
-                            (route) => false,
-                          );
-                          //   Navigator.pushNamed(context, "/projects");
-                        } else {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TeamsDashboard(),
-                            ),
-                            (route) => false,
-                          );
-                          //   Navigator.pushNamed(context, "/teamsDashboard");
-                        }
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    }
-                  },
-                  featureActiveConfig: const FeatureActiveConfig(
-                    enableReactionPopup: false,
-                    enablePagination: true,
-                    lastSeenAgoBuilderVisibility: false,
-                    receiptsBuilderVisibility: true,
-                  ),
-                  chatViewState: ChatViewState.hasMessages,
-                  chatViewStateConfig: ChatViewStateConfiguration(
-                    loadingWidgetConfig: ChatViewStateWidgetConfiguration(
-                      loadingIndicatorColor: theme.outgoingChatBubbleColor,
-                    ),
-                    onReloadButtonTap: () {},
-                  ),
-                  typeIndicatorConfig: TypeIndicatorConfiguration(
-                    flashingCircleBrightColor: theme.flashingCircleBrightColor,
-                    flashingCircleDarkColor: theme.flashingCircleDarkColor,
-                  ),
-                  chatBackgroundConfig: ChatBackgroundConfiguration(
-                    messageTimeIconColor: theme.messageTimeIconColor,
-                    messageTimeTextStyle:
-                        TextStyle(color: theme.messageTimeTextColor),
-                    defaultGroupSeparatorConfig:
-                        DefaultGroupSeparatorConfiguration(
-                      textStyle: TextStyle(
-                        color: theme.chatHeaderColor,
-                        fontSize: 17,
-                      ),
-                    ),
-                    backgroundColor: theme.backgroundColor,
-                  ),
-                  sendMessageConfig: SendMessageConfiguration(
-                    imagePickerIconsConfig: ImagePickerIconsConfiguration(
-                      cameraIconColor: theme.cameraIconColor,
-                      galleryIconColor: theme.galleryIconColor,
-                    ),
-                    replyMessageColor: theme.replyMessageColor,
-                    defaultSendButtonColor: theme.sendButtonColor,
-                    replyDialogColor: theme.replyDialogColor,
-                    replyTitleColor: theme.replyTitleColor,
-                    textFieldBackgroundColor: theme.textFieldBackgroundColor,
-                    closeIconColor: theme.closeIconColor,
-                    textFieldConfig: TextFieldConfiguration(
-                      onMessageTyping: (status) {
-                        /// Do with status
-                        debugPrint(status.toString());
-                      },
-                      compositionThresholdTime: const Duration(seconds: 1),
-                      textStyle: TextStyle(color: theme.textFieldTextColor),
-                    ),
-                    micIconColor: theme.replyMicIconColor,
-                    voiceRecordingConfiguration: VoiceRecordingConfiguration(
-                      backgroundColor: theme.waveformBackgroundColor,
-                      recorderIconColor: theme.recordIconColor,
-                      waveStyle: WaveStyle(
-                        showMiddleLine: false,
-                        waveColor: theme.waveColor ?? Colors.white,
-                        extendWaveform: true,
-                      ),
-                    ),
-                  ),
-                  chatBubbleConfig: ChatBubbleConfiguration(
-                    outgoingChatBubbleConfig: ChatBubble(
-                      linkPreviewConfig: LinkPreviewConfiguration(
-                        backgroundColor: theme.linkPreviewOutgoingChatColor,
-                        bodyStyle: theme.outgoingChatLinkBodyStyle,
-                        titleStyle: theme.outgoingChatLinkTitleStyle,
-                      ),
-                      receiptsWidgetConfig: const ReceiptsWidgetConfig(
-                          showReceiptsIn: ShowReceiptsIn.all),
-                      color: theme.outgoingChatBubbleColor,
-                    ),
-                    inComingChatBubbleConfig: ChatBubble(
-                      linkPreviewConfig: LinkPreviewConfiguration(
-                        linkStyle: TextStyle(
-                          color: theme.inComingChatBubbleTextColor,
-                          decoration: TextDecoration.underline,
-                        ),
-                        backgroundColor: theme.linkPreviewIncomingChatColor,
-                        bodyStyle: theme.incomingChatLinkBodyStyle,
-                        titleStyle: theme.incomingChatLinkTitleStyle,
-                      ),
-                      textStyle:
-                          TextStyle(color: theme.inComingChatBubbleTextColor),
-                      onMessageRead: (message) {
-                        /// send your message reciepts to the other client
-                        debugPrint('Message Read');
-                      },
-                      senderNameTextStyle:
-                          TextStyle(color: theme.inComingChatBubbleTextColor),
-                      color: theme.inComingChatBubbleColor,
-                    ),
-                  ),
-                  replyPopupConfig: ReplyPopupConfiguration(
-                    onUnsendTap: (message) {
-                      showDeleteDialog(context, int.parse(message.id));
-                    },
-                    onMoreTap: (message) {
                       print("morre");
+                      int? id = int.tryParse(msgList
+                          .where((item) => item.isSelected == true)
+                          .first
+                          .id);
                       showLoading(context);
-                      getReadUsers(int.parse(message.id));
+                      getReadUsers(id);
                     },
-                    onReportTap: () {
-                      print("report");
+                    onBackPress: () {
+                      if (msgList
+                              .where((element) => element.isSelected == true)
+                              .length >
+                          0) {
+                        msgList
+                            .where((item) => item.isSelected == true)
+                            .forEach((item) => item.isSelected = false);
+
+                        Strings.isSelectionEnabled = false;
+                        setState(() {});
+                      } else {
+                        if (Strings.fromNotificationChat) {
+                          Strings.fromNotificationChat = false;
+                          if (Strings.roleId == 6) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Projects(),
+                              ),
+                              (route) => false,
+                            );
+                            //   Navigator.pushNamed(context, "/projects");
+                          } else {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TeamsDashboard(),
+                              ),
+                              (route) => false,
+                            );
+                            //   Navigator.pushNamed(context, "/teamsDashboard");
+                          }
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      }
                     },
-                    backgroundColor: theme.replyPopupColor,
-                    buttonTextStyle:
-                        TextStyle(color: theme.replyPopupButtonColor),
-                    topBorderColor: theme.replyPopupTopBorderColor,
-                  ),
-                  messageConfig: MessageConfiguration(
-                    messageReactionConfig: MessageReactionConfiguration(
-                      backgroundColor: theme.messageReactionBackGroundColor,
-                      borderColor: theme.messageReactionBackGroundColor,
-                      reactedUserCountTextStyle:
-                          TextStyle(color: theme.inComingChatBubbleTextColor),
-                      reactionCountTextStyle:
-                          TextStyle(color: theme.inComingChatBubbleTextColor),
-                      reactionsBottomSheetConfig:
-                          ReactionsBottomSheetConfiguration(
-                        backgroundColor: theme.backgroundColor,
-                        reactedUserTextStyle: TextStyle(
-                          color: theme.inComingChatBubbleTextColor,
+                    featureActiveConfig: const FeatureActiveConfig(
+                      enableReactionPopup: false,
+                      enablePagination: true,
+                      lastSeenAgoBuilderVisibility: false,
+                      receiptsBuilderVisibility: true,
+                    ),
+                    chatViewState: ChatViewState.hasMessages,
+                    chatViewStateConfig: ChatViewStateConfiguration(
+                      loadingWidgetConfig: ChatViewStateWidgetConfiguration(
+                        loadingIndicatorColor: theme.outgoingChatBubbleColor,
+                      ),
+                      onReloadButtonTap: () {},
+                    ),
+                    typeIndicatorConfig: TypeIndicatorConfiguration(
+                      flashingCircleBrightColor: theme.flashingCircleBrightColor,
+                      flashingCircleDarkColor: theme.flashingCircleDarkColor,
+                    ),
+                    chatBackgroundConfig: ChatBackgroundConfiguration(
+                      messageTimeIconColor: theme.messageTimeIconColor,
+                      messageTimeTextStyle:
+                          TextStyle(color: theme.messageTimeTextColor),
+                      defaultGroupSeparatorConfig:
+                          DefaultGroupSeparatorConfiguration(
+                        textStyle: TextStyle(
+                          color: theme.chatHeaderColor,
+                          fontSize: 17,
                         ),
-                        reactionWidgetDecoration: BoxDecoration(
-                          color: theme.inComingChatBubbleColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDarkTheme
-                                  ? Colors.black12
-                                  : Colors.grey.shade200,
-                              offset: const Offset(0, 20),
-                              blurRadius: 40,
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(10),
+                      ),
+                      backgroundColor: theme.backgroundColor,
+                    ),
+                    sendMessageConfig: SendMessageConfiguration(
+                      imagePickerIconsConfig: ImagePickerIconsConfiguration(
+                        cameraIconColor: theme.cameraIconColor,
+                        galleryIconColor: theme.galleryIconColor,
+                      ),
+                      replyMessageColor: theme.replyMessageColor,
+                      defaultSendButtonColor: theme.sendButtonColor,
+                      replyDialogColor: theme.replyDialogColor,
+                      replyTitleColor: theme.replyTitleColor,
+                      textFieldBackgroundColor: theme.textFieldBackgroundColor,
+                      closeIconColor: theme.closeIconColor,
+                      textFieldConfig: TextFieldConfiguration(
+                        onMessageTyping: (status) {
+                          /// Do with status
+                          debugPrint(status.toString());
+                        },
+                        compositionThresholdTime: const Duration(seconds: 1),
+                        textStyle: TextStyle(color: theme.textFieldTextColor),
+                      ),
+                      micIconColor: theme.replyMicIconColor,
+                      voiceRecordingConfiguration: VoiceRecordingConfiguration(
+                        backgroundColor: theme.waveformBackgroundColor,
+                        recorderIconColor: theme.recordIconColor,
+                        waveStyle: WaveStyle(
+                          showMiddleLine: false,
+                          waveColor: theme.waveColor ?? Colors.white,
+                          extendWaveform: true,
                         ),
                       ),
                     ),
-                    imageMessageConfig: ImageMessageConfiguration(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 15),
-                      shareIconConfig: ShareIconConfiguration(
-                        defaultIconBackgroundColor:
-                            theme.shareIconBackgroundColor,
-                        defaultIconColor: theme.shareIconColor,
+                    chatBubbleConfig: ChatBubbleConfiguration(
+                      outgoingChatBubbleConfig: ChatBubble(
+                        linkPreviewConfig: LinkPreviewConfiguration(
+                          backgroundColor: theme.linkPreviewOutgoingChatColor,
+                          bodyStyle: theme.outgoingChatLinkBodyStyle,
+                          titleStyle: theme.outgoingChatLinkTitleStyle,
+                        ),
+                        receiptsWidgetConfig: const ReceiptsWidgetConfig(
+                            showReceiptsIn: ShowReceiptsIn.all),
+                        color: theme.outgoingChatBubbleColor,
+                      ),
+                      inComingChatBubbleConfig: ChatBubble(
+                        linkPreviewConfig: LinkPreviewConfiguration(
+                          linkStyle: TextStyle(
+                            color: theme.inComingChatBubbleTextColor,
+                            decoration: TextDecoration.underline,
+                          ),
+                          backgroundColor: theme.linkPreviewIncomingChatColor,
+                          bodyStyle: theme.incomingChatLinkBodyStyle,
+                          titleStyle: theme.incomingChatLinkTitleStyle,
+                        ),
+                        textStyle:
+                            TextStyle(color: theme.inComingChatBubbleTextColor),
+                        onMessageRead: (message) {
+                          /// send your message reciepts to the other client
+                          debugPrint('Message Read');
+                        },
+                        senderNameTextStyle:
+                            TextStyle(color: theme.inComingChatBubbleTextColor),
+                        color: theme.inComingChatBubbleColor,
                       ),
                     ),
-                  ),
-                  repliedMessageConfig: RepliedMessageConfiguration(
-                    backgroundColor: theme.repliedMessageColor,
-                    verticalBarColor: theme.verticalBarColor,
-                    repliedMsgAutoScrollConfig: RepliedMsgAutoScrollConfig(
-                      enableHighlightRepliedMsg: true,
-                      highlightColor: Colors.pinkAccent.shade100,
-                      highlightScale: 1.1,
+                    replyPopupConfig: ReplyPopupConfiguration(
+                      onUnsendTap: (message) {
+                        showDeleteDialog(context, int.parse(message.id));
+                      },
+                      onMoreTap: (message) {
+                        print("morre");
+                        showLoading(context);
+                        getReadUsers(int.parse(message.id));
+                      },
+                      onReportTap: () {
+                        print("report");
+                      },
+                      backgroundColor: theme.replyPopupColor,
+                      buttonTextStyle:
+                          TextStyle(color: theme.replyPopupButtonColor),
+                      topBorderColor: theme.replyPopupTopBorderColor,
                     ),
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.25,
+                    messageConfig: MessageConfiguration(
+                      messageReactionConfig: MessageReactionConfiguration(
+                        backgroundColor: theme.messageReactionBackGroundColor,
+                        borderColor: theme.messageReactionBackGroundColor,
+                        reactedUserCountTextStyle:
+                            TextStyle(color: theme.inComingChatBubbleTextColor),
+                        reactionCountTextStyle:
+                            TextStyle(color: theme.inComingChatBubbleTextColor),
+                        reactionsBottomSheetConfig:
+                            ReactionsBottomSheetConfiguration(
+                          backgroundColor: theme.backgroundColor,
+                          reactedUserTextStyle: TextStyle(
+                            color: theme.inComingChatBubbleTextColor,
+                          ),
+                          reactionWidgetDecoration: BoxDecoration(
+                            color: theme.inComingChatBubbleColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: isDarkTheme
+                                    ? Colors.black12
+                                    : Colors.grey.shade200,
+                                offset: const Offset(0, 20),
+                                blurRadius: 40,
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      imageMessageConfig: ImageMessageConfiguration(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 15),
+                        shareIconConfig: ShareIconConfiguration(
+                          defaultIconBackgroundColor:
+                              theme.shareIconBackgroundColor,
+                          defaultIconColor: theme.shareIconColor,
+                        ),
+                      ),
                     ),
-                    replyTitleTextStyle:
-                        TextStyle(color: theme.repliedTitleTextColor),
-                  ),
-                  swipeToReplyConfig: SwipeToReplyConfiguration(
-                    replyIconColor: theme.swipeToReplyIconColor,
+                    repliedMessageConfig: RepliedMessageConfiguration(
+                      backgroundColor: theme.repliedMessageColor,
+                      verticalBarColor: theme.verticalBarColor,
+                      repliedMsgAutoScrollConfig: RepliedMsgAutoScrollConfig(
+                        enableHighlightRepliedMsg: true,
+                        highlightColor: Colors.pinkAccent.shade100,
+                        highlightScale: 1.1,
+                      ),
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.25,
+                      ),
+                      replyTitleTextStyle:
+                          TextStyle(color: theme.repliedTitleTextColor),
+                    ),
+                    swipeToReplyConfig: SwipeToReplyConfiguration(
+                      replyIconColor: theme.swipeToReplyIconColor,
+                    ),
                   ),
                 ),
               ),

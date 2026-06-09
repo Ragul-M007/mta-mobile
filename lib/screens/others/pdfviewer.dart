@@ -35,14 +35,16 @@ class _PdfviewerState extends State<Pdfviewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF0061b0),
-        title: Text('MTA Konnect'),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0xFF0061b0),
+          title: Text('MTA Konnect'),
+        ),
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : PDFView(filePath: localPath!),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : PDFView(filePath: localPath!),
     );
   }
 }

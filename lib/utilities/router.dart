@@ -116,12 +116,14 @@ class RoutesGenerator {
 
   static Route<dynamic> _errorRoute() {
     return MaterialPageRoute(builder: (_) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Error'),
-        ),
-        body: Center(
-          child: Text('Error'),
+      return SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Error'),
+          ),
+          body: Center(
+            child: Text('Error'),
+          ),
         ),
       );
     });

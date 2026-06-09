@@ -142,12 +142,14 @@ class _MembersSelectionState extends State<MembersSelection> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Builder(
-          builder: (BuildContext newContext) {
-            return membersSelectionWidget(newContext);
-          },
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Builder(
+            builder: (BuildContext newContext) {
+              return membersSelectionWidget(newContext);
+            },
+          ),
         ),
       ),
     );

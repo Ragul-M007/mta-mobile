@@ -58,12 +58,14 @@ class _MeetingHistoryState extends State<MeetingHistory> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Builder(
-          builder: (BuildContext newContext) {
-            return MeetingHistoryWidget(newContext);
-          },
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Builder(
+            builder: (BuildContext newContext) {
+              return MeetingHistoryWidget(newContext);
+            },
+          ),
         ),
       ),
     );

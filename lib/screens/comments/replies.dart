@@ -75,20 +75,22 @@ class _RepliesState extends State<Replies> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: appbar("Replies"),
-          backgroundColor: Colors.grey[300],
-          body: WillPopScope(
-              onWillPop: () {
-                Strings.categoriesforReply = false;
-                _socket?.disconnect();
-                _socket?.dispose();
+        child: SafeArea(
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: appbar("Replies"),
+            backgroundColor: Colors.grey[300],
+            body: WillPopScope(
+                onWillPop: () {
+                  Strings.categoriesforReply = false;
+                  _socket?.disconnect();
+                  _socket?.dispose();
 
-                Navigator.pushNamed(context, '/comments');
-                throw 'Replies';
-              },
-              child: RepliesContent()),
+                  Navigator.pushNamed(context, '/comments');
+                  throw 'Replies';
+                },
+                child: RepliesContent()),
+          ),
         ));
   }
 }

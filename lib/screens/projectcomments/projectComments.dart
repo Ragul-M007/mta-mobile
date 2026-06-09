@@ -83,39 +83,41 @@ class _ProjectCommentsState extends State<ProjectComments> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: appbar("Comments"),
-          backgroundColor: Colors.grey[300],
-          body: WillPopScope(
-              child: CommentsContent(),
-              onWillPop: () {
-                Strings.category = false;
-                initialCommentCheck = true;
-                _socket?.disconnect();
-                _socket?.dispose();
-                // if (Strings.fromNotificationComments == true) {
-                //   Strings.fromNotificationComments = false;
-                //   Navigator.pushNamed(context, '/dashboard');
-                // } else if (Strings.fromNotificationScren) {
-                //   Strings.fromNotificationScren = false;
-                //   Navigator.of(context).pushReplacementNamed('/notification');
-                // } else {
-                //   Navigator.pushNamed(context, '/viewdoclist');
-                // }
-                if (Strings.fromNotificationScren) {
-                  Strings.fromNotificationScren = false;
-                  Navigator.of(context).pushReplacementNamed('/notification');
-                } else {
-                  if (Strings.fromNotificationComments) {
-                    Strings.fromNotificationComments = false;
-                    Navigator.pushNamed(context, '/projects');
+        child: SafeArea(
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: appbar("Comments"),
+            backgroundColor: Colors.grey[300],
+            body: WillPopScope(
+                child: CommentsContent(),
+                onWillPop: () {
+                  Strings.category = false;
+                  initialCommentCheck = true;
+                  _socket?.disconnect();
+                  _socket?.dispose();
+                  // if (Strings.fromNotificationComments == true) {
+                  //   Strings.fromNotificationComments = false;
+                  //   Navigator.pushNamed(context, '/dashboard');
+                  // } else if (Strings.fromNotificationScren) {
+                  //   Strings.fromNotificationScren = false;
+                  //   Navigator.of(context).pushReplacementNamed('/notification');
+                  // } else {
+                  //   Navigator.pushNamed(context, '/viewdoclist');
+                  // }
+                  if (Strings.fromNotificationScren) {
+                    Strings.fromNotificationScren = false;
+                    Navigator.of(context).pushReplacementNamed('/notification');
                   } else {
-                    Navigator.pushNamed(context, '/categories');
+                    if (Strings.fromNotificationComments) {
+                      Strings.fromNotificationComments = false;
+                      Navigator.pushNamed(context, '/projects');
+                    } else {
+                      Navigator.pushNamed(context, '/categories');
+                    }
                   }
-                }
-                throw 'Screen Change';
-              }),
+                  throw 'Screen Change';
+                }),
+          ),
         ));
   }
 }

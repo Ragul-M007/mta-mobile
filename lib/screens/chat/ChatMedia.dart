@@ -115,20 +115,22 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Chat Media"),
-        actions: [
-          groupCreatedUserId == Strings.userID
-              ? IconButton(
-                  onPressed: () {
-                    showDeleteDialog(context);
-                  },
-                  icon: Icon(Icons.delete_outline_outlined))
-              : Container()
-        ],
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Chat Media"),
+          actions: [
+            groupCreatedUserId == Strings.userID
+                ? IconButton(
+                    onPressed: () {
+                      showDeleteDialog(context);
+                    },
+                    icon: Icon(Icons.delete_outline_outlined))
+                : Container()
+          ],
+        ),
+        body: tabbarwidget(),
       ),
-      body: tabbarwidget(),
     );
   }
 

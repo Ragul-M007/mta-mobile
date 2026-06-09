@@ -215,124 +215,126 @@ class _AddRemoveUsersIntoGroupsState extends State<AddRemoveUsersIntoGroups> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Chat Media"),
-          leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.arrow_back_sharp)),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  child: Text(selectedClick ? "Unselect All" : "Select All"),
-                  onPressed: () {
-                    selectedClick = !selectedClick;
-                    selectUnselectUsers();
-                  },
+      home: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Chat Media"),
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.arrow_back_sharp)),
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    child: Text(selectedClick ? "Unselect All" : "Select All"),
+                    onPressed: () {
+                      selectedClick = !selectedClick;
+                      selectUnselectUsers();
+                    },
+                  ),
                 ),
               ),
-            ),
-            // Container(
-            //     decoration: BoxDecoration(
-            //       borderRadius: BorderRadius.circular(25),
-            //       color: const Color(0xFFeceeef),
-            //     ),
-            //     child:
+              // Container(
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(25),
+              //       color: const Color(0xFFeceeef),
+              //     ),
+              //     child:
 
-            //     Padding(
-            //       padding: const EdgeInsets.all(5.0),
-            //       child: Material(
-            //         color: const Color(0xFFeceeef),
-            //         child: Row(
-            //           mainAxisSize: MainAxisSize.min,
-            //           children: <Widget>[
-            //             Expanded(
-            //               child: TextField(
-            //                 focusNode: searchField,
-            //                 controller: _searchFieldController,
-            //                 decoration: InputDecoration.collapsed(
-            //                   hintText: ' Search',
-            //                 ),
-            //                 onChanged: (value) {
-            //                   if (value.isEmpty) {
-            //                     setState(() {
-            //                       _searchLists = [];
-            //                     });
-            //                     return;
-            //                   }
-            //                   _searchLists = [];
-            //                   chatUsers?.forEach((list) {
-            //                     if (list.userName!
-            //                         .toLowerCase()
-            //                         .startsWith(value.toLowerCase()))
-            //                       _searchLists?.add(list);
-            //                   });
-            //                   print("dataaaa ${_searchLists?.length}");
-            //                   setState(() {});
-            //                 },
-            //               ),
-            //             ),
-            //             InkWell(
-            //               child: Icon(
-            //                 Icons.search,
-            //                 color: Colors.black,
-            //               ),
-            //               onTap: () {},
-            //             )
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ),
+              //     Padding(
+              //       padding: const EdgeInsets.all(5.0),
+              //       child: Material(
+              //         color: const Color(0xFFeceeef),
+              //         child: Row(
+              //           mainAxisSize: MainAxisSize.min,
+              //           children: <Widget>[
+              //             Expanded(
+              //               child: TextField(
+              //                 focusNode: searchField,
+              //                 controller: _searchFieldController,
+              //                 decoration: InputDecoration.collapsed(
+              //                   hintText: ' Search',
+              //                 ),
+              //                 onChanged: (value) {
+              //                   if (value.isEmpty) {
+              //                     setState(() {
+              //                       _searchLists = [];
+              //                     });
+              //                     return;
+              //                   }
+              //                   _searchLists = [];
+              //                   chatUsers?.forEach((list) {
+              //                     if (list.userName!
+              //                         .toLowerCase()
+              //                         .startsWith(value.toLowerCase()))
+              //                       _searchLists?.add(list);
+              //                   });
+              //                   print("dataaaa ${_searchLists?.length}");
+              //                   setState(() {});
+              //                 },
+              //               ),
+              //             ),
+              //             InkWell(
+              //               child: Icon(
+              //                 Icons.search,
+              //                 color: Colors.black,
+              //               ),
+              //               onTap: () {},
+              //             )
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
 
-            Expanded(
-              child: chatUsers.length > 0
-                  ? ListView.builder(
-                      itemCount: chatUsers.length,
-                      itemBuilder: (context, index) {
-                        return CheckboxListTile(
-                          enabled: (!chatUsers[index].alreadyLinked!),
-                          title: Text('${chatUsers[index].userName}'),
-                          value: chatUsers[index].isSelected,
-                          onChanged: (value) {
-                            setState(() {
-                              chatUsers[index].isSelected = value!;
-                              print("jsonn data ${jsonEncode(chatUsers)}");
-                            });
-                          },
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Text("No users found",
-                          style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w600))),
-            ),
+              Expanded(
+                child: chatUsers.length > 0
+                    ? ListView.builder(
+                        itemCount: chatUsers.length,
+                        itemBuilder: (context, index) {
+                          return CheckboxListTile(
+                            enabled: (!chatUsers[index].alreadyLinked!),
+                            title: Text('${chatUsers[index].userName}'),
+                            value: chatUsers[index].isSelected,
+                            onChanged: (value) {
+                              setState(() {
+                                chatUsers[index].isSelected = value!;
+                                print("jsonn data ${jsonEncode(chatUsers)}");
+                              });
+                            },
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text("No users found",
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w600))),
+              ),
 
-            Container(
-                width: MediaQuery.of(context).size.width * 0.80,
-                child: ElevatedButton(
-                  onPressed: () {
-                    updateSelectedUsers();
-                  },
-                  child: Text(
-                    "Add",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.blue)),
-                ))
-          ],
+              Container(
+                  width: MediaQuery.of(context).size.width * 0.80,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      updateSelectedUsers();
+                    },
+                    child: Text(
+                      "Add",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.blue)),
+                  ))
+            ],
+          ),
         ),
       ),
     );

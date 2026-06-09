@@ -159,95 +159,97 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: AppBarWidget(
-              backButtonfunction: () {
-                Navigator.pop(context);
-              },
-              title: "Create Meetings",
-              actionWidget: []),
-        ),
-        floatingActionButton: Padding(
-          padding:
-              const EdgeInsets.only(left: 30.0, right: 30, top: 0, bottom: 20),
-          child: ThemeButton(title: "NEXT", buttonfunction: submitData),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        body: Container(
-          padding: EdgeInsets.only(
-              left: 30.0,
-              right: 30,
-              top: 30,
-              bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 70 : 0),
-          height: MediaQuery.of(context).size.height < 872
-              ? MediaQuery.of(context).size.height * 0.75
-              : MediaQuery.of(context).size.height * 0.82,
-          child: SingleChildScrollView(
-            controller: _scrollController,
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Colors.white,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(kToolbarHeight),
+            child: AppBarWidget(
+                backButtonfunction: () {
+                  Navigator.pop(context);
+                },
+                title: "Create Meetings",
+                actionWidget: []),
+          ),
+          floatingActionButton: Padding(
+            padding:
+                const EdgeInsets.only(left: 30.0, right: 30, top: 0, bottom: 20),
+            child: ThemeButton(title: "NEXT", buttonfunction: submitData),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          body: Container(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.03),
-            child: Column(
-              children: [
-                formFields("  Meeting Title", "meetingTitle",
-                    "eg: Site meeting", titleController, false),
-                formFields("  Type of Meetings", "meetingType", "Select type",
-                    typeController, false),
-                selectedType == "2"
-                    ? formFields(
-                        "  Provider",
-                        "providerType",
-                        integratedMeetingsList.isNotEmpty
-                            ? "Select a provider"
-                            : "No Data Found",
-                        typeController,
-                        false)
-                    : Container(),
-                formFields("  Invite Teams or Projects", "inviteTeams",
-                    "Select a team", teamController, false),
-                Padding(
-                  padding: EdgeInsets.only(top: 15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.37,
-                          child: Divider(
-                            color: Colors.grey.withOpacity(0.8),
-                            height: 1,
+                left: 30.0,
+                right: 30,
+                top: 30,
+                bottom: MediaQuery.of(context).viewInsets.bottom > 0.0 ? 70 : 0),
+            height: MediaQuery.of(context).size.height < 872
+                ? MediaQuery.of(context).size.height * 0.75
+                : MediaQuery.of(context).size.height * 0.82,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).size.height * 0.03),
+              child: Column(
+                children: [
+                  formFields("  Meeting Title", "meetingTitle",
+                      "eg: Site meeting", titleController, false),
+                  formFields("  Type of Meetings", "meetingType", "Select type",
+                      typeController, false),
+                  selectedType == "2"
+                      ? formFields(
+                          "  Provider",
+                          "providerType",
+                          integratedMeetingsList.isNotEmpty
+                              ? "Select a provider"
+                              : "No Data Found",
+                          typeController,
+                          false)
+                      : Container(),
+                  formFields("  Invite Teams or Projects", "inviteTeams",
+                      "Select a team", teamController, false),
+                  Padding(
+                    padding: EdgeInsets.only(top: 15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            child: Divider(
+                              color: Colors.grey.withOpacity(0.8),
+                              height: 1,
+                            ),
                           ),
                         ),
-                      ),
-                      Text("or"),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.37,
-                          child: Divider(
-                            color: Colors.grey.withOpacity(0.8),
-                            height: 1,
+                        Text("or"),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.37,
+                            child: Divider(
+                              color: Colors.grey.withOpacity(0.8),
+                              height: 1,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                formFields("", "inviteProjects", "Select a project",
-                    projectController, false),
-                formFields("  Invite via Email (Optional)", "inviteMails",
-                    "eg: email@address.com", emailController, false),
-                formFields("  Meeting Date", "meetingDate", "Select date",
-                    dateController, false),
-                formFields(
-                    "", "meetingTime", "Select Time", timeController, false),
-                formFields("  Meeting Description", "meetingDescription",
-                    "Type message..", descriptionController, false),
-              ],
+                  formFields("", "inviteProjects", "Select a project",
+                      projectController, false),
+                  formFields("  Invite via Email (Optional)", "inviteMails",
+                      "eg: email@address.com", emailController, false),
+                  formFields("  Meeting Date", "meetingDate", "Select date",
+                      dateController, false),
+                  formFields(
+                      "", "meetingTime", "Select Time", timeController, false),
+                  formFields("  Meeting Description", "meetingDescription",
+                      "Type message..", descriptionController, false),
+                ],
+              ),
             ),
           ),
         ),

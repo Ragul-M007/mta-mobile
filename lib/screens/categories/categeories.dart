@@ -19,19 +19,21 @@ class Categories extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        backgroundColor: Colors.grey[300],
-        appBar: appbar("Project Details"),
-        body: WillPopScope(
-          child: CategoriesContent(),
-          onWillPop: () {
-            if (Strings.fromProjects == true) {
-              Navigator.pushNamed(context, '/projects');
-            } else {
-              Navigator.pushNamed(context, '/dashboard');
-            }
-            throw 'Screen Change';
-          },
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.grey[300],
+          appBar: appbar("Project Details"),
+          body: WillPopScope(
+            child: CategoriesContent(),
+            onWillPop: () {
+              if (Strings.fromProjects == true) {
+                Navigator.pushNamed(context, '/projects');
+              } else {
+                Navigator.pushNamed(context, '/dashboard');
+              }
+              throw 'Screen Change';
+            },
+          ),
         ),
       ),
     );

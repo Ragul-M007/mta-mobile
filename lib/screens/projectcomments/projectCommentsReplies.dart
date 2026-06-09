@@ -78,19 +78,21 @@ class _ProjectCommentsRepliesState extends State<ProjectCommentsReplies> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
         create: (context) => ApiService.create(),
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: appbar("Replies"),
-          backgroundColor: Colors.grey[300],
-          body: WillPopScope(
-              onWillPop: () {
-                Strings.categoriesforReply = false;
-                _socket?.disconnect();
-                _socket?.dispose();
-                Navigator.pushNamed(context, '/projectComments');
-                throw 'Replies';
-              },
-              child: RepliesContent()),
+        child: SafeArea(
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: appbar("Replies"),
+            backgroundColor: Colors.grey[300],
+            body: WillPopScope(
+                onWillPop: () {
+                  Strings.categoriesforReply = false;
+                  _socket?.disconnect();
+                  _socket?.dispose();
+                  Navigator.pushNamed(context, '/projectComments');
+                  throw 'Replies';
+                },
+                child: RepliesContent()),
+          ),
         ));
   }
 }

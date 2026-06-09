@@ -46,15 +46,17 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
 
   Widget build(BuildContext context) {
     return Material(
-        child: Scaffold(
-            drawer: AppDrawer(),
-            appBar: mainappbar(ontab: menuopen, title: "News & Highlights"),
-            // mainappbar(
-            //     ontab: menuopen,
-            //     title: "News & Heighlights",
-            //     controller: _controller),
+        child: SafeArea(
+          child: Scaffold(
+              drawer: AppDrawer(),
+              appBar: mainappbar(ontab: menuopen, title: "News & Highlights"),
+              // mainappbar(
+              //     ontab: menuopen,
+              //     title: "News & Heighlights",
+              //     controller: _controller),
 
-            body: tabbarwidget()));
+              body: tabbarwidget()),
+        ));
   }
 
   menuRedirect({@required String? routename, int? currentmenu}) {

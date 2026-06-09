@@ -14,6 +14,12 @@ Future<void> main() async {
   //_setupLogging();
   // runApp(SplashScreen());
   WidgetsFlutterBinding.ensureInitialized();
+
+
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
+
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(

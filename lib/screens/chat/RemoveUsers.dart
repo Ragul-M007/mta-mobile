@@ -121,43 +121,45 @@ class _AddRemoveUsersIntoGroupsState extends State<RemoveUsersInGroup> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-      appBar: AppBar(title: Text("Chat Media"),leading: IconButton(onPressed: (){
-        Navigator.pop(context);
-      }, icon: Icon(Icons.arrow_back_sharp)),),
-        body: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: chatUsers.length,
-                itemBuilder: (context, index) {
-                  return CheckboxListTile(
-                    enabled: !(chatUsers[index].groupCreateAccess == 1),
-                    title: Text('${chatUsers[index].userName}'),
-                    value: chatUsers[index].isSelected,
-                    onChanged: (value) 
-                    {
-                      setState(() 
+      home: SafeArea(
+        child: Scaffold(
+        appBar: AppBar(title: Text("Chat Media"),leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, icon: Icon(Icons.arrow_back_sharp)),),
+          body: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: chatUsers.length,
+                  itemBuilder: (context, index) {
+                    return CheckboxListTile(
+                      enabled: !(chatUsers[index].groupCreateAccess == 1),
+                      title: Text('${chatUsers[index].userName}'),
+                      value: chatUsers[index].isSelected,
+                      onChanged: (value) 
                       {
-                        //  var data = jsonEncode(chatUsers).to;
-                        //  chatUsers[index]['isSelected'] = value;
-                        chatUsers[index].isSelected = value!;
-                        print("jsonn data ${jsonEncode(chatUsers)}");
-                      });
-                    },
-                  );
-                },
+                        setState(() 
+                        {
+                          //  var data = jsonEncode(chatUsers).to;
+                          //  chatUsers[index]['isSelected'] = value;
+                          chatUsers[index].isSelected = value!;
+                          print("jsonn data ${jsonEncode(chatUsers)}");
+                        });
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.80,
-              child: ElevatedButton(onPressed: ()
-              {
-                  updateSelectedUsers();
-              }, child: Text("Remove",style: TextStyle(color: Colors.white),),style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)
-              ),))
-          ],
+              Container(
+                width: MediaQuery.of(context).size.width * 0.80,
+                child: ElevatedButton(onPressed: ()
+                {
+                    updateSelectedUsers();
+                }, child: Text("Remove",style: TextStyle(color: Colors.white),),style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.blue)
+                ),))
+            ],
+          ),
         ),
       ),
     );

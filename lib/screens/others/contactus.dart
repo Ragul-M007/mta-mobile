@@ -36,11 +36,13 @@ class _ContactusState extends State<Contactus> {
 
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        drawer: AppDrawer(),
-        backgroundColor: Colors.grey[300],
-        appBar: EmptyAppBar(),
-        body: ContactusContent(),
+      child: SafeArea(
+        child: Scaffold(
+          drawer: AppDrawer(),
+          backgroundColor: Colors.grey[300],
+          appBar: EmptyAppBar(),
+          body: ContactusContent(),
+        ),
       ),
     );
   }

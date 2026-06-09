@@ -49,11 +49,13 @@ class _ProfileState extends State<Profile> {
 
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        drawer: AppDrawer(),
-        backgroundColor: Colors.grey[300],
-        appBar: EmptyAppBar(),
-        body: ProfileContent(),
+      child: SafeArea(
+        child: Scaffold(
+          drawer: AppDrawer(),
+          backgroundColor: Colors.grey[300],
+          appBar: EmptyAppBar(),
+          body: ProfileContent(),
+        ),
       ),
     );
   }

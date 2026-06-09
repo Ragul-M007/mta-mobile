@@ -170,598 +170,600 @@ class _ProjectsState extends State<Projects> {
         },
         child: Provider<ApiService>(
             create: (context) => ApiService.create(),
-            child: Scaffold(
-                drawer: AppDrawer(),
-                backgroundColor: const Color(0xFFececed),
-                appBar: AppBar(
-                  backgroundColor: Colors.white,
-                  actions: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
-                        child: GestureDetector(
-                            onTap: () {
-                              print(Strings.baseImageUrl + Strings.profilePic!);
-                              _showMyDialog(
-                                  context,
-                                  Strings.baseImageUrl + Strings.profilePic!,
-                                  Strings.username);
-                            },
-                            child: CircleAvatar(
-                              backgroundImage: (Strings.profilePic != "")
-                                  ? NetworkImage(Strings.baseImageUrl +
-                                      (Strings.profilePic ?? ""))
-                                  : AssetImage(
-                                      "assets/icons/account.png",
-                                    ) as ImageProvider,
-                              backgroundColor: Colors.grey.withOpacity(0.3),
-                            )
-                            // Strings.profilePic == null
-                            //     ? Image.asset(
-                            //         "assets/images/user.png",
-                            //         height: 40,
-                            //         width: 40,
-                            //       )
-                            //     : Image.network(
-                            //         Strings.baseImageUrl + Strings.profilePic!,
-                            //         height: 40,
-                            //         width: 40,
-                            //       ),
-                            // image.(
-                            //     Strings.baseImageUrl + Strings.profilePic!,
-                            //     40.0,
-                            //     40.0),
-                            ))
-                  ],
-                  bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(kToolbarHeight),
-                      child: Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Container(
-                          //  padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: const Color(0xFFeceeef),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Material(
+            child: SafeArea(
+              child: Scaffold(
+                  drawer: AppDrawer(),
+                  backgroundColor: const Color(0xFFececed),
+                  appBar: AppBar(
+                    backgroundColor: Colors.white,
+                    actions: [
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
+                          child: GestureDetector(
+                              onTap: () {
+                                print(Strings.baseImageUrl + Strings.profilePic!);
+                                _showMyDialog(
+                                    context,
+                                    Strings.baseImageUrl + Strings.profilePic!,
+                                    Strings.username);
+                              },
+                              child: CircleAvatar(
+                                backgroundImage: (Strings.profilePic != "")
+                                    ? NetworkImage(Strings.baseImageUrl +
+                                        (Strings.profilePic ?? ""))
+                                    : AssetImage(
+                                        "assets/icons/account.png",
+                                      ) as ImageProvider,
+                                backgroundColor: Colors.grey.withOpacity(0.3),
+                              )
+                              // Strings.profilePic == null
+                              //     ? Image.asset(
+                              //         "assets/images/user.png",
+                              //         height: 40,
+                              //         width: 40,
+                              //       )
+                              //     : Image.network(
+                              //         Strings.baseImageUrl + Strings.profilePic!,
+                              //         height: 40,
+                              //         width: 40,
+                              //       ),
+                              // image.(
+                              //     Strings.baseImageUrl + Strings.profilePic!,
+                              //     40.0,
+                              //     40.0),
+                              ))
+                    ],
+                    bottom: PreferredSize(
+                        preferredSize: Size.fromHeight(kToolbarHeight),
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Container(
+                            //  padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
                               color: const Color(0xFFeceeef),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: TextField(
-                                      focusNode: searchField,
-                                      controller: _searchFieldController,
-                                      decoration: InputDecoration.collapsed(
-                                        hintText: ' Search',
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isEmpty) {
-                                          setState(() {
-                                            _searchLists = [];
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Material(
+                                color: const Color(0xFFeceeef),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: TextField(
+                                        focusNode: searchField,
+                                        controller: _searchFieldController,
+                                        decoration: InputDecoration.collapsed(
+                                          hintText: ' Search',
+                                        ),
+                                        onChanged: (value) {
+                                          if (value.isEmpty) {
+                                            setState(() {
+                                              _searchLists = [];
+                                            });
+                                            return;
+                                          }
+                                          _searchLists = [];
+                                          _projectLists.forEach((projectDetail) {
+                                            if (projectDetail.projectName!
+                                                .toLowerCase()
+                                                .startsWith(value.toLowerCase()))
+                                              _searchLists.add(projectDetail);
                                           });
-                                          return;
-                                        }
-                                        _searchLists = [];
-                                        _projectLists.forEach((projectDetail) {
-                                          if (projectDetail.projectName!
-                                              .toLowerCase()
-                                              .startsWith(value.toLowerCase()))
-                                            _searchLists.add(projectDetail);
-                                        });
-                                        print(_searchLists.length);
-                                        setState(() {});
-                                      },
+                                          print(_searchLists.length);
+                                          setState(() {});
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  InkWell(
-                                    child: Icon(
-                                      Icons.search,
-                                      color: Colors.black,
-                                    ),
-                                    onTap: () {},
-                                  )
-                                ],
+                                    InkWell(
+                                      child: Icon(
+                                        Icons.search,
+                                        color: Colors.black,
+                                      ),
+                                      onTap: () {},
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
+                        )),
+                    leading: Builder(
+                      builder: (ctx) => SizedBox(
+                        height: 25.0,
+                        width: 25.0,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.menu,
+                            size: 25.0,
+                            color: const Color(0xFF979797),
+                          ),
+                          onPressed: () {
+                            searchField.unfocus();
+                            Scaffold.of(ctx).openDrawer();
+                          },
                         ),
-                      )),
-                  leading: Builder(
-                    builder: (ctx) => SizedBox(
-                      height: 25.0,
-                      width: 25.0,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.menu,
-                          size: 25.0,
-                          color: const Color(0xFF979797),
-                        ),
-                        onPressed: () {
-                          searchField.unfocus();
-                          Scaffold.of(ctx).openDrawer();
-                        },
                       ),
                     ),
                   ),
-                ),
-                body: Builder(builder: (BuildContext newContext) {
-                  ctx = newContext;
-                  return _projectLists.length > 0
-                      ? Padding(
-                          padding: EdgeInsets.only(
-                              top: 20, bottom: 20, right: 6, left: 6),
-                          child: _searchLists.length != 0
-                              ? GridView.builder(
-                                  itemCount: _searchLists.length,
-                                  gridDelegate: Responsive.isMobile(context)
-                                      ? SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          crossAxisSpacing: 2,
-                                          mainAxisSpacing: 8)
-                                      : MediaQuery.of(context).orientation ==
-                                              Orientation.portrait
-                                          ? SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: 4,
-                                              crossAxisSpacing: 8,
-                                              mainAxisSpacing: 8)
-                                          : SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: 5,
-                                              crossAxisSpacing: 8,
-                                              mainAxisSpacing: 8),
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        onTapProject(_searchLists[index]);
-                                      },
-                                      child: new Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: new GridTile(
-                                          child: Container(
-                                            child: Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    10, 10, 10, 10),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        _downloadfile(
-                                                            _searchLists[index]
-                                                                .projectImg,
-                                                            _searchLists[index]
-                                                                .projectName,
-                                                            _searchLists[index]
-                                                                .description,
-                                                            _searchLists[index]
-                                                                .status);
-                                                      },
-                                                      child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  top: 10),
-                                                          child: CircleImageFromNetwork(
-                                                              imageUrl: Strings
-                                                                      .baseImageUrl +
-                                                                  _searchLists[
-                                                                          index]
-                                                                      .projectImg!,
-                                                              width: 40,
-                                                              height: 40,
-                                                              defaultImageUrl:
-                                                                  "assets/images/background1.png",
-                                                              radius: 20)),
-                                                    ),
-                                                    Container(
-                                                      width: 40,
-                                                      height: 40,
-                                                      margin: EdgeInsets.only(
-                                                          top: 8),
-                                                      child: IconButton(
-                                                          icon: (_searchLists[index]
-                                                                          .unReadedUserId !=
-                                                                      null &&
-                                                                  _searchLists[
-                                                                          index]
-                                                                      .unReadedUserId!
-                                                                      .contains(Strings
-                                                                          .userID
-                                                                          .toString()))
-                                                              ? Image.asset(
-                                                                  'assets/images/chat.png')
-                                                              : Image.asset(
-                                                                  'assets/images/zerochat.png'),
-                                                          onPressed: () {
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        ChatGroups(
-                                                                  projectId: _searchLists[
-                                                                          index]
-                                                                      .projectId!,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }),
-                                                    )
-                                                  ],
-                                                )),
+                  body: Builder(builder: (BuildContext newContext) {
+                    ctx = newContext;
+                    return _projectLists.length > 0
+                        ? Padding(
+                            padding: EdgeInsets.only(
+                                top: 20, bottom: 20, right: 6, left: 6),
+                            child: _searchLists.length != 0
+                                ? GridView.builder(
+                                    itemCount: _searchLists.length,
+                                    gridDelegate: Responsive.isMobile(context)
+                                        ? SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 2,
+                                            mainAxisSpacing: 8)
+                                        : MediaQuery.of(context).orientation ==
+                                                Orientation.portrait
+                                            ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 4,
+                                                crossAxisSpacing: 8,
+                                                mainAxisSpacing: 8)
+                                            : SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 5,
+                                                crossAxisSpacing: 8,
+                                                mainAxisSpacing: 8),
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          onTapProject(_searchLists[index]);
+                                        },
+                                        child: new Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
                                           ),
-                                          footer: GestureDetector(
-                                            onTap: () {
-                                              onTapProject(_searchLists[index]);
-                                            },
-                                            child: Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    10, 0, 0, 20),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                        margin:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 12, 0, 0),
-                                                        child: Text(
-                                                            _searchLists[index]
-                                                                .status!,
-                                                            style: TextStyle(
-                                                                fontSize: 14,
-                                                                color: _searchLists[index]
-                                                                            .status! ==
-                                                                        "Active"
-                                                                    ? Colors
-                                                                        .lightGreen
-                                                                    : _searchLists[index].status! ==
-                                                                            "Completed"
-                                                                        ? Colors
-                                                                            .green
-                                                                        : _searchLists[index].status! ==
-                                                                                "Cancelled"
-                                                                            ? Colors
-                                                                                .red
-                                                                            : Color.fromARGB(
-                                                                                255,
-                                                                                216,
-                                                                                195,
-                                                                                3)))),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          bottom: 5, right: 8),
-                                                      child: Text(
-                                                        _searchLists[index]
-                                                            .projectName!,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        maxLines: 2,
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
+                                          child: new GridTile(
+                                            child: Container(
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 10, 10, 10),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          _downloadfile(
+                                                              _searchLists[index]
+                                                                  .projectImg,
+                                                              _searchLists[index]
+                                                                  .projectName,
+                                                              _searchLists[index]
+                                                                  .description,
+                                                              _searchLists[index]
+                                                                  .status);
+                                                        },
+                                                        child: Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    top: 10),
+                                                            child: CircleImageFromNetwork(
+                                                                imageUrl: Strings
+                                                                        .baseImageUrl +
+                                                                    _searchLists[
+                                                                            index]
+                                                                        .projectImg!,
+                                                                width: 40,
+                                                                height: 40,
+                                                                defaultImageUrl:
+                                                                    "assets/images/background1.png",
+                                                                radius: 20)),
                                                       ),
-                                                    ),
-                                                    Row(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 14.0,
-                                                          height: 14.0,
-                                                          decoration:
-                                                              new BoxDecoration(
-                                                            image:
-                                                                new DecorationImage(
-                                                              image: new AssetImage(
-                                                                  "assets/icons/pin.png"),
-                                                              fit: BoxFit.fill,
-                                                            ),
-                                                            borderRadius:
-                                                                new BorderRadius
-                                                                    .all(
-                                                                    new Radius
-                                                                        .circular(
-                                                                        50.0)),
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: 5),
-                                                        Expanded(
+                                                      Container(
+                                                        width: 40,
+                                                        height: 40,
+                                                        margin: EdgeInsets.only(
+                                                            top: 8),
+                                                        child: IconButton(
+                                                            icon: (_searchLists[index]
+                                                                            .unReadedUserId !=
+                                                                        null &&
+                                                                    _searchLists[
+                                                                            index]
+                                                                        .unReadedUserId!
+                                                                        .contains(Strings
+                                                                            .userID
+                                                                            .toString()))
+                                                                ? Image.asset(
+                                                                    'assets/images/chat.png')
+                                                                : Image.asset(
+                                                                    'assets/images/zerochat.png'),
+                                                            onPressed: () {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          ChatGroups(
+                                                                    projectId: _searchLists[
+                                                                            index]
+                                                                        .projectId!,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }),
+                                                      )
+                                                    ],
+                                                  )),
+                                            ),
+                                            footer: GestureDetector(
+                                              onTap: () {
+                                                onTapProject(_searchLists[index]);
+                                              },
+                                              child: Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 0, 0, 20),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                          margin:
+                                                              EdgeInsets.fromLTRB(
+                                                                  0, 12, 0, 0),
                                                           child: Text(
-                                                            _searchLists[index]
-                                                                    .address! +
-                                                                ' , ' +
-                                                                _searchLists[
-                                                                        index]
-                                                                    .city!,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .clip,
-                                                            style: TextStyle(
-                                                                fontSize: 10,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                                color: Colors
-                                                                    .grey),
-                                                          ),
+                                                              _searchLists[index]
+                                                                  .status!,
+                                                              style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  color: _searchLists[index]
+                                                                              .status! ==
+                                                                          "Active"
+                                                                      ? Colors
+                                                                          .lightGreen
+                                                                      : _searchLists[index].status! ==
+                                                                              "Completed"
+                                                                          ? Colors
+                                                                              .green
+                                                                          : _searchLists[index].status! ==
+                                                                                  "Cancelled"
+                                                                              ? Colors
+                                                                                  .red
+                                                                              : Color.fromARGB(
+                                                                                  255,
+                                                                                  216,
+                                                                                  195,
+                                                                                  3)))),
+                                                      Padding(
+                                                        padding: EdgeInsets.only(
+                                                            bottom: 5, right: 8),
+                                                        child: Text(
+                                                          _searchLists[index]
+                                                              .projectName!,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          maxLines: 2,
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
                                                         ),
-                                                      ],
-                                                    )
-                                                  ],
-                                                )),
+                                                      ),
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Container(
+                                                            width: 14.0,
+                                                            height: 14.0,
+                                                            decoration:
+                                                                new BoxDecoration(
+                                                              image:
+                                                                  new DecorationImage(
+                                                                image: new AssetImage(
+                                                                    "assets/icons/pin.png"),
+                                                                fit: BoxFit.fill,
+                                                              ),
+                                                              borderRadius:
+                                                                  new BorderRadius
+                                                                      .all(
+                                                                      new Radius
+                                                                          .circular(
+                                                                          50.0)),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          Expanded(
+                                                            child: Text(
+                                                              _searchLists[index]
+                                                                      .address! +
+                                                                  ' , ' +
+                                                                  _searchLists[
+                                                                          index]
+                                                                      .city!,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .clip,
+                                                              style: TextStyle(
+                                                                  fontSize: 10,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                  color: Colors
+                                                                      .grey),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  )),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : _searchFieldController.text != ""
-                                  ? Align(
-                                      alignment: Alignment.topCenter,
-                                      child: Text(
-                                        "No results found",
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    )
-                                  : GridView.builder(
-                                      itemCount: _projectLists.length,
-                                      gridDelegate: Responsive.isMobile(context)
-                                          ? SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: 2,
-                                              crossAxisSpacing: 2,
-                                              mainAxisSpacing: 8)
-                                          : MediaQuery.of(context)
-                                                      .orientation ==
-                                                  Orientation.portrait
-                                              ? SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount: 4,
-                                                  crossAxisSpacing: 8,
-                                                  mainAxisSpacing: 8)
-                                              : SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount: 5,
-                                                  crossAxisSpacing: 8,
-                                                  mainAxisSpacing: 8),
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            onTapProject(_projectLists[index]);
-                                          },
-                                          child: new Card(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: new GridTile(
-                                              child: Container(
-                                                child: Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            10, 10, 10, 10),
-                                                    child: Row(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            _downloadfile(
-                                                                _projectLists[
-                                                                        index]
-                                                                    .projectImg,
-                                                                _projectLists[
-                                                                        index]
-                                                                    .projectName,
-                                                                _projectLists[
-                                                                        index]
-                                                                    .description,
-                                                                _projectLists[
-                                                                        index]
-                                                                    .status);
-                                                          },
-                                                          child: Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10),
-                                                              child: CircleImageFromNetwork(
-                                                                  imageUrl: Strings
-                                                                          .baseImageUrl +
-                                                                      _projectLists[
-                                                                              index]
-                                                                          .projectImg!,
-                                                                  width: 40,
-                                                                  height: 40,
-                                                                  defaultImageUrl:
-                                                                      "assets/images/background1.png",
-                                                                  radius: 20)),
-                                                        ),
-                                                        Container(
-                                                          width: 40,
-                                                          height: 40,
-                                                          margin:
-                                                              EdgeInsets.only(
-                                                                  top: 8),
-                                                          child: IconButton(
-                                                              icon: (_projectLists[index]
-                                                                              .unReadedUserId !=
-                                                                          null &&
-                                                                      _projectLists[
-                                                                              index]
-                                                                          .unReadedUserId!
-                                                                          .contains(Strings
-                                                                              .userID
-                                                                              .toString()))
-                                                                  ? Image.asset(
-                                                                      'assets/images/chat.png')
-                                                                  : Image.asset(
-                                                                      'assets/images/zerochat.png'),
-                                                              onPressed: () {
-                                                                Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            ChatGroups(
-                                                                      projectId:
-                                                                          _projectLists[index]
-                                                                              .projectId!,
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              }),
-                                                        )
-                                                      ],
-                                                    )),
+                                      );
+                                    },
+                                  )
+                                : _searchFieldController.text != ""
+                                    ? Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Text(
+                                          "No results found",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      )
+                                    : GridView.builder(
+                                        itemCount: _projectLists.length,
+                                        gridDelegate: Responsive.isMobile(context)
+                                            ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 2,
+                                                crossAxisSpacing: 2,
+                                                mainAxisSpacing: 8)
+                                            : MediaQuery.of(context)
+                                                        .orientation ==
+                                                    Orientation.portrait
+                                                ? SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 4,
+                                                    crossAxisSpacing: 8,
+                                                    mainAxisSpacing: 8)
+                                                : SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 5,
+                                                    crossAxisSpacing: 8,
+                                                    mainAxisSpacing: 8),
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              onTapProject(_projectLists[index]);
+                                            },
+                                            child: new Card(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
                                               ),
-                                              footer: GestureDetector(
-                                                onTap: () {
-                                                  onTapProject(
-                                                      _projectLists[index]);
-                                                },
-                                                child: Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            10, 0, 0, 20),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Container(
-                                                            margin: EdgeInsets
-                                                                .fromLTRB(0, 12,
-                                                                    0, 0),
-                                                            child: Text(
-                                                                _projectLists[
-                                                                        index]
-                                                                    .status!,
-                                                                style: TextStyle(
-                                                                    fontSize: 14,
-                                                                    color: _projectLists[index].status! == "Active"
-                                                                        ? Colors.lightGreen
-                                                                        : _projectLists[index].status! == "Completed"
-                                                                            ? Colors.green
-                                                                            : _projectLists[index].status! == "Cancelled"
-                                                                                ? Colors.red
-                                                                                : Color.fromARGB(255, 216, 195, 3)))),
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  bottom: 5,
-                                                                  right: 8),
-                                                          child: Text(
-                                                            _projectLists[index]
-                                                                .projectName!,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            maxLines: 2,
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600),
+                                              child: new GridTile(
+                                                child: Container(
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 10, 10, 10),
+                                                      child: Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              _downloadfile(
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .projectImg,
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .projectName,
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .description,
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .status);
+                                                            },
+                                                            child: Padding(
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        top: 10),
+                                                                child: CircleImageFromNetwork(
+                                                                    imageUrl: Strings
+                                                                            .baseImageUrl +
+                                                                        _projectLists[
+                                                                                index]
+                                                                            .projectImg!,
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    defaultImageUrl:
+                                                                        "assets/images/background1.png",
+                                                                    radius: 20)),
                                                           ),
-                                                        ),
-                                                        Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Container(
-                                                              width: 14.0,
-                                                              height: 14.0,
-                                                              decoration:
-                                                                  new BoxDecoration(
-                                                                image:
-                                                                    new DecorationImage(
-                                                                  image: new AssetImage(
-                                                                      "assets/icons/pin.png"),
-                                                                  fit: BoxFit
-                                                                      .fill,
-                                                                ),
-                                                                borderRadius:
-                                                                    new BorderRadius
-                                                                        .all(
-                                                                        new Radius
-                                                                            .circular(
-                                                                            50.0)),
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 5),
-                                                            Expanded(
+                                                          Container(
+                                                            width: 40,
+                                                            height: 40,
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                                    top: 8),
+                                                            child: IconButton(
+                                                                icon: (_projectLists[index]
+                                                                                .unReadedUserId !=
+                                                                            null &&
+                                                                        _projectLists[
+                                                                                index]
+                                                                            .unReadedUserId!
+                                                                            .contains(Strings
+                                                                                .userID
+                                                                                .toString()))
+                                                                    ? Image.asset(
+                                                                        'assets/images/chat.png')
+                                                                    : Image.asset(
+                                                                        'assets/images/zerochat.png'),
+                                                                onPressed: () {
+                                                                  Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ChatGroups(
+                                                                        projectId:
+                                                                            _projectLists[index]
+                                                                                .projectId!,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }),
+                                                          )
+                                                        ],
+                                                      )),
+                                                ),
+                                                footer: GestureDetector(
+                                                  onTap: () {
+                                                    onTapProject(
+                                                        _projectLists[index]);
+                                                  },
+                                                  child: Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 0, 0, 20),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Container(
+                                                              margin: EdgeInsets
+                                                                  .fromLTRB(0, 12,
+                                                                      0, 0),
                                                               child: Text(
-                                                                _projectLists[
-                                                                            index]
-                                                                        .address! +
-                                                                    ' , ' +
-                                                                    _projectLists[
-                                                                            index]
-                                                                        .city!,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .clip,
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        10,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Colors
-                                                                        .grey),
-                                                              ),
+                                                                  _projectLists[
+                                                                          index]
+                                                                      .status!,
+                                                                  style: TextStyle(
+                                                                      fontSize: 14,
+                                                                      color: _projectLists[index].status! == "Active"
+                                                                          ? Colors.lightGreen
+                                                                          : _projectLists[index].status! == "Completed"
+                                                                              ? Colors.green
+                                                                              : _projectLists[index].status! == "Cancelled"
+                                                                                  ? Colors.red
+                                                                                  : Color.fromARGB(255, 216, 195, 3)))),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    bottom: 5,
+                                                                    right: 8),
+                                                            child: Text(
+                                                              _projectLists[index]
+                                                                  .projectName!,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              maxLines: 2,
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600),
                                                             ),
-                                                          ],
-                                                        )
-                                                      ],
-                                                    )),
+                                                          ),
+                                                          Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Container(
+                                                                width: 14.0,
+                                                                height: 14.0,
+                                                                decoration:
+                                                                    new BoxDecoration(
+                                                                  image:
+                                                                      new DecorationImage(
+                                                                    image: new AssetImage(
+                                                                        "assets/icons/pin.png"),
+                                                                    fit: BoxFit
+                                                                        .fill,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      new BorderRadius
+                                                                          .all(
+                                                                          new Radius
+                                                                              .circular(
+                                                                              50.0)),
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: 5),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  _projectLists[
+                                                                              index]
+                                                                          .address! +
+                                                                      ' , ' +
+                                                                      _projectLists[
+                                                                              index]
+                                                                          .city!,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .clip,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          10,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400,
+                                                                      color: Colors
+                                                                          .grey),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      )),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                        )
-                      : Container(
-                          height: MediaQuery.of(context).size.height * .75,
-                          child: Padding(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _errText,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                            padding: EdgeInsets.all(20),
-                          ));
-                }))));
+                                          );
+                                        },
+                                      ),
+                          )
+                        : Container(
+                            height: MediaQuery.of(context).size.height * .75,
+                            child: Padding(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _errText,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(20),
+                            ));
+                  })),
+            )));
   }
 
   onTapProject(Data projectList) {

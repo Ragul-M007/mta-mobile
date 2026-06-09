@@ -77,12 +77,14 @@ class _LocationSelectionState extends State<LocationSelection> {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Builder(
-          builder: (BuildContext newContext) {
-            return LcoationSelectionWidget(newContext);
-          },
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Builder(
+            builder: (BuildContext newContext) {
+              return LcoationSelectionWidget(newContext);
+            },
+          ),
         ),
       ),
     );

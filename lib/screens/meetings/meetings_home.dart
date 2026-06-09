@@ -119,312 +119,314 @@ class _MeetingscontentState extends State<Meetingscontent> {
                     }
                     throw '';
                   },
-                  child: Scaffold(
-                    drawer: AppDrawer(),
-                    backgroundColor: Colors.grey[300],
-                    appBar: AppBar(
-                      iconTheme: IconThemeData(color: Colors.black),
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(30.0))),
-                      elevation: 3,
-                      title: Text(
-                        "Meetings",
-                        style: Drawables.adddoccontentstyle(
-                            Colors.black, 16.0, FontWeight.bold),
-                      ),
-                      leading: Builder(
-                        builder: (ctx) => IconButton(
-                          icon: Icon(
-                            Icons.menu,
-                            size: 25.0,
-                            color: const Color(0xFF979797),
-                          ),
-                          onPressed: () {
-                            Scaffold.of(ctx).openDrawer();
-                          },
+                  child: SafeArea(
+                    child: Scaffold(
+                      drawer: AppDrawer(),
+                      backgroundColor: Colors.grey[300],
+                      appBar: AppBar(
+                        iconTheme: IconThemeData(color: Colors.black),
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(30.0))),
+                        elevation: 3,
+                        title: Text(
+                          "Meetings",
+                          style: Drawables.adddoccontentstyle(
+                              Colors.black, 16.0, FontWeight.bold),
                         ),
-                      ),
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => MeetingHistory()));
-                              },
-                              icon: Icon(
-                                Icons.history,
-                                size: 25.0,
-                                // color: const Color(0xFF979797),
-                              )),
-                        )
-                      ],
-                      bottom: PreferredSize(
-                          preferredSize: Size.fromHeight(kToolbarHeight),
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Container(
-                              //  padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                color: const Color(0xFFeceeef),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Material(
-                                  color: const Color(0xFFeceeef),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: TextField(
-                                          focusNode: searchField,
-                                          controller: _searchFieldController,
-                                          decoration: InputDecoration.collapsed(
-                                            hintText: ' Search',
-                                          ),
-                                          onChanged: (search) {
-                                            if (tempLists.isNotEmpty) {
-                                              setState(() {
-                                                meetingsData = tempLists
-                                                    .where((user) => user.title!
-                                                        .toLowerCase()
-                                                        .contains(search
-                                                            .toLowerCase()))
-                                                    .toList();
-                                              });
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                      InkWell(
-                                        child: Icon(
-                                          Icons.search,
-                                          color: Colors.black,
-                                        ),
-                                        onTap: () {},
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
+                        leading: Builder(
+                          builder: (ctx) => IconButton(
+                            icon: Icon(
+                              Icons.menu,
+                              size: 25.0,
+                              color: const Color(0xFF979797),
                             ),
-                          )),
-                    ),
-                    floatingActionButton: meetingCraetionAccess
-                        ? InkWell(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (ctx) => CreateMeeting(),
-                                ),
-                              ).whenComplete(() => getMeetings());
+                            onPressed: () {
+                              Scaffold.of(ctx).openDrawer();
                             },
-                            child: CircleAvatar(
-                              radius: 20,
-                              child: Image.asset(
-                                "assets/icons/gridicons_create.png",
-                                height: 20,
-                              ),
-                              backgroundColor:
-                                  CustomColors.appthemecolor.withOpacity(0.8),
-                            ),
+                          ),
+                        ),
+                        actions: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => MeetingHistory()));
+                                },
+                                icon: Icon(
+                                  Icons.history,
+                                  size: 25.0,
+                                  // color: const Color(0xFF979797),
+                                )),
                           )
-                        : Container(),
-                    body: meetingsData.length > 0
-                        ? ListView.builder(
-                            itemCount: meetingsData.length,
-                            padding: EdgeInsets.all(20),
-                            itemBuilder: (BuildContext ctx, int index) {
-                              return Padding(
-                                padding: EdgeInsets.all(10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                            builder: (context) =>
-                                                MeetingDetails(
-                                                    fromHistory: false,
-                                                    meeting_id:
-                                                        meetingsData[index]
-                                                            .meetingId!)))
-                                        .whenComplete(() => getMeetings());
-                                  },
-                                  child: Container(
-                                    height: 60,
-                                    child: Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(14, 4, 15, 4),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.53,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                          meetingsData[index]
-                                                              .title!,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: Drawables
-                                                              .adddoccontentstyle(
-                                                                  Colors
-                                                                      .black87,
-                                                                  14.0,
-                                                                  FontWeight
-                                                                      .w400)),
-                                                      SizedBox(
-                                                        width: 2,
-                                                      ),
-                                                      Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                              AppUtils().getMeetingDateFormat(
-                                                                  meetingsData[
-                                                                          index]
-                                                                      .start!,
-                                                                  meetingsData[
-                                                                          index]
-                                                                      .end!,
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              style: Drawables
-                                                                  .adddoccontentstyle(
-                                                                      CustomColors
-                                                                          .meetingSubtitleFontColor,
-                                                                      12.0,
-                                                                      FontWeight
-                                                                          .w400)),
-                                                          SizedBox(
-                                                            width: 2,
-                                                          ),
-                                                          MediaQuery.of(context)
-                                                                      .size
-                                                                      .width <
-                                                                  376
-                                                              ? Container()
-                                                              : Icon(
-                                                                  Icons
-                                                                      .schedule,
-                                                                  size: 14,
-                                                                  color: CustomColors
-                                                                      .meetingSubtitleFontColor,
-                                                                )
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
+                        ],
+                        bottom: PreferredSize(
+                            preferredSize: Size.fromHeight(kToolbarHeight),
+                            child: Padding(
+                              padding: EdgeInsets.all(15),
+                              child: Container(
+                                //  padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: const Color(0xFFeceeef),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Material(
+                                    color: const Color(0xFFeceeef),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: TextField(
+                                            focusNode: searchField,
+                                            controller: _searchFieldController,
+                                            decoration: InputDecoration.collapsed(
+                                              hintText: ' Search',
                                             ),
-                                            (meetingsData[index].type != "1") ||
-                                                    meetingsData[index].type ==
-                                                            "1" &&
-                                                        meetingsData[index]
-                                                                .location !=
-                                                            null &&
-                                                        meetingsData[index]
-                                                            .location!
-                                                            .isNotEmpty &&
-                                                        !meetingsData[index]
-                                                            .location!
-                                                            .contains(
-                                                                "Location Not Mentioned")
-                                                ? Container(
-                                                    width: 75,
-                                                    height: 30,
-                                                    child: ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor:
-                                                            CustomColors
-                                                                .primarycolor,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      8.0),
-                                                        ),
-                                                      ),
-                                                      onPressed: () {
-                                                        launchLink(meetingsData[
-                                                                        index]
-                                                                    .type ==
-                                                                "1"
-                                                            ? meetingsData[
-                                                                    index]
-                                                                .location!
-                                                            : meetingsData[
-                                                                    index]
-                                                                .meetingLink!);
-                                                      },
-                                                      child:
-                                                          (meetingsData[index]
-                                                                      .type !=
-                                                                  "1")
-                                                              ? Text(
-                                                                  'JOIN',
-                                                                  style: TextStyle(
-                                                                      fontWeight: Platform.isIOS
-                                                                          ? FontWeight
-                                                                              .bold
-                                                                          : FontWeight
-                                                                              .w700,
-                                                                      fontSize:
-                                                                          12,
-                                                                      color: Colors
-                                                                          .white),
-                                                                )
-                                                              : Icon(
-                                                                  Icons
-                                                                      .directions_outlined,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 18,
-                                                                ),
-                                                    ),
-                                                  )
-                                                : Container(),
-                                          ],
-                                        )),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
+                                            onChanged: (search) {
+                                              if (tempLists.isNotEmpty) {
+                                                setState(() {
+                                                  meetingsData = tempLists
+                                                      .where((user) => user.title!
+                                                          .toLowerCase()
+                                                          .contains(search
+                                                              .toLowerCase()))
+                                                      .toList();
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        InkWell(
+                                          child: Icon(
+                                            Icons.search,
+                                            color: Colors.black,
+                                          ),
+                                          onTap: () {},
+                                        )
+                                      ],
                                     ),
                                   ),
                                 ),
-                              );
-                            })
-                        : Center(child: Text("No Meetings Found")),
+                              ),
+                            )),
+                      ),
+                      floatingActionButton: meetingCraetionAccess
+                          ? InkWell(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (ctx) => CreateMeeting(),
+                                  ),
+                                ).whenComplete(() => getMeetings());
+                              },
+                              child: CircleAvatar(
+                                radius: 20,
+                                child: Image.asset(
+                                  "assets/icons/gridicons_create.png",
+                                  height: 20,
+                                ),
+                                backgroundColor:
+                                    CustomColors.appthemecolor.withOpacity(0.8),
+                              ),
+                            )
+                          : Container(),
+                      body: meetingsData.length > 0
+                          ? ListView.builder(
+                              itemCount: meetingsData.length,
+                              padding: EdgeInsets.all(20),
+                              itemBuilder: (BuildContext ctx, int index) {
+                                return Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MeetingDetails(
+                                                      fromHistory: false,
+                                                      meeting_id:
+                                                          meetingsData[index]
+                                                              .meetingId!)))
+                                          .whenComplete(() => getMeetings());
+                                    },
+                                    child: Container(
+                                      height: 60,
+                                      child: Padding(
+                                          padding:
+                                              EdgeInsets.fromLTRB(14, 4, 15, 4),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    width: MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.53,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                            meetingsData[index]
+                                                                .title!,
+                                                            overflow: TextOverflow
+                                                                .ellipsis,
+                                                            style: Drawables
+                                                                .adddoccontentstyle(
+                                                                    Colors
+                                                                        .black87,
+                                                                    14.0,
+                                                                    FontWeight
+                                                                        .w400)),
+                                                        SizedBox(
+                                                          width: 2,
+                                                        ),
+                                                        Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                                AppUtils().getMeetingDateFormat(
+                                                                    meetingsData[
+                                                                            index]
+                                                                        .start!,
+                                                                    meetingsData[
+                                                                            index]
+                                                                        .end!,
+                                                                    MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: Drawables
+                                                                    .adddoccontentstyle(
+                                                                        CustomColors
+                                                                            .meetingSubtitleFontColor,
+                                                                        12.0,
+                                                                        FontWeight
+                                                                            .w400)),
+                                                            SizedBox(
+                                                              width: 2,
+                                                            ),
+                                                            MediaQuery.of(context)
+                                                                        .size
+                                                                        .width <
+                                                                    376
+                                                                ? Container()
+                                                                : Icon(
+                                                                    Icons
+                                                                        .schedule,
+                                                                    size: 14,
+                                                                    color: CustomColors
+                                                                        .meetingSubtitleFontColor,
+                                                                  )
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              (meetingsData[index].type != "1") ||
+                                                      meetingsData[index].type ==
+                                                              "1" &&
+                                                          meetingsData[index]
+                                                                  .location !=
+                                                              null &&
+                                                          meetingsData[index]
+                                                              .location!
+                                                              .isNotEmpty &&
+                                                          !meetingsData[index]
+                                                              .location!
+                                                              .contains(
+                                                                  "Location Not Mentioned")
+                                                  ? Container(
+                                                      width: 75,
+                                                      height: 30,
+                                                      child: ElevatedButton(
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              CustomColors
+                                                                  .primarycolor,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8.0),
+                                                          ),
+                                                        ),
+                                                        onPressed: () {
+                                                          launchLink(meetingsData[
+                                                                          index]
+                                                                      .type ==
+                                                                  "1"
+                                                              ? meetingsData[
+                                                                      index]
+                                                                  .location!
+                                                              : meetingsData[
+                                                                      index]
+                                                                  .meetingLink!);
+                                                        },
+                                                        child:
+                                                            (meetingsData[index]
+                                                                        .type !=
+                                                                    "1")
+                                                                ? Text(
+                                                                    'JOIN',
+                                                                    style: TextStyle(
+                                                                        fontWeight: Platform.isIOS
+                                                                            ? FontWeight
+                                                                                .bold
+                                                                            : FontWeight
+                                                                                .w700,
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Colors
+                                                                            .white),
+                                                                  )
+                                                                : Icon(
+                                                                    Icons
+                                                                        .directions_outlined,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    size: 18,
+                                                                  ),
+                                                      ),
+                                                    )
+                                                  : Container(),
+                                            ],
+                                          )),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              })
+                          : Center(child: Text("No Meetings Found")),
+                    ),
                   ),
                 );
   }

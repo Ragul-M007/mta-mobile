@@ -44,7 +44,9 @@ class SplashScreen extends StatelessWidget {
             onGenerateRoute: RoutesGenerator.generateRoute,
             navigatorKey: navigatorKey,
             builder: EasyLoading.init(),
-            home: SplashScreenContent()));
+            home: SafeArea(
+                child: SplashScreenContent()
+            )));
   }
 }
 

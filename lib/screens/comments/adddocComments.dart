@@ -38,20 +38,22 @@ class AddDocComments extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        backgroundColor: Colors.grey[300],
-        appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.black),
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.only(bottomLeft: Radius.circular(30.0))),
-          elevation: 8,
-          title: Text("Add Videos/images",
-              style: Drawables.adddoccontentstyle(
-                  Colors.black, 16.0, FontWeight.bold)),
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.grey[300],
+          appBar: AppBar(
+            iconTheme: IconThemeData(color: Colors.black),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.only(bottomLeft: Radius.circular(30.0))),
+            elevation: 8,
+            title: Text("Add Videos/images",
+                style: Drawables.adddoccontentstyle(
+                    Colors.black, 16.0, FontWeight.bold)),
+          ),
+          body: AddDocContentComments(),
         ),
-        body: AddDocContentComments(),
       ),
     );
   }

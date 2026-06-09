@@ -59,66 +59,68 @@ class _WebpageViewState extends State<WebpageView> {
 
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: Scaffold(
-        drawer: AppDrawer(),
-        backgroundColor: const Color(0xFFececed),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          actions: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
-                child: GestureDetector(
-                    onTap: () {
-                      print(Strings.baseImageUrl + Strings.profilePic!);
-                      _showMyDialog(
-                          context,
-                          Strings.baseImageUrl + Strings.profilePic!,
-                          Strings.username);
-                    },
-                    child: CircleAvatar(
-                      backgroundImage: (Strings.profilePic != "")
-                          ? NetworkImage(
-                              Strings.baseImageUrl + (Strings.profilePic ?? ""))
-                          : AssetImage(
-                              "assets/icons/account.png",
-                            ) as ImageProvider,
-                      backgroundColor: Colors.grey.withOpacity(0.3),
-                    )
-                    // Strings.profilePic == null
-                    //     ? Image.asset(
-                    //         "assets/images/user.png",
-                    //         height: 40,
-                    //         width: 40,
-                    //       )
-                    //     : Image.network(
-                    //         Strings.baseImageUrl + Strings.profilePic!,
-                    //         height: 40,
-                    //         width: 40,
-                    //       ),
-                    // image.(
-                    //     Strings.baseImageUrl + Strings.profilePic!,
-                    //     40.0,
-                    //     40.0),
-                    ))
-          ],
-          leading: Builder(
-            builder: (ctx) => SizedBox(
-              height: 25.0,
-              width: 25.0,
-              child: IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  size: 25.0,
-                  color: const Color(0xFF979797),
+      child: SafeArea(
+        child: Scaffold(
+          drawer: AppDrawer(),
+          backgroundColor: const Color(0xFFececed),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            actions: [
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5, 20, 5),
+                  child: GestureDetector(
+                      onTap: () {
+                        print(Strings.baseImageUrl + Strings.profilePic!);
+                        _showMyDialog(
+                            context,
+                            Strings.baseImageUrl + Strings.profilePic!,
+                            Strings.username);
+                      },
+                      child: CircleAvatar(
+                        backgroundImage: (Strings.profilePic != "")
+                            ? NetworkImage(
+                                Strings.baseImageUrl + (Strings.profilePic ?? ""))
+                            : AssetImage(
+                                "assets/icons/account.png",
+                              ) as ImageProvider,
+                        backgroundColor: Colors.grey.withOpacity(0.3),
+                      )
+                      // Strings.profilePic == null
+                      //     ? Image.asset(
+                      //         "assets/images/user.png",
+                      //         height: 40,
+                      //         width: 40,
+                      //       )
+                      //     : Image.network(
+                      //         Strings.baseImageUrl + Strings.profilePic!,
+                      //         height: 40,
+                      //         width: 40,
+                      //       ),
+                      // image.(
+                      //     Strings.baseImageUrl + Strings.profilePic!,
+                      //     40.0,
+                      //     40.0),
+                      ))
+            ],
+            leading: Builder(
+              builder: (ctx) => SizedBox(
+                height: 25.0,
+                width: 25.0,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.menu,
+                    size: 25.0,
+                    color: const Color(0xFF979797),
+                  ),
+                  onPressed: () {
+                    Scaffold.of(ctx).openDrawer();
+                  },
                 ),
-                onPressed: () {
-                  Scaffold.of(ctx).openDrawer();
-                },
               ),
             ),
           ),
+          body: ProfileContent(),
         ),
-        body: ProfileContent(),
       ),
     );
   }
@@ -191,15 +193,6 @@ Future<void> _showMyDialog(context, imgurl, title) async {
                     )
                   ],
                 ),
-                // decoration: new BoxDecoration(
-                //   color: Colors.transparent,
-                //   image: new DecorationImage(
-                //     image: new NetworkImage(imgurl),
-                //     fit: BoxFit.contain,
-                //   ),
-                //   borderRadius:
-                //       new BorderRadius.all(new Radius.circular(10.0)),
-                // ),
               )),
         ),
       );
