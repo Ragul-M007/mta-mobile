@@ -385,18 +385,18 @@ class _NotificationContentState extends State<NotificationContent>
         AppUtils.dismissprogress();
 
         if (toComments == "comments") {
-          Navigator.of(context).pushReplacementNamed('/comments');
+          Navigator.of(context).pushNamed('/comments');
         } else if (toComments == "replies") {
           Strings.fromNotificationReply = true;
-          Navigator.of(context).pushReplacementNamed('/replies');
+          Navigator.of(context).pushNamed('/replies');
         } else if (toComments == "projectComments") {
-          Navigator.of(context).pushReplacementNamed('/projectComments');
+          Navigator.of(context).pushNamed('/projectComments');
         } else if (toComments == "projectReplies") {
           Strings.fromNotificationReply = true;
-          Navigator.of(context).pushReplacementNamed('/projectCommentReplies');
+          Navigator.of(context).pushNamed('/projectCommentReplies');
         } else {
           // Strings.fromNotificationDocuments = true;
-          Navigator.of(context).pushReplacementNamed('/viewdoclist');
+          Navigator.of(context).pushNamed('/viewdoclist');
         }
       } else {
         AppUtils.dismissprogress();

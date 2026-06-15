@@ -104,20 +104,23 @@ class _MeetingscontentState extends State<Meetingscontent> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-                  onWillPop: () {
+                  onWillPop: () async {
                     if (Strings.fromNotificationNewMeeting) {
                       Strings.fromNotificationNewMeeting = false;
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TeamsDashboard(),
-                        ),
-                        (route) => false,
-                      );
+                      Navigator.of(context).pushReplacementNamed('/notification');
                     } else {
-                      Navigator.pop(context);
+                      final didPop = await Navigator.of(context).maybePop();
+                      if (!didPop) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TeamsDashboard(),
+                          ),
+                          (route) => false,
+                        );
+                      }
                     }
-                    throw '';
+                    return false;
                   },
                   child: SafeArea(
                     child: Scaffold(

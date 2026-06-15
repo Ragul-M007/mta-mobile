@@ -56,6 +56,19 @@ class _MeetingDetailsState extends State<MeetingDetails> {
 
   DateTime? endTime;
 
+  Future<void> _navigateBack() async {
+    if (Strings.fromNotificationNewMeeting) {
+      Strings.fromNotificationNewMeeting = false;
+      Navigator.of(context).pushReplacementNamed('/notification');
+      return;
+    }
+
+    final didPop = await Navigator.of(context).maybePop();
+    if (!didPop) {
+      Navigator.of(context).pushReplacementNamed('/meetings');
+    }
+  }
+
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => getMeetings());
@@ -93,20 +106,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           body: WillPopScope(
-            onWillPop: () {
-              if (Strings.fromNotificationNewMeeting) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Meetings(),
-                  ),
-                  (route) => false,
-                );
-              } else {
-                Navigator.pop(context);
-              }
-        
-              throw '';
+            onWillPop: () async {
+              await _navigateBack();
+              return false;
             },
             child: Builder(
               builder: (BuildContext newContext) {
@@ -131,17 +133,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: AppBarWidget(
                   backButtonfunction: () {
-                    if (Strings.fromNotificationNewMeeting) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Meetings(),
-                        ),
-                        (route) => false,
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
+                    _navigateBack();
                   },
                   title: "Meeting Details",
                   actionWidget: [

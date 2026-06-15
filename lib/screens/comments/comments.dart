@@ -74,6 +74,31 @@ class Comments extends StatefulWidget {
 }
 
 class _CommentsState extends State<Comments> {
+  Future<bool> _handleBackNavigation(BuildContext context) async {
+    Strings.category = false;
+    initialCommentCheck = true;
+    _socket?.disconnect();
+    _socket?.dispose();
+
+    if (Strings.fromNotificationComments == true) {
+      Strings.fromNotificationComments = false;
+      Navigator.pushNamed(context, '/dashboard');
+      return false;
+    }
+
+    if (Strings.fromNotificationScren) {
+      Strings.fromNotificationScren = false;
+      Navigator.of(context).pushReplacementNamed('/notification');
+      return false;
+    }
+
+    final didPop = await Navigator.of(context).maybePop();
+    if (!didPop) {
+      Navigator.pushNamed(context, '/viewdoclist');
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Provider<ApiService>(
@@ -85,23 +110,7 @@ class _CommentsState extends State<Comments> {
             backgroundColor: Colors.grey[300],
             body: WillPopScope(
                 child: CommentsContent(),
-                onWillPop: () {
-                  Strings.category = false;
-                  initialCommentCheck = true;
-                  _socket?.disconnect();
-                  _socket?.dispose();
-          
-                  if (Strings.fromNotificationComments == true) {
-                    Strings.fromNotificationComments = false;
-                    Navigator.pushNamed(context, '/dashboard');
-                  } else if (Strings.fromNotificationScren) {
-                    Strings.fromNotificationScren = false;
-                    Navigator.of(context).pushReplacementNamed('/notification');
-                  } else {
-                    Navigator.pushNamed(context, '/viewdoclist');
-                  }
-                  throw 'Screen Change';
-                }),
+                onWillPop: () => _handleBackNavigation(context)),
           ),
         ));
   }
