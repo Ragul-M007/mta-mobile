@@ -165,10 +165,7 @@ class _ProjectsState extends State<Projects> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          final didPop = await Navigator.of(context).maybePop();
-          if (!didPop) {
-            await _onWillPop();
-          }
+          await _onWillPop();
           return false;
         },
         child: Provider<ApiService>(

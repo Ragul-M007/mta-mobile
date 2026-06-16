@@ -3,16 +3,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mta/utilities/app_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
-import 'package:mta/screens/dashboard/teamsDashboard.dart';
 import 'package:mta/screens/meetings/create_meeting.dart';
 import 'package:mta/screens/meetings/meeting_details.dart';
 import 'package:mta/screens/meetings/meeting_history.dart';
 import 'package:mta/utilities/apputilities.dart';
-import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/customcolor.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
@@ -42,6 +41,42 @@ class Meetingscontent extends StatefulWidget {
 class _MeetingscontentState extends State<Meetingscontent> {
   List<MeetingsData> tempLists = [];
   List<MeetingsData> meetingsData = [];
+
+  Future<bool> _showExitConfirmationDialog() async {
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Exit App'),
+        content: const Text('Are you sure you want to exit the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Exit'),
+          ),
+        ],
+      ),
+    );
+
+    return shouldExit ?? false;
+  }
+
+  Future<void> _handleBackPressed() async {
+    if (Strings.fromNotificationNewMeeting) {
+      Strings.fromNotificationNewMeeting = false;
+      Navigator.of(context).pushReplacementNamed('/notification');
+      return;
+    }
+
+    final shouldExit = await _showExitConfirmationDialog();
+    if (shouldExit) {
+      await SystemNavigator.pop();
+    }
+  }
 
   bool meetingCraetionAccess = false;
 
@@ -103,24 +138,13 @@ class _MeetingscontentState extends State<Meetingscontent> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-                  onWillPop: () async {
-                    if (Strings.fromNotificationNewMeeting) {
-                      Strings.fromNotificationNewMeeting = false;
-                      Navigator.of(context).pushReplacementNamed('/notification');
-                    } else {
-                      final didPop = await Navigator.of(context).maybePop();
-                      if (!didPop) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TeamsDashboard(),
-                          ),
-                          (route) => false,
-                        );
-                      }
+    return PopScope(
+                  canPop: false,
+                  onPopInvoked: (didPop) {
+                    if (didPop) {
+                      return;
                     }
-                    return false;
+                    _handleBackPressed();
                   },
                   child: SafeArea(
                     child: Scaffold(

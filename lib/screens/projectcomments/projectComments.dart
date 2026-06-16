@@ -79,6 +79,26 @@ class ProjectComments extends StatefulWidget {
 }
 
 class _ProjectCommentsState extends State<ProjectComments> {
+  Future<bool> _handleBackNavigation(BuildContext context) async {
+    Strings.category = false;
+    initialCommentCheck = true;
+    _socket?.disconnect();
+    _socket?.dispose();
+
+    if (Strings.fromNotificationScren) {
+      Strings.fromNotificationScren = false;
+      Navigator.of(context).pushReplacementNamed('/notification');
+    } else if (Strings.fromNotificationComments) {
+      Strings.fromNotificationComments = false;
+      Navigator.pushNamed(context, '/projects');
+    } else {
+      Navigator.pushNamed(context, '/categories');
+    }
+
+    // Navigation is already handled above; prevent default pop/exit behavior.
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Provider<ApiService>(
@@ -90,33 +110,7 @@ class _ProjectCommentsState extends State<ProjectComments> {
             backgroundColor: Colors.grey[300],
             body: WillPopScope(
                 child: CommentsContent(),
-                onWillPop: () {
-                  Strings.category = false;
-                  initialCommentCheck = true;
-                  _socket?.disconnect();
-                  _socket?.dispose();
-                  // if (Strings.fromNotificationComments == true) {
-                  //   Strings.fromNotificationComments = false;
-                  //   Navigator.pushNamed(context, '/dashboard');
-                  // } else if (Strings.fromNotificationScren) {
-                  //   Strings.fromNotificationScren = false;
-                  //   Navigator.of(context).pushReplacementNamed('/notification');
-                  // } else {
-                  //   Navigator.pushNamed(context, '/viewdoclist');
-                  // }
-                  if (Strings.fromNotificationScren) {
-                    Strings.fromNotificationScren = false;
-                    Navigator.of(context).pushReplacementNamed('/notification');
-                  } else {
-                    if (Strings.fromNotificationComments) {
-                      Strings.fromNotificationComments = false;
-                      Navigator.pushNamed(context, '/projects');
-                    } else {
-                      Navigator.pushNamed(context, '/categories');
-                    }
-                  }
-                  throw 'Screen Change';
-                }),
+                onWillPop: () => _handleBackNavigation(context)),
           ),
         ));
   }

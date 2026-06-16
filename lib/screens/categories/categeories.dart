@@ -25,13 +25,13 @@ class Categories extends StatelessWidget {
           appBar: appbar("Project Details"),
           body: WillPopScope(
             child: CategoriesContent(),
-            onWillPop: () {
+            onWillPop: () async {
               if (Strings.fromProjects == true) {
-                Navigator.pushNamed(context, '/projects');
+                Navigator.pushReplacementNamed(context, '/projects');
               } else {
-                Navigator.pushNamed(context, '/dashboard');
+                Navigator.pushReplacementNamed(context, '/dashboard');
               }
-              throw 'Screen Change';
+              return false;
             },
           ),
         ),

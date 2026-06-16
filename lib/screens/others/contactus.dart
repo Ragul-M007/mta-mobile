@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
@@ -30,18 +32,69 @@ class _ContactusState extends State<Contactus> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     // return Container(child: LoginContent());
 
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
-      child: SafeArea(
-        child: Scaffold(
-          drawer: AppDrawer(),
-          backgroundColor: Colors.grey[300],
-          appBar: EmptyAppBar(),
-          body: ContactusContent(),
+      child: WillPopScope(
+        onWillPop: () async {
+          await _onWillPop();
+          return false;
+        },
+        child: SafeArea(
+          child: Scaffold(
+            drawer: AppDrawer(),
+            backgroundColor: Colors.grey[300],
+            appBar: EmptyAppBar(),
+            body: ContactusContent(),
+          ),
         ),
       ),
     );

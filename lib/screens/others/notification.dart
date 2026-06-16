@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
@@ -52,14 +53,64 @@ class _NotificationContentState extends State<NotificationContent>
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   Widget build(BuildContext context) {
-    return Material(
-      child: SafeArea(
-        child: Scaffold(
-          drawer: AppDrawer(),
-          backgroundColor: Colors.grey[300],
-          appBar: mainappbar(ontab: menuopen, title: "Notification"),
-          body: Column(
+    return WillPopScope(
+      onWillPop: () async {
+        await _onWillPop();
+        return false;
+      },
+      child: Material(
+        child: SafeArea(
+          child: Scaffold(
+            drawer: AppDrawer(),
+            backgroundColor: Colors.grey[300],
+            appBar: mainappbar(ontab: menuopen, title: "Notification"),
+            body: Column(
             children: [
               _msgList.length > 0
                   ? Expanded(
@@ -303,6 +354,7 @@ class _NotificationContentState extends State<NotificationContent>
                     )
                   : SizedBox()
             ],
+            ),
           ),
         ),
       ),

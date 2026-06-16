@@ -30,7 +30,7 @@ class ViewDocScreen extends StatelessWidget {
             backgroundColor: Colors.grey[300],
             body: WillPopScope(
                 child: ViewDocContent(),
-                onWillPop: () {
+                onWillPop: () async {
                   Strings.category = false;
 
                   if (Strings.fromNotificationScren) {
@@ -39,13 +39,13 @@ class ViewDocScreen extends StatelessWidget {
                   } else {
                     if (Strings.fromNotificationDocuments) {
                       Strings.fromNotificationDocuments = false;
-                      Navigator.pushNamed(context, '/projects');
+                      Navigator.of(context).pushReplacementNamed('/notification');
                     } else {
                       Navigator.pushNamed(context, '/categories');
                     }
                   }
 
-                  throw 'Screen Change';
+                  return false;
                 }),
           ),
         ));

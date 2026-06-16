@@ -15,7 +15,11 @@ class AppDrawer extends StatelessWidget {
       AppUtils.savePreferences("easyAccess", "N");
       Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
     } else {
-      Navigator.pushNamed(context, routename);
+      final currentRouteName = ModalRoute.of(context)?.settings.name;
+      if (currentRouteName == routename) {
+        return;
+      }
+      Navigator.pushReplacementNamed(context, routename);
     }
   }
 

@@ -194,7 +194,7 @@ class _DashboardState extends State<Dashboard> {
     return WillPopScope(
         onWillPop: () async {
           Navigator.pushNamed(context, "/teamsDashboard");
-          throw 'Screen Change';
+          return false;
         },
         child: Provider<ApiService>(
             create: (context) => ApiService.create(),

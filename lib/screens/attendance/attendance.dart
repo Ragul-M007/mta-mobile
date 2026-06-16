@@ -563,6 +563,9 @@ class _AttendanceContentState extends State<AttendanceContent> {
                         _outOfLocationPopUp();
                       }
                     }
+                  } else {
+                    AppUtils.showToastError(
+                        "Location permission is required for Check In/Check Out");
                   }
                 }
               }
@@ -689,6 +692,9 @@ class _AttendanceContentState extends State<AttendanceContent> {
                         );
                       }
                     }
+                  } else {
+                    AppUtils.showToastError(
+                        "Location permission is required for Check In/Check Out");
                   }
                 }
               }
@@ -1357,50 +1363,52 @@ class _AttendanceContentState extends State<AttendanceContent> {
     }
   }
 
-  getUserLocation() async {
-    var permisionStatus = false;
-    await Geolocator.checkPermission().then((value) async {
-      if (value == LocationPermission.denied) {
-        permisionStatus = false;
-        AppUtils.dismissprogress();
-        {
-          await Geolocator.requestPermission().then((value) => {});
-        }
-      } else if (value == LocationPermission.deniedForever) {
-        permisionStatus = false;
+  Future<bool> getUserLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
         AppUtils.dismissprogress();
         AppUtils.showToastError(
-            "Please enable loaction from App permission Settings");
-      } else {
-        await Geolocator.getCurrentPosition(
-                desiredAccuracy: LocationAccuracy.best)
-            .then((value) => {
-                  setState(
-                    () {
-                      AppUtils.dismissprogress();
-                      // AppUtils.showprogress();
-                      lat = value.latitude;
-                      long = value.longitude;
-
-                      distance = Geolocator.distanceBetween(
-                          lat,
-                          long,
-                          double.parse(selectedProject?.latitude ?? "0.0"),
-                          double.parse(selectedProject?.longitude ?? "0.0"));
-
-                      print("User distance $distance");
-                      permisionStatus = true;
-                      //getGeocode(lat, long);
-                    },
-                  )
-                });
+            "Location permission denied. Please allow location access.");
+        return false;
       }
-    }).onError((error, stackTrace) {
-      permisionStatus = false;
+
+      if (permission == LocationPermission.deniedForever) {
+        AppUtils.dismissprogress();
+        AppUtils.showToastError(
+            "Please enable location from app permission settings");
+        return false;
+      }
+
+      final value = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best);
+
+      if (!mounted) {
+        AppUtils.dismissprogress();
+        return false;
+      }
+
+      setState(() {
+        AppUtils.dismissprogress();
+        lat = value.latitude;
+        long = value.longitude;
+        distance = Geolocator.distanceBetween(
+            lat,
+            long,
+            double.parse(selectedProject?.latitude ?? "0.0"),
+            double.parse(selectedProject?.longitude ?? "0.0"));
+        print("User distance $distance");
+      });
+      return true;
+    } catch (error) {
       AppUtils.dismissprogress();
       AppUtils.showToastError("$error");
-    });
-    return permisionStatus;
+      return false;
+    }
   }
 
   Future<void> getGeocode(double latt, double longg) async {

@@ -33,6 +33,9 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _drawerOpenedByBack = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,18 +46,73 @@ class _ProfileState extends State<Profile> {
     super.dispose();
   }
 
+  Future<void> _showExitDialog(BuildContext ctx) {
+    return showDialog<void>(
+      context: ctx,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Are you sure ?",
+          style: TextStyle(
+              fontSize: 18,
+              color: Color(0xFF0061b0),
+              fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Do you want to exit an App',
+          style: TextStyle(
+              fontSize: 14,
+              color: Colors.black,
+              fontWeight: FontWeight.w600),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'No',
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () => exit(0),
+            child: Text(
+              'Yes',
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // return Container(child: LoginContent());
-
-    return Provider<ApiService>(
-      create: (context) => ApiService.create(),
-      child: SafeArea(
-        child: Scaffold(
-          drawer: AppDrawer(),
-          backgroundColor: Colors.grey[300],
-          appBar: EmptyAppBar(),
-          body: ProfileContent(),
+    return WillPopScope(
+      onWillPop: () async {
+        if (!_drawerOpenedByBack) {
+          _scaffoldKey.currentState?.openDrawer();
+          setState(() => _drawerOpenedByBack = true);
+        } else {
+          setState(() => _drawerOpenedByBack = false);
+          await _showExitDialog(context);
+        }
+        return false;
+      },
+      child: Provider<ApiService>(
+        create: (context) => ApiService.create(),
+        child: SafeArea(
+          child: Scaffold(
+            key: _scaffoldKey,
+            drawer: AppDrawer(),
+            backgroundColor: Colors.grey[300],
+            appBar: EmptyAppBar(),
+            body: ProfileContent(),
+          ),
         ),
       ),
     );
