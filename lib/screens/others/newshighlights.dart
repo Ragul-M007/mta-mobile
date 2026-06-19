@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
 import 'package:mta/models/NewsRes.dart';
@@ -44,19 +46,70 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     super.dispose();
   }
 
-  Widget build(BuildContext context) {
-    return Material(
-        child: SafeArea(
-          child: Scaffold(
-              drawer: AppDrawer(),
-              appBar: mainappbar(ontab: menuopen, title: "News & Highlights"),
-              // mainappbar(
-              //     ontab: menuopen,
-              //     title: "News & Heighlights",
-              //     controller: _controller),
+  Future<bool> _showExitDialog() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
 
-              body: tabbarwidget()),
-        ));
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        await _showExitDialog();
+        return false;
+      },
+      child: Material(
+          child: SafeArea(
+            child: Scaffold(
+                drawer: AppDrawer(),
+                appBar: mainappbar(ontab: menuopen, title: "News & Highlights"),
+                // mainappbar(
+                //     ontab: menuopen,
+                //     title: "News & Heighlights",
+                //     controller: _controller),
+
+                body: tabbarwidget()),
+          )),
+    );
   }
 
   menuRedirect({@required String? routename, int? currentmenu}) {

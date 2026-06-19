@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
@@ -140,330 +141,381 @@ class _AttendanceContentState extends State<AttendanceContent> {
     super.dispose();
   }
 
+  Future<bool> _showExitDialog() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   Widget build(BuildContext context) {
     print(" data ${_projectLists?.length}");
     return Material(
       child: SafeArea(
-        child: Scaffold(
-          drawer: AppDrawer(),
-          backgroundColor:
-              isgridView ? Color.fromARGB(255, 47, 62, 75) : Colors.grey[300],
-          appBar: mainappbar(ontab: menuopen, title: "Attendance"),
-          body: isgridView
-              ? gridView()
-              : Padding(
-                  padding: EdgeInsets.all(0.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(30, 10, 0, 10),
-                              child: DropdownButton<String>(
-                                value: dropdownValue,
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16),
-                                underline: Container(
-                                  height: 3,
-                                  color: Colors.transparent,
-                                ),
-                                onChanged: (String? newValue) {
-                                  var index = 0;
-                                  monthMatch.map((element) {
-                                    // get index
-                                    if (newValue != null) {
-                                      index = monthMatch.indexOf(newValue);
+        child: WillPopScope(
+          onWillPop: () async {
+            await _showExitDialog();
+            return false;
+          },
+          child: Scaffold(
+            drawer: AppDrawer(),
+            backgroundColor:
+                isgridView ? Color.fromARGB(255, 47, 62, 75) : Colors.grey[300],
+            appBar: mainappbar(ontab: menuopen, title: "Attendance"),
+            body: isgridView
+                ? gridView()
+                : Padding(
+                    padding: EdgeInsets.all(0.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(30, 10, 0, 10),
+                                child: DropdownButton<String>(
+                                  value: dropdownValue,
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16),
+                                  underline: Container(
+                                    height: 3,
+                                    color: Colors.transparent,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    var index = 0;
+                                    monthMatch.map((element) {
+                                      // get index
+                                      if (newValue != null) {
+                                        index = monthMatch.indexOf(newValue);
+                                      }
+                                    }).toList();
+                                    var selecetedMonth = index + 1;
+                                    var editedMonth = "";
+                                    if (selecetedMonth.toString().length == 1) {
+                                      editedMonth = "0" + selecetedMonth.toString();
+                                    } else {
+                                      selecetedMonth.toString();
                                     }
-                                  }).toList();
-                                  var selecetedMonth = index + 1;
-                                  var editedMonth = "";
-                                  if (selecetedMonth.toString().length == 1) {
-                                    editedMonth = "0" + selecetedMonth.toString();
-                                  } else {
-                                    selecetedMonth.toString();
-                                  }
-                                  getAttendance(editedMonth + "-" + year);
+                                    getAttendance(editedMonth + "-" + year);
+                                    setState(() {
+                                      if (newValue != null)
+                                        dropdownValue = newValue;
+                                    });
+                                  },
+                                  items: <String>[
+                                    "Jan",
+                                    "Feb",
+                                    "Mar",
+                                    "Apr",
+                                    "May",
+                                    "Jun",
+                                    "Jul",
+                                    "Aug",
+                                    "Sep",
+                                    "Oct",
+                                    "Nov",
+                                    "Dec"
+                                  ].map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              InkWell(
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      height: 50,
+                                    ),
+                                    Text("Grid View",
+                                        style: Drawables.adddoccontentstyle(
+                                            Colors.black87, 14.0, FontWeight.w600)),
+                                    SizedBox(width: 5.0),
+                                    Icon(
+                                      Icons.grid_view,
+                                      color: Color(0xFF0061b0),
+                                    )
+                                  ],
+                                ),
+                                onTap: () {
                                   setState(() {
-                                    if (newValue != null)
-                                      dropdownValue = newValue;
+                                    isgridView = true;
+                                    isShowCheckInOut = true;
+                                    getAttendance(day + "-" + month + "-" + year);
                                   });
                                 },
-                                items: <String>[
-                                  "Jan",
-                                  "Feb",
-                                  "Mar",
-                                  "Apr",
-                                  "May",
-                                  "Jun",
-                                  "Jul",
-                                  "Aug",
-                                  "Sep",
-                                  "Oct",
-                                  "Nov",
-                                  "Dec"
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            InkWell(
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    height: 50,
-                                  ),
-                                  Text("Grid View",
-                                      style: Drawables.adddoccontentstyle(
-                                          Colors.black87, 14.0, FontWeight.w600)),
-                                  SizedBox(width: 5.0),
-                                  Icon(
-                                    Icons.grid_view,
-                                    color: Color(0xFF0061b0),
-                                  )
-                                ],
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  isgridView = true;
-                                  isShowCheckInOut = true;
-                                  getAttendance(day + "-" + month + "-" + year);
-                                });
-                              },
-                            )
-                          ],
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                      _attendance.length > 0
-                          ? Expanded(
-                              child: ListView.builder(
-                                itemCount: _attendance.length,
-                                padding: EdgeInsets.all(5),
-                                itemBuilder: (BuildContext context, int index) {
-                                  return new Padding(
-                                      padding: EdgeInsets.all(5),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15.0),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            border: Border(
-                                              left: BorderSide(
-                                                color: Colors.red,
-                                                width: 4.0,
+                        _attendance.length > 0
+                            ? Expanded(
+                                child: ListView.builder(
+                                  itemCount: _attendance.length,
+                                  padding: EdgeInsets.all(5),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return new Padding(
+                                        padding: EdgeInsets.all(5),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(15.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              border: Border(
+                                                left: BorderSide(
+                                                  color: Colors.red,
+                                                  width: 4.0,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                  width: 4,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.red,
-                                                  )),
-                                              Container(
-                                                width: 110,
-                                                child: Padding(
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal: 15,
-                                                        vertical: 35),
-                                                    child: Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 10.0),
-                                                      child: Center(
-                                                          child: Text(
-                                                        getDateFormat(
-                                                                _attendance[index]
-                                                                        .date ??
-                                                                    "",
-                                                                1) +
-                                                            "\n" +
-                                                            getDateFormat(
-                                                                _attendance[index]
-                                                                        .date ??
-                                                                    "",
-                                                                2),
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors.black87,
-                                                                14.0,
-                                                                FontWeight.w400),
-                                                      )),
-                                                      decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color: Colors
-                                                                  .grey[200]!),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10)),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                    width: 4,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
                                                     )),
-                                              ),
-                                              Expanded(
+                                                Container(
+                                                  width: 110,
                                                   child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        CircleImageFromNetwork(
-                                                            imageUrl: Strings
-                                                                    .baseImageUrl +
-                                                                (_attendance[
-                                                                            index]
-                                                                        .projectImg ??
-                                                                    ""),
-                                                            width: 40,
-                                                            height: 40,
-                                                            radius: 15,
-                                                            defaultImageUrl:
-                                                                "assets/images/background1.png"),
-                                                        SizedBox(width: 5.0),
-                                                        Expanded(
-                                                          child: Text(
-                                                            _attendance[index]
-                                                                    .projectName ??
-                                                                "",
-                                                            style: Drawables
-                                                                .adddoccontentstyle(
-                                                                    Colors.grey,
-                                                                    12.0,
-                                                                    FontWeight
-                                                                        .w400),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    RichText(
-                                                      text: TextSpan(
-                                                        text: 'Start Time -',
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors.black54,
-                                                                13.0,
-                                                                FontWeight.w400),
-                                                        children: <TextSpan>[
-                                                          TextSpan(
-                                                            text: getTimeFormat(
-                                                                _attendance[index]
-                                                                        .checkInTime ??
-                                                                    ""),
-                                                            style: Drawables
-                                                                .adddoccontentstyle(
-                                                                    Colors
-                                                                        .black54,
-                                                                    13.0,
-                                                                    FontWeight
-                                                                        .w700),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 3.0),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.pin_drop,
-                                                          color:
-                                                              Color(0xFF0061b0),
-                                                          size: 16.0,
-                                                        ),
-                                                        SizedBox(width: 5.0),
-                                                      ],
-                                                    ),
-                                                    Icon(Icons.more_vert,
-                                                        color: Colors.grey,
-                                                        size: 14.0),
-                                                    RichText(
-                                                      text: TextSpan(
-                                                        text: 'End Time -',
-                                                        style: Drawables
-                                                            .adddoccontentstyle(
-                                                                Colors.black54,
-                                                                13.0,
-                                                                FontWeight.w400),
-                                                        children: <TextSpan>[
-                                                          TextSpan(
-                                                            text: getTimeFormat(
-                                                                _attendance[index]
-                                                                        .checkOutTime ??
-                                                                    ""),
-                                                            style: Drawables
-                                                                .adddoccontentstyle(
-                                                                    Colors
-                                                                        .black54,
-                                                                    13.0,
-                                                                    FontWeight
-                                                                        .w700),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 3.0),
-                                                    Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.pin_drop,
-                                                          color:
-                                                              Color(0xFF0061b0),
-                                                          size: 16.0,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 3.0),
-                                                    Text(
-                                                      getHours(
-                                                          _attendance[index]
-                                                                  .checkInTime ??
-                                                              "",
-                                                          _attendance[index]
-                                                                  .checkOutTime ??
-                                                              ""),
-                                                      style: TextStyle(
-                                                          color:
-                                                              Color(0xFF0061b0),
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                  ],
+                                                      padding: EdgeInsets.symmetric(
+                                                          horizontal: 15,
+                                                          vertical: 35),
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                                vertical: 10.0),
+                                                        child: Center(
+                                                            child: Text(
+                                                          getDateFormat(
+                                                                  _attendance[index]
+                                                                          .date ??
+                                                                      "",
+                                                                  1) +
+                                                              "\n" +
+                                                              getDateFormat(
+                                                                  _attendance[index]
+                                                                          .date ??
+                                                                      "",
+                                                                  2),
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.black87,
+                                                                  14.0,
+                                                                  FontWeight.w400),
+                                                        )),
+                                                        decoration: BoxDecoration(
+                                                            border: Border.all(
+                                                                color: Colors
+                                                                    .grey[200]!),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(10)),
+                                                      )),
                                                 ),
-                                              ))
-                                            ],
+                                                Expanded(
+                                                    child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          CircleImageFromNetwork(
+                                                              imageUrl: Strings
+                                                                      .baseImageUrl +
+                                                                  (_attendance[
+                                                                              index]
+                                                                          .projectImg ??
+                                                                      ""),
+                                                              width: 40,
+                                                              height: 40,
+                                                              radius: 15,
+                                                              defaultImageUrl:
+                                                                  "assets/images/background1.png"),
+                                                          SizedBox(width: 5.0),
+                                                          Expanded(
+                                                            child: Text(
+                                                              _attendance[index]
+                                                                      .projectName ??
+                                                                  "",
+                                                              style: Drawables
+                                                                  .adddoccontentstyle(
+                                                                      Colors.grey,
+                                                                      12.0,
+                                                                      FontWeight
+                                                                          .w400),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                      RichText(
+                                                        text: TextSpan(
+                                                          text: 'Start Time -',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.black54,
+                                                                  13.0,
+                                                                  FontWeight.w400),
+                                                          children: <TextSpan>[
+                                                            TextSpan(
+                                                              text: getTimeFormat(
+                                                                  _attendance[index]
+                                                                          .checkInTime ??
+                                                                      ""),
+                                                              style: Drawables
+                                                                  .adddoccontentstyle(
+                                                                      Colors
+                                                                          .black54,
+                                                                      13.0,
+                                                                      FontWeight
+                                                                          .w700),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 3.0),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.pin_drop,
+                                                            color:
+                                                                Color(0xFF0061b0),
+                                                            size: 16.0,
+                                                          ),
+                                                          SizedBox(width: 5.0),
+                                                        ],
+                                                      ),
+                                                      Icon(Icons.more_vert,
+                                                          color: Colors.grey,
+                                                          size: 14.0),
+                                                      RichText(
+                                                        text: TextSpan(
+                                                          text: 'End Time -',
+                                                          style: Drawables
+                                                              .adddoccontentstyle(
+                                                                  Colors.black54,
+                                                                  13.0,
+                                                                  FontWeight.w400),
+                                                          children: <TextSpan>[
+                                                            TextSpan(
+                                                              text: getTimeFormat(
+                                                                  _attendance[index]
+                                                                          .checkOutTime ??
+                                                                      ""),
+                                                              style: Drawables
+                                                                  .adddoccontentstyle(
+                                                                      Colors
+                                                                          .black54,
+                                                                      13.0,
+                                                                      FontWeight
+                                                                          .w700),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 3.0),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.pin_drop,
+                                                            color:
+                                                                Color(0xFF0061b0),
+                                                            size: 16.0,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(height: 3.0),
+                                                      Text(
+                                                        getHours(
+                                                            _attendance[index]
+                                                                    .checkInTime ??
+                                                                "",
+                                                            _attendance[index]
+                                                                    .checkOutTime ??
+                                                                ""),
+                                                        style: TextStyle(
+                                                            color:
+                                                                Color(0xFF0061b0),
+                                                            fontWeight:
+                                                                FontWeight.w600),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ))
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ));
-                                },
+                                        ));
+                                  },
+                                ),
+                              )
+                            : Center(
+                                child: Text(
+                                  "No Attendance Marked",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w600),
+                                ),
                               ),
-                            )
-                          : Center(
-                              child: Text(
-                                "No Attendance Marked",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-        ),
-      ),
-    );
+              ),
+            ),
+          );
   }
 
   Widget bottombutton() {
@@ -948,9 +1000,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
                                               decoration: BoxDecoration(
                                                   border: Border.all(
                                                       color: Colors.grey[200]!),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
+                                                  borderRadius: BorderRadius.circular(
+                                                      10)),
                                             )),
                                       ),
                                       Expanded(

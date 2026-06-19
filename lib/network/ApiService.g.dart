@@ -12,13 +12,12 @@ part of 'ApiService.dart';
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    // baseUrl ??= 'https://mta.multitechcorp.in/mta';
+    baseUrl ??= 'https://uatmta.multitechcorp.in/mta';
   }
 
   final Dio _dio;
-
   String? baseUrl;
-
   final ParseErrorLogger? errorLogger;
 
   @override
