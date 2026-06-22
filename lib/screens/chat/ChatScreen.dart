@@ -489,8 +489,10 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return isloading
         ? Center(child: CircularProgressIndicator())
-        : WillPopScope(
-            onWillPop: () async {
+        : PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) return;
               if (msgList
                       .where((element) => element.isSelected == true)
                       .length >
@@ -498,8 +500,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 msgList
                     .where((item) => item.isSelected == true)
                     .forEach((item) => item.isSelected = false);
+                Strings.isSelectionEnabled = false;
                 setState(() {});
-                return false;
+                return;
               }
               if (Strings.fromNotificationChat) {
                 Strings.fromNotificationChat = false;
@@ -520,9 +523,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     (route) => false,
                   );
                 }
-                return false;
+                return;
               }
-              return true;
+              Navigator.of(context).pop();
             },
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
