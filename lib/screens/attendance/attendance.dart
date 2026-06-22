@@ -1165,6 +1165,7 @@ class _AttendanceContentState extends State<AttendanceContent> {
             formatAttendanceData();
           } else {
             _attendancemain = [];
+            _attendance = [];
           }
         });
       } else {
