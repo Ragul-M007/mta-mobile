@@ -189,20 +189,19 @@ class _ChatGroupsState extends State<ChatGroups> {
     return Provider<ApiService>(
       create: (context) => ApiService.create(),
       child: WillPopScope(
-        onWillPop: () {
+        onWillPop: () async {
           print(
               ">>>>>>kkk2:${widget.projectId},${widget.fromTeamProjects},${Strings.fromTeamProjects}");
           if (widget.projectId == null) {
-            Navigator.pushNamed(context, "/teamsDashboard");
+            Navigator.of(context).pushReplacementNamed("/teamsDashboard");
           } else if (widget.fromTeamProjects == true ||
               Strings.fromTeamProjects) {
             Strings.fromTeamProjects = false;
-            Navigator.pushNamed(context, "/dashboard");
+            Navigator.of(context).pushReplacementNamed("/dashboard");
           } else {
-            Navigator.pushNamed(context, "/projects");
+            Navigator.of(context).pushReplacementNamed("/projects");
           }
-
-          throw '';
+          return false;
         },
         child: loading
             ? Center(

@@ -525,6 +525,7 @@ class _ChatScreenState extends State<ChatScreen> {
               return true;
             },
             child: MaterialApp(
+              debugShowCheckedModeBanner: false,
               builder: (_, child) => Portal(child: child!),
               home: SafeArea(
                 child: Scaffold(
