@@ -84,18 +84,18 @@ class _ProjectCommentsState extends State<ProjectComments> {
     initialCommentCheck = true;
     _socket?.disconnect();
     _socket?.dispose();
+    _socket = null;
 
     if (Strings.fromNotificationScren) {
       Strings.fromNotificationScren = false;
       Navigator.of(context).pushReplacementNamed('/notification');
     } else if (Strings.fromNotificationComments) {
       Strings.fromNotificationComments = false;
-      Navigator.pushNamed(context, '/projects');
+      Navigator.of(context).pushReplacementNamed('/projects');
     } else {
-      Navigator.pushNamed(context, '/categories');
+      Navigator.of(context).pushReplacementNamed('/categories');
     }
 
-    // Navigation is already handled above; prevent default pop/exit behavior.
     return false;
   }
 
@@ -218,6 +218,7 @@ class _CommentsContentState extends State<CommentsContent>
 
     _socket?.disconnect();
     _socket?.dispose();
+    _socket = null;
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];

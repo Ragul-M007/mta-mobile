@@ -79,10 +79,11 @@ class _CommentsState extends State<Comments> {
     initialCommentCheck = true;
     _socket?.disconnect();
     _socket?.dispose();
+    _socket = null;
 
     if (Strings.fromNotificationComments == true) {
       Strings.fromNotificationComments = false;
-      Navigator.pushNamed(context, '/dashboard');
+      Navigator.of(context).pushReplacementNamed('/dashboard');
       return false;
     }
 
@@ -92,10 +93,7 @@ class _CommentsState extends State<Comments> {
       return false;
     }
 
-    final didPop = await Navigator.of(context).maybePop();
-    if (!didPop) {
-      Navigator.pushNamed(context, '/viewdoclist');
-    }
+    Navigator.of(context).pushReplacementNamed('/viewdoclist');
     return false;
   }
 
@@ -215,6 +213,7 @@ class _CommentsContentState extends State<CommentsContent>
 
     _socket?.disconnect();
     _socket?.dispose();
+    _socket = null;
     super.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
@@ -1375,8 +1374,17 @@ class _CommentsContentState extends State<CommentsContent>
             itemScrollController.jumpTo(index: 0);
 
             msgField.unfocus();
-            Strings.selectedProDocument[0].commentsCount =
-                Strings.comments.length.toString();
+            if (Strings.category == true) {
+              if (Strings.selectedCatDocument.isNotEmpty) {
+                Strings.selectedCatDocument[0].commentsCount =
+                    Strings.comments.length.toString();
+              }
+            } else {
+              if (Strings.selectedProDocument.isNotEmpty) {
+                Strings.selectedProDocument[0].commentsCount =
+                    Strings.comments.length.toString();
+              }
+            }
           });
           //  });
         });
