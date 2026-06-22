@@ -33,9 +33,6 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _drawerOpenedByBack = false;
-
   @override
   void initState() {
     super.initState();
@@ -94,20 +91,13 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (!_drawerOpenedByBack) {
-          _scaffoldKey.currentState?.openDrawer();
-          setState(() => _drawerOpenedByBack = true);
-        } else {
-          setState(() => _drawerOpenedByBack = false);
-          await _showExitDialog(context);
-        }
+        await _showExitDialog(context);
         return false;
       },
       child: Provider<ApiService>(
         create: (context) => ApiService.create(),
         child: SafeArea(
           child: Scaffold(
-            key: _scaffoldKey,
             drawer: AppDrawer(),
             backgroundColor: Colors.grey[300],
             appBar: EmptyAppBar(),
@@ -531,10 +521,10 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   fillData() {
-    print("data--> ${threeT.text}");
-    twoT.text = " ";
-    threeT.text = " ";
-    fourT.text = " ";
+    oneT.clear();
+    twoT.clear();
+    threeT.clear();
+    fourT.clear();
   }
 
   static void removeUser(ctx) {
@@ -625,6 +615,9 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   Future<void> _changePass() async {
+    changePassOld.clear();
+    changePassNew.clear();
+    changePassConfirm.clear();
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -734,6 +727,10 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   Future<void> _changePin() async {
+    oneT.clear();
+    twoT.clear();
+    threeT.clear();
+    fourT.clear();
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -859,7 +856,7 @@ class _ProfileContentState extends State<ProfileContent> {
         child: TextField(
           keyboardType: TextInputType.number,
           maxLength: 1,
-          autofocus: true,
+          autofocus: val == 1,
           controller: val == 1
               ? oneT
               : val == 2

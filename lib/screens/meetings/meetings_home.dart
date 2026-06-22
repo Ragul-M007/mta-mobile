@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mta/utilities/app_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
@@ -42,27 +41,49 @@ class _MeetingscontentState extends State<Meetingscontent> {
   List<MeetingsData> tempLists = [];
   List<MeetingsData> meetingsData = [];
 
-  Future<bool> _showExitConfirmationDialog() async {
-    final shouldExit = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Exit App'),
-        content: const Text('Are you sure you want to exit the app?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(
+              "Are you sure ?",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF0061b0),
+                  fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              'Do you want to exit an App',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text(
+                  'No',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              TextButton(
+                onPressed: () => exit(0),
+                child: new Text(
+                  'Yes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Exit'),
-          ),
-        ],
-      ),
-    );
-
-    return shouldExit ?? false;
+        )) ??
+        false;
   }
 
   Future<void> _handleBackPressed() async {
@@ -72,10 +93,7 @@ class _MeetingscontentState extends State<Meetingscontent> {
       return;
     }
 
-    final shouldExit = await _showExitConfirmationDialog();
-    if (shouldExit) {
-      await SystemNavigator.pop();
-    }
+    _onWillPop();
   }
 
   bool meetingCraetionAccess = false;

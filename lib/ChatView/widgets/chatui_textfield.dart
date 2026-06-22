@@ -483,7 +483,7 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
         FilePickerResult? result = await FilePicker.pickFiles(
           allowMultiple: true,
           type: FileType.custom,
-          allowedExtensions: ['jpg', 'pdf', 'doc', 'm4a', 'mp3', 'mp4'],
+          allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'm4a', 'mp3', 'mp4'],
         );
         if (result != null) {
           List<MultipartFile> files = result.paths

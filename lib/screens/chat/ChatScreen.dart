@@ -490,7 +490,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return isloading
         ? Center(child: CircularProgressIndicator())
         : WillPopScope(
-            onWillPop: () {
+            onWillPop: () async {
               if (msgList
                       .where((element) => element.isSelected == true)
                       .length >
@@ -499,34 +499,30 @@ class _ChatScreenState extends State<ChatScreen> {
                     .where((item) => item.isSelected == true)
                     .forEach((item) => item.isSelected = false);
                 setState(() {});
-              } else {
-                if (Strings.fromNotificationChat) {
-                  Strings.fromNotificationChat = false;
-                  if (Strings.roleId == 6) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Projects(),
-                      ),
-                      (route) => false,
-                    );
-                    //   Navigator.pushNamed(context, "/projects");
-                  } else {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                         builder: (context) => TeamsDashboard(),
-                      ),
-                      (route) => false,
-                    );
-                    //   Navigator.pushNamed(context, "/teamsDashboard");
-                  }
-                } else {
-                  Navigator.pop(context);
-                }
+                return false;
               }
-
-              throw '';
+              if (Strings.fromNotificationChat) {
+                Strings.fromNotificationChat = false;
+                if (Strings.roleId == 6) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Projects(),
+                    ),
+                    (route) => false,
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamsDashboard(),
+                    ),
+                    (route) => false,
+                  );
+                }
+                return false;
+              }
+              return true;
             },
             child: MaterialApp(
               builder: (_, child) => Portal(child: child!),

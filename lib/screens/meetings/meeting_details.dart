@@ -63,10 +63,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
       return;
     }
 
-    final didPop = await Navigator.of(context).maybePop();
-    if (!didPop) {
-      Navigator.of(context).pushReplacementNamed('/meetings');
-    }
+    Navigator.of(context).pop();
   }
 
   void initState() {
