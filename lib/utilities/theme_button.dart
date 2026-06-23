@@ -7,7 +7,7 @@ class ThemeButton extends StatelessWidget {
 
   double? height, width;
 
-  final VoidCallback buttonfunction;
+  final VoidCallback? buttonfunction;
 
   ThemeButton({super.key, required this.title, required this.buttonfunction});
 
@@ -26,7 +26,7 @@ class ThemeButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(4.0),
             ),
           ),
-          onPressed: () => buttonfunction(),
+          onPressed: buttonfunction,
           child: Text(title,
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),

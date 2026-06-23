@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
@@ -37,6 +38,8 @@ class _LocationSelectionState extends State<LocationSelection> {
   TextEditingController _searchFieldController = TextEditingController();
 
   LatLng? _markedLocation;
+
+  bool _isLoading = false;
 
   FocusNode searchFocus = FocusNode();
 
@@ -115,88 +118,84 @@ class _LocationSelectionState extends State<LocationSelection> {
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(bottom: 20, left: 30, right: 30),
             child: ThemeButton(
-                title: "CREATE MEETING", buttonfunction: submitData),
+                title: "CREATE MEETING", buttonfunction: _isLoading ? null : submitData),
           ),
           body: Column(
             children: [
               Padding(
                 padding:
                     EdgeInsets.only(left: 20, right: 20, top: height! * 0.06),
-                child: Container(
-                  // height: 35,
-                  child: GooglePlaceAutoCompleteTextField(
-                    focusNode: searchFocus,
-                    googleAPIKey: Strings.googleAPIKey,
-                    itemClick: (prediction) async {
-                      _searchFieldController.text = prediction.description!;
-                      _searchFieldController.selection =
-                          TextSelection.fromPosition(TextPosition(
-                              offset: prediction.description!.length));
-                      searchFocus.unfocus();
-                      // Update the map to display the new marker
-                      setState(() {});
-                      // FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    getPlaceDetailWithLatLng: (postalCodeResponse) async {
-                      _markedLocation = LatLng(
-                          double.tryParse(postalCodeResponse.lat!)!,
-                          double.tryParse(postalCodeResponse.lng!)!);
-                      final GoogleMapController controller =
-                          await _controller.future;
-                      await controller
-                          .animateCamera(CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                          target: _markedLocation!,
-                          zoom: 18.0,
-                        ),
-                      ));
-                      searchFocus.unfocus();
-                      setState(() {});
-                      // FocusManager.instance.primaryFocus?.unfocus();
-                      // Add a marker to the selected place
-                    },
-                    inputDecoration: InputDecoration(
-                      border: InputBorder.none, // Remove underline
-                      hintText: 'Search places',
-                      contentPadding: EdgeInsets.only(left: 10.0),
-                      // hintStyle: TextStyle(color: Colors.grey),
-                    ),
-                    textEditingController: _searchFieldController,
-                    boxDecoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      color: const Color(0xFFeceeef),
-                    ),
+                child: GooglePlaceAutoCompleteTextField(
+                  focusNode: searchFocus,
+                  googleAPIKey: Strings.googleAPIKey,
+                  itemClick: (prediction) async {
+                    _searchFieldController.text = prediction.description!;
+                    _searchFieldController.selection =
+                        TextSelection.fromPosition(TextPosition(
+                            offset: prediction.description!.length));
+                    searchFocus.unfocus();
+                    setState(() {});
+                  },
+                  getPlaceDetailWithLatLng: (postalCodeResponse) async {
+                    _markedLocation = LatLng(
+                        double.tryParse(postalCodeResponse.lat!)!,
+                        double.tryParse(postalCodeResponse.lng!)!);
+                    final GoogleMapController controller =
+                        await _controller.future;
+                    await controller
+                        .animateCamera(CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: _markedLocation!,
+                        zoom: 18.0,
+                      ),
+                    ));
+                    searchFocus.unfocus();
+                    setState(() {});
+                  },
+                  inputDecoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search places',
+                    contentPadding: EdgeInsets.only(left: 10.0),
+                  ),
+                  textEditingController: _searchFieldController,
+                  boxDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: const Color(0xFFeceeef),
                   ),
                 ),
               ),
-              Container(
-                height: height! * 0.6,
-                padding: EdgeInsets.only(left: 20, right: 20, top: 30),
-                child: GoogleMap(
-                  initialCameraPosition: initialLocation,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  myLocationButtonEnabled: false,
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                  onTap: (LatLng point) {
-                    _markedLocation = point;
-                    searchFocus.unfocus();
-                    setState(() {});
-                    // FocusManager.instance.primaryFocus?.unfocus();
-                  },
-                  markers: _markedLocation != null
-                      ? {
-                          Marker(
-                            markerId: MarkerId('marked_location'),
-                            position: _markedLocation!,
-                            infoWindow: InfoWindow(
-                              title: 'Marked Location',
-                            ),
-                          ),
-                        }
-                      : {},
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20, right: 20, top: 30, bottom: 90),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: GoogleMap(
+                      mapType: MapType.normal,
+                      initialCameraPosition: initialLocation,
+                      myLocationEnabled: true,
+                      zoomControlsEnabled: false,
+                      myLocationButtonEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller.complete(controller);
+                      },
+                      onTap: (LatLng point) {
+                        _markedLocation = point;
+                        searchFocus.unfocus();
+                        setState(() {});
+                      },
+                      markers: _markedLocation != null
+                          ? {
+                              Marker(
+                                markerId: MarkerId('marked_location'),
+                                position: _markedLocation!,
+                                infoWindow: InfoWindow(
+                                  title: 'Marked Location',
+                                ),
+                              ),
+                            }
+                          : {},
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -213,29 +212,25 @@ class _LocationSelectionState extends State<LocationSelection> {
     }
     final api = Provider.of<ApiService>(context, listen: false);
 
+    setState(() => _isLoading = true);
+    EasyLoading.show();
     print(">AddMeeting:${jsonEncode(widget.addMeetingData)}");
     api.createMeeting(widget.addMeetingData).then((response) {
+      setState(() => _isLoading = false);
+      EasyLoading.dismiss();
       if (response.status!) {
         AppUtils.showToastSuccess("Meeting created successfully!");
 
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.pop(context);
-        // Navigator.pushAndRemoveUntil(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => Meetings(),
-        //   ),
-        //   (route) => false,
-        // );
       } else {
         AppUtils.showErrorSnackBar(context, response.message!);
       }
     }).catchError((onError) {
+      setState(() => _isLoading = false);
+      EasyLoading.dismiss();
       AppUtils.showToastError("Something went wrong!");
     });
-    // } else {
-    //   AppUtils.showToastError("Please mark meeting location!");
-    // }
   }
 }
