@@ -1,4 +1,4 @@
-package com.multicorp.mta
+package com.multicorp.mtaarch
 
 import io.flutter.embedding.android.FlutterActivity
 

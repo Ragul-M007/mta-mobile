@@ -39,7 +39,7 @@ if (flutterVersionName == null) {
    }
 
 android {
-    namespace 'com.multicorp.mta'
+    namespace 'com.multicorp.mtaarch'
     compileSdkVersion 36
     ndkVersion flutter.ndkVersion
 
@@ -50,7 +50,7 @@ android {
     defaultConfig
     {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId 'com.multicorp.mta'
+        applicationId 'com.multicorp.mtaarch'
         minSdkVersion 26
         targetSdkVersion 36
         versionCode 3
