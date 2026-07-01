@@ -39,7 +39,10 @@ class PermissionService {
       return true;
     }
 
-    if (sdk <= 28) {
+    // requestLegacyExternalStorage="true" in AndroidManifest.xml forces legacy
+    // external storage behavior through SDK 33, so WRITE_EXTERNAL_STORAGE is
+    // still enforced on Android 10-13, not just Android 9 and below.
+    if (sdk <= 33) {
       final PermissionStatus status = await Permission.storage.status;
       if (status.isGranted || status.isLimited || status.isProvisional) {
         debugPrint('PermissionService: storage permission already granted for SDK $sdk');
