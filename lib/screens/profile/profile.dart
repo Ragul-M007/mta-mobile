@@ -164,6 +164,7 @@ class _ProfileContentState extends State<ProfileContent> {
   var address = '';
   var editPicTap = false;
   var removeImage = false;
+  bool _cameraInProgress = false;
   var editProfilePictureBase64 = '';
   Uint8List? editProfilePicture;
 
@@ -1010,8 +1011,7 @@ class _ProfileContentState extends State<ProfileContent> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    //changeProPic();
-                                    takePhoto(ImageSource.camera);
+                                    takePhoto(ImageSource.camera, setState);
                                   },
                                   child: Container(
                                     child: Row(
@@ -1037,9 +1037,7 @@ class _ProfileContentState extends State<ProfileContent> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    //changeProPic();
-                                    // takePhoto(ImageSource.gallery);
-                                    pickImage(ImageSource.gallery);
+                                    pickImage(ImageSource.gallery, setState);
                                   },
                                   child: Container(
                                     child: Row(
@@ -1303,64 +1301,43 @@ class _ProfileContentState extends State<ProfileContent> {
     }
   }
 
-  void takePhoto(ImageSource source) async {
-    if (Platform.isIOS) {
-      var status = await Permission.camera.status;
-      if (!status.isGranted) {
-        getPermission();
-      } else {
-        final pickedFile = await _picker.pickImage(source: source);
-        final bytes = await Io.File(pickedFile!.path).readAsBytes();
-        setState(() {
-          editProfilePictureBase64 =
-              "data:image/jpeg;base64," + base64Encode(bytes);
-          editProfilePicture = base64.decode(base64Encode(bytes));
-          editPicTap = true;
-          _imageAsyncWidget = new MemoryImage(editProfilePicture!);
-          name.requestFocus();
-        });
+  void takePhoto(ImageSource source, StateSetter dialogSetState) async {
+    if (_cameraInProgress) return;
+    _cameraInProgress = true;
+    try {
+      final status = await Permission.camera.request();
+      if (status.isPermanentlyDenied) {
+        AppUtils.showToastError(
+            "Please enable Camera from App permission Settings");
+        return;
       }
-    } else {
+      if (!status.isGranted) return;
       final pickedFile = await _picker.pickImage(source: source);
-      final bytes = await Io.File(pickedFile!.path).readAsBytes();
-      setState(() {
+      if (pickedFile == null) return;
+      final bytes = await Io.File(pickedFile.path).readAsBytes();
+      dialogSetState(() {
         editProfilePictureBase64 =
             "data:image/jpeg;base64," + base64Encode(bytes);
         editProfilePicture = base64.decode(base64Encode(bytes));
         editPicTap = true;
         _imageAsyncWidget = new MemoryImage(editProfilePicture!);
-        name.requestFocus();
       });
+    } finally {
+      _cameraInProgress = false;
     }
   }
 
-  void pickImage(ImageSource source) async {
+  void pickImage(ImageSource source, StateSetter dialogSetState) async {
     final pickedFile = await _picker.pickImage(source: source);
-    final bytes = await Io.File(pickedFile!.path).readAsBytes();
-    setState(() {
+    if (pickedFile == null) return;
+    final bytes = await Io.File(pickedFile.path).readAsBytes();
+    dialogSetState(() {
       editProfilePictureBase64 =
           "data:image/jpeg;base64," + base64Encode(bytes);
       editProfilePicture = base64.decode(base64Encode(bytes));
       editPicTap = true;
       _imageAsyncWidget = new MemoryImage(editProfilePicture!);
-      name.requestFocus();
     });
-  }
-
-  void getPermission() async {
-    var status = await Permission.camera.status;
-    if (status.isDenied) {
-      await Permission.camera.request();
-      var updatedStatus = await Permission.camera.status;
-      if (updatedStatus.isGranted) {
-        takePhoto(ImageSource.camera);
-      }
-    } else if (status.isPermanentlyDenied) {
-      AppUtils.showToastError(
-          "Please enable Camera from App permission Settings");
-    } else {
-      await Permission.camera.request();
-    }
   }
 
   resetPin(contextpin) {
