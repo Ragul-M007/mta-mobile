@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/apputilities.dart';
-import 'package:mta/utilities/external_path_helper.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,14 +21,19 @@ class DocumentDownloadService {
 
   Future<Directory> resolveDefaultDownloadsDirectory() async {
     if (Platform.isAndroid) {
-      final String path = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DOWNLOADS,
-      );
-      final Directory androidDownloads = Directory(path);
-      if (!await androidDownloads.exists()) {
-        await androidDownloads.create(recursive: true);
+      // Android 11+ (targetSdk 30+) blocks direct file writes to the public
+      // Download folder under scoped storage regardless of permissions
+      // granted. The app-specific external directory needs no permission
+      // on any Android version and FileProvider can still share it for
+      // OpenFilex to hand off to viewer apps.
+      final Directory? appExternalDir = await getExternalStorageDirectory();
+      final Directory baseDir = appExternalDir != null
+          ? Directory('${appExternalDir.path}/Download')
+          : await getApplicationDocumentsDirectory();
+      if (!await baseDir.exists()) {
+        await baseDir.create(recursive: true);
       }
-      return androidDownloads;
+      return baseDir;
     }
 
     if (Platform.isIOS) {
