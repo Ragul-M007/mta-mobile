@@ -315,33 +315,29 @@ class _ChatUITextFieldState extends State<ChatUITextField> {
       "Voice messages are only supported with android and ios platform",
     );
 
-    var status = await Permission.microphone.status;
-    if (status.isDenied) {
-      await Permission.microphone.request();
-    } else if (status.isPermanentlyDenied) {
+    final status = await Permission.microphone.request();
+    if (status.isPermanentlyDenied) {
       AppUtils.showToastError(
           "Please enable Microphone from App permission Settings");
-    } else {
-      await Permission.microphone.request();
+      return;
     }
+    if (!status.isGranted) return;
 
-    if (status.isGranted) {
-      if (!isRecording.value) {
-        if (Platform.isIOS) {
-          var uniqueRecordId = Uuid().v1();
-          await controller?.record(
-              path: "${Strings.basePath}/$uniqueRecordId-mta.m4a");
-        } else {
-          await controller?.record();
-        }
-        isRecording.value = true;
+    if (!isRecording.value) {
+      if (Platform.isIOS) {
+        var uniqueRecordId = Uuid().v1();
+        await controller?.record(
+            path: "${Strings.basePath}/$uniqueRecordId-mta.m4a");
       } else {
-        final path = await controller?.stop();
-
-        print("pathhh $path");
-        isRecording.value = false;
-        widget.onRecordingComplete(path);
+        await controller?.record();
       }
+      isRecording.value = true;
+    } else {
+      final path = await controller?.stop();
+
+      print("pathhh $path");
+      isRecording.value = false;
+      widget.onRecordingComplete(path);
     }
   }
 

@@ -1542,15 +1542,17 @@ class _RepliesContentState extends State<RepliesContent>
   recordComments() async {
     var dir = await ExternalPath.getExternalStoragePublicDirectory(
         ExternalPath.DIRECTORY_DOWNLOADS);
-    var status = await Permission.microphone.status;
-    if (!status.isGranted) {
-      getPermission();
-    } else {
-      await _audioRecorder.start(
-        const RecordConfig(),
-        path: dir! + "/MTARecordedAudio.wav",
-      );
+    final status = await Permission.microphone.request();
+    if (status.isPermanentlyDenied) {
+      AppUtils.showToastError(
+          "Please enable Microphone from App permission Settings");
+      return;
     }
+    if (!status.isGranted) return;
+    await _audioRecorder.start(
+      const RecordConfig(),
+      path: dir! + "/MTARecordedAudio.wav",
+    );
   }
 
   stopRecord() async {
@@ -1893,13 +1895,9 @@ Future<void> _showMyDialog(context, imgurl) async {
 }
 
 void getPermission() async {
-  var status = await Permission.microphone.status;
-  if (status.isDenied) {
-    await Permission.microphone.request();
-  } else if (status.isPermanentlyDenied) {
+  final status = await Permission.microphone.request();
+  if (status.isPermanentlyDenied) {
     AppUtils.showToastError(
         "Please enable Microphone from App permission Settings");
-  } else {
-    await Permission.microphone.request();
   }
 }

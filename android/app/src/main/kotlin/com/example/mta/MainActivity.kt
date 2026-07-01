@@ -12,7 +12,9 @@ class MainActivity: FlutterActivity() {
     override fun onStop() {
         super.onStop()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            revokeSelfPermissionsOnKill(listOf(Manifest.permission.CAMERA))
+            revokeSelfPermissionsOnKill(
+                listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+            )
         }
     }
 }

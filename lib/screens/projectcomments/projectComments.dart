@@ -1041,16 +1041,16 @@ class _CommentsContentState extends State<CommentsContent>
                 child: GestureDetector(
                   onLongPressStart: (details) {
                     setState(() async {
-                      var status = await Permission.microphone.status;
-                      if (status.isGranted) {
-                        startRecording = true;
-                        startOrStop();
-                        recordComments();
-                      } else {
+                      final status = await Permission.microphone.request();
+                      if (status.isPermanentlyDenied) {
                         AppUtils.showToastError(
-                            "Please allow the Microphone Permission");
-                        getPermission();
+                            "Please enable Microphone from App permission Settings");
+                        return;
                       }
+                      if (!status.isGranted) return;
+                      startRecording = true;
+                      startOrStop();
+                      recordComments();
                     });
                   },
                   onLongPressEnd: (details) async {
@@ -1286,18 +1286,20 @@ class _CommentsContentState extends State<CommentsContent>
         path = path.substring(0, path.length - 1);
       }
     }
-    var status = await Permission.microphone.status;
-    if (!status.isGranted) {
-      getPermission();
-    } else {
-      String filePath = path + '/' + "${uniqueRecordId}_mta12" + '.m4a';
-
-      print("tteyyyy $filePath");
-      await _audioRecorder.start(
-        const RecordConfig(),
-        path: filePath,
-      );
+    final status = await Permission.microphone.request();
+    if (status.isPermanentlyDenied) {
+      AppUtils.showToastError(
+          "Please enable Microphone from App permission Settings");
+      return;
     }
+    if (!status.isGranted) return;
+    String filePath = path + '/' + "${uniqueRecordId}_mta12" + '.m4a';
+
+    print("tteyyyy $filePath");
+    await _audioRecorder.start(
+      const RecordConfig(),
+      path: filePath,
+    );
   }
 
   Future<void> stopRecord() async {
@@ -1773,14 +1775,9 @@ Future<void> _showMyDialog(context, imgurl) async {
 }
 
 void getPermission() async {
-  var status = await Permission.microphone.status;
-  print("srtatus $status");
-  if (status.isDenied) {
-    await Permission.microphone.request();
-  } else if (status.isPermanentlyDenied) {
+  final status = await Permission.microphone.request();
+  if (status.isPermanentlyDenied) {
     AppUtils.showToastError(
         "Please enable Microphone from App permission Settings");
-  } else {
-    await Permission.microphone.request();
   }
 }
