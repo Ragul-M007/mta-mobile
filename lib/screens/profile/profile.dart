@@ -18,6 +18,7 @@ import 'package:mta/utilities/constant.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:io' as Io;
 
@@ -1304,6 +1305,13 @@ class _ProfileContentState extends State<ProfileContent> {
     if (_cameraInProgress) return;
     _cameraInProgress = true;
     try {
+      final status = await Permission.camera.request();
+      if (status.isPermanentlyDenied) {
+        AppUtils.showToastError(
+            "Please enable Camera from App permission Settings");
+        return;
+      }
+      if (!status.isGranted) return;
       final pickedFile = await _picker.pickImage(source: source);
       if (pickedFile == null) return;
       final bytes = await Io.File(pickedFile.path).readAsBytes();
