@@ -52,7 +52,7 @@ android {
         applicationId 'com.multicorp.mtaarch'
         minSdkVersion 26
         targetSdkVersion 36
-        versionCode 4
+        versionCode 5
         versionName flutterVersionName
         multiDexEnabled true
     }
