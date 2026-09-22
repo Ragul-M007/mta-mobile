@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/profile/profile_bloc.dart';
 import 'package:mta/utilities/app_drawer.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -170,6 +172,9 @@ class _ProfileContentState extends State<ProfileContent> {
 
   MemoryImage? _imageAsyncWidget;
 
+  late final ProfileBloc _bloc;
+  late final StreamSubscription<ProfileState> _blocSub;
+
   @override
   void initState() {
     setState(() {
@@ -177,9 +182,88 @@ class _ProfileContentState extends State<ProfileContent> {
       userType.text = "";
     });
     super.initState();
+    _bloc = ProfileBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     // WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
     getProfile();
     fillData();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(ProfileState state) {
+    if (!mounted) return;
+    if (state is ProfileLoading) {
+      AppUtils.showprogress();
+    } else if (state is ProfileDataLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        loader = false;
+        print("response----> ${state.data}");
+        _profileData = state.data;
+        mobileField.text = _profileData[0].mobileNo!;
+        userType.text = _profileData[0].role!;
+        if (Strings.roleId == 7) {
+          address = _profileData[0].city! + " , " + _profileData[0].state!;
+        } else {
+          address = _profileData[0].area! +
+              " , " +
+              _profileData[0].city! +
+              " , " +
+              _profileData[0].state!;
+        }
+
+        editNumber.text = _profileData[0].mobileNo!;
+        editName.text = _profileData[0].name!;
+        editAddress.text = _profileData[0].area!;
+        editState.text = _profileData[0].state!;
+        editCity.text = _profileData[0].city!;
+        if (_profileData[0].userImg != null) {
+          Strings.profilePic = _profileData[0].userImg!;
+        } else {
+          Strings.profilePic = "";
+        }
+        print("check");
+      });
+    } else if (state is ProfileErrorDismiss) {
+      AppUtils.dismissprogress();
+    } else if (state is ProfileFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is ProfileNavToLogin) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess(state.message);
+      Navigator.popAndPushNamed(context, "/login");
+    } else if (state is ProfileEditSuccess) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess(state.message);
+      if (state.removeImage == true) {
+        print("removeImage");
+        _bloc.add(const ProfileProPicRemoveRequested());
+      } else {
+        Navigator.of(context).pop();
+        getProfile();
+      }
+    } else if (state is ProfilePinSuccess) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess(state.message);
+      Navigator.of(context).pop();
+      // Navigator.popAndPushNamed(context, "/verifypin");
+      oneT.text = '';
+      twoT.text = '';
+      threeT.text = '';
+      fourT.text = '';
+    } else if (state is ProfileProPicSuccess) {
+      AppUtils.dismissprogress();
+      Navigator.of(context).pop();
+      getProfile();
+      AppUtils.showToast("Profile picture removed Successfully.");
+    }
   }
 
   @override
@@ -472,7 +556,8 @@ class _ProfileContentState extends State<ProfileContent> {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          removeUser(context);
+                                          _bloc.add(
+                                              const ProfileUserDeleteRequested());
                                         },
                                         child: new Text(
                                           'Yes',
@@ -528,66 +613,8 @@ class _ProfileContentState extends State<ProfileContent> {
     fourT.clear();
   }
 
-  static void removeUser(ctx) {
-    final api = Provider.of<ApiService>(ctx!, listen: false);
-    AppUtils.getIntPreferences('userId').then((value) {
-      if (value != null) {
-        api.deleteUser(value).then((response) {
-          if (response.status!) {
-            AppUtils.showToastSuccess(response.message!);
-            AppUtils.clearAllPreferences();
-            Strings.isLogin = false;
-            Navigator.popAndPushNamed(ctx!, "/login");
-          } else {
-            AppUtils.showToastError(response.message!);
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print(onError.toString());
-        });
-      }
-    });
-  }
-
   getProfile() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.profile(Strings.userID!).then((response) {
-      AppUtils.dismissprogress();
-      print('profileResponse status ${response.data}');
-
-      setState(() {
-        loader = false;
-        print("response----> ${response.data}");
-        _profileData = response.data!;
-        mobileField.text = _profileData[0].mobileNo!;
-        userType.text = _profileData[0].role!;
-        if (Strings.roleId == 7) {
-          address = _profileData[0].city! + " , " + _profileData[0].state!;
-        } else {
-          address = _profileData[0].area! +
-              " , " +
-              _profileData[0].city! +
-              " , " +
-              _profileData[0].state!;
-        }
-
-        editNumber.text = _profileData[0].mobileNo!;
-        editName.text = _profileData[0].name!;
-        editAddress.text = _profileData[0].area!;
-        editState.text = _profileData[0].state!;
-        editCity.text = _profileData[0].city!;
-        if (_profileData[0].userImg != null) {
-          Strings.profilePic = _profileData[0].userImg!;
-        } else {
-          Strings.profilePic = "";
-        }
-        print("check");
-      });
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(const ProfileRequested());
   }
 
   Widget _loader() {
@@ -916,29 +943,13 @@ class _ProfileContentState extends State<ProfileContent> {
       AppUtils.showToastError(
           "New Password & Confirm Password are not matching");
     } else {
-      AppUtils.showprogress();
-      final api = Provider.of<ApiService>(context, listen: false);
       ChangePassReq request = ChangePassReq();
       request.emailId = _profileData[0].email;
       request.newPassword = changePassNew.text;
       request.password = changePassOld.text;
       var dat = jsonEncode(request);
       print(dat);
-      api.changePass(request).then((response) {
-        AppUtils.dismissprogress();
-        print('Response status ${response.toJson()}');
-        if (response.status!) {
-          AppUtils.showToastSuccess(response.message!);
-          AppUtils.clearAllPreferences();
-          Strings.isLogin = false;
-          Navigator.popAndPushNamed(context, "/login");
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+      _bloc.add(ProfilePasswordSubmitted(request));
     }
   }
 
@@ -1232,8 +1243,6 @@ class _ProfileContentState extends State<ProfileContent> {
     } else if (editAddress.text.trim() == "") {
       AppUtils.showToastError("Please enter your Address");
     } else {
-      AppUtils.showprogress();
-      final api = Provider.of<ApiService>(context, listen: false);
       EditProfileReq request = EditProfileReq();
       request.name = editName.text;
       request.mobileNo = editNumber.text;
@@ -1253,26 +1262,7 @@ class _ProfileContentState extends State<ProfileContent> {
       var dat = jsonEncode(request);
 
       print(dat);
-      api.editProfile(Strings.userID!, request).then((response) {
-        AppUtils.dismissprogress();
-        print('Response status ${response.toJson()}');
-        if (response.status!) {
-          AppUtils.showToastSuccess(response.message!);
-
-          if (removeImage == true) {
-            print("removeImage");
-            removeProPic();
-          } else {
-            Navigator.of(ctxt).pop();
-            getProfile();
-          }
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+      _bloc.add(ProfileEditSubmitted(request, removeImage));
     }
   }
 
@@ -1341,34 +1331,10 @@ class _ProfileContentState extends State<ProfileContent> {
   }
 
   resetPin(contextpin) {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
     SetPinReq setpinreq = SetPinReq();
     setpinreq.loginpin = codeVerifyField;
     codeVerifyField = "";
-    AppUtils.getIntPreferences('userId').then((value) {
-      if (value != null) {
-        api.setPin(value, setpinreq).then((response) {
-          AppUtils.dismissprogress();
-
-          if (response.status!) {
-            AppUtils.showToastSuccess(response.message!);
-            AppUtils.savePreferences("easyAccess", "Y");
-            Navigator.of(contextpin).pop();
-            // Navigator.popAndPushNamed(context, "/verifypin");
-            oneT.text = '';
-            twoT.text = '';
-            threeT.text = '';
-            fourT.text = '';
-          } else {
-            AppUtils.showToastError(response.message!);
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print(onError.toString());
-        });
-      }
-    });
+    _bloc.add(ProfilePinSubmitted(setpinreq));
   }
 
   removeProPic() {

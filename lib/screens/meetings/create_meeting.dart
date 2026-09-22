@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dropdown_button2/dropdown_button2.dart' as db2;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mta/blocs/meetings/create_meeting_bloc.dart';
 import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -50,6 +52,8 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   final dateController = TextEditingController();
   final timeController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late final CreateMeetingBloc _bloc;
+  late final StreamSubscription<CreateMeetingState> _blocSub;
 
   FocusNode teamFocusNode = FocusNode();
   FocusNode projectFocusNode = FocusNode();
@@ -93,8 +97,32 @@ class _CreateMeetingContentState extends State<CreateMeetingContent> {
   void initState() {
     super.initState();
 
-    getIntegratedMeetings();
+    _bloc = CreateMeetingBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    _bloc.add(const CreateMeetingDataRequested());
     print(">>>>token:${Strings.authToken}");
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Performs the UI side effects for [CreateMeetingBloc] states — sets the
+  /// form's lists as the load chain completes (only the projects step calls
+  /// setState, mirroring getIntegratedMeetings()/getTeams()/getProjects()).
+  void _onBlocState(CreateMeetingState state) {
+    if (state is CreateMeetingIntegratedLoaded) {
+      integratedMeetingsList = state.integrated;
+    } else if (state is CreateMeetingTeamsLoaded) {
+      teamLists = state.teams;
+    } else if (state is CreateMeetingProjectsLoaded) {
+      setState(() {
+        projectsList = state.projects;
+      });
+    }
   }
 
   void _scrollToBottom() {

@@ -1,7 +1,8 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/chat/chat_groups_bloc.dart';
 import 'package:mta/models/Chat/GroupChatListRes.dart';
 import 'package:mta/models/Chat/GroupCreationReq.dart';
 import 'package:mta/network/ApiService.dart';
@@ -9,7 +10,6 @@ import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/utilities/drawables.dart';
 import 'package:mta/utilities/strings.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:dio/dio.dart';
 
@@ -33,7 +33,8 @@ class ChatGroups extends StatefulWidget {
 class _ChatGroupsState extends State<ChatGroups> {
   WebViewController controller = WebViewController();
 
-  IO.Socket? _socket;
+  late final ChatGroupsBloc _bloc;
+  late final StreamSubscription<ChatGroupsState> _blocSub;
 
   BuildContext? ctx;
   bool loading = true;
@@ -53,6 +54,8 @@ class _ChatGroupsState extends State<ChatGroups> {
 
   String _errText = "";
   void initState() {
+    _bloc = ChatGroupsBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     super.initState();
     print(">>>kkkkk");
     connectSocket();
@@ -61,82 +64,63 @@ class _ChatGroupsState extends State<ChatGroups> {
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
   }
 
-  fetchChatCreateAcess() {
-    final api = Provider.of<ApiService>(context, listen: false);
+  void _onBlocState(ChatGroupsState state) {
+    if (!mounted) return;
+    if (state is ChatGroupsAccessLoaded) {
+      setState(() {
+        Strings.groupCreationAccess = state.groupCreateAccess;
+      });
+    } else if (state is ChatGroupsLoaded) {
+      setState(() {
+        groupList.clear();
+        for (var item in state.items) {
+          groupList.add(item);
+        }
+        loading = false;
+      });
+    } else if (state is ChatGroupsLoadedNoMatch) {
+      setState(() {
+        loading = false;
+      });
+    } else if (state is ChatGroupsCreateLoading) {
+      AppUtils.showprogress();
+    } else if (state is ChatGroupsCreateOk) {
+      AppUtils.dismissprogress();
+      _groupNameFieldController.clear();
+      _groupDescriptionFieldController.clear();
+      Navigator.of(context).pop();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddRemoveUsersIntoGroups(
+            groupId: 0,
+            teamId: widget.teamId,
+            projectId: widget.projectId,
+            fromCreateGroup: true,
+            groupData: state.req,
+          ),
+        ),
+      ).whenComplete(() => connectSocket());
+    } else if (state is ChatGroupsCreateFailed) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is ChatGroupsCreateError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    }
+  }
 
-    api.getAccessDetails().then((response) {
-      if (response.status!) {
-        setState(() {
-          Strings.groupCreationAccess = response.data!.groupCreateAccess;
-        });
-      }
-    }).catchError((onError) {
-      print(onError.toString());
-      //getProjects();
-    });
+  fetchChatCreateAcess() {
+    _bloc.add(const ChatGroupsAccessRequested());
   }
 
   connectSocket() {
-    print("teamid ${widget.teamId}  projectid ${widget.projectId}");
-    print("trying to connect socket");
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-      'forceNew': false,
-      'query': {
-        'token': Strings.authToken,
-        "group_type": widget.projectId == null ? "team" : "project",
-        "project_group_id": widget.projectId,
-        "team_id": widget.teamId
-      }
-    });
-    _socket?.connect();
-    _socket?.onConnect((_) {
-      print('connect');
-    });
-    _socket?.on("connect", (_) {
-      print('Connected');
-      print("Calling function");
-      getChats();
-      //recieveMessages();
-
-      //_socket?.disconnect();
-    });
-  }
-
-  // recieveMessages() {
-  //   _socket?.on("message-received", (_data) {
-  //     getChats();
-  //   });
-  // }
-
-  getChats() {
-    _socket?.on("all-groups", (_data) {
-      print("dataa from all groups $_data");
-      if (mounted) {
-        setState(() {
-          var formattedRes = GroupListRes.fromJson(_data);
-
-          if (formattedRes.userId == Strings.userID &&
-              ((formattedRes.projectId != null &&
-                      formattedRes.projectId == widget.projectId) ||
-                  (formattedRes.teamId != null &&
-                      formattedRes.teamId == widget.teamId))) {
-            groupList.clear();
-
-            for (var item in formattedRes.groupDetails ?? []) {
-              groupList.add(item);
-            }
-          } else {
-            print("else");
-          }
-          loading = false;
-        });
-      }
-    });
+    _bloc.add(ChatGroupsConnect(widget.projectId, widget.teamId));
   }
 
   String getFileName(String _path) {
@@ -145,9 +129,6 @@ class _ChatGroupsState extends State<ChatGroups> {
 
   createGroup() {
     print("dataaa ${widget.teamId}");
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    print("api--->  {$api}");
     GroupCreationReq req = GroupCreationReq();
     req.groupCreatedBy = Strings.userID;
     req.groupImage = null;
@@ -157,32 +138,7 @@ class _ChatGroupsState extends State<ChatGroups> {
     req.projectId = widget.projectId;
     req.groupType = widget.projectId == null ? "team" : "project";
 
-    api.checkGroupName(_groupNameFieldController.text).then((response) {
-      AppUtils.dismissprogress();
-      if (response.status!) {
-        _groupNameFieldController.clear();
-        _groupDescriptionFieldController.clear();
-        Navigator.of(context).pop();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddRemoveUsersIntoGroups(
-              groupId: 0,
-              teamId: widget.teamId,
-              projectId: widget.projectId,
-              fromCreateGroup: true,
-              groupData: req,
-            ),
-          ),
-        ).whenComplete(() => connectSocket());
-      } else {
-        AppUtils.showToastError(response.message ?? "Error");
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError(onError.toString());
-      print(onError.toString());
-    });
+    _bloc.add(ChatGroupsCreateRequested(req, _groupNameFieldController.text));
   }
 
   Widget build(BuildContext context) {

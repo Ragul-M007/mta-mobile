@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
-import 'package:mta/models/FectchProjectDocReq.dart';
+import 'package:mta/blocs/documents/viewdoclist_bloc.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/FetchCategoryDocRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -77,28 +79,62 @@ class _ViewDocContentState extends State<ViewDocContent> {
 
   String _errText = "";
 
+  late final ViewDocListBloc _bloc;
+  late final StreamSubscription<ViewDocListState> _blocSub;
+
   void initState() {
     super.initState();
+    _bloc = ViewDocListBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     if (Strings.fromNotificationDocuments) {
       updateNotification(Strings.notificationID);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => getDocs());
   }
 
-  updateNotification(notificationId) {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.updateNotificationStatus(notificationId).then((response) {
-      if (response.status!) {
-        // AppUtils.showToastError("Unable to update status");
-      } else {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(ViewDocListState state) {
+    if (!mounted) return;
+    if (state is ViewDocLoading) {
+      AppUtils.showprogress();
+    } else if (state is ViewDocCategoryLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _categorydocsList = state.data;
+        print("docname ${_categorydocsList[0].name}");
+      });
+    } else if (state is ViewDocProjectLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _docsList = state.data;
+      });
+    } else if (state is ViewDocEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _errText = "No Documents found !";
+      });
+    } else if (state is ViewDocErrorDismiss) {
+      AppUtils.dismissprogress();
+    } else if (state is ViewDocCommentsNav) {
+      AppUtils.dismissprogress();
+      Navigator.pushNamed(context, '/comments');
+    } else if (state is ViewDocNotifFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is ViewDocNotifError) {
       AppUtils.dismissprogress();
       AppUtils.showToastError("Unable to connect to server");
-      print(onError.toString());
-    });
+    }
+  }
+
+  updateNotification(notificationId) {
+    _bloc.add(ViewDocNotificationUpdate(notificationId));
   }
 
   webcheck() {
@@ -855,70 +891,7 @@ class _ViewDocContentState extends State<ViewDocContent> {
   }
 
   getDocs() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-
-    if (Strings.category == true) {
-      print("Category");
-      AppUtils.getIntPreferences('userId').then((value) {
-        api
-            .getCategoryDoc(Strings.selectedCategory[0].categoryId!,
-                Strings.selectedProject[0].projectId!, value)
-            .then((response) {
-          AppUtils.dismissprogress();
-          print('DocsResponse status ${response.toJson()}');
-          if (response.status!) {
-            setState(() {
-              _categorydocsList = response.data!;
-              print("docname ${_categorydocsList[0].name}");
-            });
-          } else {
-            setState(() {
-              _errText = "No Documents found !";
-            });
-            // if (response.message != null) {
-            //   AppUtils.showToastError(response.message);
-            // }
-            // else {
-            //   AppUtils.showToastError("No Documents found !");
-            // }
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print(onError.toString());
-        });
-      });
-    } else {
-      AppUtils.getIntPreferences('userId').then((value) {
-        FetchProjectDocReq fetchProjectDocReq = FetchProjectDocReq();
-        fetchProjectDocReq.projectId = Strings.selectedProject[0].projectId;
-        api
-            .getProjectDoc(fetchProjectDocReq.projectId!, value)
-            .then((response) {
-          AppUtils.dismissprogress();
-          print('DocsResponse status ${response.toJson()}');
-          if (response.status!) {
-            setState(() {
-              _docsList = response.data!;
-            });
-          } else {
-            setState(() {
-              _errText = "No Documents found !";
-              //  _errText = response.message;
-            });
-            // if (response.message != null) {
-            //   AppUtils.showToastError(response.message);
-            // }
-            // else {
-            //   AppUtils.showToastError("No Documents found !");
-            // }
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print(onError.toString());
-        });
-      });
-    }
+    _bloc.add(const ViewDocsRequested());
   }
 
   String getFileExt(String fileName) {
@@ -1057,38 +1030,6 @@ class _ViewDocContentState extends State<ViewDocContent> {
   }
 
   getUserCats() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
-      if (response.status!) {
-        setState(() {
-          Strings.users = response.data!;
-        });
-        final api = Provider.of<ApiService>(context, listen: false);
-        print("PRo id ${Strings.selectedProject[0].projectId!}");
-        api.fetchCats(Strings.selectedProject[0].projectId!).then((response) {
-          AppUtils.dismissprogress();
-          if (response.status!) {
-            setState(() {
-              Strings.categories = response.data!;
-              Navigator.pushNamed(context, '/comments');
-            });
-          } else {
-            Navigator.pushNamed(context, '/comments');
-            print('No categories');
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print("Catched $onError");
-        });
-      } else {
-        Navigator.pushNamed(context, '/comments');
-        AppUtils.dismissprogress();
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(const ViewDocUserCatsRequested());
   }
 }

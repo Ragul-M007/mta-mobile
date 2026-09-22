@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:mta/blocs/meetings/meeting_create_bloc.dart';
 import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/AppBarWidget.dart';
@@ -42,11 +42,46 @@ class _LocationSelectionState extends State<LocationSelection> {
   bool _isLoading = false;
 
   FocusNode searchFocus = FocusNode();
+  late final MeetingCreateBloc _bloc;
+  late final StreamSubscription<MeetingCreateState> _blocSub;
 
   @override
   void initState() {
     super.initState();
+    _bloc = MeetingCreateBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     _getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Performs the UI side effects for [MeetingCreateBloc] states — the loading
+  /// flag/spinner, toasts, error snackbar and the triple pop submitData() did.
+  void _onBlocState(MeetingCreateState state) {
+    if (state is MeetingCreateLoading) {
+      setState(() => _isLoading = true);
+      EasyLoading.show();
+    } else if (state is MeetingCreated) {
+      setState(() => _isLoading = false);
+      EasyLoading.dismiss();
+      AppUtils.showToastSuccess("Meeting created successfully!");
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pop(context);
+    } else if (state is MeetingCreateFailed) {
+      setState(() => _isLoading = false);
+      EasyLoading.dismiss();
+      AppUtils.showErrorSnackBar(context, state.message);
+    } else if (state is MeetingCreateError) {
+      setState(() => _isLoading = false);
+      EasyLoading.dismiss();
+      AppUtils.showToastError("Something went wrong!");
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -210,27 +245,6 @@ class _LocationSelectionState extends State<LocationSelection> {
     } else {
       widget.addMeetingData.location = 'Location Not Mentioned!';
     }
-    final api = Provider.of<ApiService>(context, listen: false);
-
-    setState(() => _isLoading = true);
-    EasyLoading.show();
-    print(">AddMeeting:${jsonEncode(widget.addMeetingData)}");
-    api.createMeeting(widget.addMeetingData).then((response) {
-      setState(() => _isLoading = false);
-      EasyLoading.dismiss();
-      if (response.status!) {
-        AppUtils.showToastSuccess("Meeting created successfully!");
-
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context);
-      } else {
-        AppUtils.showErrorSnackBar(context, response.message!);
-      }
-    }).catchError((onError) {
-      setState(() => _isLoading = false);
-      EasyLoading.dismiss();
-      AppUtils.showToastError("Something went wrong!");
-    });
+    _bloc.add(MeetingSubmitted(widget.addMeetingData));
   }
 }

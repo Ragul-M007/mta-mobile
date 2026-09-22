@@ -16,6 +16,11 @@ import 'package:mta/utilities/validators.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mta/models/NewsRes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mta/blocs/auth/login/login_bloc.dart';
+import 'package:mta/blocs/auth/signup/signup_bloc.dart';
+import 'package:mta/blocs/auth/forgot_password/forgot_password_bloc.dart';
+import 'package:mta/blocs/auth/news/news_cubit.dart';
 
 bool isVerifyScreen = false;
 String? codeVerifyField;
@@ -135,19 +140,157 @@ class _LoginContentState extends State<LoginContent>
   TabController? _tabController;
 
   List<NewsResData>? _newsLists;
+  late final LoginBloc _loginBloc;
+  late final SignupBloc _signupBloc;
+  late final ForgotPasswordBloc _forgotBloc;
+  late final NewsCubit _newsCubit;
 
   @override
   void initState() {
     super.initState();
+    _loginBloc = LoginBloc(ApiService.create());
+    _signupBloc = SignupBloc(ApiService.create());
+    _forgotBloc = ForgotPasswordBloc(ApiService.create());
+    _newsCubit = NewsCubit(ApiService.create());
     certifcatecheck();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _newsCubit.fetch());
     setState(() {
       _emailIdController.text = "";
       _passwordController.text = "";
       // _emailIdController.text = "superadmin@mta.com";
       // _passwordController.text = "test12";
     });
+  }
+
+  @override
+  void dispose() {
+    _loginBloc.close();
+    _signupBloc.close();
+    _forgotBloc.close();
+    _newsCubit.close();
+    super.dispose();
+  }
+
+  void _loginListener(BuildContext context, LoginState state) {
+    if (state is LoginLoading) {
+      AppUtils.showprogress();
+    } else if (state is LoginValidationError) {
+      if (state.top) {
+        AppUtils.showToastErrorTop(state.message);
+      } else {
+        AppUtils.showToastError(state.message);
+      }
+    } else if (state is LoginError) {
+      AppUtils.dismissprogress();
+    } else if (state is LoginFailed) {
+      AppUtils.dismissprogress();
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(
+            "Login Failed",
+            style: TextStyle(color: Colors.red),
+          ),
+          content: Text(state.message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else if (state is LoginSuccess) {
+      AppUtils.dismissprogress();
+      Navigator.pushNamed(context, "/setpin");
+    }
+  }
+
+  void _signupListener(BuildContext context, SignupState state) {
+    if (state is SignupLoading) {
+      AppUtils.showprogress();
+    } else if (state is SignupFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is SignupError) {
+      AppUtils.dismissprogress();
+    } else if (state is SignupSuccess) {
+      AppUtils.dismissprogress();
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(
+            "Success",
+            style: TextStyle(color: Colors.green),
+          ),
+          content: Text(
+              "User created successfully! Please check your email for the credentials."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                editEmail.text = "";
+                editName.text = "";
+                editNumber.text = "";
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _forgotListener(BuildContext context, ForgotPasswordState state) {
+    if (state is ForgotLoading) {
+      AppUtils.showprogress();
+    } else if (state is ForgotFailure) {
+      AppUtils.dismissprogress();
+      if (state.top) {
+        AppUtils.showToastErrorTop(state.message);
+      } else {
+        AppUtils.showToastError(state.message);
+      }
+    } else if (state is ForgotError) {
+      AppUtils.dismissprogress();
+    } else if (state is ForgotOtpSent) {
+      AppUtils.dismissprogress();
+      Navigator.of(context).pop();
+      forgotPassEmailID.text = '';
+      _otpVerify();
+    } else if (state is ForgotOtpVerified) {
+      AppUtils.dismissprogress();
+      Navigator.of(context).pop();
+      oneT.text = '';
+      twoT.text = '';
+      threeT.text = '';
+      fourT.text = '';
+      fiveT.text = '';
+      _changePass();
+    } else if (state is PasswordChanged) {
+      AppUtils.dismissprogress();
+      changePassNew.text = "";
+      changePassConfirm.text = "";
+      Navigator.of(context).pop();
+      AppUtils.showToastSuccess(state.message);
+    }
+  }
+
+  void _newsListener(BuildContext context, NewsState state) {
+    if (state is NewsLoading) {
+      AppUtils.showprogress();
+    } else if (state is NewsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _newsLists = state.news;
+      });
+    } else if (state is NewsError) {
+      AppUtils.dismissprogress();
+    }
   }
 
   signin() {
@@ -255,7 +398,18 @@ class _LoginContentState extends State<LoginContent>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<LoginBloc, LoginState>(
+            bloc: _loginBloc, listener: _loginListener),
+        BlocListener<SignupBloc, SignupState>(
+            bloc: _signupBloc, listener: _signupListener),
+        BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
+            bloc: _forgotBloc, listener: _forgotListener),
+        BlocListener<NewsCubit, NewsState>(
+            bloc: _newsCubit, listener: _newsListener),
+      ],
+      child: Stack(
       children: <Widget>[
         Container(
           width: double.infinity,
@@ -375,7 +529,9 @@ class _LoginContentState extends State<LoginContent>
                     ),
                     InkWell(
                       onTap: () {
-                        _login();
+                        FocusScope.of(context).unfocus();
+                        _loginBloc.add(LoginSubmitted(
+                            _emailIdController.text, _passwordController.text));
                       },
                       child: Container(
                         child: Center(
@@ -451,7 +607,7 @@ class _LoginContentState extends State<LoginContent>
           child: tabbarwidget(),
         )
       ],
-    );
+    ));
   }
 
   Widget tabbarwidget() {
@@ -922,7 +1078,7 @@ class _LoginContentState extends State<LoginContent>
                         if (codeVerifyField!.length < 5) {
                           AppUtils.showToastError("Please Enter code");
                         } else {
-                          otpVerifyCall(contextResetPin);
+                          _forgotBloc.add(ForgotOtpSubmitted(codeVerifyField!));
                         }
                       },
                       child: Container(
@@ -1105,7 +1261,19 @@ class _LoginContentState extends State<LoginContent>
                     ),
                     InkWell(
                       onTap: () {
-                        setNewPass(ctxd);
+                        if (changePassNew.text == '') {
+                          AppUtils.showToastErrorTop("Please Enter Password");
+                        } else if (changePassConfirm.text == '') {
+                          AppUtils.showToastErrorTop(
+                              "Please Enter Confirm Password");
+                        } else if (changePassNew.text !=
+                            changePassConfirm.text) {
+                          AppUtils.showToastErrorTop(
+                              "Password & Confirm Password are not same");
+                        } else {
+                          _forgotBloc.add(
+                              NewPasswordSubmitted(changePassNew.text));
+                        }
                       },
                       child: Container(
                         child: Center(
@@ -1186,7 +1354,14 @@ class _LoginContentState extends State<LoginContent>
                     ),
                     InkWell(
                       onTap: () {
-                        _generateOtp(context);
+                        if (forgotPassEmailID.text == "" ||
+                            forgotPassEmailID.text.isEmpty) {
+                          AppUtils.showToastErrorTop(
+                              "Please enter your registered Email Id");
+                        } else {
+                          _forgotBloc.add(
+                              ForgotOtpRequested(forgotPassEmailID.text));
+                        }
                       },
                       child: Container(
                         child: Center(
@@ -1339,7 +1514,27 @@ class _LoginContentState extends State<LoginContent>
 
                     InkWell(
                       onTap: () {
-                        _signupRequest(context);
+                        final bool emailValid = RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(editEmail.text);
+                        if (editName.text == "" || editName.text.isEmpty) {
+                          AppUtils.showToastErrorTop("Please enter your Name");
+                        } else if (editNumber.text == "" ||
+                            editNumber.text.isEmpty ||
+                            editNumber.text.length != 10) {
+                          AppUtils.showToastErrorTop(
+                              "Please enter valid Phone number");
+                        } else if (editEmail.text == "" ||
+                            editEmail.text.isEmpty) {
+                          AppUtils.showToastErrorTop(
+                              "Please enter your Email Id");
+                        } else if (!emailValid) {
+                          AppUtils.showToastErrorTop(
+                              "Please enter valid Email Id");
+                        } else {
+                          _signupBloc.add(SignupSubmitted(editName.text,
+                              editNumber.text, editEmail.text));
+                        }
                       },
                       child: Container(
                         child: Center(

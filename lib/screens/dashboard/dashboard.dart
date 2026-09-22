@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/dashboard/dashboard_bloc.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/chat/ChatGroups.dart';
@@ -37,6 +39,9 @@ class _DashboardState extends State<Dashboard> {
   var dio = Dio();
 
   String _errText = "No Projects Found";
+  late final DashboardBloc _bloc;
+  late final StreamSubscription<DashboardState> _blocSub;
+
   void initState() {
     super.initState();
     if (Strings.roleId == 7) {
@@ -44,11 +49,42 @@ class _DashboardState extends State<Dashboard> {
     }
 
     super.initState();
+    _bloc = DashboardBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     getPermission();
     if (Strings.roleId != 7) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _bloc.add(const DashboardProjectsRequested()));
     }
     configureWebview();
+  }
+
+  /// Performs the UI side effects for [DashboardBloc] states — the spinner,
+  /// list / error-text updates and navigation the old getProjects() /
+  /// getUserCats() did inline.
+  void _onBlocState(DashboardState state) {
+    if (state is DashboardLoading) {
+      AppUtils.showprogress();
+    } else if (state is DashboardLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _projectLists = state.projects;
+      });
+    } else if (state is DashboardEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _errText = state.message;
+      });
+    } else if (state is DashboardLoadError) {
+      AppUtils.dismissprogress();
+    } else if (state is DashboardCommentsLoading) {
+      AppUtils.showprogress();
+    } else if (state is DashboardCommentsReady) {
+      AppUtils.dismissprogress();
+      Navigator.pushNamed(context, '/comments');
+    } else if (state is DashboardCommentsDismissed) {
+      AppUtils.dismissprogress();
+    }
   }
 
   configureWebview() {
@@ -72,6 +108,8 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
   }
 

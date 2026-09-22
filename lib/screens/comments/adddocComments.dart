@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/comments/adddoc_comments_bloc.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
@@ -76,6 +78,9 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
   var tagedCats = [];
   var tagedCatsId = [];
 
+  late final AddDocCommentsBloc _bloc;
+  late final StreamSubscription<AddDocCommentsState> _blocSub;
+
   // getUserCats() {
   //   final api = Provider.of<ApiService>(context, listen: false);
   //   api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
@@ -99,12 +104,50 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
   void initState() {
     super.initState();
+    _bloc = AddDocCommentsBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     if (Strings.fromReplies) {
       Strings.fromReplies = false;
       fromReplies = true;
     }
 
     // getUserCats();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(AddDocCommentsState state) {
+    if (!mounted) return;
+    if (state is AddDocCommentsLoading) {
+      AppUtils.showprogress();
+    } else if (state is AddDocCommentsSuccess) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess("Document uploaded successfully");
+
+      if (!Strings.documentUploadfromProject) {
+        if (fromReplies) {
+          Navigator.pushReplacementNamed(context, '/replies');
+        } else {
+          Navigator.pushReplacementNamed(context, '/comments');
+        }
+      } else {
+        if (fromReplies) {
+          Navigator.pushReplacementNamed(context, '/projectCommentReplies');
+        } else {
+          Navigator.pushReplacementNamed(context, '/projectComments');
+        }
+      }
+    } else if (state is AddDocCommentsFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is AddDocCommentsErrorDismiss) {
+      AppUtils.dismissprogress();
+    }
   }
 
 
@@ -400,8 +443,6 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
         docTitle.text == "null" || file64 == '') {
       AppUtils.showToastError("Please select Document");
     } else {
-      AppUtils.showprogress();
-      final api = Provider.of<ApiService>(context, listen: false);
       String extension;
       if (fileExt == 'png' ||
           fileExt == 'jpg' ||
@@ -458,42 +499,7 @@ class _AddDocContentCommentsState extends State<AddDocContentComments> {
 
       var data = jsonEncode(req);
       debugPrint(data);
-      api.uploadAudio(req).then((response) {
-        AppUtils.dismissprogress();
-        if (response.status!) {
-          // Navigator.popAndPushNamed(context, '/viewdoclist');
-          // print("Doc id--> ${Strings.docID}");
-
-          // //UpdateRights();
-
-          // setState(() {});
-          AppUtils.showToastSuccess("Document uploaded successfully");
-
-          if(!Strings.documentUploadfromProject)
-          {
-            if (fromReplies) {
-            Navigator.pushReplacementNamed(context, '/replies');
-              } else {
-                Navigator.pushReplacementNamed(context, '/comments');
-              }
-          }
-          else
-          {
-            if (fromReplies) {
-            Navigator.pushReplacementNamed(context, '/projectCommentReplies');
-              } else {
-                Navigator.pushReplacementNamed(context, '/projectComments');
-              }
-          }
-
-          
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+      _bloc.add(AddDocCommentsSubmitted(req));
     }
   }
 }

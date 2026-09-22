@@ -1,13 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/chat/chat_media_bloc.dart';
 import 'package:mta/models/Chat/MediaDetailsRes.dart';
 import 'package:mta/screens/chat/ChatGroups.dart';
 import 'package:mta/screens/chat/ChatScreen.dart';
 import 'package:mta/screens/chat/RemoveUsers.dart';
 import 'package:mta/screens/chat/AddUsers.dart';
 import 'package:mta/screens/splashscreen.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/Chat/GroupUsersRes.dart';
 import '../../network/ApiService.dart';
@@ -39,10 +40,15 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
   int? groupCreatedUserId = 0;
   String? basePath;
 
+  late final ChatMediaBloc _bloc;
+  late final StreamSubscription<ChatMediaState> _blocSub;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _bloc = ChatMediaBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     _tabController = new TabController(length: 4, vsync: this);
     findPath();
     getDocumentDetails("image");
@@ -52,65 +58,74 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
     getGroupData();
   }
 
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(ChatMediaState state) {
+    if (!mounted) return;
+    if (state is ChatMediaDocsLoaded) {
+      setState(() {
+        if (state.type == "image") {
+          _imageList = state.data;
+        } else if (state.type == "video") {
+          _videoList = state.data;
+        } else {
+          _docList = state.data;
+        }
+      });
+
+      AppUtils.dismissprogress();
+    } else if (state is ChatMediaUsersLoaded) {
+      setState(() {
+        chatUsers = state.data;
+      });
+    } else if (state is ChatMediaGroupDataLoaded) {
+      setState(() {
+        // chatUsers = response.data!;
+        groupCreatedUserId = state.groupCreatedBy;
+      });
+    } else if (state is ChatMediaErrorDismiss) {
+      AppUtils.dismissprogress();
+    } else if (state is ChatMediaDeleteLoading) {
+      AppUtils.showprogress();
+    } else if (state is ChatMediaDeleteSuccess) {
+      AppUtils.dismissprogress();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatGroups(
+                  teamId: widget.teamId,
+                  projectId: widget.projectId,
+                  fromTeamProjects: widget.projectId == null ? true : false,
+                )),
+      );
+      setState(() {
+        AppUtils.showToastSuccess(state.comment ?? "Deleted Successfully");
+      });
+    } else if (state is ChatMediaDeleteFailed) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Something went wrong!");
+    }
+  }
+
   findPath() async {
     basePath = Strings.basePath;
   }
 
   getDocumentDetails(type) {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getMediaDetails(widget.groupId, type).then((response) {
-      if (response.status!) {
-        setState(() {
-          if (type == "image") {
-            _imageList = response.data!;
-          } else if (type == "video") {
-            _videoList = response.data!;
-          } else {
-            _docList = response.data!;
-          }
-        });
-
-        AppUtils.dismissprogress();
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(ChatMediaDocsRequested(widget.groupId, type));
   }
 
   getUsersByGroupId() {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getChatUsers(widget.groupId).then((response) {
-      if (response.status!) {
-        setState(() {
-          chatUsers = response.data!;
-        });
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(ChatMediaUsersRequested(widget.groupId));
   }
 
   getGroupData() {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getGroupData(widget.groupId).then((response) {
-      if (response.status!) {
-        setState(() {
-          // chatUsers = response.data!;
-          groupCreatedUserId = response.data?.groupCreatedBy;
-        });
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(ChatMediaGroupDataRequested(widget.groupId));
   }
 
   @override
@@ -780,32 +795,6 @@ class _ChatMediaState extends State<ChatMedia> with TickerProviderStateMixin {
   }
 
   deleteGroup(context) {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.deleteGroup(widget.groupId).then((response) {
-      AppUtils.dismissprogress();
-      if (response.status!) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatGroups(
-                    teamId: widget.teamId,
-                    projectId: widget.projectId,
-                    fromTeamProjects: widget.projectId == null ? true : false,
-                  )),
-        );
-        setState(() {
-          AppUtils.showToastSuccess(response.comment ?? "Deleted Successfully");
-        });
-      } else {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError("Something went wrong!");
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError("Something went wrong!");
-      print(onError.toString());
-    });
+    _bloc.add(ChatMediaDeleteGroupRequested(widget.groupId));
   }
 }

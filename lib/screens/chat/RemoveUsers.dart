@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mta/ChatView/models/AddRemoveUserReq.dart';
+import 'package:mta/blocs/chat/remove_users_bloc.dart';
 import 'package:mta/models/Chat/GroupUsersRes.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/Chat/AddRemoveUserListRes.dart';
 import '../../network/ApiService.dart';
@@ -26,41 +27,44 @@ class _AddRemoveUsersIntoGroupsState extends State<RemoveUsersInGroup> {
  
   List<GroupChatUsersData> chatUsers = [];
 
+  late final RemoveUsersBloc _bloc;
+  late final StreamSubscription<RemoveUsersState> _blocSub;
 
-  
-
- getUsersByGroupId()
-    {
+  void _onBlocState(RemoveUsersState state) {
+    if (!mounted) return;
+    if (state is RemoveUsersLoading) {
       AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getChatUsers(widget.groupId).then((response) {
-      if (response.status!) {
-        setState(() {
-          chatUsers.clear();
-          chatUsers = response.data!;
-          for(int i = 0;i<chatUsers.length;i++)
-          {
-            if(chatUsers[i].groupCreateAccess == 1)
-            {
-                chatUsers[i].isSelected = true;
-            }
-            else
-            {
-               chatUsers[i].isSelected = false;
-            }
+    } else if (state is RemoveUsersLoaded) {
+      setState(() {
+        chatUsers.clear();
+        chatUsers = state.data;
+        for (int i = 0; i < chatUsers.length; i++) {
+          if (chatUsers[i].groupCreateAccess == 1) {
+            chatUsers[i].isSelected = true;
+          } else {
+            chatUsers[i].isSelected = false;
           }
-          AppUtils.dismissprogress();
-        });
-      } else {
-        AppUtils.showToastError("Unable to load users");
-        print('error');
-      }
-    }).catchError((onError) {
+        }
+        AppUtils.dismissprogress();
+      });
+    } else if (state is RemoveUsersLoadFailed) {
+      AppUtils.showToastError("Unable to load users");
+    } else if (state is RemoveUsersLoadError) {
       AppUtils.dismissprogress();
-      AppUtils.showToastError(onError.toString());
-      print(onError.toString());
-    });
+      AppUtils.showToastError(state.message);
+    } else if (state is RemoveUsersRemoveSuccess) {
+      AppUtils.showToastSuccess(state.message ?? "Success");
+      Navigator.pop(context);
+    } else if (state is RemoveUsersRemoveFailed) {
+      AppUtils.showToastError(state.message ?? "Failed");
+    } else if (state is RemoveUsersRemoveError) {
+      AppUtils.dismissprogress();
     }
+  }
+
+  getUsersByGroupId() {
+    _bloc.add(RemoveUsersLoadRequested(widget.groupId));
+  }
 
     
   updateSelectedUsers()
@@ -81,41 +85,30 @@ class _AddRemoveUsersIntoGroupsState extends State<RemoveUsersInGroup> {
 
             if(selectedUsers.length>0)
             {
-                removeUsersToGroupApiCall(req);
+                _bloc.add(RemoveUsersSubmitted(req));
             }
             else
             {
               AppUtils.showToastError("Please select atleast any user");
             }
-           
+
   }
 
-
-  removeUsersToGroupApiCall(req) 
-  {
-    final api = Provider.of<ApiService>(context, listen: false);
-
-    print("req  ${jsonEncode(req)}");
-    api.removeUsersintoGroup(req).then((response) {
-      if (response.status!) 
-      {
-        AppUtils.showToastSuccess(response.message ?? "Success");
-        Navigator.pop(context);
-      } else {
-        print('error');
-        AppUtils.showToastError(response.message ?? "Failed");
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
-  }
   @override
-  void initState() 
+  void initState()
   {
+    _bloc = RemoveUsersBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     getUsersByGroupId();
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
   }
 
   @override

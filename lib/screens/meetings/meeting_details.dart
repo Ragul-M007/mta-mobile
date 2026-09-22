@@ -1,10 +1,12 @@
 // ignore_for_file: unnecessary_null_comparison, must_be_immutable
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/meetings/meeting_details_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingDetails.dart';
@@ -56,6 +58,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
 
   DateTime? endTime;
 
+  late final MeetingDetailsBloc _bloc;
+  late final StreamSubscription<MeetingDetailsState> _blocSub;
+
   Future<void> _navigateBack() async {
     if (Strings.fromNotificationNewMeeting) {
       Strings.fromNotificationNewMeeting = false;
@@ -68,31 +73,60 @@ class _MeetingDetailsState extends State<MeetingDetails> {
 
   void initState() {
     super.initState();
+    _bloc = MeetingDetailsBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     WidgetsBinding.instance.addPostFrameCallback((_) => getMeetings());
   }
 
-  getMeetings() {
-    print(">>>>:${widget.meeting_id}");
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getMeetingById(widget.meeting_id).then((response) async {
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(MeetingDetailsState state) {
+    if (!mounted) return;
+    if (state is MeetingDetailsLoading) {
+      AppUtils.showprogress();
+    } else if (state is MeetingDetailsLoaded) {
       AppUtils.dismissprogress();
-      print(">>>>>>11:${response.status!}");
-      if (response.status!) {
-        setState(() {
-          meetingsData = response.data!;
-        });
-        if (meetingsData!.type == "1" &&
-            Strings.urlRegex.hasMatch(meetingsData!.location!)) {
-          _getAddressFromLink(meetingsData!.location!);
-        } else if (meetingsData!.type == "1") {
-          locationData = meetingsData!.location!;
-        }
+      setState(() {
+        meetingsData = state.data;
+      });
+      if (meetingsData!.type == "1" &&
+          Strings.urlRegex.hasMatch(meetingsData!.location!)) {
+        _getAddressFromLink(meetingsData!.location!);
+      } else if (meetingsData!.type == "1") {
+        locationData = meetingsData!.location!;
       }
-    }).catchError((onError) {
-      print(">>>>>err:${onError}");
+    } else if (state is MeetingDetailsDismiss) {
       AppUtils.dismissprogress();
-    });
+    } else if (state is MeetingUpdateSuccess) {
+      getMeetings();
+      AppUtils.showToastSuccess("Meeting updated successfully!");
+      AppUtils.dismissprogress();
+    } else if (state is MeetingUpdateFailure) {
+      AppUtils.showToastError(state.message);
+      AppUtils.dismissprogress();
+    } else if (state is MeetingUpdateError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Something went wrong!");
+    } else if (state is MeetingCancelSuccess) {
+      AppUtils.showToastSuccess("Meeting cancelled successfully!");
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    } else if (state is MeetingCancelFailure) {
+      Navigator.of(context).pop();
+      AppUtils.showToastError(state.message);
+    } else if (state is MeetingCancelError) {
+      AppUtils.showToastError("Something went wrong!");
+      Navigator.of(context).pop();
+    }
+  }
+
+  getMeetings() {
+    _bloc.add(MeetingDetailsLoadRequested(widget.meeting_id));
   }
 
   @override
@@ -726,21 +760,9 @@ class _MeetingDetailsState extends State<MeetingDetails> {
     updateMeetingReq.meetingId = meetingsData!.meetingId.toString();
     updateMeetingReq.type = meetingsData!.type!;
     updateMeetingReq.meeting = meetingsData!.imeetifyMeetingId;
-    final api = Provider.of<ApiService>(context, listen: false);
     print(">>>>:${Strings.authToken}");
     print(">>>>:${jsonEncode(updateMeetingReq)}");
-    api.updateMeeting(updateMeetingReq).then((response) {
-      if (response.status!) {
-        getMeetings();
-        AppUtils.showToastSuccess("Meeting updated successfully!");
-      } else {
-        AppUtils.showToastError(response.message!);
-      }
-      AppUtils.dismissprogress();
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError("Something went wrong!");
-    });
+    _bloc.add(MeetingDetailsUpdateRequested(updateMeetingReq));
   }
 
   void _showDeleteMeetingDialog(BuildContext context) {
@@ -787,20 +809,7 @@ class _MeetingDetailsState extends State<MeetingDetails> {
     CancelMeetingReq cancelMeetingReq = CancelMeetingReq();
     cancelMeetingReq.meeting = meetingsData!.imeetifyMeetingId!;
     cancelMeetingReq.type = meetingsData!.type;
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.deleteMeeting(cancelMeetingReq).then((response) {
-      if (response.status!) {
-        AppUtils.showToastSuccess("Meeting cancelled successfully!");
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-      } else {
-        Navigator.of(context).pop();
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.showToastError("Something went wrong!");
-      Navigator.of(context).pop();
-    });
+    _bloc.add(MeetingDetailsCancelRequested(cancelMeetingReq));
   }
 
   Future<void> shareFile() async {

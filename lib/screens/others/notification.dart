@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/notification/notification_bloc.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/FectchProjectDocRes.dart';
 import 'package:mta/models/NotificationRes.dart';
@@ -39,17 +41,69 @@ class NotificationContent extends StatefulWidget {
 
 class _NotificationContentState extends State<NotificationContent>
     with TickerProviderStateMixin {
+  late final NotificationBloc _bloc;
+  late final StreamSubscription<NotificationState> _blocSub;
+
   void initState() {
     _msgList.clear();
     super.initState();
 
+    _bloc = NotificationBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     WidgetsBinding.instance.addPostFrameCallback((_) => getNotification());
+  }
+
+  /// Performs the UI side effects for [NotificationBloc] states — the spinner,
+  /// setState of `_msgList`, toasts and the type-based navigation that
+  /// getNotification()/updateNotification() did inline.
+  void _onBlocState(NotificationState state) {
+    if (state is NotificationsLoading) {
+      AppUtils.showprogress();
+    } else if (state is NotificationsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _msgList = state.notifications;
+      });
+    } else if (state is NotificationsEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _msgList.clear();
+      });
+      AppUtils.showToastError(state.message);
+    } else if (state is NotificationsError) {
+      AppUtils.dismissprogress();
+    } else if (state is NotificationUpdateLoading) {
+      AppUtils.showprogress();
+    } else if (state is NotificationUpdated) {
+      AppUtils.dismissprogress();
+      if (state.toComments == "comments") {
+        Navigator.of(context).pushNamed('/comments');
+      } else if (state.toComments == "replies") {
+        Strings.fromNotificationReply = true;
+        Navigator.of(context).pushNamed('/replies');
+      } else if (state.toComments == "projectComments") {
+        Navigator.of(context).pushNamed('/projectComments');
+      } else if (state.toComments == "projectReplies") {
+        Strings.fromNotificationReply = true;
+        Navigator.of(context).pushNamed('/projectCommentReplies');
+      } else {
+        Navigator.of(context).pushNamed('/viewdoclist');
+      }
+    } else if (state is NotificationUpdateFailed) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is NotificationUpdateError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+    }
   }
 
   menuopen() {}
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
   }
 
@@ -407,58 +461,14 @@ class _NotificationContentState extends State<NotificationContent>
     }
   }
 
+  // Now a thin dispatcher — logic moved to NotificationBloc (behavior-preserving).
   getNotification() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.notification().then((response) {
-      AppUtils.dismissprogress();
-      print('categoiresResponse status ${response.toJson()}');
-      if (response.status!) {
-        setState(() {
-          _msgList = response.data!;
-        });
-      } else {
-        setState(() {
-          _msgList.clear();
-          AppUtils.showToastError(response.message!);
-        });
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(const NotificationsRequested());
   }
 
+  // Now a thin dispatcher — logic moved to NotificationBloc (behavior-preserving).
   updateNotification(notificationId, toComments) {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.updateNotificationStatus(notificationId).then((response) {
-      if (response.status!) {
-        AppUtils.dismissprogress();
-
-        if (toComments == "comments") {
-          Navigator.of(context).pushNamed('/comments');
-        } else if (toComments == "replies") {
-          Strings.fromNotificationReply = true;
-          Navigator.of(context).pushNamed('/replies');
-        } else if (toComments == "projectComments") {
-          Navigator.of(context).pushNamed('/projectComments');
-        } else if (toComments == "projectReplies") {
-          Strings.fromNotificationReply = true;
-          Navigator.of(context).pushNamed('/projectCommentReplies');
-        } else {
-          // Strings.fromNotificationDocuments = true;
-          Navigator.of(context).pushNamed('/viewdoclist');
-        }
-      } else {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError("Unable to connect to server");
-      print(onError.toString());
-    });
+    _bloc.add(NotificationStatusUpdated(notificationId, toComments));
   }
 
   getUserCats(proId) {

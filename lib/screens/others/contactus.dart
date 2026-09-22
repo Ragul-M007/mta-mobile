@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/contactus/contactus_bloc.dart';
 import 'package:flutter/widgets.dart';
 //import 'package:mta/models/ContactusRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -150,6 +152,8 @@ class _ContactusContentState extends State<ContactusContent> {
   bool loader = false;
 
   var address = '';
+  late final ContactusBloc _bloc;
+  late final StreamSubscription<ContactusState> _blocSub;
 
   @override
   void initState() {
@@ -160,8 +164,42 @@ class _ContactusContentState extends State<ContactusContent> {
     userType.text = "info@multitechcorp.in";
     emailChennai.text = "info@mtadesigns.com";
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getSocialsMediaLinks());
+    _bloc = ContactusBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _bloc.add(const SocialLinksRequested()));
     //getContactus();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Performs the UI side effects for [ContactusBloc] states — the spinner and
+  /// the socialLinksData / loader updates getSocialsMediaLinks() did inline.
+  void _onBlocState(ContactusState state) {
+    if (state is SocialLinksLoading) {
+      AppUtils.showprogress();
+    } else if (state is SocialLinksLoaded) {
+      socialLinksData.forEach((element) {
+        if (element['social_media'] == "Instagram") {
+          element['link'] = state.data[0].instagramLink!;
+        } else if (element['social_media'] == "Twitter") {
+          element['link'] = state.data[0].twitterLink!;
+        } else if (element['social_media'] == "Linkedin") {
+          element['link'] = state.data[0].linkedin!;
+        }
+      });
+      setState(() {
+        loader = false;
+      });
+      AppUtils.dismissprogress();
+    } else if (state is SocialLinksError) {
+      AppUtils.dismissprogress();
+    }
   }
 
   @override

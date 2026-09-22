@@ -1,5 +1,8 @@
 // ignore_for_file: must_be_immutable
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/meetings/members_selection_bloc.dart';
 import 'package:mta/models/AddMeetingReq.dart';
 import 'package:mta/models/AllTeamsRes.dart';
 import 'package:mta/models/DashboardRes.dart';
@@ -48,18 +51,73 @@ class _MembersSelectionState extends State<MembersSelection> {
   int totalUserCount = 0;
 
   List totalUser = [];
+  late final MembersSelectionBloc _bloc;
+  late final StreamSubscription<MembersSelectionState> _blocSub;
 
   @override
   void initState() {
     super.initState();
+    _bloc = MembersSelectionBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     configData();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
     AppUtils.dismissprogress();
+  }
+
+  /// Performs the UI side effects for [MembersSelectionBloc] states — the user
+  /// Maps, `totalUser` accumulation, spinner, toasts, snackbar and pops that
+  /// getTeamsUsers()/getProjectUsers()/submitData() did inline.
+  void _onBlocState(MembersSelectionState state) {
+    if (state is TeamUsersLoaded) {
+      setState(() {
+        teamUsersLists["${state.teamId}"] = state.users;
+      });
+      for (var user in state.users) {
+        if (!totalUser.contains(user.email)) {
+          totalUser.add(user.email!);
+        }
+      }
+    } else if (state is TeamUsersEmpty) {
+      setState(() {
+        teamUsersLists["${state.teamId}"] = [];
+      });
+    } else if (state is ProjectUsersLoaded) {
+      setState(() {
+        projectUsersLists["${state.projectId}"] = state.users;
+      });
+      for (var user in state.users) {
+        if (!totalUser.contains(user.email)) {
+          totalUser.add(user.email!);
+        }
+      }
+    } else if (state is ProjectUsersEmpty) {
+      setState(() {
+        projectUsersLists["${state.projectId}"] = [];
+      });
+    } else if (state is MembersSubmitLoading) {
+      AppUtils.showprogress();
+    } else if (state is MembersMeetingCreated) {
+      AppUtils.showToastSuccess("Meeting created successfully!");
+      isButtonEnabled = false;
+      Navigator.pop(context);
+      Navigator.pop(context);
+      AppUtils.dismissprogress();
+    } else if (state is MembersSubmitFailed) {
+      AppUtils.showErrorSnackBar(context, state.message);
+      isButtonEnabled = false;
+      AppUtils.dismissprogress();
+    } else if (state is MembersSubmitError) {
+      AppUtils.dismissprogress();
+      isButtonEnabled = false;
+      AppUtils.showToastError("Something went wrong!");
+    }
   }
 
   void configData() {
@@ -69,9 +127,9 @@ class _MembersSelectionState extends State<MembersSelection> {
 
     widget.addMeetingData!.meetingTypeId!.forEach((element) {
       if (widget.addMeetingData!.meetingType == "Team") {
-        getTeamsUsers(element);
+        _bloc.add(TeamUsersRequested(element));
       } else {
-        getProjectUsers(element);
+        _bloc.add(ProjectUsersRequested(element));
       }
     });
     AppUtils.dismissprogress();
@@ -503,32 +561,7 @@ class _MembersSelectionState extends State<MembersSelection> {
         });
         if (addMeetingReq!.type == "2") {
           addMeetingReq!.location = null;
-          AppUtils.showprogress();
-          final api = Provider.of<ApiService>(context, listen: false);
-          api.createMeeting(addMeetingReq!).then((response) {
-            if (response.status!) {
-              AppUtils.showToastSuccess("Meeting created successfully!");
-
-              isButtonEnabled = false;
-              Navigator.pop(context);
-              Navigator.pop(context);
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => Meetings(),
-              //   ),
-              //   (route) => false,
-              // );
-            } else {
-              AppUtils.showErrorSnackBar(context, response.message!);
-              isButtonEnabled = false;
-            }
-            AppUtils.dismissprogress();
-          }).catchError((onError) {
-            AppUtils.dismissprogress();
-            isButtonEnabled = false;
-            AppUtils.showToastError("Something went wrong!");
-          });
+          _bloc.add(MembersMeetingSubmitted(addMeetingReq!));
         } else {
           isButtonEnabled = false;
           Navigator.of(context).push(MaterialPageRoute(

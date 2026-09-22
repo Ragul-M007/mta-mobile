@@ -1,9 +1,11 @@
 // ignore_for_file: unnecessary_null_comparison
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/meetings/meetings_home_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
@@ -40,6 +42,8 @@ class Meetingscontent extends StatefulWidget {
 class _MeetingscontentState extends State<Meetingscontent> {
   List<MeetingsData> tempLists = [];
   List<MeetingsData> meetingsData = [];
+  late final MeetingsHomeBloc _bloc;
+  late final StreamSubscription<MeetingsHomeState> _blocSub;
 
   Future<bool> _onWillPop() async {
     return (await showDialog(
@@ -102,9 +106,45 @@ class _MeetingscontentState extends State<Meetingscontent> {
   TextEditingController _searchFieldController = TextEditingController();
 
   void initState() {
-
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getProfile());
+    _bloc = MeetingsHomeBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _bloc.add(const MeetingsHomeRequested()));
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Performs the UI side effects for [MeetingsHomeBloc] states — the spinner
+  /// and setState of the meetings lists / access flag getProfile() did inline.
+  void _onBlocState(MeetingsHomeState state) {
+    if (state is MeetingsHomeLoading) {
+      AppUtils.showprogress();
+    } else if (state is UpcomingMeetingsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        tempLists = state.meetings;
+        meetingsData = state.meetings;
+      });
+    } else if (state is UpcomingMeetingsEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        tempLists = [];
+        meetingsData = [];
+      });
+    } else if (state is MeetingAccessLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        meetingCraetionAccess = state.access;
+      });
+    } else if (state is MeetingAccessError) {
+      AppUtils.dismissprogress();
+    }
   }
 
   getProfile() {

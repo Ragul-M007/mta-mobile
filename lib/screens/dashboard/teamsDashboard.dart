@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/teams_dashboard/teams_dashboard_bloc.dart';
 import 'package:mta/models/DashboardRes.dart';
 import 'package:mta/models/TeamsModel.dart';
 import 'package:mta/network/ApiService.dart';
@@ -34,6 +36,9 @@ class _TeamsDashboardState extends State<TeamsDashboard> {
   var dio = Dio();
 
   String _errText = "";
+  late final TeamsDashboardBloc _bloc;
+  late final StreamSubscription<TeamsDashboardState> _blocSub;
+
   void initState() {
     super.initState();
     if (Strings.roleId == 7) {
@@ -43,12 +48,43 @@ class _TeamsDashboardState extends State<TeamsDashboard> {
     print("checkval--> ${Strings.roleId}");
 
     super.initState();
+    _bloc = TeamsDashboardBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     getPermission();
 
     if (Strings.roleId != 7) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => getTeams());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _bloc.add(const TeamsRequested()));
     }
     configureWebview();
+  }
+
+  /// Performs the UI side effects for [TeamsDashboardBloc] states — the spinner,
+  /// list / error-text updates and navigation the old getTeams() / getUserCats()
+  /// did inline.
+  void _onBlocState(TeamsDashboardState state) {
+    if (state is TeamsLoading) {
+      AppUtils.showprogress();
+    } else if (state is TeamsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _teamLists = state.teams;
+      });
+    } else if (state is TeamsEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _errText = state.message;
+      });
+    } else if (state is TeamsLoadError) {
+      AppUtils.dismissprogress();
+    } else if (state is TeamCommentsLoading) {
+      AppUtils.showprogress();
+    } else if (state is TeamCommentsReady) {
+      AppUtils.dismissprogress();
+      Navigator.pushNamed(context, '/comments');
+    } else if (state is TeamCommentsDismissed) {
+      AppUtils.dismissprogress();
+    }
   }
 
   configureWebview() {
@@ -72,6 +108,8 @@ class _TeamsDashboardState extends State<TeamsDashboard> {
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
   }
 

@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mta/models/ForgotPassReq.dart';
-import 'package:mta/models/LoginReq.dart';
-// import 'package:mta/models/validateOTPReq.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mta/blocs/auth/verifypin/verifypin_bloc.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/comments/comments.dart';
 import 'package:mta/screens/comments/replies.dart';
@@ -13,11 +11,8 @@ import 'package:mta/screens/projectcomments/projectComments.dart';
 import 'package:mta/screens/projectcomments/projectCommentsReplies.dart';
 import 'package:mta/utilities/apputilities.dart';
 import 'package:mta/utilities/strings.dart';
-import 'package:provider/provider.dart';
 import 'package:mta/screens/attendance/attendance.dart';
 
-import '../../models/validateOTPReq.dart';
-import '../chat/ChatGroups.dart';
 import '../chat/ChatScreen.dart';
 import '../doucument/viewdoclist.dart';
 
@@ -29,12 +24,7 @@ class Verifypin extends StatefulWidget {
 }
 
 class _VerifypinState extends State<Verifypin> {
-  final mobileField = TextEditingController();
   String? codeVerifyField;
-  String? verificationCode;
-  String emailIdforVerification = '';
-
-  bool _isLoading = false;
 
   FocusNode one = new FocusNode();
   FocusNode two = new FocusNode();
@@ -60,14 +50,22 @@ class _VerifypinState extends State<Verifypin> {
 
   final forgotPassEmailID = TextEditingController();
 
+  late final VerifyPinBloc _bloc;
+
   @override
   void initState() {
     super.initState();
     print("Testing message--> ${Strings.testing}");
     print("Testing bool--> ${Strings.fromNotificationComments}");
+    _bloc = VerifyPinBloc(ApiService.create());
   }
 
-  BuildContext? ctx;
+  @override
+  void dispose() {
+    _bloc.close();
+    super.dispose();
+  }
+
   Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
@@ -113,30 +111,11 @@ class _VerifypinState extends State<Verifypin> {
         false;
   }
 
-  _generateOtp(ctx) {
+  void _submitForgotEmail() {
     if (forgotPassEmailID.text == "" || forgotPassEmailID.text.isEmpty) {
       AppUtils.showToastErrorTop("Please enter your registered Email Id");
     } else {
-      AppUtils.showprogress();
-      final api = Provider.of<ApiService>(context, listen: false);
-      ForgotPassReq request = ForgotPassReq();
-      request.emailId = forgotPassEmailID.text;
-
-      api.forgotPass(request).then((response) {
-        AppUtils.dismissprogress();
-        print('Response status ${response.toJson()}');
-        if (response.status!) {
-          Navigator.of(ctx).pop();
-          emailIdforVerification = forgotPassEmailID.text;
-          forgotPassEmailID.text = '';
-          _otpVerify();
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+      _bloc.add(ForgotPasswordOtpRequested(forgotPassEmailID.text));
     }
   }
 
@@ -195,7 +174,7 @@ class _VerifypinState extends State<Verifypin> {
                         if (codeVerifyField!.length < 5) {
                           AppUtils.showToastError("Please Enter code");
                         } else {
-                          otpVerifyCall(contextResetPin);
+                          _bloc.add(ResetOtpSubmitted(codeVerifyField!));
                         }
                       },
                       child: Container(
@@ -222,39 +201,6 @@ class _VerifypinState extends State<Verifypin> {
         );
       },
     );
-  }
-
-  otpVerifyCall(ctx) {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(context, listen: false);
-    ValidateOTPReq request = ValidateOTPReq();
-    request.emailId = emailIdforVerification;
-    request.otp = codeVerifyField;
-
-    print("data ${request.emailId}");
-    print("data ${request.otp}");
-
-    api.otpVerify(request).then((response) {
-      AppUtils.dismissprogress();
-      print('Response status ${response.toJson()}');
-      if (response.status!) {
-        Navigator.of(ctx).pop();
-        ResetoneT.text = '';
-        ResettwoT.text = '';
-        ResetthreeT.text = '';
-        ResetfourT.text = '';
-        ResetfiveT.text = '';
-
-        Strings.fromForgotPassword = true;
-        Navigator.pushNamed(context, "/setpin");
-        // _changePass();
-      } else {
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
   }
 
   Future<void> _forgotPass() async {
@@ -310,7 +256,7 @@ class _VerifypinState extends State<Verifypin> {
                     ),
                     InkWell(
                       onTap: () {
-                        _generateOtp(context);
+                        _submitForgotEmail();
                       },
                       child: Container(
                         child: Center(
@@ -338,124 +284,55 @@ class _VerifypinState extends State<Verifypin> {
     );
   }
 
-  signin() {
-    AppUtils.showprogress();
-    final api = Provider.of<ApiService>(ctx!, listen: false);
-    LoginReq loginreq = LoginReq();
-
-    AppUtils.getStringPreferences('emailId').then((value) {
-      if (value != null) {
-        loginreq.email = value;
-        loginreq.loginpin = codeVerifyField;
-        loginreq.token = Strings.fcmToken;
-        // print(loginreq.email);
-        // print(loginreq.loginpin);
-        //Navigator.pushNamed(ctx, "/dashboard");
-
-        var dat = jsonEncode(loginreq);
-
-        print(dat);
-
-        api.login(loginreq).then((response) {
-          AppUtils.dismissprogress();
-          print('verifyPinResponse status ${response.toJson()}');
-          assignroles() {
-            if (response.data?.role == "ADMIN") {
-              Strings.roleId = 1;
-            } else if (response.data?.role == "STAFF") {
-              Strings.roleId = 2;
-            } else if (response.data?.role == "VENDOR") {
-              Strings.roleId = 3;
-            } else if (response.data?.role == "CONSULTANTS") {
-              Strings.roleId = 4;
-            } else if (response.data?.role == "CONTRACTORS") {
-              Strings.roleId = 5;
-            } else if (response.data?.role == "CLIENT") {
-              Strings.roleId = 6;
-            } else if (response.data?.role == "PUBLICUSER") {
-              Strings.roleId = 7;
-            }
-            AppUtils.savePreferences("roleId", "${Strings.roleId}");
-          }
-
-          if (response.status!) {
-            AppUtils.savePreferences("emailId", response.data!.emailId);
-            AppUtils.savePreferences("userId", response.data!.userId);
-            AppUtils.savePreferences("username", response.data!.name);
-            if (response.data!.userImg != null) {
-              AppUtils.savePreferences("profilePic", response.data!.userImg);
-              Strings.profilePic = response.data!.userImg!;
-            } else {
-              AppUtils.savePreferences("profilePic", "");
-              Strings.profilePic = "";
-            }
-            Strings.userID = response.data!.userId;
-            Strings.authToken = response.token!;
-            Strings.username = response.data!.name;
-            Strings.userID = response.data!.userId;
-            assignroles();
-            AppUtils.savePreferences("easyAccess", "Y");
-            AppUtils.savePreferences("authToken", response.token);
-
-            Strings.isLogin = true;
-
-            if (Strings.FromNotification) {
-              Strings.FromNotification = false;
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => Attendance()));
-            } else if (Strings.fromNotificationComments) {
-              if (Strings.selectedProDocument[0].projectComments == "true") {
-                if (Strings.selectedProDocument[0].commentId == null) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProjectComments()));
-                } else {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProjectCommentsReplies()));
-                }
-              } else {
-                if (Strings.selectedProDocument[0].commentId == null) {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Comments()));
-                } else {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => Replies()));
-                }
-              }
-            } else if (Strings.fromNotificationDocuments) {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ViewDocScreen()));
-            } else if (Strings.fromNotificationChat) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    teamName:
-                        Strings.chatNotificationResponse?.groupName ?? "0",
-                    groupId: int.parse(
-                        Strings.chatNotificationResponse?.groupId ?? "0"),
-                    teamId: int.parse(
-                        Strings.chatNotificationResponse?.teamId ?? "0"),
-                    projectId: int.parse(
-                        Strings.chatNotificationResponse?.projectId ?? "0"),
-                  ),
-                ),
-              );
-            } else {
-              if (Strings.roleId == 6) {
-                Navigator.pushNamed(context, "/projects");
-              } else {
-                Navigator.pushNamed(ctx!, "/teamsDashboard");
-              }
-            }
-          } else {
-            AppUtils.showToastError(response.message!);
-          }
-        }).catchError((onError) {
-          AppUtils.dismissprogress();
-          print(onError.toString());
-        });
-      }
-    });
+  void _navigate(BuildContext context, VerifyPinDestination destination) {
+    switch (destination) {
+      case VerifyPinDestination.attendance:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Attendance()));
+        break;
+      case VerifyPinDestination.projectComments:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => ProjectComments()));
+        break;
+      case VerifyPinDestination.projectCommentsReplies:
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => ProjectCommentsReplies()));
+        break;
+      case VerifyPinDestination.comments:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Comments()));
+        break;
+      case VerifyPinDestination.replies:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Replies()));
+        break;
+      case VerifyPinDestination.viewDoc:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => ViewDocScreen()));
+        break;
+      case VerifyPinDestination.chat:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              teamName: Strings.chatNotificationResponse?.groupName ?? "0",
+              groupId:
+                  int.parse(Strings.chatNotificationResponse?.groupId ?? "0"),
+              teamId:
+                  int.parse(Strings.chatNotificationResponse?.teamId ?? "0"),
+              projectId:
+                  int.parse(Strings.chatNotificationResponse?.projectId ?? "0"),
+            ),
+          ),
+        );
+        break;
+      case VerifyPinDestination.projects:
+        Navigator.pushNamed(context, "/projects");
+        break;
+      case VerifyPinDestination.teamsDashboard:
+        Navigator.pushNamed(context, "/teamsDashboard");
+        break;
+    }
   }
 
   @override
@@ -465,156 +342,185 @@ class _VerifypinState extends State<Verifypin> {
         _onWillPop();
         return false;
       },
-      child: Provider<ApiService>(
-        create: (context) => ApiService.create(),
-        child: SafeArea(
-          child: Scaffold(
-              body: Builder(builder: (BuildContext newContext) {
-            ctx = newContext;
-            return Stack(
-              children: <Widget>[
-                Container(
-                  height: MediaQuery.of(context).size.height * .35,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    image: new DecorationImage(
-                      image: new AssetImage("assets/images/logo.jpg"),
-                      fit: BoxFit.fill,
+      child: BlocProvider<VerifyPinBloc>.value(
+        value: _bloc,
+        child: BlocListener<VerifyPinBloc, VerifyPinState>(
+          listener: (context, state) {
+            if (state is VerifyPinLoading) {
+              AppUtils.showprogress();
+            } else if (state is VerifyPinFailure) {
+              AppUtils.dismissprogress();
+              AppUtils.showToastError(state.message);
+            } else if (state is VerifyPinError) {
+              AppUtils.dismissprogress();
+            } else if (state is ForgotOtpSent) {
+              AppUtils.dismissprogress();
+              forgotPassEmailID.text = '';
+              Navigator.of(context).pop(); // close the forgot-pin dialog
+              _otpVerify(); // open the OTP dialog
+            } else if (state is ResetOtpVerified) {
+              AppUtils.dismissprogress();
+              ResetoneT.text = '';
+              ResettwoT.text = '';
+              ResetthreeT.text = '';
+              ResetfourT.text = '';
+              ResetfiveT.text = '';
+              Navigator.of(context).pop(); // close the OTP dialog
+              Navigator.pushNamed(context, "/setpin");
+            } else if (state is VerifyPinAuthenticated) {
+              AppUtils.dismissprogress();
+              _navigate(context, state.destination);
+            }
+          },
+          child: SafeArea(
+            child: Scaffold(
+              body: Stack(
+                children: <Widget>[
+                  Container(
+                    height: MediaQuery.of(context).size.height * .35,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      image: new DecorationImage(
+                        image: new AssetImage("assets/images/logo.jpg"),
+                        fit: BoxFit.fill,
+                      ),
                     ),
+                    padding: EdgeInsets.all(10),
+                    width: double.infinity,
                   ),
-                  padding: EdgeInsets.all(10),
-                  width: double.infinity,
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(
-                      0, MediaQuery.of(context).size.height * .35, 0, 0),
-                  padding: EdgeInsets.all(5),
-                  width: double.infinity,
-                  decoration: BoxDecoration(color: Colors.grey[200]),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(
-                      20, MediaQuery.of(context).size.height * .22, 20, 10),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15)),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 54,
-                        ),
-                        Text(
-                          "Verify Pin",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 50,
-                        ),
-                        Text(
-                          "Enter your 4 digit secret pin",
-                          style: TextStyle(color: const Color(0xFF9e9e9e)),
-                        ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        _boxBuilder(),
-                        SizedBox(
-                          height: 40,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    _forgotPass();
-                    //AppUtils.clearAllPreferences();
-                    //  Navigator.popAndPushNamed(context, '/login');
-                  },
-                  child: Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.fromLTRB(
-                          10, MediaQuery.of(context).size.height * .68, 10, 20),
-                      child: Text("Forgot Pin",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF9e9e9e)))),
-                ),
-                Center(
-                  child: Container(
+                  Container(
                     margin: EdgeInsets.fromLTRB(
-                        10, MediaQuery.of(context).size.height * .75, 10, 20),
-                    child: ButtonTheme(
-                      minWidth: double.infinity,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Color(0xFF0061b0)),
-                          foregroundColor:
-                              MaterialStateProperty.all(Colors.white),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                            ),
+                        0, MediaQuery.of(context).size.height * .35, 0, 0),
+                    padding: EdgeInsets.all(5),
+                    width: double.infinity,
+                    decoration: BoxDecoration(color: Colors.grey[200]),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(
+                        20, MediaQuery.of(context).size.height * .22, 20, 10),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15)),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 54,
                           ),
-                        ),
-                        onPressed: () {
-                          print(
-                              "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
-                          codeVerifyField =
-                              oneT.text + twoT.text + threeT.text + fourT.text;
-                          print(codeVerifyField);
-                          print("${codeVerifyField!.length}");
-                          if (codeVerifyField!.length < 4) {
-                            AppUtils.showToastError("Please Enter Pin");
-                          } else {
-                            signin();
-                          }
-                        },
-                        child: Text("SUBMIT",
+                          Text(
+                            "Verify Pin",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color: Colors.white)),
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            height: 50,
+                          ),
+                          Text(
+                            "Enter your 4 digit secret pin",
+                            style: TextStyle(color: const Color(0xFF9e9e9e)),
+                          ),
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          _boxBuilder(),
+                          SizedBox(
+                            height: 40,
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                Align(
-                  alignment: FractionalOffset.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Not ${Strings.username}?",
-                          style: TextStyle(color: const Color(0xFF9e9e9e)),
+                  GestureDetector(
+                    onTap: () {
+                      _forgotPass();
+                      //AppUtils.clearAllPreferences();
+                      //  Navigator.popAndPushNamed(context, '/login');
+                    },
+                    child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.fromLTRB(10,
+                            MediaQuery.of(context).size.height * .68, 10, 20),
+                        child: Text("Forgot Pin",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF9e9e9e)))),
+                  ),
+                  Center(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(
+                          10, MediaQuery.of(context).size.height * .75, 10, 20),
+                      child: ButtonTheme(
+                        minWidth: double.infinity,
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Color(0xFF0061b0)),
+                            foregroundColor:
+                                MaterialStateProperty.all(Colors.white),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            print(
+                                "${oneT.text} ${twoT.text} ${threeT.text} ${fourT.text}");
+                            codeVerifyField = oneT.text +
+                                twoT.text +
+                                threeT.text +
+                                fourT.text;
+                            print(codeVerifyField);
+                            print("${codeVerifyField!.length}");
+                            if (codeVerifyField!.length < 4) {
+                              AppUtils.showToastError("Please Enter Pin");
+                            } else {
+                              _bloc.add(VerifyPinSubmitted(codeVerifyField!));
+                            }
+                          },
+                          child: Text("SUBMIT",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.white)),
                         ),
-                        TextButton(
-                            onPressed: () {
-                              AppUtils.savePreferences("easyAccess", "N");
-                              AppUtils.removeDeviceId(context);
-                              Navigator.popAndPushNamed(context, "/login");
-                            },
-                            child: Text(
-                              "Logout",
-                              style: TextStyle(color: Colors.red),
-                            ))
-                      ],
+                      ),
                     ),
                   ),
-                )
-              ],
-            );
-          })),
+                  Align(
+                    alignment: FractionalOffset.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Not ${Strings.username}?",
+                            style: TextStyle(color: const Color(0xFF9e9e9e)),
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                AppUtils.savePreferences("easyAccess", "N");
+                                AppUtils.removeDeviceId(context);
+                                Navigator.popAndPushNamed(context, "/login");
+                              },
+                              child: Text(
+                                "Logout",
+                                style: TextStyle(color: Colors.red),
+                              ))
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -775,7 +681,7 @@ class _VerifypinState extends State<Verifypin> {
             print("qwe  ${codeVerifyField?.length}");
             if (codeVerifyField!.length == 4) {
               FocusManager.instance.primaryFocus?.unfocus();
-              signin();
+              _bloc.add(VerifyPinSubmitted(codeVerifyField!));
             }
           },
         ),

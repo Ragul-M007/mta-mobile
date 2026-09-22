@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mta/utilities/app_drawer.dart';
+import 'package:mta/blocs/newsfeed/news_highlights_cubit.dart';
 import 'package:mta/models/NewsRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -32,17 +34,41 @@ class _NewshighlightsContentState extends State<NewshighlightsContent>
     with TickerProviderStateMixin {
   List<NewsResData>? _newsLists;
   TabController? _tabController;
+  late final NewsHighlightsCubit _cubit;
+  late final StreamSubscription<NewsHighlightsState> _cubitSub;
 
   void initState() {
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => getNewsFeeds());
+    _cubit = NewsHighlightsCubit(ApiService.create());
+    _cubitSub = _cubit.stream.listen(_onCubitState);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.fetch());
+  }
+
+  /// Performs the UI side effects for [NewsHighlightsCubit] states — the spinner,
+  /// setState of `_newsLists` and the error toast getNewsFeeds() did inline.
+  void _onCubitState(NewsHighlightsState state) {
+    if (state is NewsHighlightsLoading) {
+      AppUtils.showprogress();
+    } else if (state is NewsHighlightsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _newsLists = state.news;
+      });
+    } else if (state is NewsHighlightsFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is NewsHighlightsLoadError) {
+      AppUtils.dismissprogress();
+    }
   }
 
   menuopen() {}
 
   @override
   void dispose() {
+    _cubitSub.cancel();
+    _cubit.close();
     super.dispose();
   }
 

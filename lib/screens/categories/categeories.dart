@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/categories/categories_bloc.dart';
 import 'package:mta/models/FetchCatsRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/utilities/apputilities.dart';
@@ -53,10 +55,63 @@ class _CategoriesContentState extends State<CategoriesContent> {
 
   List<FetchMapedUsersData>? users;
   String _errText = "";
+  late final CategoriesBloc _bloc;
+  late final StreamSubscription<CategoriesState> _blocSub;
+
   void initState() {
     super.initState();
-    getUserCats();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getCategories());
+    _bloc = CategoriesBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    _bloc.add(const CategoriesUsersRequested());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _bloc.add(const CategoriesRequested()));
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Performs the UI side effects for [CategoriesBloc] states — the spinner,
+  /// setState of the screen's lists, toasts and the assigned-users dialog the
+  /// old getUserCats() / getCategories() / getAssignedUsers() did inline.
+  void _onBlocState(CategoriesState state) {
+    if (state is CategoriesUsersLoaded) {
+      setState(() {
+        Strings.users = state.users;
+        users = state.users;
+      });
+    } else if (state is CategoriesUsersError) {
+      AppUtils.dismissprogress();
+    } else if (state is CategoriesLoading) {
+      AppUtils.showprogress();
+    } else if (state is CategoriesLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _catsList = state.cats;
+      });
+    } else if (state is CategoriesEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _errText = "No Categories found !";
+      });
+    } else if (state is CategoriesLoadError) {
+      AppUtils.dismissprogress();
+    } else if (state is AssignedUsersLoaded) {
+      setState(() {
+        _catUsersList = state.catUsers;
+      });
+      Navigator.pop(context);
+      showCategoryUsersDialog();
+    } else if (state is AssignedUsersFailure) {
+      AppUtils.showToastError(state.message);
+      Navigator.pop(context);
+    } else if (state is AssignedUsersError) {
+      Navigator.pop(context);
+      AppUtils.showToastError(state.error);
+    }
   }
 
   showLoading(BuildContext context) {
@@ -485,8 +540,9 @@ class _CategoriesContentState extends State<CategoriesContent> {
                                         onPressed: () {
                                           // print("staff cliked");
                                           showLoading(context);
-                                          getAssignedUsers(
-                                              _catsList[index].categoryId!);
+                                          _catUsersList = [];
+                                          _bloc.add(AssignedUsersRequested(
+                                              _catsList[index].categoryId!));
                                         },
                                         icon: Icon(
                                           Icons.people,

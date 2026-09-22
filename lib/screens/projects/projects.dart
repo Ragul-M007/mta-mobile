@@ -14,6 +14,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mta/blocs/projects/projects_bloc.dart';
 
 import '../../utilities/checkResponsive.dart';
 import '../chat/ChatGroups.dart';
@@ -33,19 +35,51 @@ class _ProjectsState extends State<Projects> {
   TextEditingController _searchFieldController = TextEditingController();
   String? filepath;
   var dio = Dio();
+  late final ProjectsBloc _bloc;
 
   String _errText = "";
   void initState() {
     super.initState();
 
     super.initState();
+    _bloc = ProjectsBloc(ApiService.create());
     getPermission();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getProjects());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _bloc.add(const ProjectsRequested()));
   }
 
   @override
   void dispose() {
+    _bloc.close();
     super.dispose();
+  }
+
+  /// Performs the UI side effects for [ProjectsBloc] states — the spinner,
+  /// list / error-text updates and navigation the old `getProjects()` /
+  /// `getUserCats()` methods did inline.
+  void _onBlocState(BuildContext context, ProjectsState state) {
+    if (state is ProjectsLoading) {
+      AppUtils.showprogress();
+    } else if (state is ProjectsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _projectLists = state.projects;
+      });
+    } else if (state is ProjectsEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _errText = state.message;
+      });
+    } else if (state is ProjectsLoadError) {
+      AppUtils.dismissprogress();
+    } else if (state is ProjectCommentsLoading) {
+      AppUtils.showprogress();
+    } else if (state is ProjectCommentsReady) {
+      AppUtils.dismissprogress();
+      Navigator.pushNamed(context, '/comments');
+    } else if (state is ProjectCommentsDismissed) {
+      AppUtils.dismissprogress();
+    }
   }
 
   getUserCats(proId) {
@@ -163,7 +197,10 @@ class _ProjectsState extends State<Projects> {
   }
 
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return BlocListener<ProjectsBloc, ProjectsState>(
+      bloc: _bloc,
+      listener: _onBlocState,
+      child: WillPopScope(
         onWillPop: () async {
           await _onWillPop();
           return false;
@@ -763,7 +800,7 @@ class _ProjectsState extends State<Projects> {
                               padding: EdgeInsets.all(20),
                             ));
                   })),
-            )));
+            )))); // close BlocListener
   }
 
   onTapProject(Data projectList) {

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/attendance/attendance_bloc.dart';
 import 'package:mta/models/AddAttendanceReq.dart';
 import 'package:mta/models/CurrentProjectReq.dart';
 import 'package:mta/models/FetchAttendanceRes.dart';
@@ -79,13 +81,83 @@ class _AttendanceContentState extends State<AttendanceContent> {
 
   FocusNode searchField = new FocusNode();
   TextEditingController _searchFieldController = TextEditingController();
+  late final AttendanceBloc _bloc;
+  late final StreamSubscription<AttendanceState> _blocSub;
 
   void initState() {
     //_calendarController = CalendarController();
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => getAttendance(day + "-" + month + "-" + year));
-    getProjects();
+    _bloc = AttendanceBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bloc
+        .add(AttendanceForDateRequested(day + "-" + month + "-" + year)));
+    _bloc.add(const AttendanceProjectsRequested());
+  }
+
+  /// Performs the UI side effects for [AttendanceBloc] states — spinner, toasts,
+  /// setState of the screen globals/fields, `formatAttendanceData()` and the
+  /// grid/list-aware list refresh the old networking methods did inline.
+  void _onBlocState(AttendanceState state) {
+    if (state is AttendanceProjectsLoading) {
+      AppUtils.showprogress();
+    } else if (state is AttendanceProjectsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _projectLists = state.projects;
+        selectedProject = state.selectedProject;
+        location = state.selectedProject?.projectName ?? "";
+      });
+    } else if (state is AttendanceProjectsFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is AttendanceProjectsError) {
+      AppUtils.dismissprogress();
+    } else if (state is AttendanceCurrentProjectFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is AttendanceRecordsLoading) {
+      AppUtils.showprogress();
+    } else if (state is AttendanceRecordsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _attendancemain = state.records;
+        formatAttendanceData();
+      });
+    } else if (state is AttendanceRecordsEmpty) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _attendancemain = [];
+        _attendance = [];
+      });
+    } else if (state is AttendanceRecordsFailure) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _attendance = [];
+      });
+      AppUtils.showToastError(state.message);
+    } else if (state is AttendanceRecordsError) {
+      AppUtils.dismissprogress();
+      setState(() {
+        _attendance = [];
+      });
+    } else if (state is AttendanceCheckLoading) {
+      AppUtils.showprogress();
+    } else if (state is AttendanceCheckSuccess) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess(state.message);
+      if (isgridView == true) {
+        _bloc.add(AttendanceForDateRequested(day + "-" + month + "-" + year));
+      } else {
+        dropdownValue = monthMatch[int.parse(month) - 1];
+        _bloc.add(AttendanceForDateRequested(month + "-" + year));
+      }
+      setState(() {});
+    } else if (state is AttendanceCheckFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is AttendanceCheckError) {
+      AppUtils.dismissprogress();
+    }
   }
 
   getProjects() {
@@ -138,6 +210,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
   }
 
@@ -239,7 +313,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
                                     } else {
                                       selecetedMonth.toString();
                                     }
-                                    getAttendance(editedMonth + "-" + year);
+                                    _bloc.add(AttendanceForDateRequested(
+                                        editedMonth + "-" + year));
                                     setState(() {
                                       if (newValue != null)
                                         dropdownValue = newValue;
@@ -286,7 +361,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
                                   setState(() {
                                     isgridView = true;
                                     isShowCheckInOut = true;
-                                    getAttendance(day + "-" + month + "-" + year);
+                                    _bloc.add(AttendanceForDateRequested(
+                                        day + "-" + month + "-" + year));
                                   });
                                 },
                               )
@@ -859,7 +935,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
                           isShowCheckInOut = false;
                           dropdownValue = monthMatch[int.parse(month) - 1];
                           //getAttendance(month);
-                          getAttendance(month + "-" + year);
+                          _bloc.add(
+                              AttendanceForDateRequested(month + "-" + year));
                         });
                       },
                     )
@@ -909,7 +986,8 @@ class _AttendanceContentState extends State<AttendanceContent> {
                     var month1 = selectedDay.month.toString().padLeft(2, '0');
                     var day1 = selectedDay.day.toString().padLeft(2, '0');
                     var year1 = selectedDay.year.toString();
-                    getAttendance(day1 + "-" + month1 + "-" + year1);
+                    _bloc.add(AttendanceForDateRequested(
+                        day1 + "-" + month1 + "-" + year1));
                     setState(() {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
@@ -1259,8 +1337,15 @@ class _AttendanceContentState extends State<AttendanceContent> {
                 ),
               ),
               TextButton(
-                onPressed: () =>
-                    ({checkInOut(action), Navigator.of(context).pop(false)}),
+                onPressed: () {
+                  _bloc.add(AttendanceCheckInOutRequested(
+                      action: action,
+                      lat: lat,
+                      long: long,
+                      location: location,
+                      projectId: selectedProject?.projectId));
+                  Navigator.of(context).pop(false);
+                },
                 child: new Text(
                   'Yes',
                   style: TextStyle(
@@ -1598,9 +1683,10 @@ class _AttendanceContentState extends State<AttendanceContent> {
                                                 maxLines: 3,
                                               ),
                                               onTap: () {
-                                                updateCurrentProject(
-                                                    _searchLists![index]
-                                                        .projectId!);
+                                                _bloc.add(
+                                                    AttendanceCurrentProjectUpdated(
+                                                        _searchLists![index]
+                                                            .projectId!));
                                                 _searchFieldController.text =
                                                     "";
                                                 _searchLists?.clear();
@@ -1656,9 +1742,10 @@ class _AttendanceContentState extends State<AttendanceContent> {
                                                     maxLines: 3,
                                                   ),
                                                   onTap: () {
-                                                    updateCurrentProject(
-                                                        _projectLists![index]
-                                                            .projectId!);
+                                                    _bloc.add(
+                                                        AttendanceCurrentProjectUpdated(
+                                                            _projectLists![index]
+                                                                .projectId!));
                                                     Navigator.of(context).pop();
                                                   },
                                                 ),

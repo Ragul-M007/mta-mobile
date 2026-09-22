@@ -22,18 +22,23 @@ mixin Strings {
   static String? basePath = '';
 
   // static String baseUrl = "https://demo.emeetify.com:81/mta";
-  static String baseUrl = "https://mta.multitechcorp.in/mta";
+  // static String baseUrl = "https://mta.multitechcorp.in/mta";
   // static String baseUrl = "https://uatmta.multitechcorp.in/mta/";
+  // static String baseUrl = "http://localhost:3000/mta/"; // LOCAL dev (adb reverse)
+  static String baseUrl = "http://192.168.0.22:3000/mta/"; // LOCAL dev (PC LAN IP — same Wi-Fi)
 
   // static String socketUrl = 'https://demo.emeetify.com:5015/';
-
-  static String socketUrl = 'https://mta.multitechcorp.in:5022/';
+  // static String socketUrl = 'https://mta.multitechcorp.in:5022/';
   // static String socketUrl = 'https://uatmta.multitechcorp.in:5022/';
 //  static String socketUrl = 'http://192.168.0.134:5021/';
+  // static String socketUrl = 'http://localhost:5022/'; // LOCAL dev (adb reverse)
+  static String socketUrl = 'http://192.168.0.22:5022/'; // LOCAL dev (PC LAN IP)
 
   // static String baseImageUrl = 'https://demo.emeetify.com:5032/';
-  static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
+  // static String baseImageUrl = 'https://mta.multitechcorp.in/mta-img/';
   // static String baseImageUrl = 'https://uatmta.multitechcorp.in/mta-img/';
+  // static String baseImageUrl = 'http://localhost:3000/mta-img/'; // LOCAL dev (adb reverse)
+  static String baseImageUrl = 'http://192.168.0.22:3000/mta-img/'; // LOCAL dev (PC LAN IP)
 
   static bool documentUploadfromProject = false;
   static bool internetDialog = false;

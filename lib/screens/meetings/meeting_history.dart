@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mta/blocs/meetings/meeting_history_bloc.dart';
 import 'package:mta/models/MeetingsDataRes.dart';
 import 'package:mta/network/ApiService.dart';
 import 'package:mta/screens/meetings/meeting_details.dart';
@@ -25,10 +28,42 @@ class _MeetingHistoryState extends State<MeetingHistory> {
   double? width;
 
   DateTime? picked;
+  late final MeetingHistoryBloc _bloc;
+  late final StreamSubscription<MeetingHistoryState> _blocSub;
 
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getMeetings());
+    _bloc = MeetingHistoryBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadHistory());
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  /// Computes the date from the optional `picked` filter and dispatches the
+  /// fetch (mirrors the old `getMeetings()` date logic).
+  void _loadHistory() {
+    final now = picked != null ? picked! : DateTime.now();
+    final formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    _bloc.add(MeetingHistoryRequested(formattedDate));
+  }
+
+  /// Performs the UI side effects for [MeetingHistoryBloc] states.
+  void _onBlocState(MeetingHistoryState state) {
+    if (state is MeetingHistoryLoaded) {
+      setState(() {
+        meetingsData = state.meetings;
+      });
+    } else if (state is MeetingHistoryEmpty) {
+      setState(() {
+        meetingsData = [];
+      });
+    }
   }
 
   getMeetings() {
@@ -217,7 +252,7 @@ class _MeetingHistoryState extends State<MeetingHistory> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      getMeetings();
+      _loadHistory();
     }
     setState(() {});
   }

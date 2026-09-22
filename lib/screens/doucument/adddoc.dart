@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/documents/adddoc_bloc.dart';
 import 'package:mta/models/AddDocReq.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/UserAccessreq.dart';
@@ -69,31 +71,55 @@ class _AddDocContentState extends State<AddDocContent>
   String file64 = '';
   String? fileExt;
 
-  
-  getUserCats() 
-  {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.fetchUsers(Strings.selectedProject[0].projectId!).then((response) {
-      if (response.status!) 
-      {
-        setState(() {
-          Strings.users = response.data!;
-          users = response.data!;
-          _userIitems = users
-    .map((user) => MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
-    .toList();
-        });
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+  late final AddDocBloc _bloc;
+  late final StreamSubscription<AddDocState> _blocSub;
+
+  getUserCats() {
+    _bloc.add(const AddDocUsersRequested());
   }
+
   void initState() {
     super.initState();
+    _bloc = AddDocBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     getUserCats();
+  }
+
+  @override
+  void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onBlocState(AddDocState state) {
+    if (!mounted) return;
+    if (state is AddDocUsersLoaded) {
+      setState(() {
+        Strings.users = state.data;
+        users = state.data;
+        _userIitems = users
+            .map((user) =>
+                MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
+            .toList();
+      });
+    } else if (state is AddDocSubmitLoading) {
+      AppUtils.showprogress();
+    } else if (state is AddDocSubmitSuccess) {
+      AppUtils.dismissprogress();
+      Navigator.popAndPushNamed(context, '/viewdoclist');
+      Strings.docID = state.documentId;
+      print("Doc id--> ${Strings.docID}");
+
+      UpdateRights();
+
+      setState(() {});
+    } else if (state is AddDocFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is AddDocErrorDismiss) {
+      AppUtils.dismissprogress();
+    }
   }
 
   @override
@@ -264,18 +290,7 @@ class _AddDocContentState extends State<AddDocContent>
     var test = jsonEncode(userAccessReq);
     print("user--> $test");
 
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.userAccess(users,userAccessReq,).then((response) 
-      {
-
-        print(response.message);
-        if (response.status!) {
-        } else {
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+    _bloc.add(AddDocRightsRequested(users, userAccessReq));
   }
 
   Widget uploadButton() {
@@ -339,8 +354,6 @@ class _AddDocContentState extends State<AddDocContent>
         {
       AppUtils.showToastError("Please select Document");
     } else {
-      AppUtils.showprogress();
-      final api = Provider.of<ApiService>(context, listen: false);
       String extension;
       if (fileExt == 'png' ||
           fileExt == 'jpg' ||
@@ -369,25 +382,7 @@ class _AddDocContentState extends State<AddDocContent>
 
       var data = jsonEncode(addDocreq);
       debugPrint(data);
-      api.addDoc(addDocreq).then((response) 
-      {
-        AppUtils.dismissprogress();
-        if (response.status!) {
-          
-          Navigator.popAndPushNamed(context, '/viewdoclist');
-          Strings.docID = response.data?[0].documentId;
-          print("Doc id--> ${Strings.docID}");
-
-          UpdateRights();
-
-          setState(() {});
-        } else {
-          AppUtils.showToastError(response.message!);
-        }
-      }).catchError((onError) {
-        AppUtils.dismissprogress();
-        print(onError.toString());
-      });
+      _bloc.add(AddDocSubmitted(addDocreq));
     }
   }
   }

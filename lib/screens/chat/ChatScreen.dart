@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:mta/ChatView/widgets/send_message_widget.dart';
+import 'package:mta/blocs/chat/chat_screen_bloc.dart';
 import 'package:mta/models/FetchMapedUsersRes.dart';
 import 'package:mta/models/ForwardMessageReq.dart';
 import 'package:mta/models/GroupReq.dart';
@@ -14,7 +15,6 @@ import 'package:mta/screens/chat/theme.dart';
 import 'package:mta/screens/dashboard/teamsDashboard.dart';
 import 'package:mta/screens/projects/projects.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:path/path.dart' as path;
 
 import '../../ChatView/chatview.dart';
@@ -48,8 +48,6 @@ List<ChatUser> chtusers = [];
 
 List<Map<String, dynamic>> flutterMentionUserList = [];
 
-var dio = Dio();
-
 class _ChatScreenState extends State<ChatScreen> {
   AppTheme theme = LightTheme();
   bool isDarkTheme = false;
@@ -67,7 +65,9 @@ class _ChatScreenState extends State<ChatScreen> {
       scrollController: ScrollController(),
       chatUsers: chtusers);
 
-  IO.Socket? _socket;
+  late final ChatScreenBloc _bloc;
+  late final StreamSubscription<ChatScreenState> _blocSub;
+  List<Message> _forwardMessages = [];
   int pageNo = 2;
   bool isloading = true;
 
@@ -83,156 +83,50 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
-    print("dispose called");
-    _socket?.disconnect();
-    _socket?.dispose();
   }
 
   @override
   void initState() {
     msgList.clear();
+    _bloc = ChatScreenBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     super.initState();
     getUsersByGroupId();
 
     print("team idd ${widget.teamId}");
 
     //connect socket_io
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-      'forceNew': false,
-      'query': {
-        'token': Strings.authToken,
-        'group_id': widget.groupId,
-        "group_type": widget.projectId == null ? "team" : "project",
-        "project_id": widget.projectId,
-        "team_id": widget.teamId
-      }
-    });
-    _socket?.connect();
-    _socket?.on("connect", (_) {
-      print('Connected');
-      joinGroup();
-    });
+    _bloc.add(ChatSocketInit(widget.groupId, widget.projectId, widget.teamId));
 
     // Timer(Duration(seconds: 5), () {
     //       updateChatCountDetails("");
     //   });
   }
 
-//join chatgroup
-  joinGroup() {
-    _socket?.emit(
-        'join-group',
-        json.encode({
-          "group_id": widget.groupId,
-        }));
-    updateUsersReadMessage();
-    getMessages();
-    getUsersList();
-  }
-
-//function call to update readed message user
-  updateUsersReadMessage() {
-    _socket?.emit(
-        'update-message-readed-user',
-        json.encode({
-          "group_id": widget.groupId,
-        }));
-  }
-
-  void showUploadProgress(received, total) {
-    if (total != -1) {
-      AppUtils.showUploadProgressWithPercent(received / total);
-      print((received / total * 100).toStringAsFixed(0) + "%");
-    }
-  }
-
-  getUsersByGroupId() {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getChatUsers(widget.groupId!).then((response) {
-      if (response.status!) {
-        setState(() {
-          chtusers.clear();
-          response.data?.forEach((element) {
-            print(
-                "user image ${Strings.baseImageUrl + (element.userImage ?? "")}");
-            chtusers.add(ChatUser(
-                id: '${element.userId}',
-                name: element.userName ?? "test",
-                profilePhoto:
-                    Strings.baseImageUrl + (element.userImage ?? "")));
-          });
-          log("added users ${jsonEncode(chtusers)}");
-
-          addMentionUsers(response.data);
+  void _onBlocState(ChatScreenState state) {
+    if (!mounted) return;
+    if (state is ChatUsersLoaded) {
+      // Mirrors getUsersByGroupId() success setState
+      setState(() {
+        chtusers.clear();
+        state.data.forEach((element) {
+          print(
+              "user image ${Strings.baseImageUrl + (element.userImage ?? "")}");
+          chtusers.add(ChatUser(
+              id: '${element.userId}',
+              name: element.userName ?? "test",
+              profilePhoto: Strings.baseImageUrl + (element.userImage ?? "")));
         });
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
-  }
+        log("added users ${jsonEncode(chtusers)}");
 
-  //add users to mentioning list
-  addMentionUsers(users) {
-    flutterMentionUserList.clear();
-
-    for (int i = 0; i < chtusers.length; i++) {
-      var user = {
-        "id": users[i].userId.toString(),
-        "display": users[i].userName?.split(' ')[0],
-        "full_name": users[i].userName,
-        "photo": Strings.baseImageUrl + (users[i].userImage ?? "")
-      };
-      flutterMentionUserList.add(user);
-    }
-  }
-
-  //function call delete messages
-  deleteMessagesById(int msgId, int grpId) {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.deleteMessage(msgId, grpId).then((response) {
-      unSelectList([]);
-      if (response.status!) {
-        setState(() {
-          AppUtils.showToastSuccess(response.message ?? "Deleted Successfully");
-          joinGroup();
-        });
-      } else {
-        print('error');
-      }
-      Strings.isSelectionEnabled = false;
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      unSelectList([]);
-      print(onError.toString());
-    });
-  }
-
-  updateChatCountDetails(String type) {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api
-        .checkMessageAvailability(
-            widget.projectId,
-            widget.teamId,
-            Strings.userID,
-            widget.projectId == null ? "team" : "project",
-            type,
-            widget.groupId)
-        .then((response) {
-      print("okkk");
-    }).catchError((onError) {
-      print(onError.toString());
-    });
-  }
-
-//get the users list from socket_io
-  getUsersList() {
-    _socket?.on("group-users-list", (_data) {
+        addMentionUsers(state.data);
+      });
+    } else if (state is ChatGroupUsersSocket) {
+      // Mirrors getUsersList() "group-users-list" setState
+      var _data = state.data;
       setState(() {
         flutterMentionUserList.clear();
         chtusers.clear();
@@ -253,16 +147,10 @@ class _ChatScreenState extends State<ChatScreen> {
           flutterMentionUserList.add(user);
         }
       });
-    });
-  }
-
-//get messages from socket io
-  getMessages() {
-    print("getting messages");
-    _socket?.on("group-messages", (_data) {
+    } else if (state is ChatGroupMessagesSocket) {
+      // Mirrors getMessages() "group-messages" setState
+      var _data = state.data;
       log("dataloaded $_data");
-
-      // updateChatCountDetails("");
       setState(() {
         msgList.clear();
         if (_data.length > 0) {
@@ -328,13 +216,96 @@ class _ChatScreenState extends State<ChatScreen> {
         }
         isloading = false;
       });
+    } else if (state is ChatDeleteOk) {
+      unSelectList([]);
+      AppUtils.showToastSuccess(state.message);
+      _bloc.add(const ChatJoinRequested());
+      Strings.isSelectionEnabled = false;
+    } else if (state is ChatDeleteFail) {
+      unSelectList([]);
+      Strings.isSelectionEnabled = false;
+    } else if (state is ChatDeleteError) {
+      AppUtils.dismissprogress();
+      unSelectList([]);
+    } else if (state is ChatForwardListLoading) {
+      AppUtils.showprogress();
+    } else if (state is ChatForwardListLoaded) {
+      AppUtils.dismissprogress();
+      showListPopup(state.groups, _forwardMessages);
+    } else if (state is ChatForwardListFailed) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is ChatForwardListError) {
+      AppUtils.dismissprogress();
+      Strings.isSelectionEnabled = false;
+      AppUtils.showToastError("Something went wrong!");
+    } else if (state is ChatReadUsersLoaded) {
+      setState(() {
+        _readUsersList = state.data;
+      });
+      unSelectList([]);
+      showReadUsersDialog();
+    } else if (state is ChatReadUsersFailed) {
+      AppUtils.showToastError(state.message);
+      unSelectList([]);
+      print('error');
+    } else if (state is ChatReadUsersError) {
+      unSelectList([]);
+      AppUtils.showToastError(state.message);
+    }
+  }
+
+  void showUploadProgress(received, total) {
+    if (total != -1) {
+      AppUtils.showUploadProgressWithPercent(received / total);
+      print((received / total * 100).toStringAsFixed(0) + "%");
+    }
+  }
+
+  getUsersByGroupId() {
+    _bloc.add(ChatUsersRequested(widget.groupId!));
+  }
+
+  //add users to mentioning list
+  addMentionUsers(users) {
+    flutterMentionUserList.clear();
+
+    for (int i = 0; i < chtusers.length; i++) {
+      var user = {
+        "id": users[i].userId.toString(),
+        "display": users[i].userName?.split(' ')[0],
+        "full_name": users[i].userName,
+        "photo": Strings.baseImageUrl + (users[i].userImage ?? "")
+      };
+      flutterMentionUserList.add(user);
+    }
+  }
+
+  //function call delete messages
+  deleteMessagesById(int msgId, int grpId) {
+    _bloc.add(ChatDeleteRequested(msgId, grpId));
+  }
+
+  updateChatCountDetails(String type) {
+    final api = Provider.of<ApiService>(context, listen: false);
+    api
+        .checkMessageAvailability(
+            widget.projectId,
+            widget.teamId,
+            Strings.userID,
+            widget.projectId == null ? "team" : "project",
+            type,
+            widget.groupId)
+        .then((response) {
+      print("okkk");
+    }).catchError((onError) {
+      print(onError.toString());
     });
   }
 
 //Pagination for older messages(API Call)
   Future<List<Message>> getMessagesWithPageCount() async {
-    final api = Provider.of<ApiService>(context, listen: false);
-    var val = await api.getMessagesWithPageCount(widget.groupId!, pageNo);
+    var val = await _bloc.loadMoreMessages(widget.groupId!, pageNo);
     // msgList.clear();
     List<Message> loasdedMsgList = [];
 
@@ -432,7 +403,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'group_id': widget.groupId,
       'groupFile': audioFile,
     });
-    uploadFile(formData);
+    _bloc.add(ChatUploadRequested(formData));
   }
 
 //send documents via API
@@ -444,45 +415,11 @@ class _ChatScreenState extends State<ChatScreen> {
       'group_id': widget.groupId,
       'groupFile': files,
     });
-    uploadFile(formData);
+    _bloc.add(ChatUploadRequested(formData));
   }
 
   String getFileName(String _path) {
     return path.basename(_path);
-  }
-
-  uploadFile(formData) async {
-    try {
-      var myUrl = '${Strings.baseUrl}/chat/createMessage';
-      var response = await dio.post(
-        myUrl,
-        data: formData,
-        onSendProgress: showUploadProgress,
-        //Received data with List<int>
-        options: Options(
-            responseType: ResponseType.bytes,
-            followRedirects: false,
-            validateStatus: (status) {
-              return status! < 500;
-            }),
-      );
-
-      print("response ${response.statusMessage}");
-
-      print("status code ${response.statusCode}");
-      if (response.statusCode == 200) {
-        joinGroup();
-        AppUtils.dismissprogress();
-      } else if (response.statusCode == 404) {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError("Sorry, File  not Found !");
-      } else {
-        AppUtils.dismissprogress();
-      }
-    } catch (e) {
-      AppUtils.dismissprogress();
-      print(e);
-    }
   }
 
   @override
@@ -541,7 +478,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     teamName: widget.teamName,
                     refreshCall: () {},
                     audioDownloadConfirmation: () {
-                      joinGroup();
+                      _bloc.add(const ChatJoinRequested());
                     },
                     userList: flutterMentionUserList,
                     isLastPage: !nextPageAvailable,
@@ -791,28 +728,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _onForwardTap(List<Message> messages) async {
-    AppUtils.showprogress();
     GroupReq req = GroupReq();
     req.projectId = widget.projectId != null ? widget.projectId.toString() : "";
     req.groupType = widget.projectId == null ? "team" : "project";
     req.teamId = widget.teamId != null ? widget.teamId.toString() : "";
     req.userId = Strings.userID!.toString();
     req.groupId = widget.groupId.toString();
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.fetchGroupList(req).then((response) {
-      if (response.status!) {
-        AppUtils.dismissprogress();
-        showListPopup(response.data!, messages);
-      } else {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-
-      Strings.isSelectionEnabled = false;
-      AppUtils.showToastError("Something went wrong!");
-    });
+    _forwardMessages = messages;
+    _bloc.add(ChatForwardListRequested(req));
   }
 
 // Dummy Listview for group selection
@@ -1144,23 +1067,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getReadUsers(msgID) {
     _readUsersList = [];
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.getReadedUsers(msgID).then((response) {
-      if (response.status!) {
-        setState(() {
-          _readUsersList = response.data!;
-        });
-        unSelectList([]);
-        showReadUsersDialog();
-      } else {
-        AppUtils.showToastError(response.message ?? "Unknown Error");
-        unSelectList([]);
-        print('error');
-      }
-    }).catchError((onError) {
-      unSelectList([]);
-      AppUtils.showToastError(onError.toString());
-    });
+    _bloc.add(ChatReadUsersRequested(msgID));
   }
 
   Future<void> showReadUsersDialog() async {
@@ -1293,36 +1200,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   updateChat(msg, parentMsgId) {
-    _socket?.emitWithAck(
-        'create-message',
-        json.encode({
-          "message": msg,
-          "group_id": widget.groupId,
-          "user_id": Strings.userID,
-          "parent_message_id": parentMsgId
-        }), ack: (_data) {
-      print("dataaa ${_data}");
-    });
+    _bloc.add(ChatSendText(msg, parentMsgId));
 
     // updateChatCountDetails("create");
   }
 
   updateForwardMessage(List<Message> messages) {
-    _socket?.emitWithAck(
-        'forward-message',
-        json.encode({
-          "document_id": messages
-              .where((element) => element.isSelected == true)
-              .map((element) {
-                // Assuming 'id' property exists for true elements
-                return int.tryParse(element.id);
-              })
-              .cast<int>()
-              .toList(),
-          "receiver_group_id": _selectedItems,
-          "sender_group_id": widget.groupId.toString(),
-          "user_id": Strings.userID!.toString()
-        }));
+    var documentIds = messages
+        .where((element) => element.isSelected == true)
+        .map((element) {
+          // Assuming 'id' property exists for true elements
+          return int.tryParse(element.id);
+        })
+        .cast<int>()
+        .toList();
+    _bloc.add(ChatForwardEmit(documentIds, _selectedItems));
   }
 
   void _onThemeIconTap() {
