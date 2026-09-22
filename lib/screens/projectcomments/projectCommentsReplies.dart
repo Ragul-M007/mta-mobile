@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:mta/utilities/external_path_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mta/blocs/projectcomments/project_comments_replies_bloc.dart';
 import 'package:mta/models/AudioReq.dart';
 import 'package:mta/models/CommentsRes.dart';
 import 'package:mta/models/FetchMapedCatRes.dart';
@@ -21,7 +22,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -62,7 +62,6 @@ Timer? _timer;
 List<int> recordedData = [];
 final _audioRecorder = AudioRecorder();
 String? filepath;
-IO.Socket? _socket;
 int? projectId;
 String? projectname = "";
 
@@ -86,8 +85,6 @@ class _ProjectCommentsRepliesState extends State<ProjectCommentsReplies> {
             body: WillPopScope(
                 onWillPop: () {
                   Strings.categoriesforReply = false;
-                  _socket?.disconnect();
-                  _socket?.dispose();
                   Navigator.pushNamed(context, '/projectComments');
                   throw 'Replies';
                 },
@@ -114,9 +111,14 @@ class _RepliesContentState extends State<RepliesContent>
       ItemPositionsListener.create();
   FocusNode msgField = new FocusNode();
 
+  late final ProjectCommentsRepliesBloc _bloc;
+  late final StreamSubscription<ProjectCommentsRepliesState> _blocSub;
+
   @override
   void initState() {
     super.initState();
+    _bloc = ProjectCommentsRepliesBloc(ApiService.create());
+    _blocSub = _bloc.stream.listen(_onBlocState);
     Strings.pushNotify = false;
     initialCommentCheck = true;
     uniqueRecordId = Uuid().v1();
@@ -150,97 +152,94 @@ class _RepliesContentState extends State<RepliesContent>
     // } else {
     //   _currDoc = Strings.selectedProDocument[0];
     // }
-    _socket = IO.io(Strings.socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-      'query': {'token': Strings.authToken, "project_id": projectId}
-    });
-    _socket?.connect();
-    _socket?.on("connect", (_) {
-      print('Connected init');
-      getReplies();
-    });
+    _bloc.add(ProjectCommentsRepliesSocketInit(projectId));
+  }
 
-    _socket?.onDisconnect((_) => print('Connected dis'));
+  void _onBlocState(ProjectCommentsRepliesState state) {
+    if (!mounted) return;
+    if (state is ProjectCommentsRepliesConnectedState) {
+      getReplies();
+    } else if (state is ProjectCommentsRepliesReconnectedState) {
+      if (state.audioUi) {
+        getReplies();
+        _msgcontroller.text = '';
+        typing = false;
+        msgField.unfocus();
+      } else {
+        initialCommentCheck = true;
+        getReplies();
+      }
+    } else if (state is ProjectCommentsRepliesDocLoaded) {
+      _onProjectComments(state.data);
+    } else if (state is ProjectCommentsRepliesUserCatsLoaded) {
+      setState(() {
+        Strings.users = state.data;
+        users = state.data;
+        _userIitems = users
+            .map((user) =>
+                MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
+            .toList();
+      });
+    } else if (state is ProjectCommentsRepliesProjectLoaded) {
+      setState(() {
+        projectname = state.name;
+      });
+    } else if (state is ProjectCommentsRepliesCatsLoaded) {
+      AppUtils.dismissprogress();
+      setState(() {
+        Strings.categories = state.data;
+        cats = state.data;
+        _catsItems = cats
+            .map((cats) => MultiSelectItem<CatsData?>(cats, cats.categoryName!))
+            .toList();
+      });
+    } else if (state is ProjectCommentsRepliesDismiss) {
+      AppUtils.dismissprogress();
+    } else if (state is ProjectCommentsRepliesRemoveLoading) {
+      AppUtils.showprogress();
+    } else if (state is ProjectCommentsRepliesRemoveOk) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastSuccess("Comment deleted successfully");
+    } else if (state is ProjectCommentsRepliesRemoveError) {
+      AppUtils.dismissprogress();
+    } else if (state is ProjectCommentsRepliesAudioOk) {
+      AppUtils.dismissprogress();
+      UserData.clear();
+      tagedCats.clear();
+      tagedCatsId.clear();
+      tagedUsers.clear();
+      tagedUsersId.clear();
+      initialCommentCheck = true;
+      AppUtils.showToastSuccess("Audio sent successfully");
+      CatData.clear();
+    } else if (state is ProjectCommentsRepliesAudioFail) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastErrorTop(state.message);
+    } else if (state is ProjectCommentsRepliesAudioError) {
+      AppUtils.dismissprogress();
+    } else if (state is ProjectCommentsRepliesNotifFailure) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError(state.message);
+    } else if (state is ProjectCommentsRepliesNotifError) {
+      AppUtils.dismissprogress();
+      AppUtils.showToastError("Unable to connect to server");
+    }
   }
 
   updateNotification(notificationId) {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.updateNotificationStatus(notificationId).then((response) {
-      if (response.status!) {
-        // AppUtils.showToastError("Unable to update status");
-      } else {
-        AppUtils.dismissprogress();
-        AppUtils.showToastError(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      AppUtils.showToastError("Unable to connect to server");
-      print(onError.toString());
-    });
+    _bloc.add(ProjectCommentsRepliesNotificationUpdate(notificationId));
   }
 
   getUserCats() {
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.fetchUsers(projectId!).then((response) {
-      if (response.status!) {
-        setState(() {
-          Strings.users = response.data!;
-          users = response.data!;
-          _userIitems = users
-              .map((user) =>
-                  MultiSelectItem<FetchMapedUsersData?>(user, user.name!))
-              .toList();
-        });
-      } else {
-        print('error');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(ProjectCommentsRepliesUserCatsRequested(projectId!));
   }
 
   getProjectDetails() {
-    print("project details called");
-    final api = Provider.of<ApiService>(context, listen: false);
-
-    api.getProjectName(projectId!).then((response) {
-      if (response.status!) {
-        setState(() {
-          print("project name ---> {response.data![0].projectName}");
-          projectname = response.data![0].projectName ?? "";
-        });
-      } else {
-        print('No categories');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print("Catched $onError");
-    });
+    _bloc.add(ProjectCommentsRepliesProjectRequested(projectId!));
   }
 
   getuserCatgories() {
-    final api = Provider.of<ApiService>(context, listen: false);
-
-    api.fetchCats(projectId!).then((response) {
-      AppUtils.dismissprogress();
-      if (response.status!) {
-        setState(() {
-          Strings.categories = response.data!;
-          cats = response.data!;
-          _catsItems = cats
-              .map((cats) =>
-                  MultiSelectItem<CatsData?>(cats, cats.categoryName!))
-              .toList();
-        });
-      } else {
-        print('No categories');
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print("Catched $onError");
-    });
+    _bloc.add(ProjectCommentsRepliesCatsRequested(projectId!));
   }
 
   getIndex() {
@@ -443,26 +442,8 @@ class _RepliesContentState extends State<RepliesContent>
           ),
           TextButton(
             onPressed: () {
-              final api = Provider.of<ApiService>(context, listen: false);
               Navigator.of(context).pop(false);
-              AppUtils.showprogress();
-              api.removeComment(commentId).then((response) {
-                AppUtils.dismissprogress();
-                if (response.status!) {
-                  AppUtils.showToastSuccess("Comment deleted successfully");
-                  _socket?.disconnect();
-                  _socket?.connect();
-                  _socket?.on("connect", (_) {
-                    initialCommentCheck = true;
-                    getReplies();
-                  });
-                } else {
-                  print("delete failed");
-                }
-              }).catchError((onError) {
-                AppUtils.dismissprogress();
-                print(onError.toString());
-              });
+              _bloc.add(ProjectCommentsRepliesRemoveRequested(commentId));
             },
             child: new Text(
               'Yes',
@@ -509,10 +490,10 @@ class _RepliesContentState extends State<RepliesContent>
 
   @override
   void dispose() {
+    _blocSub.cancel();
+    _bloc.close();
     super.dispose();
     _animationController?.dispose();
-    _socket?.disconnect();
-    _socket?.dispose();
     Strings.pushNotify = true;
     tagedUsers = [];
     tagedUsersId = [];
@@ -1265,7 +1246,8 @@ class _RepliesContentState extends State<RepliesContent>
                       children: [
                         InkWell(
                             onTap: () {
-                              _socket?.disconnect();
+                              _bloc.add(
+                                  const ProjectCommentsRepliesDisconnect());
                               Strings.fromReplies = true;
                               Strings.documentUploadfromProject = true;
                               Navigator.pushNamed(context, '/adddocComments');
@@ -1511,38 +1493,39 @@ class _RepliesContentState extends State<RepliesContent>
     );
   }
 
-  getReplies() async {
-    print("Getting replied");
-    _socket?.on("project-comments", (_data) {
-      log('fromServer $_data');
-      print("initial check $initialCommentCheck");
-      if (initialCommentCheck) {
-        print("dataaa $_data");
-        print("validation passed");
-        Strings.comments = [];
-        for (var item in _data) {
-          Strings.comments.add(CommentsRes.fromJson(item));
-        }
-        if (Strings.fromNotificationComments || Strings.fromNotificationReply) {
-          getIndex();
-        }
-        print("chnaging initaial value to false");
-        initialCommentCheck = false;
+  getReplies() {
+    _bloc.add(const ProjectCommentsRepliesSubscribe());
+  }
 
-        print(
-            "length  ${Strings.comments[Strings.selectedCommentsIndex].replies?.length}");
-        if (Strings.comments[Strings.selectedCommentsIndex].replies!.length >
-            1) {
-          itemScrollController.jumpTo(
-              index: Strings
-                  .comments[Strings.selectedCommentsIndex].replies!.length);
-          msgField.unfocus();
-        }
-        setState(() {
-          print("val");
-        });
+  // Mirrors the "project-comments" socket handler body
+  void _onProjectComments(_data) {
+    log('fromServer $_data');
+    print("initial check $initialCommentCheck");
+    if (initialCommentCheck) {
+      print("dataaa $_data");
+      print("validation passed");
+      Strings.comments = [];
+      for (var item in _data) {
+        Strings.comments.add(CommentsRes.fromJson(item));
       }
-    });
+      if (Strings.fromNotificationComments || Strings.fromNotificationReply) {
+        getIndex();
+      }
+      print("chnaging initaial value to false");
+      initialCommentCheck = false;
+
+      print(
+          "length  ${Strings.comments[Strings.selectedCommentsIndex].replies?.length}");
+      if (Strings.comments[Strings.selectedCommentsIndex].replies!.length > 1) {
+        itemScrollController.jumpTo(
+            index: Strings
+                .comments[Strings.selectedCommentsIndex].replies!.length);
+        msgField.unfocus();
+      }
+      setState(() {
+        print("val");
+      });
+    }
   }
 
   recordComments() async {
@@ -1646,7 +1629,6 @@ class _RepliesContentState extends State<RepliesContent>
     final bytesData = await Io.File(filePath).readAsBytes();
     String base64Encodes(List<int> bytes) => base64.encode(bytes);
     String base64Encode = base64Encodes(bytesData);
-    final api = Provider.of<ApiService>(context, listen: false);
     AudioReq req = AudioReq();
     req.audio = "data:audio/wav;base64," + base64Encode;
     req.categoryIdList = json.encode(tagedCatsId);
@@ -1661,53 +1643,7 @@ class _RepliesContentState extends State<RepliesContent>
     var dat = jsonEncode(req);
     print("Printing data -- > $dat");
     log("data--> $dat");
-    api.uploadAudio(req).then((response) {
-      AppUtils.dismissprogress();
-      if (response.status!) {
-        _socket?.disconnect();
-        _socket?.connect();
-        UserData.clear();
-        tagedCats.clear();
-        tagedCatsId.clear();
-        tagedUsers.clear();
-        tagedUsersId.clear();
-        initialCommentCheck = true;
-        AppUtils.showToastSuccess("Audio sent successfully");
-        CatData.clear();
-        _socket?.on("connect", (_) {
-          getReplies();
-
-          // if (Strings.categoriesforReply == true) {
-          //   Strings.selectedCatDocument[0].commentsCount =
-          //       Strings.selectedCatDocument[0].commentsCount! + "1";
-          // } else {
-          //   Strings.selectedProDocument[0].commentsCount =
-          //       Strings.selectedProDocument[0].commentsCount! + "1";
-          // }
-          // tagedUsers = [];
-          // tagedUsersId = [];
-          // tagedCats = [];
-          // tagedCatsId = [];
-          _msgcontroller.text = '';
-          typing = false;
-          // if (showscroll != true) {
-          // _scrollController.animateTo(
-          //   _scrollController.position.maxScrollExtent,
-          //   curve: Curves.fastOutSlowIn,
-          //   duration: const Duration(seconds: 1),
-          // );
-          msgField.unfocus();
-          // } else {
-          //   showscroll = false;
-          // }
-        });
-      } else {
-        AppUtils.showToastErrorTop(response.message!);
-      }
-    }).catchError((onError) {
-      AppUtils.dismissprogress();
-      print(onError.toString());
-    });
+    _bloc.add(ProjectCommentsRepliesAudioRequested(req));
   }
 
   postReplies() {
@@ -1716,28 +1652,19 @@ class _RepliesContentState extends State<RepliesContent>
     if (_msgcontroller.text.trim() == "") {
       AppUtils.showToastError("Please Enter Comments");
     } else {
-      _socket?.emitWithAck(
-          'create-project-comment',
-          json.encode({
-            "project_id": projectId,
-            "project_name": projectname,
-            "audio": "",
-            "comment": _msgcontroller.text,
-            'recipient_id': json.encode(tagedUsersId),
-            'recipient': json.encode(tagedUsers),
-            "category_id_list": json.encode(tagedCatsId),
-            "category_list": json.encode(tagedCats),
-            'parent_comment_id':
-                Strings.comments[Strings.selectedCommentsIndex].commentId,
-            "user_id": Strings.userID
-          }), ack: (datal) {
-        print('ack $datal');
-        if (datal != null) {
-          print('from server $datal');
-        } else {
-          print("Null");
-        }
-      });
+      _bloc.add(ProjectCommentsRepliesPostEmit({
+        "project_id": projectId,
+        "project_name": projectname,
+        "audio": "",
+        "comment": _msgcontroller.text,
+        'recipient_id': json.encode(tagedUsersId),
+        'recipient': json.encode(tagedUsers),
+        "category_id_list": json.encode(tagedCatsId),
+        "category_list": json.encode(tagedCats),
+        'parent_comment_id':
+            Strings.comments[Strings.selectedCommentsIndex].commentId,
+        "user_id": Strings.userID
+      }));
       AppUtils.showToastSuccess("Comment sent successfully");
       initialCommentCheck = true;
 
