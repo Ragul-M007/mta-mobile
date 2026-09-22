@@ -69,17 +69,13 @@ part 'ApiService.g.dart';
 // @RestApi(baseUrl: "https://demo.emeetify.com:81/mta")
 
 // @RestApi(baseUrl: "https://uatmta.multitechcorp.in/mta/")
-// @RestApi(baseUrl: "https://mta.multitechcorp.in/mta")
-// @RestApi(baseUrl: "http://192.168.0.112:5777/mta")
-// @RestApi(baseUrl: "http://localhost:3000/mta/") // LOCAL dev (adb reverse)
-@RestApi(baseUrl: "http://192.168.0.22:3000/mta/") // LOCAL dev (PC LAN IP — same Wi-Fi)
-
+@RestApi(baseUrl: "http://192.168.0.112:5777/mta")
 abstract class ApiService {
   factory ApiService(Dio dio, {String baseUrl}) = _ApiService;
 
-//////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
   /// Login and Signup Module
-//////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
   @POST("/users/login")
   Future<LoginRes> login(@Body() LoginReq body);
@@ -92,14 +88,18 @@ abstract class ApiService {
 
   @POST("/users/changePin")
   Future<LoginRes> setForgotPin(
-      @Path("user_id") int id, @Body() SetPinReq body);
+    @Path("user_id") int id,
+    @Body() SetPinReq body,
+  );
 
   @POST("/projects/currentProject")
   Future<LoginRes> setCurrentProject(@Body() CurrentProjectReq body);
 
   @PUT("/projects/putCategory/{user_id}")
   Future<LoginRes> userAccess(
-      @Path("user_id") String id, @Body() UserAccessReq body);
+    @Path("user_id") String id,
+    @Body() UserAccessReq body,
+  );
 
   @GET("/projects?user_id={user_id}")
   Future<DashboardRes> projects(@Path("user_id") int id);
@@ -117,13 +117,19 @@ abstract class ApiService {
   Future<LoginStatusRes> fetchLoginHours(@Path("user_id") int userId);
 
   @GET(
-      "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}")
-  Future<FetchCategoryDocRes> getCategoryDoc(@Path("category_id") int id,
-      @Path("project_id") int pid, @Path("users_id") int userid);
+    "/projects/getDocuments?category_id={category_id}&project_id={project_id}&users_id={users_id}",
+  )
+  Future<FetchCategoryDocRes> getCategoryDoc(
+    @Path("category_id") int id,
+    @Path("project_id") int pid,
+    @Path("users_id") int userid,
+  );
 
   @GET("/projects/getDocuments?project_id={project_id}&&users_id={users_id}")
   Future<FectchProjectDocRes> getProjectDoc(
-      @Path("project_id") int id, @Path("users_id") int userid);
+    @Path("project_id") int id,
+    @Path("users_id") int userid,
+  );
 
   @GET("/categories?project_id={project_id}&&type=mobile")
   Future<FectchCatsRes> getCats(@Path("project_id") int id);
@@ -139,22 +145,28 @@ abstract class ApiService {
 
   @POST("/chat/addUsersIntoGroup")
   Future<AddAttendanceRes> addRemoveUsersintoGroup(
-      @Body() AddRemoveUserReq body);
+    @Body() AddRemoveUserReq body,
+  );
 
   @POST("/chat/removeUserInGroup")
   Future<AddAttendanceRes> removeUsersintoGroup(@Body() AddRemoveUserReq body);
 
   @GET("/attendance?user_id={user_id}&date={date}")
   Future<FetchAttendanceRes> getAttendance(
-      @Path("user_id") int id, @Path("date") String date);
+    @Path("user_id") int id,
+    @Path("date") String date,
+  );
 
   @GET("/categories?project_id={project_id}")
   Future<FetchMapedCatRes> fetchCats(@Path("project_id") int id);
 
   @GET(
-      "/categories/getCatUsers?project_id={project_id}&category_id={category_id}")
+    "/categories/getCatUsers?project_id={project_id}&category_id={category_id}",
+  )
   Future<FetchCategoryUsersRes> getCatUsers(
-      @Path("project_id") int id, @Path("category_id") int catid);
+    @Path("project_id") int id,
+    @Path("category_id") int catid,
+  );
 
   @GET("/projects/getmappedUser?project_id={project_id}")
   Future<FetchMapedUsersRes> fetchUsers(@Path("project_id") int id);
@@ -176,7 +188,9 @@ abstract class ApiService {
 
   @GET("/chat/getGroupFiles?group_id={group_id}&file_type={file_type}")
   Future<MediaDetailsRes> getMediaDetails(
-      @Path("group_id") int id, @Path("file_type") String type);
+    @Path("group_id") int id,
+    @Path("file_type") String type,
+  );
 
   @GET("/utils/getNotification")
   Future<NotificationRes> notification();
@@ -185,18 +199,22 @@ abstract class ApiService {
   Future<AccessDetailsRes> getAccessDetails();
 
   @GET(
-      "/chat/getureadMessageDetails?group_type={group_type}&team_id={team_id}&project_id={project_id}&user_id={user_id}&type={type}&group_id={group_id}")
+    "/chat/getureadMessageDetails?group_type={group_type}&team_id={team_id}&project_id={project_id}&user_id={user_id}&type={type}&group_id={group_id}",
+  )
   Future<ChatMessageWithPageCountRes> checkMessageAvailability(
-      @Path("project_id") int? projectId,
-      @Path("team_id") int? teamId,
-      @Path("user_id") int? userId,
-      @Path("group_type") String? groupType,
-      @Path("type") String? type,
-      @Path("group_id") int? grpId);
+    @Path("project_id") int? projectId,
+    @Path("team_id") int? teamId,
+    @Path("user_id") int? userId,
+    @Path("group_type") String? groupType,
+    @Path("type") String? type,
+    @Path("group_id") int? grpId,
+  );
 
   @GET("/chat/getMessagesByGroupId?group_id={group_id}&page_no={page_no}")
   Future<ChatMessageWithPageCountRes> getMessagesWithPageCount(
-      @Path("group_id") int id, @Path("page_no") int pageNo);
+    @Path("group_id") int id,
+    @Path("page_no") int pageNo,
+  );
 
   @POST("/users/changePassword")
   Future<CommonRes> changePass(@Body() ChangePassReq body);
@@ -212,19 +230,25 @@ abstract class ApiService {
 
   @PUT("/users/{user_id}")
   Future<CommonRes> editProfile(
-      @Path("user_id") int id, @Body() EditProfileReq body);
+    @Path("user_id") int id,
+    @Body() EditProfileReq body,
+  );
 
   @PUT("/utils/updateNotification/{noti_id}")
   Future<CommonRes> updateNotificationStatus(@Path("noti_id") int id);
   @PUT("/chat/updateFileDownloadStatus?message_id={msg_id}&status={status}")
   Future<CommonRes> updateDownloadStatus(
-      @Path("msg_id") int id, @Path("status") int status);
+    @Path("msg_id") int id,
+    @Path("status") int status,
+  );
 
   @DELETE("/users/removeImage/{user_id}")
   Future<CommonRes> removeProPic(@Path("user_id") int id);
   @DELETE("/chat/deleteMessage?message_id={msg_id}&&group_id={grp_id}")
   Future<CommonRes> deleteMessage(
-      @Path("msg_id") int id, @Path("grp_id") int grpId);
+    @Path("msg_id") int id,
+    @Path("grp_id") int grpId,
+  );
 
   @DELETE("/users/{user_id}")
   Future<CommonRes> deleteUser(@Path("user_id") int id);
@@ -254,7 +278,8 @@ abstract class ApiService {
   Future<GroupDetailsRes> getGroupData(@Path("group_id") int id);
 
   @GET(
-      "/chat/getTeamProjectUsers?group_type={group_type}&team_id={team_id}&project_id={project_id}")
+    "/chat/getTeamProjectUsers?group_type={group_type}&team_id={team_id}&project_id={project_id}",
+  )
   Future<AddUsersListRes> getUsers(
     @Path("group_type") String? groupType,
     @Path("team_id") int? teamId,
@@ -294,42 +319,46 @@ abstract class ApiService {
   @DELETE("/meeting/deletemeeting")
   Future<CommonRes> deleteMeeting(@Body() CancelMeetingReq body);
 
-/////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////
   /// Request and Response Body
-//////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
   static ApiService create() {
     final dio = Dio();
     try {
       print("trying dio");
       dio.interceptors.add(PrettyDioLogger());
-      dio.interceptors
-          .add(InterceptorsWrapper(onRequest: (options, handler) async {
-        options.headers["Content-Type"] = "application/json";
-        options.headers["x-access-token"] = Strings.authToken;
-        //options.headers["Host"] = "<calculated when request is sent>";
-        options.followRedirects = false;
-        // options.data = (data){
-        //   print("dataa $data");
-        // };
-        options.validateStatus = (status) {
-          Strings.statusCode = status!;
-          if (status == 401) {
-            Strings.isLogin = false;
-            AppUtils.showToastError(
-                "Session has been expired ! Please login again");
-            navigatorKey.currentState?.popAndPushNamed('/verifypin');
-            // return false;
-          } else if (status == 502) {
-            AppUtils.showToastError("Bad Gateway");
-          }
-          return status < 500;
-        };
-        print("Printing api service");
-        // print("dio api service-->${ApiService(dio)}");
-        return handler.next(options);
-        // return options;
-      }));
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) async {
+            options.headers["Content-Type"] = "application/json";
+            options.headers["x-access-token"] = Strings.authToken;
+            //options.headers["Host"] = "<calculated when request is sent>";
+            options.followRedirects = false;
+            // options.data = (data){
+            //   print("dataa $data");
+            // };
+            options.validateStatus = (status) {
+              Strings.statusCode = status!;
+              if (status == 401) {
+                Strings.isLogin = false;
+                AppUtils.showToastError(
+                  "Session has been expired ! Please login again",
+                );
+                navigatorKey.currentState?.popAndPushNamed('/verifypin');
+                // return false;
+              } else if (status == 502) {
+                AppUtils.showToastError("Bad Gateway");
+              }
+              return status < 500;
+            };
+            print("Printing api service");
+            // print("dio api service-->${ApiService(dio)}");
+            return handler.next(options);
+            // return options;
+          },
+        ),
+      );
       return ApiService(dio);
     } on DioError catch (error) {
       print("went inside error");
